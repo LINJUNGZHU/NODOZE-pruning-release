@@ -1,0 +1,71 @@
+{
+  "causal_search": {
+    "seed_strategy": "poi_bidirectional",
+    "window_page_size": 5000,
+    "resource_memory_mb": 4096.0,
+    "cache_max_blocks": 256,
+    "completion_span_seconds": 900.0,
+    "cache_block_seconds": 60.0,
+    "expansion_direction": "both",
+    "topology": "path",
+    "eligibility_mode": "hard_threshold",
+    "soft_priority_max_fanout": 20,
+    "min_edge_suspicion": 0.55,
+    "min_path_suspicion": 0.45,
+    "suspicion_momentum": 0.8,
+    "branch_suspicion_quantile": 0.9,
+    "initial_window_seconds": 900.0,
+    "window_growth_factor": 2.0,
+    "window_boundary_fraction": 0.1,
+    "temporal_half_life_seconds": 900.0,
+    "rarity_priority_weight": 0.6,
+    "temporal_priority_weight": 0.25,
+    "fanout_priority_weight": 0.15,
+    "path_relevance_decay": 0.95,
+    "min_frontier_relevance": 0.45,
+    "high_frequency_degree": 1000,
+    "high_frequency_partition_seconds": 60.0,
+    "resource_max_edges": 25000,
+    "resource_max_states": 50000,
+    "resource_max_hops": 20,
+    "resource_timeout_seconds": 180.0
+  },
+  "scoring": {
+    "rarity_weight": 0.2,
+    "path_weight": 0.0,
+    "impact_weight": 0.05,
+    "behavior_weight": 0.05,
+    "path_decay": 0.95,
+    "damping": 0.85,
+    "diffusion_mode": "time_respecting_bidir",
+    "fusion_mode": "rdp_guard",
+    "score_mass_target": 0.98,
+    "poi_aggregation": "noisy_or"
+  },
+  "depimpact": {
+    "merge_threshold_seconds": 10.0,
+    "data_flow_alpha": 0.0001,
+    "kmeans_restarts": 20,
+    "random_seed": 0
+  },
+  "behavior": {
+    "min_cluster_size": 3,
+    "fallback_gap_seconds": 30.0,
+    "embedding_dimensions": 32,
+    "minimum_token_frequency": 1
+  },
+  "pruning": {
+    "keep_ratios": [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.4, 0.5],
+    "mode": "rdp_guard",
+    "scope": "merged",
+    "protect_alert_edges": true,
+    "churn_slack_ratio": 0.02,
+    "positive_score_only": true,
+    "certificate_topology_policy": "causal_path_cover"
+  },
+  "evidence": {
+    "score_ledger_enabled": true,
+    "high_score_threshold": 0.8,
+    "high_score_quantile": 0.99
+  }
+}

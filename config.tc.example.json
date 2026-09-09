@@ -1,0 +1,23 @@
+{
+  "engagement": "E5",
+  "performer": "cadets",
+  "inputs": [
+    "D:/datasets/darpa-tc-e5/data/cadets/ta1-cadets-1-e5-official-1.bin.gz"
+  ],
+  "schema": "D:/datasets/darpa-tc-e5/schema/TCCDMDatum.avsc",
+  "database": "output/tc/cadets-e3-nodoze.db",
+  "annotations": "annotations/cadets-e3-nodoze.json",
+  "max_hops": 6,
+  "max_edges": 200000,
+  "keep_ratios": [0.05, 0.1, 0.2, 0.3, 0.5],
+  "max_paths": 2000,
+  "max_paths_per_alert": 50,
+  "per_node_edge_limit": 500,
+  "time_window_hours": 48,
+  "rarity_weight": 0.4,
+  "path_weight": 0.3,
+  "path_decay": 0.95,
+  "damping": 0.85,
+  "pruning_mode": "adaptive",
+  "protect_alert_edges": false
+}

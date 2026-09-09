@@ -1,0 +1,37 @@
+{
+  "event_ids": [
+    "F6A0543B-3958-51CD-B8D1-C8BA519DC1CE#0e4cb560403d33cf",
+    "D382F7AF-830A-5C95-A11B-61E1B561A6FE#2ede196f7b2d581f",
+    "B5BA7AC4-2A51-5E4F-A287-895AA4BD30D2"
+  ],
+  "certificate_paths": [
+    {
+      "path_id": "nginx_payload_peja",
+      "event_ids": [
+        "F6A0543B-3958-51CD-B8D1-C8BA519DC1CE#0e4cb560403d33cf",
+        "D382F7AF-830A-5C95-A11B-61E1B561A6FE#2ede196f7b2d581f"
+      ]
+    },
+    {
+      "path_id": "failed_injection_sshd_branch",
+      "event_ids": [
+        "B5BA7AC4-2A51-5E4F-A287-895AA4BD30D2"
+      ]
+    }
+  ],
+  "metadata": {
+    "scenario": "UBC13",
+    "source": "DARPA TC Ground Truth Report E3 Update, Section 3.14",
+    "policy": "report_aligned_causal_path_cover_e3_v3",
+    "oracle_event_ranking": false,
+    "poi_role": "report_derived_oracle_proxy_for_post_alert_pruning",
+    "description": "The third Nginx-backdoor episode executes /tmp/pEja72mA, establishes C2, and attempts repeated injection into sshd; the report records subsequent sshd communication.",
+    "selection_rule": "Choose the first report-aligned nginx C2 observable before payload creation, the first pEja72mA C2 observable after payload execution, and the distinct sshd communication branch. Declare the nginx-to-pEja sequence and failed-injection sshd branch before graph search; never infer branches from candidate disconnection.",
+    "poi_semantics": [
+      "first nginx EVENT_SENDTO 155.162.39.48:80 in the fixed window",
+      "first pEja72mA EVENT_SENDTO 53.158.101.118:80 after payload execution",
+      "sshd EVENT_SENDTO 198.115.236.119:80 on the report-confirmed branch"
+    ],
+    "topology_rationale": "DARPA E3 Section 3.14 reports nginx creating/executing pEja72mA, while repeated sshd injection attempts fail; therefore sshd communication is not asserted as a downstream stage of the pEja C2 edge."
+  }
+}

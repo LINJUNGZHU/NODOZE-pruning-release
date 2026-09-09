@@ -1,0 +1,27 @@
+{
+  "event_ids": [
+    "764AB6F2-DF26-2415-B8F5-3B0000000010",
+    "AB9231DC-0828-2415-DEA1-400000000010",
+    "5338C80F-2428-2415-3146-410000000010"
+  ],
+  "certificate_paths": [
+    {
+      "path_id": "firefox-to-staged-payloads",
+      "event_ids": [
+        "764AB6F2-DF26-2415-B8F5-3B0000000010",
+        "AB9231DC-0828-2415-DEA1-400000000010",
+        "5338C80F-2428-2415-3146-410000000010"
+      ]
+    }
+  ],
+  "metadata": {
+    "source": "DARPA E3 ground-truth report sections 3.3.2-3.3.4",
+    "selection_policy": "chronological report stages with exact raw-event validation",
+    "stages": [
+      "Firefox writes the 166.78KB /home/admin/clean executable (DEPIMPACT Case1 POI-size match)",
+      "Firefox writes the 166.78KB /home/admin/profile executable after re-exploitation",
+      "profile writes the 166.64KB /var/log/xdev library"
+    ],
+    "oracle_derived": true
+  }
+}

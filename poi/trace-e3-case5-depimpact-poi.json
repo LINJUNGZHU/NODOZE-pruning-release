@@ -1,0 +1,26 @@
+{
+  "name": "TRACE E3 Case5 single 95KB file POI from DEPIMPACT and DARPA report",
+  "event_ids": [
+    "C2D1D51A-9857-998A-3271-F5A2B00930D8"
+  ],
+  "seed_event_groups": [
+    {
+      "group_id": "trace-case5-depimpact-window",
+      "seed_event_ids": [
+        "C2D1D51A-9857-998A-3271-F5A2B00930D8"
+      ],
+      "window_start_ns": 1523643379000000000,
+      "window_end_ns": 1523644178000000000
+    }
+  ],
+  "metadata": {
+    "dataset": "DARPA TC E3 TRACE",
+    "case": "Trace Case5",
+    "source": "DEPIMPACT RQ1 graphSize/Sheet14 and DARPA E3 Ground Truth Report section 4.9",
+    "selection_rule": "Use the final write that completes /tmp/tcexec as the event representation of DEPIMPACT's 95KB file POI.",
+    "poi_path": "/tmp/tcexec",
+    "poi_size_bytes": 95015,
+    "poi_size_derivation": "23 writes of 4096 bytes plus one final write of 807 bytes",
+    "oracle_event_ranking": false
+  }
+}

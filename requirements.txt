@@ -1,0 +1,23 @@
+# PyETWkit - Windows ETW 事件收集
+# 若使用本地 PyETWkit：pip install ./PyETWkit
+# 或从 PyPI：pip install pyetwkit
+pyetwkit>=3.0.0
+
+# PostgreSQL 支持（可选，仅在使用 --db postgresql 时需要）
+psycopg2-binary>=2.9.0
+
+# Web 前端
+flask>=3.0.0
+flask-cors>=4.0.0
+
+# DARPA Transparent Computing Avro object-container files
+fastavro>=1.9.0
+
+# Regression and CDM format-conformance tests
+pytest>=8.0.0
+psutil>=5.9.0
+
+# Behavior partitioning for long-running processes (NumPy is also used by
+# DEPIMPACT's deterministic KMeans++ + Fisher-LDA projection).
+numpy>=1.26.0
+hdbscan>=0.8.40

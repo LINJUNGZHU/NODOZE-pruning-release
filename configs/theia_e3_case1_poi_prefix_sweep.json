@@ -1,0 +1,15 @@
+{
+  "keep_ratio": 0.2,
+  "use_frequency_cache": false,
+  "use_frequency_snapshot": false,
+  "scenarios": [
+    {
+      "code": "theia-case1",
+      "poi_file": "../poi/theia-e3-case1-report-pois.json",
+      "base_groundtruth_file": "../darpa/E3-THEIA/theia-case1-derived-groundtruth.json",
+      "window_start_ns": 1523384400000000000,
+      "window_end_ns": 1523387100000000000,
+      "window_extension_reason": "DARPA report Case 3.3 attack interval 14:20-15:05 EDT, covering exploitation, clean/profile execution, and xdev staging."
+    }
+  ]
+}

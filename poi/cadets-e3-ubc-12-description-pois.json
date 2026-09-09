@@ -1,0 +1,31 @@
+{
+  "event_ids": [
+    "DAF0ADE1-DC8C-5484-8D9E-E5EDED74D9D9",
+    "6FEFAC0C-064F-5EBB-AAD9-AFCE9AAC8FAF:2",
+    "DB442FC9-5CD9-50AB-B742-057A6F9BB231:2",
+    "230FB5E8-611B-5199-9F81-B410CBBD92EF",
+    "9A3CA81D-7BD7-5E0C-A5B9-EE6592816B67:2",
+    "6E2259C6-9E26-5923-B341-F4A3BF23FD30:2",
+    "59819D70-6F7F-5353-B723-113206C54D62:2",
+    "41800DBE-F766-5398-9754-C81E26F42B55:2",
+    "7FF588AF-3819-5BBC-B53C-3E4872570F05:2",
+    "68A6FF52-2820-5A5A-82D4-5BDCFB5C1944"
+  ],
+  "metadata": {
+    "scenario": "UBC12",
+    "source": "DARPA TC Ground Truth Report E3 Update, Section 3.13",
+    "policy": "depimpact_description_driven_multi_instance_poi_e3_v3",
+    "oracle_event_ranking": false,
+    "description": "The Nginx backdoor downloads several payloads. Elevation of /tmp/main fails; XIM runs as root, while /tmp/test executes without root and performs the micro-APT communication and scan branch.",
+    "selection_rule": "Select one observable for every distinct payload instance described in the episode: compromised nginx communication, both minions/XIM executions, the attempted main execution, every test execution, and the terminal C2 observations. Ground Truth event labels are not used to rank candidates.",
+    "poi_semantics": [
+      "nginx EVENT_SENDTO 155.162.39.48:80",
+      "second minions EVENT_EXECUTE /libexec/ld-elf.so.1",
+      "first XIM EVENT_EXECUTE /libexec/ld-elf.so.1",
+      "socket 53.158.101.118:80 EVENT_RECVFROM XIM (successful root Drakon C2)",
+      "main EVENT_EXECUTE /libexec/ld-elf.so.1 (attempted elevation branch)",
+      "four distinct test EVENT_EXECUTE /libexec/ld-elf.so.1 observations",
+      "socket 192.113.144.28:80 EVENT_RECVFROM test (micro APT C2 and scan phase)"
+    ]
+  }
+}

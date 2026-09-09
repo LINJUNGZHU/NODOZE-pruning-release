@@ -1,0 +1,38 @@
+{
+  "event_ids": [
+    "FF9BFBA0-4EBE-2415-E1F7-620200000010",
+    "01FD23F0-FDBE-2415-1B13-640200000010",
+    "D3225666-C4BF-2415-2778-670200000010"
+  ],
+  "certificate_paths": [
+    {
+      "path_id": "firefox-gtcache-write",
+      "event_ids": [
+        "FF9BFBA0-4EBE-2415-E1F7-620200000010"
+      ]
+    },
+    {
+      "path_id": "gtcache-memtrace-write",
+      "event_ids": [
+        "01FD23F0-FDBE-2415-1B13-640200000010"
+      ]
+    },
+    {
+      "path_id": "micro-apt-execute",
+      "event_ids": [
+        "D3225666-C4BF-2415-2778-670200000010"
+      ]
+    }
+  ],
+  "metadata": {
+    "source": "DARPA E3 ground-truth report sections 3.11.2-3.11.5",
+    "selection_policy": "chronological report stages with exact raw-event validation",
+    "stages": [
+      "Firefox writes the 166.78KB gtcache executable",
+      "gtcache writes the 166.64KB memtrace.so payload (DEPIMPACT Case3 POI-size match)",
+      "the 95,015-byte /var/log/mail Micro APT payload executes"
+    ],
+    "certificate_topology": "three report-anchored branches; no unverified cross-stage edge chain",
+    "oracle_derived": true
+  }
+}

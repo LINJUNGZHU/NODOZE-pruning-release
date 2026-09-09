@@ -1,0 +1,20 @@
+{
+  "event_ids": [
+    "DB442FC9-5CD9-50AB-B742-057A6F9BB231#4ccbffbfb7e33eb4",
+    "52C5A760-8B88-57C6-BFFE-350A31A65885#363f36c5612a37cb",
+    "4030D5CC-A9C0-529F-8466-495BC4B87153#8c86cf677a62873b"
+  ],
+  "metadata": {
+    "scenario": "UBC12",
+    "source": "TC_Ground_Truth_Report_E3_Update.pdf, Section 3.13, pages 23-25",
+    "policy": "pdf_description_driven_stage_diverse_poi_v1",
+    "oracle_event_ranking": false,
+    "description": "The CADETS Nginx backdoor episode runs the root Drakon payload XIM, establishes Drakon C2 to 53.158.101.118:80, then runs the micro APT payload test and connects to 192.113.144.28:80 for the reconnaissance branch.",
+    "selection_rule": "Select one database-verified downstream event for each distinct attack stage: payload execution, root Drakon C2 establishment, and micro APT C2/reconnaissance. Evaluation CSV labels are not used to rank or select the POIs.",
+    "poi_semantics": [
+      "XIM EVENT_EXECUTE /tmp/XIM at 2018-04-12T18:20:08.576164Z",
+      "XIM EVENT_CONNECT 53.158.101.118:80 at 2018-04-12T18:20:08.586166Z",
+      "test EVENT_CONNECT 192.113.144.28:80 at 2018-04-12T18:35:31.806155Z"
+    ]
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "causal_search": {
+    "seed_strategy": "window_context",
+    "window_page_size": 5000,
+    "resource_memory_mb": 4096.0,
+    "cache_max_blocks": 256,
+    "completion_span_seconds": 900.0,
+    "cache_block_seconds": 60.0,
+    "expansion_direction": "both",
+    "min_edge_suspicion": 0.6,
+    "min_path_suspicion": 0.5,
+    "suspicion_momentum": 0.8,
+    "branch_suspicion_quantile": 0.9,
+    "initial_window_seconds": 900.0,
+    "window_growth_factor": 2.0,
+    "window_boundary_fraction": 0.1,
+    "temporal_half_life_seconds": 900.0,
+    "rarity_priority_weight": 0.6,
+    "temporal_priority_weight": 0.25,
+    "fanout_priority_weight": 0.15,
+    "path_relevance_decay": 0.95,
+    "min_frontier_relevance": 0.45,
+    "high_frequency_degree": 1000,
+    "high_frequency_partition_seconds": 60.0,
+    "resource_max_edges": 250000,
+    "resource_max_states": 100000,
+    "resource_max_hops": null,
+    "resource_timeout_seconds": 120.0
+  },
+  "scoring": {
+    "rarity_weight": 0.3,
+    "path_weight": 0.2,
+    "impact_weight": 0.2,
+    "behavior_weight": 0.1,
+    "path_decay": 0.95,
+    "damping": 0.85
+  },
+  "depimpact": {
+    "merge_threshold_seconds": 10.0,
+    "data_flow_alpha": 0.0001,
+    "kmeans_restarts": 20,
+    "random_seed": 0
+  },
+  "behavior": {
+    "min_cluster_size": 3,
+    "fallback_gap_seconds": 30.0,
+    "embedding_dimensions": 32,
+    "minimum_token_frequency": 1
+  },
+  "pruning": {
+    "keep_ratios": [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.4, 0.5],
+    "mode": "ratio",
+    "scope": "merged",
+    "protect_alert_edges": false
+  }
+}

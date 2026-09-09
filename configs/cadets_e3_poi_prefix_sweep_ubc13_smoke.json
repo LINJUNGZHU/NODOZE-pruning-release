@@ -1,0 +1,15 @@
+{
+  "keep_ratio": 0.2,
+  "use_frequency_cache": true,
+  "use_frequency_snapshot": true,
+  "scenarios": [
+    {
+      "code": "13",
+      "poi_file": "../poi/cadets-e3-ubc-13-description-pois.json",
+      "base_groundtruth_file": "../output/tc/ubc-cadets-e3/cadets-e3-ubc-13-annotations.json",
+      "window_start_ns": 1523624580000000000,
+      "window_end_ns": 1523625386684642175,
+      "window_extension_reason": "DARPA E3 report Section 3.14 explicitly records the later sshd C2; the fixed investigation window extends about 27 seconds beyond the official UBC core-entity window to include that report-confirmed POI."
+    }
+  ]
+}

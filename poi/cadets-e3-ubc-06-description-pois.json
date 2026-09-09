@@ -1,0 +1,20 @@
+{
+  "event_ids": [
+    "616B090D-14A2-59BC-8535-77267D442CAD",
+    "96DAD344-4B1B-56B9-8C47-212C75F326E6",
+    "32761782-3213-5B56-839E-96CB77791B0B"
+  ],
+  "metadata": {
+    "scenario": "UBC06",
+    "source": "DARPA TC Ground Truth Report E3 Update, Section 3.1",
+    "policy": "depimpact_description_driven_multi_poi_e3_v2",
+    "oracle_event_ranking": false,
+    "description": "Nginx is exploited, /tmp/vUgefal is executed, and the payload communicates with an external host. The report also describes netrecon and a failed sshd injection attempt.",
+    "selection_rule": "Choose concrete downstream SENDTO symptoms for the compromised nginx process and two temporally distinct vUgefal callback episodes. Do not fabricate a netrecon POI: the imported database contains no node for netrecon, 154.145.113.18, or 61.167.39.128.",
+    "poi_semantics": [
+      "nginx EVENT_SENDTO 200.36.109.214:80",
+      "vUgefal EVENT_SENDTO 139.123.0.113:80 (early episode)",
+      "vUgefal EVENT_SENDTO 139.123.0.113:80 (late episode)"
+    ]
+  }
+}

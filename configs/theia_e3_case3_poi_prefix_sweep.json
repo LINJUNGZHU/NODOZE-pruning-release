@@ -1,0 +1,15 @@
+{
+  "keep_ratio": 0.2,
+  "use_frequency_cache": false,
+  "use_frequency_snapshot": false,
+  "scenarios": [
+    {
+      "code": "theia-case3",
+      "poi_file": "../poi/theia-e3-case3-report-pois.json",
+      "base_groundtruth_file": "../darpa/E3-THEIA/theia-case3-derived-groundtruth.json",
+      "window_start_ns": 1523551200000000000,
+      "window_end_ns": 1523554200000000000,
+      "window_extension_reason": "DARPA report Case 3.11 attack interval 12:40-13:30 EDT, covering browser-extension exploitation, payload writes, execution, and Micro APT C2."
+    }
+  ]
+}

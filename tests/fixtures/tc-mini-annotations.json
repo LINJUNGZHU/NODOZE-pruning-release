@@ -1,0 +1,7 @@
+{
+  "name": "CDM format fixture, not a DARPA benchmark",
+  "seed_uuids": ["p-alert"],
+  "seed_event_ids": ["e-fork"],
+  "attack_event_ids": ["e-fork", "e-secret", "e-c2"],
+  "attack_node_uuids": ["p-alert", "p-attack", "f-secret", "s-c2"]
+}

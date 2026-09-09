@@ -1,0 +1,25 @@
+{
+  "name": "TRACE E3 Case5 95KB file execution POI aligned to DEPIMPACT",
+  "event_ids": [
+    "AACD274A-BFF1-3B66-476B-5E5ED8BFB365"
+  ],
+  "seed_event_groups": [
+    {
+      "group_id": "trace-case5-depimpact-window",
+      "seed_event_ids": [
+        "AACD274A-BFF1-3B66-476B-5E5ED8BFB365"
+      ],
+      "window_start_ns": 1523643379000000000,
+      "window_end_ns": 1523644178000000000
+    }
+  ],
+  "metadata": {
+    "dataset": "DARPA TC E3 TRACE",
+    "case": "Trace Case5",
+    "source": "DEPIMPACT RQ1 graphSize/Sheet14 and DARPA E3 Ground Truth Report section 4.9",
+    "selection_rule": "Represent DEPIMPACT's 95KB /tmp/tcexec file POI by the event that loads the completed file into the new tcexec process; this bridges the CDM file-epoch change without using attack labels.",
+    "poi_path": "/tmp/tcexec",
+    "poi_size_bytes": 95015,
+    "oracle_event_ranking": false
+  }
+}

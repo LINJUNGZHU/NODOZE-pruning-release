@@ -1,0 +1,47 @@
+{
+  "name": "CADETS E3 UBC-12 ordered attack stages from DARPA report",
+  "event_ids": [
+    "EBFB7595-F532-54F8-B51B-CE074AAAFE37#715fe1e78a715cf2",
+    "8D73948F-2FEC-5F28-814D-EE0269114A88#a8ae47e8bd21898c",
+    "524924BA-2082-5E97-A5F8-299EF2C44A6A#8f242692ba8dec31",
+    "354D448E-ADAE-55E8-81BC-EFE28EC68680#d1eead8f7720d045",
+    "35C1EF14-32E7-53E2-AF0F-81EB21518AAF#9b0dabb7c221b085",
+    "A894F7E7-40B0-5D82-9E4E-AA119C1DF84E#f09ccd6a029b2659",
+    "7FF588AF-3819-5BBC-B53C-3E4872570F05#22253c06b2898cf9",
+    "4030D5CC-A9C0-529F-8466-495BC4B87153#8c86cf677a62873b"
+  ],
+  "seed_event_groups": [
+    {
+      "group_id": "ubc-12-pdf-incident",
+      "seed_event_ids": [
+        "EBFB7595-F532-54F8-B51B-CE074AAAFE37#715fe1e78a715cf2",
+        "8D73948F-2FEC-5F28-814D-EE0269114A88#a8ae47e8bd21898c",
+        "524924BA-2082-5E97-A5F8-299EF2C44A6A#8f242692ba8dec31",
+        "354D448E-ADAE-55E8-81BC-EFE28EC68680#d1eead8f7720d045",
+        "35C1EF14-32E7-53E2-AF0F-81EB21518AAF#9b0dabb7c221b085",
+        "A894F7E7-40B0-5D82-9E4E-AA119C1DF84E#f09ccd6a029b2659",
+        "7FF588AF-3819-5BBC-B53C-3E4872570F05#22253c06b2898cf9",
+        "4030D5CC-A9C0-529F-8466-495BC4B87153#8c86cf677a62873b"
+      ],
+      "window_start_ns": 1523555940000000000,
+      "window_end_ns": 1523558340000000000
+    }
+  ],
+  "metadata": {
+    "scenario": "UBC12",
+    "source": "DARPA TC Ground Truth Report E3 Update, Section 3.13",
+    "policy": "darpa_report_ordered_stage_pois_database_verified_v1",
+    "oracle_event_ranking": false,
+    "selection_rule": "Map the ordered attack stages named in the DARPA report to concrete CDM events that exist in the imported database; retain report order and do not use UBC Ground Truth scores to rank events.",
+    "poi_semantics": [
+      "compromised nginx EVENT_CONNECT to local socket 128.55.12.73:12680",
+      "nginx EVENT_WRITE landing /tmp/XIM",
+      "XIM process EVENT_EXECUTE from /tmp/XIM",
+      "XIM EVENT_CONNECT to local socket 128.55.12.73:39242",
+      "XIM EVENT_WRITE landing /tmp/main",
+      "XIM EVENT_WRITE landing /tmp/test",
+      "test process EVENT_EXECUTE from /tmp/test",
+      "test EVENT_CONNECT to local socket 128.55.12.73:34345"
+    ]
+  }
+}
