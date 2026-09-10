@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>PS-RDP 溯源图剪枝演示</title>
+  <link rel="stylesheet" href="/assets/styles.css">
+</head>
+<body>
+  <header>
+    <div>
+      <p class="eyebrow">PROVENANCE SECURITY · PS-RDP</p>
+      <h1>溯源图自适应剪枝控制台</h1>
+      <p class="subtitle">稀有度、时间因果扩散与依赖影响融合分析</p>
+    </div>
+    <span id="health" class="status">连接中</span>
+  </header>
+
+  <main>
+    <section id="metrics" class="metrics"></section>
+
+    <section class="panel controls">
+      <div>
+        <h2>THEIA Case 3 · 攻击路径对比</h2>
+        <p id="sample-note">正在加载预计算可视化子图…</p>
+      </div>
+      <label>高亮路径
+        <select id="path-select"><option value="all">全部路径</option></select>
+      </label>
+      <label class="check"><input id="show-removed" type="checkbox" checked> 剪枝前显示被删除边</label>
+      <button id="fit">重置视图</button>
+    </section>
+
+    <section class="comparison">
+      <article class="graph-card">
+        <div class="graph-title"><h3>剪枝前</h3><span id="before-count"></span></div>
+        <canvas id="before"></canvas>
+      </article>
+      <article class="graph-card">
+        <div class="graph-title"><h3>剪枝后</h3><span id="after-count"></span></div>
+        <canvas id="after"></canvas>
+      </article>
+    </section>
+
+    <section class="lower-grid">
+      <article class="panel">
+        <h2>攻击阶段</h2>
+        <div id="paths" class="path-list"></div>
+      </article>
+      <article class="panel">
+        <h2>图例与边详情</h2>
+        <div class="legend">
+          <span><i class="poi"></i>POI</span><span><i class="attack"></i>攻击路径</span>
+          <span><i class="kept"></i>保留上下文</span><span><i class="removed"></i>删除边</span>
+        </div>
+        <pre id="details">点击图中的节点查看详情</pre>
+      </article>
+    </section>
+
+    <section class="panel import-panel">
+      <div>
+        <h2>录入新的 CDM 图数据</h2>
+        <p>支持 JSON、JSONL、GZ 和 Avro。文件上传后在服务器后台导入 SQLite，不会阻塞页面。</p>
+      </div>
+      <form id="upload-form">
+        <input id="files" name="files" type="file" multiple required>
+        <button type="submit">开始导入</button>
+      </form>
+      <pre id="upload-status">尚未启动导入任务</pre>
+    </section>
+  </main>
+  <script src="/assets/app.js"></script>
+</body>
+</html>

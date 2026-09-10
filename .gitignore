@@ -4,6 +4,7 @@
 /darpa/
 /ubc-provenance-ground-truth-ff65bc7/
 /figures/
+/webapp/runtime/
 
 # Databases and raw event streams
 *.db
