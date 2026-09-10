@@ -603,3 +603,7 @@ POI 数；这些路径是 POI 锚定的参考路径，不等于独立攻击数�
 `minimum_observed_poi_count_for_full_path_retention` 则保留不考虑证书是否合法的
 观察值，防止把失败证书误称为 sufficient。`unselected_terminal_path_retention`
 排除了已选作 POI 的终端路径，用来避免硬保护种子造成的指标虚高。
+
+## RASP-D 实验更新
+
+新增保持评分不变的多样性/边际收益递减选边分支，提供四案例、四预算和权重消融，以及逐事件决策账本。20% 预算有提升，低预算存在明显退步，网页默认仍保留 RASP。论文依据、完整结果和后台复现命令见 [RASP-D 实验说明](docs/rasp-diverse.md)。

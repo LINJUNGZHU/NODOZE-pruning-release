@@ -18,9 +18,11 @@ const key = e => JSON.stringify([e.source,e.target,e.relation]);
 
 function showDetails(e){
  if(!e)return;
- const rasp=state.algorithm?.startsWith('rasp:');
+ const diverse=state.algorithm?.startsWith('diverse:');
+ const rasp=diverse||state.algorithm?.startsWith('rasp:');
  const fields=[['时间（UTC）',time(e)],['操作',`${operation(e)} · ${e.relation}`],['最终重要性评分',score(e.score)],['源实体',label(e.source_label)],['目标实体',label(e.target_label)],['剪枝结果',e.retained?'保留':'删除'],['局部稀有度',score(e.components.rarity)],['局部因果扩散',score(e.components.diffusion)],['行为分量',score(e.components.behavior)]];
  if(rasp){fields.pop();fields.push(['分叉连接证据',e.rasp.fork_reachable?'有共同原因或直接时序连接':'无'],['选边策略','整组计入预算；不追加超额边']);}
+ if(diverse){fields.push(['选择机制','同类交互边际收益递减；重要性分数不变']);if(state.algorithm.slice(8)===state.data.rasp_diverse_experiment.primary_method)fields.push(['本次入选锚点边际收益',score(e.rasp_diverse.primary_anchor_priority)],['当前选边原因',e.rasp_diverse.primary_reason]);}
  if(state.algorithm==='adaptive'&&e.adaptive)fields.push([e.adaptive.high_score_membership==null?'T-MASS 组内阈值':'高分群归属度（非攻击概率）',score(e.adaptive.high_score_membership??e.adaptive.threshold)],['严格时序可达 POI',e.adaptive.temporal_reachable?'是（不等于真实攻击）':'未找到严格递增连接'],['当前决策来源','T-MASS；原始 reasons 仅属于旧基线']);
  $('#details').classList.remove('empty-state');
  const explanation=rasp?'RASP 重新计算传播，不使用 DEPIMPACT 辅助分数。重复交互不增加传播权重；相对背景的传播证据与历史稀有度融合，并保留微弱 PPR 通道以避免必要解释边被置零。rasp 字段包含共同原因事件、两条分支连接以及所有预算的决策。':'当前历史实验包含权重 0.05 的结构影响辅助项，数值为 '+score(e.components.depimpact)+'。0 不是缺失；分量来自贡献最大的 POI，不能直接相加得到最终分数。';
@@ -41,7 +43,7 @@ function selectScope(){
  $('#reference-paths').innerHTML=paths.map(p=>`<div class="reference"><strong>${esc(titles[p.id]||p.id)} · ${p.event_ids.length} 条参考事件${p.event_ids.length===1?' · 单事件参考':''}</strong><div class="event-chain">${p.event_ids.map((id,i)=>{const e=state.data.edges.find(e=>e.id===id);return e?`<article class="step" data-event="${esc(id)}"><div class="step-head"><span>STEP 0${i+1}</span><span>${time(e)} UTC</span></div><h3>${esc(operation(e))}</h3><div class="entity">${esc(label(e.source_label))}</div><div class="arrow">↓</div><div class="entity">${esc(label(e.target_label))}</div><div class="step-bottom"><span>S = ${score(e.score)}</span><span class="badge ${e.poi?'poi':''}">${e.poi?'POI · ':''}${e.retained?'已保留':'已删除'}</span></div></article>`:`<p>参考事件缺失</p>`}).join('')}</div></div>`).join('');
  const kept=state.edges.filter(e=>e.retained),afterNodes=new Set(kept.flatMap(e=>[e.source,e.target]));
  $('#local-stats').innerHTML=`<span>事件边 <b>${state.edges.length}</b> → <b>${kept.length}</b></span><span>节点 <b>${state.nodes.length}</b> → <b>${afterNodes.size}</b></span><span>局部删除 <b>${pct(1-kept.length/Math.max(1,state.edges.length))}</b></span>`;
- const c=state.algorithm?.startsWith('rasp:')?null:state.algorithm==='repair'?state.data.adaptive_experiment.repair_context_counts:state.algorithm==='adaptive'?state.data.adaptive_experiment.full_context_counts:state.data.sample.full_context_counts;
+ const c=/^(rasp|diverse):/.test(state.algorithm)?null:state.algorithm==='repair'?state.data.adaptive_experiment.repair_context_counts:state.algorithm==='adaptive'?state.data.adaptive_experiment.full_context_counts:state.data.sample.full_context_counts;
  $('#scope-note').textContent=`当前为参考链的一跳上下文抽样；布局与聚合规则在剪枝前后保持一致。${state.clustered?'外围同类型实体已聚合，框内显示实际实体数量；逐边表保留所有展示事件。':''}`;
  $('#sample-note').textContent=c?`全部参考链的一跳上下文：${fmt(c.retained+c.removed)} 条事件，删除 ${fmt(c.removed)} 条。顶部压缩率是全图结果，非本图比例。`:'';
  state.page=0;state.group=null;renderTable();redraw();showDetails(core[0]);
@@ -112,18 +114,20 @@ function renderMetrics(m){
 }
 function changeAlgorithm(value){
  state.algorithm=value;
- const rasp=value.startsWith('rasp:');
+ const diverse=value.startsWith('diverse:');
+ const rasp=diverse||value.startsWith('rasp:');
  for(const e of state.data.edges){
   Object.assign(e,state.originalScores.get(e.id));
-  e.retained=rasp?e.rasp.decisions[value.slice(5)]:value==='repair'?e.adaptive.repair_retained:value==='adaptive'?e.adaptive.retained:state.baseline.get(e.id);
+  e.retained=diverse?e.rasp_diverse.decisions[value.slice(8)]:rasp?e.rasp.decisions[value.slice(5)]:value==='repair'?e.adaptive.repair_retained:value==='adaptive'?e.adaptive.retained:state.baseline.get(e.id);
   if(rasp){e.score=e.rasp.score;e.components={rarity:e.rasp.rarity,diffusion:e.rasp.contrast_diffusion};e.reasons=['RASP causal-fork budget selection'];}
  }
  const report=state.data.adaptive_experiment;
- const m=rasp?state.data.rasp_experiment.results.find(r=>r.method===value.slice(5)):value==='repair'?report.results.find(r=>r.method==='baseline_witness_repair'):value==='adaptive'?report.results.find(r=>r.method===report.primary_method):state.data.metrics;
+ const m=diverse?state.data.rasp_diverse_experiment.results.find(r=>r.method===value.slice(8)):rasp?state.data.rasp_experiment.results.find(r=>r.method===value.slice(5)):value==='repair'?report.results.find(r=>r.method==='baseline_witness_repair'):value==='adaptive'?report.results.find(r=>r.method===report.primary_method):state.data.metrics;
  renderMetrics(m);selectScope();
  $('#scores-section .footnote').textContent=rasp?'当前为 RASP 新评分，不是攻击概率。稀有度来自历史频次，扩散列为相对背景的传播证据；最终分数另经归一化与微弱 PPR 保底。连接边可低分保留，全部边受同一预算约束。':'最终评分用于剪枝排序，不是恶意概率。稀有度与扩散列为贡献最大的 POI 的局部分量，不能直接相加得到多 POI 最终分数。';
  $('#paths').textContent=value!=='baseline'?'当前为研究版决策；评分沿用 PS-RDP。详情 adaptive 字段提供分群证据、时序可达性和下一条连接事件；原始 reasons 字段仅解释历史 PS-RDP 决策。':'当前为 PS-RDP 历史决策；实体名称按原始 CDM 声明补全。';
  if(rasp)$('#paths').textContent='当前展示新计算的 RASP 评分和共同原因分叉选边。原始事件与标签不变；共同原因连接不等于已确认的攻击路径。图中上下文仍为固定抽样，不是全图。';
+ if(diverse){for(const e of state.data.edges)e.reasons=['RASP-D diminishing-return causal-fork selection'];$('#paths').textContent+=' RASP-D 实验版：分数不变，选边优先级随已保留交互变化；低预算下存在攻击事件召回退步。';}
 }
 $('#algorithm-select').onchange=e=>changeAlgorithm(e.target.value);
 $('#path-tabs').onclick=e=>{const p=e.target.closest('[data-path]')?.dataset.path;if(p)changePath(p)};
@@ -157,6 +161,13 @@ $('#upload-form').onsubmit=async e=>{e.preventDefault();const output=$('#upload-
   $('#algorithm-results').innerHTML=table(raspReport.results.filter(r=>r.method==='original_ps_rdp@0.2'||r.method.startsWith('rasp_forks@')))+`<p>相同候选图与 POI，新方法重新计算传播评分。预算是硬上限，未用满不补零分边。参考链是派生短路径，不代表完整攻击；本轮为开发集实验，尚未证明跨场景泛化。</p><details><summary>传播、稀有度与路径选择消融 · ${raspReport.results.length} 组</summary>${table(raspReport.results)}</details><details><summary>上一轮 T-MASS 负结果（不作为推荐方法）</summary>${history}</details>`;
   const suite=state.data.rasp_validation;
   if(suite)$('#algorithm-results').insertAdjacentHTML('beforeend',`<h3>CADETS 三天 · 同配置验证</h3><div class="table-scroll"><table><thead><tr><th>场景</th><th>方法</th><th>保留边</th><th>攻击事件召回</th><th>参考链</th></tr></thead><tbody>${suite.cases.flatMap(c=>c.results.filter(r=>r.method==='original_ps_rdp@0.2'||r.method===c.primary_method).map(r=>`<tr><td>${esc(c.case)}</td><td>${esc(r.method)}</td><td>${fmt(r.retained_edges)}</td><td>${pct(r.attack_event_recall)}</td><td>${r.retained_paths}/${r.reference_paths}</td></tr>`)).join('')}</tbody></table></div><p>三天使用各自既有 POI 与固定候选图；算法配置相同。三天这里只展示实验指标，事件图仍为 THEIA Case 3。</p>`);
+ }
+ const diverse=state.data.rasp_diverse_experiment;
+ if(diverse&&state.data.edges.every(e=>e.rasp_diverse&&e.rasp)){
+  for(const row of diverse.results.filter(r=>r.quality_weight===.05))$('#algorithm-select').insertAdjacentHTML('beforeend',`<option value="diverse:${esc(row.method)}">RASP-D 实验版 · ${pct(row.budget_ratio)} 边预算</option>`);
+  const cases=[{case:'THEIA',...diverse},...(state.data.rasp_diverse_validation||[])];
+  const table=cases=>`<div class="table-scroll"><table><thead><tr><th>场景</th><th>方法 / 预算</th><th>攻击事件召回</th><th>攻击交互族覆盖</th><th>参考链</th></tr></thead><tbody>${cases.flatMap(c=>c.results.map(r=>`<tr><td>${esc(c.case)}</td><td>${esc(r.method)}</td><td>${pct(r.attack_event_recall)}</td><td>${pct(r.attack_family_recall)}</td><td>${r.retained_paths}/${r.reference_paths}</td></tr>`)).join('')}</tbody></table></div>`;
+  $('#algorithm-results').insertAdjacentHTML('afterbegin',`<h3>RASP-D · 边际收益递减实验</h3><p>保持原始重要性分数，减少重复交互垄断预算；不使用攻击标签选边。20% 预算有改善，但低预算出现退步，因此默认仍是 RASP。交互族覆盖仅统计有标签的源—目标—关系组合，不等于攻击事件召回，更不等于完整攻击链。</p>${table(cases.map(c=>({...c,results:c.results.filter(r=>r.budget_ratio===.2&&(r.quality_weight===null||r.quality_weight===.05))})))}<details><summary>查看全部预算与权重，包括负结果（${cases.length*16} 组）</summary>${table(cases)}</details>`);
  }
  $('#health').textContent='● 数据已就绪';
  $('#path-tabs').innerHTML=state.data.paths.map((p,i)=>`<button class="path-tab" data-path="${esc(p.id)}">0${i+1}　${esc(titles[p.id]||p.id)}<small>${p.event_ids.length} 条参考事件 · 点击查看</small></button>`).join('')+'<button class="path-tab" data-path="all">全部关键路径<small>聚合上下文概览</small></button>';
