@@ -1,0 +1,9 @@
+{
+  "algorithm": "RASP-D-v1",
+  "scoring_config": "configs/rasp_v1.json",
+  "quality_weights": [0.0, 0.05, 0.25],
+  "primary_quality_weight": 0.0,
+  "budgets": [0.01, 0.05, 0.1, 0.2],
+  "primary_budget": 0.2,
+  "parameter_policy": "selected post hoc by four-case macro attack-event recall at 20% cap; development selection, not held-out validation"
+}

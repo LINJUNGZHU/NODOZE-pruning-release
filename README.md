@@ -1,5 +1,7 @@
 # 稀有度与图扩散融合的溯源图自适应剪枝
 
+**当前默认：[RASP-D q=0 / 20% 边预算](docs/selected-default.md)**。四案例同预算平均攻击事件召回 95.87%；按已有开发结果选型，不是泛化保证。默认命令入口为 `python -m scripts.run_selected_rasp`，网页已同步；旧实验和流式原型保留独立入口。
+
 新增[论文/公开项目参考与排名融合实验](docs/rank-fusion-research.md)：RASP-RRF 提供四案例 64 组同预算对照及逐边排名证据，有部分收益也有显著退步，未替换默认算法。
 
 增量工程实验：[Stream-RASP](docs/stream-rasp.md) 基于动态 PPR 残差维护，支持逐行 CDM 微批读入和版本化逐边决策。当前是原型，不替代离线默认算法；历史回查的后续更新见下一段。

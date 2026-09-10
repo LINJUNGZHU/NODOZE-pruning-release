@@ -164,16 +164,19 @@ $('#upload-form').onsubmit=async e=>{e.preventDefault();const output=$('#upload-
  }
  const diverse=state.data.rasp_diverse_experiment;
  if(diverse&&state.data.edges.every(e=>e.rasp_diverse&&e.rasp)){
-  for(const row of diverse.results.filter(r=>r.quality_weight===.05))$('#algorithm-select').insertAdjacentHTML('beforeend',`<option value="diverse:${esc(row.method)}">RASP-D 实验版 · ${pct(row.budget_ratio)} 边预算</option>`);
+  for(const row of diverse.results.filter(r=>r.quality_weight===diverse.config.primary_quality_weight))$('#algorithm-select').insertAdjacentHTML('beforeend',`<option value="diverse:${esc(row.method)}">RASP-D · q=${row.quality_weight} · ${pct(row.budget_ratio)} 边预算${row.method===diverse.primary_method?'（默认）':'（实验）'}</option>`);
   const cases=[{case:'THEIA',...diverse},...(state.data.rasp_diverse_validation||[])];
   const table=cases=>`<div class="table-scroll"><table><thead><tr><th>场景</th><th>方法 / 预算</th><th>攻击事件召回</th><th>攻击交互族覆盖</th><th>参考链</th></tr></thead><tbody>${cases.flatMap(c=>c.results.map(r=>`<tr><td>${esc(c.case)}</td><td>${esc(r.method)}</td><td>${pct(r.attack_event_recall)}</td><td>${pct(r.attack_family_recall)}</td><td>${r.retained_paths}/${r.reference_paths}</td></tr>`)).join('')}</tbody></table></div>`;
-  $('#algorithm-results').insertAdjacentHTML('afterbegin',`<h3>RASP-D · 边际收益递减实验</h3><p>保持原始重要性分数，减少重复交互垄断预算；不使用攻击标签选边。20% 预算有改善，但低预算出现退步，因此默认仍是 RASP。交互族覆盖仅统计有标签的源—目标—关系组合，不等于攻击事件召回，更不等于完整攻击链。</p>${table(cases.map(c=>({...c,results:c.results.filter(r=>r.budget_ratio===.2&&(r.quality_weight===null||r.quality_weight===.05))})))}<details><summary>查看全部预算与权重，包括负结果（${cases.length*16} 组）</summary>${table(cases)}</details>`);
+  $('#algorithm-results').insertAdjacentHTML('afterbegin',`<h3>RASP-D · 当前默认配置</h3><p>默认采用 ${esc(diverse.primary_method)}。按四个开发案例相同 20% 边预算的平均攻击事件召回选择；属于事后选型，不是独立测试。低预算存在退步，保留为实验对照。交互族覆盖不等于事件召回，参考短链也不代表完整攻击。</p>${table(cases.map(c=>({...c,results:c.results.filter(r=>r.budget_ratio===.2&&(r.quality_weight===null||r.method===c.primary_method))})))}<details><summary>查看全部预算与权重，包括负结果（${cases.length*16} 组）</summary>${table(cases)}</details>`);
  }
  $('#health').textContent='● 数据已就绪';
  $('#path-tabs').innerHTML=state.data.paths.map((p,i)=>`<button class="path-tab" data-path="${esc(p.id)}">0${i+1}　${esc(titles[p.id]||p.id)}<small>${p.event_ids.length} 条参考事件 · 点击查看</small></button>`).join('')+'<button class="path-tab" data-path="all">全部关键路径<small>聚合上下文概览</small></button>';
  state.data.paths.forEach(p=>$('#path-select').insertAdjacentHTML('beforeend',`<option value="${esc(p.id)}">${esc(p.id)}</option>`));
  $('#paths').textContent='当前展示使用已有实验分数；实体名称根据原始 CDM 声明补全，原始 UUID 和名称来源保存在展开证据中。';
- if(raspReport&&state.data.edges.every(e=>e.rasp)){
+ if(diverse&&state.data.edges.every(e=>e.rasp&&e.rasp_diverse)){
+  const choice=`diverse:${diverse.primary_method}`;
+  $('#algorithm-select').value=choice;changeAlgorithm(choice);
+ }else if(raspReport&&state.data.edges.every(e=>e.rasp)){
   const choice=`rasp:${raspReport.primary_method}`;
   $('#algorithm-select').value=choice;changeAlgorithm(choice);
  }else selectScope();
