@@ -1,0 +1,9 @@
+{
+  "algorithm": "RASP-RRF-development",
+  "scoring_config": "configs/rasp_v1.json",
+  "rrf_k": 60,
+  "primary": "rrf_dual",
+  "budgets": [0.05, 0.1, 0.2],
+  "absolute_budget": 4000,
+  "policy": "fixed across development cases; no held-out or universal improvement claim"
+}
