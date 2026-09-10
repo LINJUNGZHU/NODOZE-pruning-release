@@ -1,11 +1,11 @@
 <!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PS-RDP · 攻击溯源工作台</title><link rel="stylesheet" href="/assets/styles.css?v=4"></head>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>RASP · 攻击溯源工作台</title><link rel="stylesheet" href="/assets/styles.css?v=5"></head>
 <body>
 <nav class="topbar"><a class="brand" href="/">P<span>∕</span>R <b>PS-RDP</b><small>溯源分析工作台</small></a><div><span class="dataset-tag">THEIA E3 · CASE 03</span><span id="health" class="status">连接中</span></div></nav>
 <main>
  <header class="page-heading"><div><p class="eyebrow">INVESTIGATION / 2018.04.12</p><h1>让关键路径，从系统噪声中浮现。</h1><p>从关键事件出发，追踪因果依赖，查看稀有度与扩散驱动的剪枝结果。</p></div><a href="#import-section" class="button secondary">＋ 录入图数据</a></header>
  <section id="metrics" class="metrics"></section>
- <section class="workspace" id="algorithm-panel"><div class="section-head"><div><span class="section-index">研究版</span><h2>自适应剪枝 · T-MASS</h2></div><select id="algorithm-select" aria-label="选择剪枝算法"><option value="baseline">PS-RDP · 原始 20% 预算</option><option value="adaptive" disabled>T-MASS · 自适应研究版</option></select></div><p class="footnote">保留现有稀有度与扩散评分；研究分组阈值、无监督高低分群拟合与时序连接补全。分群归属度不是攻击概率，评分总量约束不是漏报率保证。保留旧方法作为默认，不自动用研究版覆盖已有结果。</p><div id="algorithm-results" class="footnote">实验结果尚未载入；当前显示原始基线。</div></section>
+ <section class="workspace" id="algorithm-panel"><div class="section-head"><div><span class="section-index">研究版</span><h2>RASP · 对比传播与因果分叉剪枝</h2></div><select id="algorithm-select" aria-label="选择剪枝算法"><option value="baseline">PS-RDP · 原始 20% 预算</option><option value="adaptive" disabled>T-MASS · 旧研究版（负结果）</option></select></div><p class="footnote">重复交互去偏 → 带重启图传播 → 背景校正与稀有度融合 → 共同原因分叉成组保留。新旧方法在同一候选图和边预算上对照；新方法不使用 DEPIMPACT 辅助评分。</p><div id="algorithm-results" class="footnote">实验结果尚未载入；当前显示原始基线。</div></section>
  <section class="workspace">
   <div class="section-head"><div><span class="section-index">01</span><h2>参考事件链</h2></div><span class="hint">PDF 关键事件 · 真值核心图派生</span></div>
   <div id="path-tabs" class="path-tabs"></div><select id="path-select" hidden><option value="all">全部路径</option></select>
@@ -22,4 +22,4 @@
  <section class="workspace evidence-panel"><div class="section-head"><div><span class="section-index">04</span><h2>事件详情</h2></div></div><div id="details" class="event-details empty-state">点击评分表中的一行，查看事件、分数与保留依据。</div><div id="paths" class="footnote"></div></section>
  <section class="workspace import-panel" id="import-section"><div class="section-head"><div><span class="section-index">05</span><h2>录入新的图数据</h2></div><span class="hint">CDM · JSON / JSONL / GZ / AVRO</span></div><p class="footnote">上传后在服务器后台导入数据库。当前图对比展示的是已完成的 THEIA Case 3 实验；新数据导入不会自动生成剪枝结果。</p><form id="upload-form"><input id="files" name="files" type="file" multiple required aria-label="选择 CDM 数据文件"><button type="submit">上传并导入</button></form><pre id="upload-status">等待选择数据文件</pre></section>
  <footer>PS-RDP · 稀有度与因果扩散 <span>可视化上下文与全图指标分别统计</span></footer>
-</main><script src="/assets/app.js?v=4"></script></body></html>
+</main><script src="/assets/app.js?v=5"></script></body></html>

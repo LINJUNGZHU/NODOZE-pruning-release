@@ -1,0 +1,8 @@
+{
+  "scoring_config": "configs/rasp_v1.json",
+  "cases": [
+    {"name": "CADETS-06", "scenario": "output/tc/poi-prefix-sweep/2026-09-09_10-47-48/scenario-06", "prefix": 3},
+    {"name": "CADETS-12", "scenario": "output/tc/poi-prefix-sweep/2026-09-09_10-47-48/scenario-12", "prefix": 8},
+    {"name": "CADETS-13", "scenario": "output/tc/poi-prefix-sweep/2026-09-09_10-47-48/scenario-13", "prefix": 3}
+  ]
+}

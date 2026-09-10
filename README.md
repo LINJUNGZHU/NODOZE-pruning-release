@@ -6,9 +6,10 @@
 
 面向 CCF-A 级实证要求的当前保证、可主张边界与后续基线/统计计划见 `docs/CCF_A_EVALUATION_ROADMAP.md`；仓库明确把它作为质量目标，而不是录用保证。
 
-2026-09 新增 [T-MASS 自适应阈值与最少跳时序修复研究版](docs/t-mass-research.md)：
-支持分组评分总量阈值、无监督分数混合模型、时序连接补全、逐边决策账本和网页算法对照。
-新阈值方案目前未超过旧基线；保留负结果，不宣称达到顶会水平。运行与展示见
+2026-09 新增 [RASP：对比传播与因果分叉剪枝](docs/rasp-method.md)：
+重新计算去重复交互偏差的 PPR 与背景对比评分，融合历史稀有度，在硬边预算下成组保留共同原因分叉。
+THEIA 和 CADETS 三天使用同配置开发集对照；完整结果、消融与逐边分数支持网页切换。
+[上一轮 T-MASS 负结果](docs/t-mass-research.md) 继续保留，不宣称达到顶会水平。运行与展示见
 [Web Demo](webapp/README.md)，测试命令为 `PYTHONPATH=. python -m pytest -q`。
 
 ## 项目总体架构与流程

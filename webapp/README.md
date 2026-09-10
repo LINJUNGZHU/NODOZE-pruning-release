@@ -5,6 +5,14 @@ post-pruning THEIA Case 3 graph with ground-truth-derived reference paths. The b
 small representative subgraph; headline metrics always come from the complete
 1,132,218-edge score ledger.
 
+The current research method is [RASP](../docs/rasp-method.md). When its cache
+is present, the UI defaults to RASP's fixed 20% budget preset, with 1%, 5%, 10%
+and the original baseline also selectable. It updates scores, decisions, metrics
+and graph labels together; the new scorer does not use DEPIMPACT. The three-day
+CADETS table uses the same frozen configuration and implementation as THEIA,
+checked by `publish_rasp_validation.py`. These are development-set results,
+not held-out validation. Legacy T-MASS results are collapsed as history.
+
 The reference paths contain 2, 4 and 1 events. Their preservation does not
 establish complete attack reconstruction; a singleton is only a retained
 event. The default view focuses on the four-event reference. The path context
@@ -43,8 +51,8 @@ to the final multi-POI score. Small nonzero scores use scientific notation.
 
 The algorithm comparison panel can load T-MASS offline experiment results via
 `scripts/run_adaptive_mass.py --cache ...` (see
-[method and reproduction](../docs/t-mass-research.md)). The baseline remains
-the default. Switching to the experimental method updates full-graph metrics,
+[method and reproduction](../docs/t-mass-research.md)). Without a RASP cache the
+baseline remains the default. Switching methods updates full-graph metrics,
 individual edge decisions, path cards, local counts and both graph views using
 exactly the same display sample. Negative results remain visible. Uploading
 new data does not automatically execute this research experiment.
