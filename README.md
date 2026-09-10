@@ -6,6 +6,11 @@
 
 面向 CCF-A 级实证要求的当前保证、可主张边界与后续基线/统计计划见 `docs/CCF_A_EVALUATION_ROADMAP.md`；仓库明确把它作为质量目标，而不是录用保证。
 
+2026-09 新增 [T-MASS 自适应阈值与最少跳时序修复研究版](docs/t-mass-research.md)：
+支持分组评分总量阈值、无监督分数混合模型、时序连接补全、逐边决策账本和网页算法对照。
+新阈值方案目前未超过旧基线；保留负结果，不宣称达到顶会水平。运行与展示见
+[Web Demo](webapp/README.md)，测试命令为 `PYTHONPATH=. python -m pytest -q`。
+
 ## 项目总体架构与流程
 
 ```text

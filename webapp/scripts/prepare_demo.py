@@ -3,6 +3,8 @@ from __future__ import annotations
 import argparse
 import gzip
 import json
+import hashlib
+import heapq
 from pathlib import Path
 
 
@@ -83,19 +85,23 @@ def build(run_dir: Path, output: Path, context_per_class: int = 550) -> dict:
 
     selected: dict[str, dict] = dict(path_rows)
     counts = {"retained": 0, "removed": 0}
-    top_counts = {"retained": 0, "removed": 0}
+    sample_heap = []
     for row in read_rows(ledger):
         event_id = row["event_id"]
         if event_id in selected:
             continue
         bucket = "retained" if is_kept(row) else "removed"
         contextual = row["src"] in path_nodes or row["dst"] in path_nodes
-        if contextual and counts[bucket] < context_per_class:
-            selected[event_id] = row
+        if contextual:
             counts[bucket] += 1
-        elif top_counts[bucket] < 100:
-            selected[event_id] = row
-            top_counts[bucket] += 1
+            priority = int(hashlib.sha256(event_id.encode()).hexdigest(), 16)
+            item = (-priority, event_id, row)
+            heapq.heappush(sample_heap, item)
+            if len(sample_heap) > context_per_class * 2:
+                heapq.heappop(sample_heap)
+    selected.update({item[1]: item[2] for item in sample_heap})
+    for row in path_rows.values():
+        counts['retained' if is_kept(row) else 'removed'] += 1
 
     edges = [compact_edge(row, membership, truth) for row in selected.values()]
     edges.sort(key=lambda row: (row["timestamp_ns"], row["id"]))
@@ -142,7 +148,8 @@ def build(run_dir: Path, output: Path, context_per_class: int = 550) -> dict:
         "sample": {
             "edge_count": len(edges),
             "node_count": len(nodes),
-            "policy": "all certified path events plus retained/removed one-hop context and top-score anchors",
+            "policy": "all reference path events plus deterministic hash sample of one-hop context, independent of scores and retention",
+            "full_context_counts": counts,
         },
     }
     output.parent.mkdir(parents=True, exist_ok=True)
