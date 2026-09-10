@@ -1,5 +1,6 @@
 from scripts.run_stream_rasp import StreamRASP
 from tc_pruning.models import EdgeRecord
+from tc_pruning.history_archive import HistoryArchive
 
 
 def edge(i):
@@ -25,3 +26,13 @@ def test_history_rarity_late_arrival_and_window_hard_cap():
     assert next(r for r in rows if r['event_id']=='4')['retained']
     s.ingest(edge(0)); report, _ = s.snapshot()
     assert report['late_arrivals'] == 1
+
+
+def test_history_recovers_expired_poi_without_inflating_budget(tmp_path):
+    s=StreamRASP(['0'],5,archive=HistoryArchive(tmp_path))
+    for i in range(10):s.ingest(edge(i))
+    report,rows=s.snapshot()
+    assert report['active_pois']==1
+    assert report['budget_edges']==1
+    assert report['active_events']==10
+    assert next(r for r in rows if r['event_id']=='0')['retained']

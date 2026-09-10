@@ -1,5 +1,7 @@
 # Stream-RASP 工程原型
 
+后续已加入可选 `--history` 分片历史检索，见 [历史回查实验](history-recall.md)。下文记录最初仅窗口版本的边界，可靠续读仍未实现。
+
 ## 采用哪篇算法，修改了什么
 
 基础是 [Approximate Personalized PageRank on Dynamic Graphs (KDD 2016)](https://arxiv.org/abs/1603.07796)

@@ -17,11 +17,12 @@ import numpy as np
 from tc_pruning.cdm import normalize_cdm_record
 from tc_pruning.models import EdgeRecord, NodeRecord
 from tc_pruning.dynamic_ppr import DynamicPPR
+from tc_pruning.history_archive import HistoryArchive
 from tc_pruning.rasp import temporal_routes, temporal_fork_routes, select_fork_bundles
 
 
 class StreamRASP:
-    def __init__(self, poi_ids, window=20000, budget=.2):
+    def __init__(self, poi_ids, window=20000, budget=.2, archive=None):
         if window < 1 or not 0 < budget <= 1:
             raise ValueError('invalid window/budget')
         self.poi_ids = set(poi_ids)
@@ -31,6 +32,8 @@ class StreamRASP:
         self.counts = Counter(); self.total = 0
         self.ppr = DynamicPPR(); self.weights = {}
         self.late = 0; self.latest = -1
+        self.archive = archive
+        self.alert_endpoints = set()
 
     def ingest(self, event):
         if isinstance(event, NodeRecord):
@@ -47,13 +50,28 @@ class StreamRASP:
         self.late += event.timestamp_ns < self.latest
         self.latest = max(self.latest, event.timestamp_ns)
         self.events.append((event, rarity)); self.active_ids.add(event.event_id)
+        if self.archive:
+            self.archive.append(dict(asdict(event), rarity=rarity))
+        if event.event_id in self.poi_ids:
+            self.alert_endpoints.update((event.src, event.dst))
         if len(self.events) > self.window:
             old, _ = self.events.popleft(); self.active_ids.remove(old.event_id)
         return True
 
     def snapshot(self):
         started = time.perf_counter()
-        events = list(self.events); n = len(events)
+        events = list(self.events)
+        retrieval = {}
+        if self.archive:
+            self.archive.flush()
+            if self.alert_endpoints:
+                recovered, retrieval = self.archive.retrieve(self.alert_endpoints, self.latest, hops=2)
+                combined = {e.event_id:(e,r) for e,r in events}
+                for row in recovered:
+                    e = EdgeRecord(**{k:row[k] for k in ('event_id','src','dst','relation','timestamp_ns')})
+                    combined.setdefault(e.event_id,(e,row['rarity']))
+                events = list(combined.values())
+        n = len(events)
         channels = {}
         for e, rarity in events:
             a, b = sorted((self.nodes[e.src], self.nodes[e.dst]))
@@ -64,15 +82,15 @@ class StreamRASP:
         for a, b in self.weights.keys() | weights.keys():
             self.ppr.set_edge(a, b, weights.get((a, b), 0))
         self.weights = weights
-        src = np.array([self.nodes[e.src] for e, _ in events], dtype=int)
-        dst = np.array([self.nodes[e.dst] for e, _ in events], dtype=int)
+        src = np.array([self.nodes[e.dst if e.relation=='EVENT_EXECUTE' else e.src] for e, _ in events], dtype=int)
+        dst = np.array([self.nodes[e.src if e.relation=='EVENT_EXECUTE' else e.dst] for e, _ in events], dtype=int)
         ts = np.array([e.timestamp_ns for e, _ in events], dtype=np.int64)
         poi = np.array([e.event_id in self.poi_ids for e, _ in events], dtype=bool)
         seed = Counter()
         for a, b in zip(src[poi], dst[poi]): seed[int(a)] += 1; seed[int(b)] += 1
         kept = np.zeros(n, dtype=bool); scores = np.zeros(n)
         diag = {'converged': False, 'status': 'waiting_for_poi'}
-        cap = int(n*self.budget)
+        cap = int(len(self.events)*self.budget)
         if seed:
             self.ppr.set_seed(seed); diag = self.ppr.solve()
             # Degree stationary reference, distinct from batch process-seeded PPR.
@@ -94,6 +112,7 @@ class StreamRASP:
                 assert int((kept & reachable).sum()) == int(after.sum())
                 diag['status'] = 'ready'
         report = {'seen_events': self.total, 'active_events': n, 'retained_events': int(kept.sum()),
+                  'hot_window_events':len(self.events), 'history_retrieval':retrieval,
                   'budget_edges': cap, 'late_arrivals': self.late, 'active_pois': int(poi.sum()),
                   'history_nodes': len(self.nodes), 'snapshot_seconds': time.perf_counter()-started,
                   'propagation': diag, 'raw_log_deletion': False,
@@ -111,10 +130,12 @@ def main():
     parser.add_argument('--window', type=int, default=20000)
     parser.add_argument('--batch', type=int, default=5000)
     parser.add_argument('--max-events', type=int, default=0)
+    parser.add_argument('--history', action='store_true', help='retain indexed shards and recover two-hop alert history')
     args = parser.parse_args()
     if args.batch < 1: parser.error('batch must be positive')
     args.output.mkdir(parents=True, exist_ok=False)
-    engine = StreamRASP(json.loads(args.poi.read_text()), args.window)
+    archive = HistoryArchive(args.output/'archive') if args.history else None
+    engine = StreamRASP(json.loads(args.poi.read_text()), args.window, archive=archive)
     def publish():
         report, rows = engine.snapshot()
         version = engine.total
