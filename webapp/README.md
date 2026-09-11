@@ -2,7 +2,9 @@
 
 页面按三步使用：**选案例 → 看剪枝效果 → 核验可疑进程**。提供四个真实 OPTC 窗口，全量图最大 188,609 条边。详情分为攻击线索、事件日志与评分、运行记录；高级参数默认折叠。
 
-新增真实训练的自监督图模型，可切换“深度学习 · 实验”后点击“重新分析”。当前实测未优于规则，因此规则仍为默认。[方法、论文来源和完整负结果](../docs/deep-graph-method.md)。
+默认使用增强规则（组合行为 + 受限进程创建链），旧规则保留对照。[增强规则实测与 TAPAS 标注核查](../docs/rule-lineage-method.md)。
+
+另有真实训练的自监督图模型，可切换“深度学习 · 实验”后点击“重新分析”。当前实测未优于规则，因此神经模型保持实验选项。[方法、论文来源和完整负结果](../docs/deep-graph-method.md)。
 
 ## 当前服务器启动
 
@@ -33,12 +35,12 @@ python webapp/backend/app.py
 
 1. 点击案例卡。其事件数就是候选图原始规模。
 2. 选择调查起点（POI）。三个攻击预设来自项目 Ground Truth：下载 runme.bat、初始 PowerShell C2、提权代理 C2。默认最后一项。背景案例的起点明确标为普通调查事件。
-3. 选择“规则对照”或“深度学习 · 实验”、保留边上限，点击“重新分析”。结果保存到当前案例，其余案例不变；失败保留上次成功结果。
-4. 查看“攻击线索”：点击进程看依据与支持日志，路径下的事件按钮打开真实记录。参考标签与算法预测分开，页面显示 Precision、Recall、F1、命中/误报/漏报。
+3. 选择“增强规则 · 进程链”、“旧规则 · 对照”或“深度学习 · 实验”、保留边上限，点击“重新分析”。结果保存到当前案例，其余案例不变；失败保留上次成功结果。
+4. 查看“攻击线索”：点击进程看依据与支持日志，路径下的事件按钮打开真实记录。参考标签与算法预测分开，页面显示 Precision、Recall、F1、命中/误报/漏报，并单独显示 TAPAS 静态进程清单的召回与标签分歧。“查看活动事件”可检索预测进程生命周期内的全部候选活动，不仅是路径片段。
 5. 在“事件日志与评分”中搜索文件、IP、进程、节点 UUID 或事件 ID。每页 20 条，评分曲线对应当前页真实分数；点击分数点或事件行可查看完整精度、判定原因、历史频率和原始日志。“将此事件设为调查起点”填写 POI，但需重新分析才生效。
 6. “运行记录”提供历史计数、数据来源和剪枝审计下载；攻击页另有调查报告下载。
 
-自定义事件 ID、剪枝范围、规则异常分位线在折叠的高级设置中。神经模型阈值固定，不会随规则分位线变化。边评分用于调查排序，节点异常分用于候选识别，二者都不是恶意概率。剪枝受完整路径和预算约束，不能用一个单边阈值代替；真实同分不会被打散。
+自定义事件 ID、剪枝范围、异常分位线在折叠的高级设置中，它只决定旧规则判定和增强规则的复核队列。神经模型阈值固定，不会随规则分位线变化。边评分用于调查排序，增强规则按组合证据和创建链判定，异常分仅用于排序/复核；各分数都不是恶意概率。剪枝受完整路径和预算约束，不能用一个单边阈值代替；真实同分不会被打散。
 
 频率统计始终使用 `event.timestamp_ns < poi.timestamp_ns` 的全部同主机可用历史，不含同刻及之后事件，不将数据砍一半。切换案例或 POI 不改变这一条件。
 
@@ -56,6 +58,8 @@ python webapp/scripts/prepare_optc.py
 python webapp/scripts/prepare_optc_corpus.py
 # 标签归档须放在 webapp/runtime/research/optc-labels/ 下
 python webapp/scripts/prepare_examples.py
+python webapp/scripts/prepare_tapas_reference.py
+python webapp/scripts/evaluate_rule_lineage.py
 # 仓库自带 checkpoint；仅需重新训练时运行下面一行
 python webapp/scripts/train_deep_graph.py
 python webapp/scripts/evaluate_deep_graph.py
@@ -78,9 +82,9 @@ curl -fL https://raw.githubusercontent.com/AT03380/optc-labels/64c9f9b2e1a15bf3c
 
 - `GET /api/datasets`：案例列表、全量计数与模型可用状态。
 - `GET /api/datasets/<id>/view`：紧凑全量图、当前 POI、指标与攻击报告。`graph.nodes=[id,label,type]`，`graph.edges=[id,source_index,target_index,retained,score]`，`sampled=false`。
-- `GET /api/datasets/<id>/edges?page=0&limit=20&q=&filter=all`：全量日志分页，支持 `retained/removed/attack`；最大 100 条/页。
+- `GET /api/datasets/<id>/edges?page=0&limit=20&q=&filter=all`：全量日志分页，支持 `retained/removed/attack/activity`；最大 100 条/页。
 - `GET /api/datasets/<id>/events/<event_id>`：原始日志与判定详情。
-- `POST /api/datasets/<id>/prune`：`poi_event_id` 必填；支持 `budget_ratio`、`selection_mode`、`attack_quantile`、`detector=rules|neural`；`compact=true` 返回新版全量图。
+- `POST /api/datasets/<id>/prune`：`poi_event_id` 必填；支持 `budget_ratio`、`selection_mode`、`attack_quantile`、`detector=rules|rules_legacy|neural`；`compact=true` 返回新版全量图。
 - `GET /api/datasets/<id>/graph`：原有完整数据接口保留。
 - `GET /api/datasets/<id>/decision-audit` / `attack-report`：下载可核验报告。
 

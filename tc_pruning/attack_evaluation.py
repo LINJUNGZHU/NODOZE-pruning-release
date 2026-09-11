@@ -9,6 +9,7 @@ from tc_pruning.attack_inference import check_path, temporal_paths
 
 REFERENCE = Path(__file__).resolve().parents[1] / 'poi/optc-day1-attack-reference.json'
 PUBLIC_LABELS = REFERENCE.with_name('optc-0201-public-labels.json')
+TAPAS_LABELS = REFERENCE.with_name('tapas-optc-slices.json')
 
 
 def node_metrics(node_ids, predicted, labels):
@@ -117,8 +118,13 @@ def evaluate_attack(report, edges, reference=None):
             emitted_events=set(report['path_event_ids']);malicious=set(benchmark['malicious_event_ids'])
             all_labeled=sum(set(p['event_ids'])<=malicious for p in report['paths'])
             path_processes=set(n for p in report['paths'] for n in p['node_ids']) & universe
+            activity=set(report.get('activity_event_ids',[]));activity_matches=len(activity & malicious)
             result['published_benchmark']=dict(repository=benchmark['repository'],commit=benchmark['commit'],
                 policy=benchmark['policy'],labels=labels,node_metrics=bm,
+                activity_event_metrics=dict(predicted_events=len(activity),labeled_malicious_events=len(malicious),matched_events=activity_matches,
+                    false_positive_events=len(activity-malicious),missed_events=len(malicious-activity),
+                    missed_event_ids=sorted(malicious-activity),false_positive_event_ids=sorted(activity-malicious),
+                    precision=activity_matches/len(activity) if activity else None,recall=activity_matches/len(malicious) if malicious else None),
                 missed_process_ids=sorted(n for n,v in labels.items() if v is True and n not in predicted),
                 false_positive_process_ids=sorted(n for n,v in labels.items() if v is False and n in predicted),
                 path_event_metrics=dict(predicted_events=len(emitted_events),labeled_malicious_events=len(malicious),
@@ -128,4 +134,21 @@ def evaluate_attack(report, edges, reference=None):
                                         paths_with_all_events_labeled_malicious=all_labeled),
                 path_process_coverage=node_metrics(universe,path_processes,labels),
                 note='公开标签按其作者的补集规则计正常；含继承标签和已知数据错误。过程节点、路径上的上下文节点、逐事件与完整路径是不同评估单位，不能互换。')
+    if TAPAS_LABELS.is_file():
+        tapas=json.loads(TAPAS_LABELS.read_text())
+        scope=tapas['windows'].get(digest(by_id))
+        observed_nodes={n for e in edges for n in (e['source'],e['target'])}
+        if scope and digest(observed_nodes)==scope['node_ids_sha256']:
+            positive=set(scope['positive_node_ids']);labels={n:n in positive for n in universe}
+            metrics=node_metrics(universe,predicted,labels)
+            metrics['excluding_seed_nodes']=node_metrics(universe-seeds,predicted-seeds,{n:v for n,v in labels.items() if n not in seeds})
+            published=result.get('published_benchmark',{}).get('labels',{})
+            conflicts=[n for n in sorted(universe) if n in published and published[n] is not None and published[n]!=labels[n]]
+            result['tapas_benchmark']=dict(source=tapas['source_path'],sha256=tapas['source_sha256'],
+                source_node_count=tapas['source_node_count'],granularity=tapas['granularity'],limitation=tapas['limitation'],
+                matched_types=scope['matched_types'],labels=labels,node_metrics=metrics,
+                missed_process_ids=sorted(n for n in universe if labels[n] and n not in predicted),
+                false_positive_process_ids=sorted(n for n in predicted if not labels[n]),
+                disagreement_with_published_process_ids=conflicts,
+                full_attack_path_precision=None,full_attack_path_recall=None)
     return result

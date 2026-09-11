@@ -226,8 +226,9 @@ def rescore(data, poi_id, budget_ratio=None, selection_mode=None, attack_quantil
     data['attack'] = infer_attack(edges, poi_id, dict(anomaly_quantile=quantile),detector=detector if detector is not None else data.get('attack',{}).get('detector','rules'))
     data['attack']['evaluation'] = evaluate_attack(data['attack'], edges)
     attack_paths, attack_evidence = set(data['attack']['path_event_ids']), set(data['attack']['evidence_event_ids'])
+    attack_activity=set(data['attack'].get('activity_event_ids',[]))
     for e in edges:
-        e['attack_role'] = 'path_and_evidence' if e['id'] in attack_paths & attack_evidence else 'path' if e['id'] in attack_paths else 'evidence' if e['id'] in attack_evidence else 'none'
+        e['attack_role'] = 'path_and_evidence' if e['id'] in attack_paths & attack_evidence else 'path' if e['id'] in attack_paths else 'evidence' if e['id'] in attack_evidence else 'activity' if e['id'] in attack_activity else 'none'
     data['logs']=[f"读取 OPTC：{len(data['dataset'].get('sources',[]))} 份来源文件；主机 SysClient0201",
                   f"手动 POI：{data['poi']['label']} · {poi_id}",f"POI 时间 / 频率截止：{data['poi']['timestamp']}，严格小于，不含同刻事件",
                   f"累计历史：{history['history_edges']:,} 条；按原始事件 ID 去重，不按窗口对半切分",
@@ -238,4 +239,8 @@ def rescore(data, poi_id, budget_ratio=None, selection_mode=None, attack_quantil
                   f"攻击推断：{data['attack']['summary']['inferred_attack_nodes']} 个进程假设，{data['attack']['summary']['paths']} 条时序路径；独立于剪枝预算",
                   f"攻击节点评估：已知正例找回 {data['attack']['evaluation']['node_metrics']['tp']} / {data['attack']['evaluation']['node_metrics']['known_positive']}；未标注预测 {data['attack']['evaluation']['node_metrics']['unreviewed_predictions']} 个，不计为正常或误报",
                   f"重算完成，用时 {time.monotonic()-started:.2f} 秒"]
+    for key,label in [('published_benchmark','公开进程标注'),('tapas_benchmark','TAPAS 静态进程清单')]:
+        benchmark=data['attack']['evaluation'].get(key)
+        if benchmark:
+            m=benchmark['node_metrics'];data['logs'].insert(-1,f"{label}：命中 {m['tp']} / {m['known_positive']}，误报 {m['fp']}，漏报 {m['fn']}")
     return data

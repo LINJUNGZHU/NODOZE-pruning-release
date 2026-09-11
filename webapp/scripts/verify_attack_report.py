@@ -28,14 +28,48 @@ def verify(document):
     if path_union!=set(attack['path_event_ids']): raise ValueError('path event union mismatch')
     evidence={i for n in attack['nodes'] if n['predicted_attack'] for i in n['evidence_event_ids']}
     if evidence!=set(attack['evidence_event_ids']): raise ValueError('evidence union mismatch')
-    if set(by_id)!=path_union|evidence: raise ValueError('missing/extra supporting event')
+    activity=set(attack.get('activity_event_ids',[]))
+    if set(by_id)!=path_union|evidence|activity: raise ValueError('missing/extra supporting event')
     processes={n['id'] for n in attack['nodes']};predicted={n['id'] for n in attack['nodes'] if n['predicted_attack']}
     path_nodes={n for p in attack['paths'] for n in p['node_ids']}
     if set(attack['connector_node_ids'])!=(path_nodes&processes)-predicted: raise ValueError('connector role mismatch')
     if set(attack['resource_node_ids'])!=path_nodes-processes: raise ValueError('resource role mismatch')
     for p in attack['paths']:
         if set(p['inferred_node_ids'])!=set(p['node_ids'])&predicted: raise ValueError('inferred role mismatch')
-    return dict(raw_events_verified=True,strict_temporal_paths_verified=True,roles_verified=True,
+    activity_verified=False
+    if 'activity_event_ids' in attack:
+        births={};ends={}
+        for e in sorted(events,key=lambda e:(e['timestamp_ns'],e['id'])):
+            if e['relation']=='PROCESS_CREATE' and e['target'] in predicted:births.setdefault(e['target'],e)
+        start={n:births[n]['timestamp_ns'] if n in births else min((e['timestamp_ns'] for e in events if e['raw']['actorID']==n),default=0) for n in predicted}
+        for e in sorted(events,key=lambda e:(e['timestamp_ns'],e['id'])):
+            if e['relation']=='PROCESS_TERMINATE' and e['target'] in start and e['timestamp_ns']>=start[e['target']]:ends.setdefault(e['target'],e['timestamp_ns'])
+        expected=set()
+        for e in events:
+            actor=e['raw']['actorID']
+            own=actor in start and start[actor]<=e['timestamp_ns']<=ends.get(actor,float('inf'))
+            birth=e['relation']=='PROCESS_CREATE' and e['target'] in births and e['id']==births[e['target']]['id']
+            end=e['relation']=='PROCESS_TERMINATE' and e['target'] in ends and e['timestamp_ns']==ends[e['target']]
+            if own or birth or end:expected.add(e['id'])
+        if activity!=expected:raise ValueError('activity membership mismatch')
+        activity_verified=True
+    rule_verified=False
+    if attack.get('version')=='attack-hypothesis-v2-lineage':
+        from tc_pruning.rule_lineage import verify_witness
+        for node in attack['nodes']:
+            if not node['predicted_attack']:continue
+            verify_witness(node,by_id,attack['config'])
+            witness=node['rule_witness']
+            if witness['root_node_id'] not in predicted:raise ValueError('unreported behavioral root')
+            if witness['kind']=='corroborated_behavior':
+                start=witness['active_since_ns']
+                end=min((e['timestamp_ns'] for e in events if e['relation']=='PROCESS_TERMINATE' and e['target']==node['id'] and e['timestamp_ns']>=start),default=float('inf'))
+                support=[by_id[i] for i in witness['root_evidence_event_ids']]
+                if not any(e['raw']['actorID']==node['id'] and start<e['timestamp_ns']<end and
+                           (e['relation']=='PROCESS_CREATE' or e['raw']['object']=='FLOW' and e['raw']['properties'].get('direction','').lower()=='outbound') for e in support):
+                    raise ValueError('behavioral root corroboration is outside lifetime')
+        rule_verified=True
+    return dict(activity_membership_verified=activity_verified,rule_witnesses_verified=rule_verified,raw_events_verified=True,strict_temporal_paths_verified=True,roles_verified=True,
                 paths=len(attack['paths']),maliciousness_proven=False,
                 limitation='Checks internal event/route consistency, not log authenticity, model optimality or ground-truth correctness.')
 

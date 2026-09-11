@@ -1,0 +1,235 @@
+{
+  "note": "Diagnostic only: undirected all-relation expansion, not the deployed attack classifier. Shows why broad neighborhood coverage must not be substituted for accurate attack attribution.",
+  "results": [
+    {
+      "hops": 1,
+      "predicted": 23,
+      "tapas": {
+        "tp": 16,
+        "fp": 7,
+        "fn": 28,
+        "tn": 62,
+        "predicted": 23,
+        "known_positive": 44,
+        "known_negative": 69,
+        "unknown_nodes": 0,
+        "unreviewed_predictions": 0,
+        "known_positive_recall": 0.36363636363636365,
+        "precision": 0.6956521739130435,
+        "recall": 0.36363636363636365,
+        "accuracy": 0.6902654867256637,
+        "f1": 0.47761194029850745,
+        "precision_bounds": [
+          0.6956521739130435,
+          0.6956521739130435
+        ],
+        "complete_labels": true
+      },
+      "public": {
+        "tp": 8,
+        "fp": 15,
+        "fn": 0,
+        "tn": 90,
+        "predicted": 23,
+        "known_positive": 8,
+        "known_negative": 105,
+        "unknown_nodes": 0,
+        "unreviewed_predictions": 0,
+        "known_positive_recall": 1.0,
+        "precision": 0.34782608695652173,
+        "recall": 1.0,
+        "accuracy": 0.8672566371681416,
+        "f1": 0.5161290322580645,
+        "precision_bounds": [
+          0.34782608695652173,
+          0.34782608695652173
+        ],
+        "complete_labels": true
+      }
+    },
+    {
+      "hops": 2,
+      "predicted": 89,
+      "tapas": {
+        "tp": 36,
+        "fp": 53,
+        "fn": 8,
+        "tn": 16,
+        "predicted": 89,
+        "known_positive": 44,
+        "known_negative": 69,
+        "unknown_nodes": 0,
+        "unreviewed_predictions": 0,
+        "known_positive_recall": 0.8181818181818182,
+        "precision": 0.4044943820224719,
+        "recall": 0.8181818181818182,
+        "accuracy": 0.46017699115044247,
+        "f1": 0.5413533834586466,
+        "precision_bounds": [
+          0.4044943820224719,
+          0.4044943820224719
+        ],
+        "complete_labels": true
+      },
+      "public": {
+        "tp": 8,
+        "fp": 81,
+        "fn": 0,
+        "tn": 24,
+        "predicted": 89,
+        "known_positive": 8,
+        "known_negative": 105,
+        "unknown_nodes": 0,
+        "unreviewed_predictions": 0,
+        "known_positive_recall": 1.0,
+        "precision": 0.0898876404494382,
+        "recall": 1.0,
+        "accuracy": 0.2831858407079646,
+        "f1": 0.16494845360824742,
+        "precision_bounds": [
+          0.0898876404494382,
+          0.0898876404494382
+        ],
+        "complete_labels": true
+      }
+    },
+    {
+      "hops": 3,
+      "predicted": 102,
+      "tapas": {
+        "tp": 39,
+        "fp": 63,
+        "fn": 5,
+        "tn": 6,
+        "predicted": 102,
+        "known_positive": 44,
+        "known_negative": 69,
+        "unknown_nodes": 0,
+        "unreviewed_predictions": 0,
+        "known_positive_recall": 0.8863636363636364,
+        "precision": 0.38235294117647056,
+        "recall": 0.8863636363636364,
+        "accuracy": 0.39823008849557523,
+        "f1": 0.5342465753424658,
+        "precision_bounds": [
+          0.38235294117647056,
+          0.38235294117647056
+        ],
+        "complete_labels": true
+      },
+      "public": {
+        "tp": 8,
+        "fp": 94,
+        "fn": 0,
+        "tn": 11,
+        "predicted": 102,
+        "known_positive": 8,
+        "known_negative": 105,
+        "unknown_nodes": 0,
+        "unreviewed_predictions": 0,
+        "known_positive_recall": 1.0,
+        "precision": 0.0784313725490196,
+        "recall": 1.0,
+        "accuracy": 0.168141592920354,
+        "f1": 0.14545454545454545,
+        "precision_bounds": [
+          0.0784313725490196,
+          0.0784313725490196
+        ],
+        "complete_labels": true
+      }
+    },
+    {
+      "hops": 4,
+      "predicted": 105,
+      "tapas": {
+        "tp": 41,
+        "fp": 64,
+        "fn": 3,
+        "tn": 5,
+        "predicted": 105,
+        "known_positive": 44,
+        "known_negative": 69,
+        "unknown_nodes": 0,
+        "unreviewed_predictions": 0,
+        "known_positive_recall": 0.9318181818181818,
+        "precision": 0.3904761904761905,
+        "recall": 0.9318181818181818,
+        "accuracy": 0.40707964601769914,
+        "f1": 0.5503355704697986,
+        "precision_bounds": [
+          0.3904761904761905,
+          0.3904761904761905
+        ],
+        "complete_labels": true
+      },
+      "public": {
+        "tp": 8,
+        "fp": 97,
+        "fn": 0,
+        "tn": 8,
+        "predicted": 105,
+        "known_positive": 8,
+        "known_negative": 105,
+        "unknown_nodes": 0,
+        "unreviewed_predictions": 0,
+        "known_positive_recall": 1.0,
+        "precision": 0.0761904761904762,
+        "recall": 1.0,
+        "accuracy": 0.1415929203539823,
+        "f1": 0.1415929203539823,
+        "precision_bounds": [
+          0.0761904761904762,
+          0.0761904761904762
+        ],
+        "complete_labels": true
+      }
+    },
+    {
+      "hops": 5,
+      "predicted": 105,
+      "tapas": {
+        "tp": 41,
+        "fp": 64,
+        "fn": 3,
+        "tn": 5,
+        "predicted": 105,
+        "known_positive": 44,
+        "known_negative": 69,
+        "unknown_nodes": 0,
+        "unreviewed_predictions": 0,
+        "known_positive_recall": 0.9318181818181818,
+        "precision": 0.3904761904761905,
+        "recall": 0.9318181818181818,
+        "accuracy": 0.40707964601769914,
+        "f1": 0.5503355704697986,
+        "precision_bounds": [
+          0.3904761904761905,
+          0.3904761904761905
+        ],
+        "complete_labels": true
+      },
+      "public": {
+        "tp": 8,
+        "fp": 97,
+        "fn": 0,
+        "tn": 8,
+        "predicted": 105,
+        "known_positive": 8,
+        "known_negative": 105,
+        "unknown_nodes": 0,
+        "unreviewed_predictions": 0,
+        "known_positive_recall": 1.0,
+        "precision": 0.0761904761904762,
+        "recall": 1.0,
+        "accuracy": 0.1415929203539823,
+        "f1": 0.1415929203539823,
+        "precision_bounds": [
+          0.0761904761904762,
+          0.0761904761904762
+        ],
+        "complete_labels": true
+      }
+    }
+  ]
+}

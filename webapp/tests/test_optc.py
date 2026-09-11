@@ -183,6 +183,7 @@ def test_compact_view_keeps_every_edge_and_paginated_logs(dataset,tmp_path):
         assert client.get(base+'/events/'+e['id']).json==e
     assert client.get(base+'/events/missing').status_code==404
     assert client.get(base+'/edges?filter=retained').json['total']==data['metrics']['retained_edges']
+    assert client.get(base+'/edges?filter=activity').json['total']==data['attack']['summary']['activity_edges']
     for suffix in ['/view','/edges','/events/seed']:
         assert client.get('/api/datasets/missing'+suffix).status_code==404
     assert client.get(base+'/edges?page=bad').status_code==400

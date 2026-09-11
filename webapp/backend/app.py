@@ -162,7 +162,7 @@ def create_app(cache_path: str | Path | None = None, dataset_catalog: str | Path
             return jsonify({'error': 'unknown dataset'}), 404
         if 'attack' not in data:
             return jsonify({'error': 'Recompute the POI to generate attack hypotheses'}), 503
-        ids = set(data['attack']['path_event_ids']) | set(data['attack']['evidence_event_ids'])
+        ids = set(data['attack']['path_event_ids']) | set(data['attack']['evidence_event_ids']) | set(data['attack'].get('activity_event_ids',[]))
         response = jsonify(dict(dataset=data['dataset'],poi=data['poi'],history=data['history'],
                                 attack=data['attack'],events=[e for e in data['edges'] if e['id'] in ids]))
         response.headers['Content-Disposition'] = 'attachment; filename="optc-attack-report.json"'
@@ -202,10 +202,11 @@ def create_app(cache_path: str | Path | None = None, dataset_catalog: str | Path
             page=max(0,int(request.args.get('page',0)));limit=min(100,max(1,int(request.args.get('limit',20))))
         except ValueError:return jsonify(error='invalid pagination'),400
         query=request.args.get('q','').lower().strip();decision=request.args.get('filter','all')
-        if decision not in ('all','retained','removed','attack'):return jsonify(error='unknown edge filter'),400
+        if decision not in ('all','retained','removed','attack','activity'):return jsonify(error='unknown edge filter'),400
+        activity_ids=set(data.get('attack',{}).get('activity_event_ids',[])) if decision=='activity' else set()
         edges=[e for e in data['edges'] if
                (decision=='all' or decision=='retained' and e['retained'] or decision=='removed' and not e['retained'] or
-                decision=='attack' and e.get('attack_role','none')!='none') and
+                decision=='attack' and e.get('attack_role','none')!='none' or decision=='activity' and e['id'] in activity_ids) and
                (not query or query in f"{e['id']} {e['source']} {e['target']} {e['source_label']} {e['target_label']} {e['relation']}".lower())]
         if request.args.get('sort','score')=='score':edges.sort(key=lambda e:(-e['score'],e['id']))
         keys=('id','source_label','target_label','relation','timestamp','score','historical_count','retained','reason','attack_role')

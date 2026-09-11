@@ -19,7 +19,7 @@ from tc_pruning.optc import signature
 
 VERSION = 'attack-hypothesis-v1'
 DEFAULT_CONFIG = dict(anomaly_quantile=.90, min_families=2, top_families=3,
-                      max_lineage_hops=12,max_path_anchors=12)
+                      max_lineage_hops=12,max_path_anchors=12,lineage_depth=4,lineage_seconds=600,launcher_seconds=120)
 
 
 def process_metadata(edges):
@@ -97,14 +97,14 @@ def check_path(event_ids, by_id):
 def infer_attack(edges, poi_id, config=None, detector='rules', neural_scores=None):
     started = time.monotonic()
     cfg = dict(DEFAULT_CONFIG, **(config or {}))
-    if detector not in ('rules','neural'):raise ValueError('unknown attack detector')
+    if detector not in ('rules','rules_legacy','neural'):raise ValueError('unknown attack detector')
     if detector=='neural' and neural_scores is None:
         from tc_pruning.deep_graph import score_nodes
         neural_scores=score_nodes(edges)
     q = cfg['anomaly_quantile']
     if isinstance(q, bool) or not isinstance(q, (float,int)) or not 0 < q < 1:
         raise ValueError('anomaly_quantile must be in (0, 1)')
-    for key in ('min_families', 'top_families', 'max_lineage_hops','max_path_anchors'):
+    for key in ('min_families', 'top_families', 'max_lineage_hops','max_path_anchors','lineage_depth','lineage_seconds','launcher_seconds'):
         if type(cfg[key]) is not int or cfg[key] < 1: raise ValueError(f'invalid {key}')
     edges = sorted(edges, key=lambda e:(e['timestamp_ns'], e['id']))
     by_id = {e['id']:e for e in edges}
@@ -127,6 +127,10 @@ def infer_attack(edges, poi_id, config=None, detector='rules', neural_scores=Non
         key = signature(e)
         previous = families[actor].get(key)
         if previous is None or value > previous[0]: families[actor][key] = (value,e['id'])
+    deaths={}
+    for e in edges:
+        if e['relation']=='PROCESS_TERMINATE' and e['target'] in births and e['timestamp_ns']>=births[e['target']]['timestamp_ns']:
+            deaths.setdefault(e['target'],e['timestamp_ns'])
     rows = []
     for nid, meta in processes.items():
         support = sorted(families[nid].values(), key=lambda x:(-x[0],x[1]))
@@ -140,6 +144,7 @@ def infer_attack(edges, poi_id, config=None, detector='rules', neural_scores=Non
             for e in activities[nid]:
                 r=e['raw']; p=r.get('properties', {})
                 if e['timestamp_ns'] <= birth['timestamp_ns']: continue
+                if detector=='rules' and e['timestamp_ns']>=deaths.get(nid,float('inf')):continue
                 if ((r['object'] == 'FLOW' and p.get('direction','').lower() == 'outbound') or
                     (r['object'] == 'PROCESS' and r['action'] == 'CREATE')):
                     corroboration.append(e['id']); break
@@ -147,7 +152,7 @@ def infer_attack(edges, poi_id, config=None, detector='rules', neural_scores=Non
         evidence_ids = list(dict.fromkeys(([birth['id']] if flags else []) + corroboration + [i for _,i in support[:cfg['top_families']]]))
         rows.append(dict(**meta, label=meta['images'][0] if meta['images'] else nid,
                          anomaly_score=anomaly, family_count=len(support),
-                         command_signals=flags, behavioral_match=behavioral,
+                         command_signals=flags, behavioral_match=behavioral,behavioral_candidate=bool(corroboration),corroboration_event_ids=corroboration,
                          evidence_event_ids=evidence_ids, poi_linked=nid in linked,
                          seed_node=nid in (by_id[poi_id]['source'],by_id[poi_id]['target']),
                          first_support_ns=min((by_id[i]['timestamp_ns'] for i in evidence_ids),default=None)))
@@ -161,6 +166,10 @@ def infer_attack(edges, poi_id, config=None, detector='rules', neural_scores=Non
         if outlier: row['reasons'].append(f"{row['family_count']} 个不同历史异常交互，聚合分严格超过当前窗口 {q:.0%} 分位线")
         if not row['reasons']: row['reasons'].append('未满足攻击假设判定；不等于已确认正常')
         row['status'] = 'inferred_attack' if row['predicted_attack'] else 'manual_seed' if row['seed_node'] else 'unclassified'
+    rule_summary=None
+    if detector=='rules':
+        from tc_pruning.rule_lineage import expand_lineage
+        rule_summary=expand_lineage(rows,edges,cfg)
     if detector=='neural':
         for row in rows:
             neural=neural_scores['nodes'].get(row['id'])
@@ -176,6 +185,20 @@ def infer_attack(edges, poi_id, config=None, detector='rules', neural_scores=Non
     rows.sort(key=lambda r:(not r['predicted_attack'],not r['behavioral_match'],-r['anomaly_score'],r['id']))
     for rank,row in enumerate(rows,1): row['rank']=rank
     predicted = {r['id']:r for r in rows if r['predicted_attack']}
+    # Full observed activity of inferred processes is distinct from the small
+    # selected path explanation. Do not silently report path samples as recovery.
+    active={nid:births[nid]['timestamp_ns'] if nid in births else min((e['timestamp_ns'] for e in activities[nid]),default=0) for nid in predicted}
+    ended={}
+    for e in edges:
+        if e['relation']=='PROCESS_TERMINATE' and e['target'] in active and e['timestamp_ns']>=active[e['target']]:
+            ended.setdefault(e['target'],e['timestamp_ns'])
+    activity_ids=[]
+    for e in edges:
+        actor=e['raw']['actorID']
+        own=actor in active and active[actor]<=e['timestamp_ns']<=ended.get(actor,float('inf'))
+        birth=e['relation']=='PROCESS_CREATE' and e['target'] in predicted and births[e['target']]['id']==e['id']
+        terminal=e['relation']=='PROCESS_TERMINATE' and e['target'] in ended and e['timestamp_ns']==ended[e['target']]
+        if own or birth or terminal:activity_ids.append(e['id'])
     paths, seen_paths, disconnected = [], set(), []
     def append_path(event_ids, kind, anchor, truncated=False):
         event_ids = tuple(event_ids)
@@ -221,9 +244,10 @@ def infer_attack(edges, poi_id, config=None, detector='rules', neural_scores=Non
     report = dict(version=VERSION,config=cfg,poi_event_id=poi_id, nodes=rows,paths=paths,
                   disconnected_pairs=disconnected,resource_node_ids=sorted(resource_ids),
                   connector_node_ids=sorted(connectors),path_event_ids=sorted(path_event_ids),
-                  evidence_event_ids=sorted(evidence_event_ids),
+                  evidence_event_ids=sorted(evidence_event_ids),activity_event_ids=activity_ids,
+                  activity_contract='Observed actor activity from process birth (or first observation) through termination, plus creation/termination boundaries; candidate event subgraph, not a single attack path or event-maliciousness proof',
                   summary=dict(inferred_attack_nodes=len(predicted),evaluated_process_nodes=len(rows),
-                               paths=len(paths),path_edges=len(path_event_ids),resource_nodes=len(resource_ids),
+                               paths=len(paths),path_edges=len(path_event_ids),activity_edges=len(activity_ids),resource_nodes=len(resource_ids),
                                connector_nodes=len(connectors),
                                path_anchor_nodes=len(path_anchors),untraced_predictions=len(predicted)-len(path_anchors),
                                execution_paths=sum(p['support_level']=='execution_trace' for p in paths),
@@ -236,6 +260,12 @@ def infer_attack(edges, poi_id, config=None, detector='rules', neural_scores=Non
                                 resources='参与路径的文件/网络对象不是自动判定的恶意节点',
                                 paths='真实事件的严格时序有向路径；路径存在不证明每个节点或事件恶意'))
     report['detector']=detector
+    if detector=='rules':
+        report['version']='attack-hypothesis-v2-lineage'
+        report['rule_summary']=rule_summary
+        report['threshold'].update(value=None,review_value=threshold,calibration='No scalar attack threshold; empirical quantile only queues review')
+        report['contract']['classification']=rule_summary['policy']
+        report['contract']['scope']='Retrospective bounded execution attribution; no POI gating of behavioral roots'
     if detector=='neural':
         report['model']={k:v for k,v in neural_scores.items() if k!='nodes'}
         report['threshold']=dict(value=neural_scores['threshold'],comparison='strict >',calibration=neural_scores['calibration'])

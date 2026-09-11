@@ -48,7 +48,11 @@ def main():
             assert page.locator('#detail-content [data-event]').count()>0
             page.locator('#detail-content [data-event]').first.click();page.wait_for_function('document.querySelector("#detail-title").textContent==="原始事件与评分依据"')
             assert '来源行' in page.locator('#detail-content').inner_text();page.click('#close-detail')
-            report=page.request.get(base+'/attack-report').json();assert verify_attack(report)['roles_verified']
+            assert 'TAPAS' in page.locator('#tapas-evaluation').inner_text()
+            page.click('#view-activity');page.wait_for_function('state.table?.total===state.data.attack.summary.activity_edges')
+            page.click('#tab-attack')
+            report=page.request.get(base+'/attack-report').json();assert verify_attack(report)['rule_witnesses_verified']
+            assert verify_attack(report)['activity_membership_verified']
             for path in report['attack']['paths']:
                 page.select_option('#attack-path-select',path['id'])
                 assert page.locator('#attack-path [data-path-node]').count()==len(path['node_ids'])
@@ -72,6 +76,9 @@ def main():
             assert page.evaluate('state.data.poi.event_id')==other
             page.select_option('#poi-select',original['poi']);assert run().status==200
             assert page.locator('#error').is_hidden()
+            page.select_option('#detector','rules_legacy');assert run().status==200
+            assert page.evaluate('state.data.attack.detector')=='rules_legacy'
+            assert page.evaluate('state.data.attack.summary.inferred_attack_nodes')<len(inferred)
             page.select_option('#detector','neural');assert run().status==200
             assert page.evaluate('state.data.attack.detector')=='neural'
             assert page.evaluate('state.data.attack.contract.truth_used') is False
@@ -93,8 +100,8 @@ def main():
                     selection_mode=original['algorithm']['selection_mode'],detector=original['detector'],attack_quantile=original['q'],compact=True),timeout=90000)
             assert restored.status==200
             browser.close()
-        result=dict(cases=snapshots,browser_errors=errors,mobile_overflow=False,checks=['all events drawn once','all four real cases','node evidence and paths','paginated event search','manual POI and failure recovery','neural and rules recompute','download audit replay','original state restored'])
-        (ROOT/'docs/workspace-browser-verification.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n')
+        result=dict(cases=snapshots,browser_errors=errors,mobile_overflow=False,checks=['all events drawn once','all four real cases','node evidence and paths','paginated event search','manual POI and failure recovery','enhanced/legacy/neural recompute','TAPAS and public labels displayed separately','complete activity log filter','download audit replay','original state restored'])
+        (ROOT/'docs/rule-lineage-browser-verification.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n')
         print(json.dumps(result,ensure_ascii=False),flush=True)
 
 
