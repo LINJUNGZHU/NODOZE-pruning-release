@@ -1,5 +1,7 @@
 # OPTC 手动 POI 与历史频率评估
 
+> 这是提交 `c373025` 的历史基线记录。后续判定审计及精简模式的完整对照见 [新评估](evidence-selection-evaluation.md)。
+
 日期：2026-09-11。使用同一候选窗口、同一 RASP-D 配置评估全部三个 Ground Truth 预设；默认 POI 在评估前指定为提权代理 C2。
 
 ## 结果

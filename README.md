@@ -1,3 +1,5 @@
+> **评分与判定审计更新**：[论文研读](docs/provenance-selection-literature.md)、[方法与证明范围](docs/evidence-selection-method.md)、[含负结果的对照实验](docs/evidence-selection-evaluation.md)。默认保留扩展上下文，可选证据子图；所有判定可下载并重放。
+
 > **OPTC Web 更新**：支持按 Ground Truth 手动设置 POI，频率统计使用全部严格早于 POI 的历史。
 > [启动与页面说明](webapp/README.md) · [三个 POI 的真实评估结果](docs/optc-poi-evaluation.md)。
 

@@ -94,7 +94,7 @@ def create_app(cache_path: str | Path | None = None) -> Flask:
                 return jsonify({"error": "unknown dataset"}), 404
             if data.get("schema_version") != 2:
                 return jsonify({"error": "Rebuild the OPTC frequency index with prepare_optc.py"}), 503
-            rescore(data, payload["poi_event_id"], payload.get("budget_ratio"))
+            rescore(data, payload["poi_event_id"], payload.get("budget_ratio"), payload.get("selection_mode"))
             target = app.config["DEMO_CACHE"]
             temporary = target.with_name(target.name + "." + uuid.uuid4().hex + ".tmp")
             try:
@@ -109,6 +109,21 @@ def create_app(cache_path: str | Path | None = None) -> Flask:
             return jsonify({"error": str(exc)}), 400
         finally:
             pruning_lock.release()
+
+    @app.get("/api/datasets/<dataset_id>/decision-audit")
+    def decision_audit(dataset_id: str):
+        try:
+            data = load_cache()
+        except FileNotFoundError as exc:
+            return jsonify({"error": str(exc)}), 503
+        if dataset_id != data['dataset']['id']:
+            return jsonify({"error": "unknown dataset"}), 404
+        if 'decision_certificate' not in data:
+            return jsonify({"error": "Recompute the investigation to generate its audit"}), 503
+        response=jsonify({key:data[key] for key in ('dataset','poi','history','algorithm','metrics',
+                          'decision_contract','decision_certificate','decision_trace','decision_inputs','score_diagnostics')})
+        response.headers['Content-Disposition']='attachment; filename="optc-decision-audit.json"'
+        return response
 
     def update_job(job_id: str, **changes) -> None:
         with jobs_lock:

@@ -11,6 +11,8 @@ import numpy as np
 from tc_pruning.optc import signature
 from tc_pruning.rasp import propagate, temporal_routes, temporal_fork_routes
 from tc_pruning.rasp_diverse import event_families, select_diverse
+from tc_pruning.evidence_selection import select_evidence, audit_selection, validate_routes, witness_bundle
+from collections import Counter
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -66,10 +68,13 @@ def reference_evidence(e):
     return evidence
 
 
-def rescore(data, poi_id, budget_ratio=None):
+def rescore(data, poi_id, budget_ratio=None, selection_mode=None):
     """Update one isolated cache value; truth only declares the manual seed."""
     started = time.monotonic()
-    edges = data['edges']
+    edges = sorted(data['edges'], key=lambda e:(e['timestamp_ns'],e['id']))
+    data['edges'] = edges
+    selection_mode = selection_mode or data['algorithm'].get('selection_mode', 'context')
+    if selection_mode not in ('evidence','context'): raise ValueError('unknown selection mode')
     selected = next((i for i,e in enumerate(edges) if e['id'] == poi_id), None)
     if selected is None:
         raise ValueError('POI event ID is not in the candidate window')
@@ -100,12 +105,90 @@ def rescore(data, poi_id, budget_ratio=None):
     parent,pivot,_,_ = temporal_fork_routes(src,dst,timestamp,poi,backward)
     ties = np.array([int(hashlib.sha256(e['id'].encode()).hexdigest()[:15],16) for e in edges])
     budget = max(1, int(len(edges)*budget_ratio))
-    kept,_,_ = select_diverse(scores,poi,backward,parent,pivot,event_families(src,dst,relation),budget,ties,quality_weight=.05)
+    evidence = diag['contrast_only']
+    certified = diag['positive_lift_certified']
+    numerical_routes_valid = validate_routes(src,dst,timestamp,poi,backward,parent,pivot)
+    semantic_ids={};semantic_family=np.array([semantic_ids.setdefault(signature_key(e),len(semantic_ids)) for e in edges])
+    if selection_mode=='evidence':
+        tie_keys=[(abs(e['timestamp_ns']-edges[selected]['timestamp_ns']),e['timestamp_ns'],e['id']) for e in edges]
+        kept,audit=select_evidence(evidence,poi,backward,parent,pivot,semantic_family,budget,tie_keys,certified=certified)
+        verified=audit_selection(kept,poi,backward,parent,pivot,audit,evidence,semantic_family,budget)
+        trace=[dict(row,anchor=edges[row['anchor']]['id'],new_edges=[edges[j]['id'] for j in row['new_edges']]) for row in audit['trace']]
+        certificate=dict(verified,temporal_links_valid=numerical_routes_valid,
+                         objective=audit['objective'],objective_upper_bound=audit['objective_upper_bound'],
+                         objective_fraction_of_upper_bound=audit['objective_fraction_of_upper_bound'],
+                         stop_reason=audit['stop_reason'],unused_budget=audit['unused_budget'],
+                         eligible_count=audit['eligible_count'])
+    else:
+        kept,anchors,legacy=select_diverse(scores,poi,backward,parent,pivot,event_families(src,dst,relation),budget,ties,quality_weight=.05,record_audit=True)
+        owners=np.full(len(edges),-1,dtype=int)
+        for i in sorted(np.flatnonzero(anchors),key=lambda i:(int(legacy['selected_step'][i]),edges[i]['id'])):
+            for j in witness_bundle(int(i),backward,parent,pivot):
+                if owners[j]<0: owners[j]=i
+        audit=dict(owner=owners,step_of=legacy['selected_step'],eligible=(pivot>=0)&(scores>0),reasons=[
+            'manual_poi' if poi[i] else 'context_anchor' if anchors[i] else 'causal_connector' if kept[i]
+            else 'no_temporal_witness' if pivot[i]<0 else 'no_propagation_score' if scores[i]<=0 else 'context_bundle_exceeded_budget_at_attempt' if i in legacy['attempts'] else 'context_not_reached_before_stop' for i in range(len(edges))])
+        trace=[dict(row,anchor=edges[row['anchor']]['id'],new_edges=[edges[j]['id'] for j in row['new_edges']]) for row in legacy['trace']]
+        replayed=set(np.flatnonzero(poi))
+        for row in legacy['trace']:
+            needed=set(witness_bundle(row['anchor'],backward,parent,pivot))-replayed
+            if needed!=set(row['new_edges']) or row['used_before']!=len(replayed) or row['used_after']!=len(replayed|needed):
+                raise ValueError('context ledger replay mismatch')
+            replayed|=needed
+        if replayed!=set(np.flatnonzero(kept)):raise ValueError('context ledger final mismatch')
+        kept_set=set(np.flatnonzero(kept))
+        certificate=dict(budget_valid=int(kept.sum())<=budget,poi_preserved=bool(np.all(kept[poi])),
+                         temporal_links_valid=numerical_routes_valid,
+                         complete_witnesses=all(set(witness_bundle(int(i),backward,parent,pivot))<=kept_set for i in np.flatnonzero(anchors)),
+                         ledger_replayed=True,unused_budget=budget-int(kept.sum()),
+                         stop_reason='legacy_context_policy',eligible_count=int(audit['eligible'].sum()))
+    reason_labels={'manual_poi':'手动 POI', 'evidence':'背景增益证据', 'causal_connector':'完整时序路径连接边',
+                   'no_temporal_witness':'没有到 POI 的时序见证', 'no_positive_background_lift':'没有正的背景增益',
+                   'background_lift_within_numeric_error':'背景增益未超出数值误差界',
+                   'bundle_exceeds_remaining_budget':'完整路径新增边数超过剩余预算',
+                   'context_anchor':'扩展上下文锚点（可仅有保底分）', 'no_propagation_score':'传播分为零',
+                   'context_bundle_exceeded_budget_at_attempt':'考虑时整条路径超过剩余预算',
+                   'context_not_reached_before_stop':'预算耗尽或队列结束前未轮到该锚点'}
+    displayed_score=evidence if selection_mode=='evidence' else scores
+    exact_ties=Counter(float(v) for v in displayed_score)
+    shown_ties=Counter(format(float(v),'.9g') for v in displayed_score)
+    data['decision_inputs']=dict(event_ids=[e['id'] for e in edges],src=src.tolist(),dst=dst.tolist(),
+        timestamp_ns=timestamp.tolist(),poi=poi.tolist(),backward=backward.tolist(),parent=parent.tolist(),
+        pivot=pivot.tolist(),family=semantic_family.tolist(),evidence=evidence.tolist(),certified=certified.tolist(),
+        owner=audit['owner'].tolist(),eligible=audit['eligible'].tolist(),budget=budget,
+        retained=kept.tolist(),quality=.05,propagation_score=scores.tolist(),legacy_family=event_families(src,dst,relation).tolist(),tie_order=ties.tolist())
+    certificate['inputs_sha256']=hashlib.sha256(json.dumps(data['decision_inputs'],sort_keys=True,separators=(',',':')).encode()).hexdigest()
+    data['decision_trace']=trace
+    data['decision_certificate']=certificate
+    data['decision_contract']=dict(mode=selection_mode,scalar_score_threshold=None,
+        eligibility='两端 POI-PPR 超过背景 PPR，且超出迭代误差界；存在严格时序见证',
+        numerical_bound='每次 PPR 的 L1 误差上界为 residual_l1 / restart；两端均须超过两个误差上界之和',
+        selection='完整路径的总边际收益 / 新增边数贪心；不是单边分数阈值',
+        tie_break='收益率、总收益、距 POI 时间、时间戳、事件 ID；不扰动分数',
+        score_meaning='调查相关性证据，不是恶意概率',statistical_fpr_guarantee=False,
+        calibration='没有独立、标注充分且满足适用假设的校准集，不报告误报率保证')
+    if selection_mode=='context':
+        data['decision_contract'].update(eligibility='旧传播分（含数值保底通道）大于零且存在时序见证',
+            selection='旧 RASP-D 按锚点边际收益排序，完整路径计入预算；不是总路径收益贪心',
+            tie_break='事件 ID SHA-256；不扰动分数')
+    data['score_diagnostics']=dict(exact_unique=len(exact_ties),rounded_four_unique=len(set(format(float(v),'.4f') for v in displayed_score)),
+        largest_exact_tie=max(exact_ties.values()),certified_evidence_edges=int(certified.sum()),
+        retained_without_positive_contrast=int((kept & (evidence<=0)).sum()),
+        threshold_equivalent=bool(not np.any(~kept) or float(np.min(displayed_score[kept]))>float(np.max(displayed_score[~kept]))))
+
     for i,e in enumerate(edges):
-        e.update(score=float(scores[i]), retained=bool(kept[i]), poi=bool(poi[i]),
+        e.update(score=float(displayed_score[i]), propagation_score=float(scores[i]), evidence_score=float(evidence[i]), retained=bool(kept[i]), poi=bool(poi[i]),
                  historical_count=int(frequency[i]), historical_frequency=float(frequency[i]/history['history_edges']),
                  components=dict(rarity=float(rarity[i]),diffusion=float(diag['diffusion'][i])),
-                 reason='手动指定 POI' if poi[i] else '评分与因果连接成组保留' if kept[i] else '无时序连接' if pivot[i]<0 else '预算内未入选')
+                 reason=reason_labels[audit['reasons'][i]])
+        owner=int(audit['owner'][i])
+        witness=witness_bundle(owner,backward,parent,pivot) if owner>=0 else ()
+        e['decision']=dict(context_attempt=legacy['attempts'].get(i) if selection_mode=='context' else None,code=audit['reasons'][i],certified_background_lift=bool(certified[i]),
+                           background_margin_lower=float(diag['background_margin_lower'][i]),
+                           temporal_witness=bool(pivot[i]>=0),step=int(audit['step_of'][i]),
+                           owner_event_id=edges[owner]['id'] if owner>=0 else None,
+                           witness_event_ids=[edges[j]['id'] for j in witness],
+                           exact_tie_count=exact_ties[float(displayed_score[i])],display_tie_count=shown_ties[format(float(displayed_score[i]),'.9g')])
         e['reference_evidence'] = reference_evidence(e)
     refs = np.array([bool(e['reference_evidence']) for e in edges])
     reference_without_poi = refs & ~poi
@@ -125,19 +208,23 @@ def rescore(data, poi_id, budget_ratio=None):
                            retained_nodes=len({e[k] for e in edges if e['retained'] for k in ('source','target')}),
                            budget_edges=budget,history_edges=history['history_edges'])
     data['nodes'] = list(nodes.values())
+    by_id={e['id'] for e in edges}
+    fixed_sample=[edges[i]['id'] for i in np.linspace(0,len(edges)-1,min(80,len(edges)),dtype=int)]
+    data['display_event_ids']=list(dict.fromkeys(fixed_sample+[p['event_id'] for p in data['poi_presets'] if p['event_id'] in by_id]+[poi_id]))
     data['truth'].update(matched_events=matched,retained_events=retained,seed_event_id=poi_id,
                          retention_rate=retained/matched if matched else None,
                          non_poi_matched=int(reference_without_poi.sum()),
                          non_poi_retained=int((reference_without_poi & kept).sum()),stages=stages,
                          note='PDF 指标匹配是参考证据，不是完整攻击边标注。POI 由配置或用户手动指定；参考标签不参与其余边的打分和选边。')
-    data['algorithm'].update(budget_ratio=budget_ratio, rarity='1 / (1 + 严格早于 POI 的同语义交互次数)',
+    data['algorithm'].update(budget_ratio=budget_ratio, selection_mode=selection_mode, rarity='1 / (1 + 严格早于 POI 的同语义交互次数)',
                              frequency='同语义交互次数 / POI 前全部历史事件数',
                              seed_source='manual groundtruth-backed configuration' if preset else 'manual user event ID')
     data['logs']=[f"读取 OPTC：{len(data['dataset'].get('sources',[]))} 份来源文件；主机 SysClient0201",
                   f"手动 POI：{data['poi']['label']} · {poi_id}",f"POI 时间 / 频率截止：{data['poi']['timestamp']}，严格小于，不含同刻事件",
                   f"累计历史：{history['history_edges']:,} 条；按原始事件 ID 去重，不按窗口对半切分",
                   f"候选窗口保持不变：{len(edges):,} 条（包含 POI 前后事件；仅评分历史截止 POI）",
-                  f"RASP-D：保留 {int(kept.sum()):,} / {len(edges):,}，预算上限 {budget:,}",
+                  f"RASP / {selection_mode}：保留 {int(kept.sum()):,} / {len(edges):,}，预算上限 {budget:,}",
                   f"PDF 指标参考保留 {retained} / {matched}；排除 POI 后 {data['truth']['non_poi_retained']} / {data['truth']['non_poi_matched']}",
+                  f"判定审计：预算有效={certificate['budget_valid']}，完整时序见证={certificate['complete_witnesses']}，剩余预算={certificate['unused_budget']}",
                   f"重算完成，用时 {time.monotonic()-started:.2f} 秒"]
     return data

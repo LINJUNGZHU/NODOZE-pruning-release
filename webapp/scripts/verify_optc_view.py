@@ -1,9 +1,12 @@
 """Check the actual OPTC page against the API, including mobile and interactions."""
 import json
 from pathlib import Path
+import sys
 from playwright.sync_api import sync_playwright
 
 runtime=Path(__file__).resolve().parents[1]/'runtime'
+sys.path.insert(0,str(runtime.parents[1]))
+from webapp.scripts.verify_decision_audit import verify
 with sync_playwright() as p:
     browser=p.chromium.launch(headless=True,args=['--no-sandbox','--no-proxy-server'])
     page=browser.new_page(viewport={'width':1440,'height':1100})
@@ -65,11 +68,28 @@ with sync_playwright() as p:
     assert page.locator('#error').is_hidden()
     assert page.locator('#edge-rows td:nth-child(4)').count()==30
 
+    for mode in ('evidence','context'):
+        page.select_option('#selection-mode',mode)
+        with page.expect_response(lambda r:r.url.endswith('/prune') and r.request.method=='POST',timeout=60000):
+            page.click('#apply-poi')
+        page.wait_for_function("!document.querySelector('#apply-poi').disabled",timeout=60000)
+        assert page.evaluate('state.data.decision_contract.mode')==mode
+        audit=page.request.get('http://127.0.0.1:8000/api/datasets/optc-0201/decision-audit').json()
+        assert verify(audit)['greedy_ranking_replayed']
+        (runtime/f'{mode}-decision-audit.json').write_text(json.dumps(audit))
+        assert '完整时序路径校验通过' in page.locator('#decision-summary').inner_text()
+        assert '真实同分不会被扰动' in page.locator('#score-note').inner_text()
+        if mode=='evidence':
+            page.select_option('#edge-decision','connector')
+            assert page.locator('#edge-rows tr[data-id]').count()>0
+            assert '完整时序路径连接边' in page.locator('#edge-rows').inner_text()
+            page.click('#clear-edge')
+    assert page.locator('#edge-rows td:nth-child(3)').first.get_attribute('title') is not None
     page.uncheck('#show-scores');page.evaluate('window.scrollTo(0,0)')
     page.screenshot(path=str(runtime/'optc-desktop.png'),full_page=True)
     page.set_viewport_size({'width':390,'height':844})
     assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
     page.screenshot(path=str(runtime/'optc-mobile.png'),full_page=True)
     assert not errors,errors
-    print(json.dumps({'before':len(visible),'after':kept,'candidate_edges':len(data['edges']),'browser_errors':errors,'mobile':'passed','manual_poi_recompute':'passed','invalid_poi_recovery':'passed'}))
+    print(json.dumps({'before':len(visible),'after':kept,'candidate_edges':len(data['edges']),'browser_errors':errors,'mobile':'passed','manual_poi_recompute':'passed','invalid_poi_recovery':'passed','both_modes_audit_replay':'passed'}))
     browser.close()

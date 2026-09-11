@@ -1,10 +1,10 @@
 const $=s=>document.querySelector(s), state={data:null,page:0,selected:null};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt=n=>Number(n).toLocaleString('zh-CN');
-const score=n=>n===0?'0':n<.001?n.toExponential(2):n.toFixed(4);
+const score=n=>n===0?'0':n.toPrecision(9);
 const short=s=>s.length>25?'…'+s.slice(-24):s;
 const localTime=s=>{const m=s.match(/T(\d{2}:\d{2}:\d{2})(?:\.(\d+))?/);return m?`${m[1]}.${(m[2]||'').padEnd(3,'0')}`:s;};
-function details(e){state.selected=e.id;$('#use-event-poi').disabled=false;$('#event-detail').open=true;$('#details').textContent=JSON.stringify({事件:e.id,评分:e.score,分量:e.components,剪枝结果:e.retained?'保留':'删除',原因:e.reason,参考证据:e.reference_evidence,POI前计数:e.historical_count,POI前频率:e.historical_frequency,频率统计截止:state.data.poi?.timestamp,来源文件:e.source_file,来源行:e.source_line,原始日志:e.raw},null,2);renderTable();}
+function details(e){state.selected=e.id;$('#use-event-poi').disabled=false;$('#event-detail').open=true;$('#details').textContent=JSON.stringify({事件:e.id,评分:e.score,分量:e.components,剪枝结果:e.retained?'保留':'删除',原因:e.reason,逐边判定:e.decision,本次选择步骤:state.data.decision_trace?.find(r=>r.step===e.decision?.step),参考证据:e.reference_evidence,POI前计数:e.historical_count,POI前频率:e.historical_frequency,频率统计截止:state.data.poi?.timestamp,来源文件:e.source_file,来源行:e.source_line,原始日志:e.raw},null,2);renderTable();}
 function drawGraph(after){
  const svg=$(after?'#after':'#before'), es=state.display.filter(e=>!after||e.retained), visible=new Set(es.flatMap(e=>[e.source,e.target]));
  $(after?'#after-count':'#before-count').textContent=`${es.length} 边 · ${visible.size} 节点`;
@@ -18,11 +18,11 @@ function drawGraph(after){
  }).join('')+[...visible].map(id=>{const p=positions.get(id),n=state.nodes.get(id);return `<g><title>${esc(n.label)} · ${esc(id)}</title><circle cx="${p.x}" cy="${p.y}" r="${n.type==='process'?6:3}" fill="${n.type==='process'?'#315d4a':'#b1c2b6'}"/>${n.type==='process'?`<text x="${p.x+8}" y="${p.y-7}" font-size="8" fill="#476352">${esc(short(n.label.split('\\').pop()))}</text>`:''}</g>`}).join('');
  svg.querySelectorAll('[data-id]').forEach(g=>g.addEventListener('click',()=>details(state.byId.get(g.dataset.id))));
 }
-function filtered(){const q=$('#edge-search').value.trim().toLowerCase(),d=$('#edge-decision').value;return state.sorted.filter(e=>(d==='all'||d==='reference'&&e.reference_evidence.length||d==='retained'&&e.retained||d==='removed'&&!e.retained)&&(!q||e.search.includes(q)));}
+function filtered(){const q=$('#edge-search').value.trim().toLowerCase(),d=$('#edge-decision').value;return state.sorted.filter(e=>(d==='all'||d==='reference'&&e.reference_evidence.length||d==='retained'&&e.retained||d==='removed'&&!e.retained||d==='evidence'&&e.decision?.code==='evidence'||d==='connector'&&e.decision?.code==='causal_connector')&&(!q||e.search.includes(q)));}
 function renderTable(){
  const es=filtered(),pages=Math.max(1,Math.ceil(es.length/30));state.page=Math.min(state.page,pages-1);const rows=es.slice(state.page*30,state.page*30+30);
  $('#edge-total').textContent=`${fmt(es.length)} 条可查事件`;
- $('#edge-rows').innerHTML=rows.map(e=>`<tr tabindex="0" data-id="${esc(e.id)}" class="${e.id===state.selected?'selected':''}"><td>${esc(localTime(e.timestamp))}<small>${esc(e.relation)}</small></td><td>${esc(e.source_label)}<small>→ ${esc(e.target_label)}</small></td><td>${score(e.score)}<div class="bar"><i class="${e.retained?'':'removed'}" style="width:${Math.max(0,Math.min(100,e.score*100))}%"></i></div></td><td>${fmt(e.historical_count)}<small>${(e.historical_frequency*100).toFixed(5)}%</small></td><td><span class="badge ${e.retained?'':'removed'}">${e.retained?'保留':'删除'}</span>${e.reference_evidence.length?'<small class="truth">PDF 参考</small>':''}</td></tr>`).join('')||'<tr><td colspan="5">没有匹配事件</td></tr>';
+ $('#edge-rows').innerHTML=rows.map(e=>`<tr tabindex="0" data-id="${esc(e.id)}" class="${e.id===state.selected?'selected':''}"><td>${esc(localTime(e.timestamp))}<small>${esc(e.relation)}</small></td><td>${esc(e.source_label)}<small>→ ${esc(e.target_label)}</small></td><td title="${Number(e.score).toPrecision(17)}">${score(e.score)}${e.decision?.exact_tie_count>1?`<small>同分 ${fmt(e.decision.exact_tie_count)} 条</small>`:''}<div class="bar"><i class="${e.retained?'':'removed'}" style="width:${Math.max(0,Math.min(100,e.score*100))}%"></i></div></td><td>${fmt(e.historical_count)}<small>${(e.historical_frequency*100).toFixed(5)}%</small></td><td><span class="badge ${e.retained?'':'removed'}">${e.retained?'保留':'删除'}</span><small>${esc(e.reason)}</small>${e.reference_evidence.length?'<small class="truth">PDF 参考</small>':''}</td></tr>`).join('')||'<tr><td colspan="5">没有匹配事件</td></tr>';
  $('#page-info').textContent=`第 ${state.page+1} / ${pages} 页 · 时间 UTC−04:00`;
  $('#prev-page').disabled=state.page===0;$('#next-page').disabled=state.page>=pages-1;
  $('#edge-rows').querySelectorAll('tr[data-id]').forEach(tr=>{tr.onclick=()=>details(state.byId.get(tr.dataset.id));tr.onkeydown=e=>{if(e.key==='Enter')tr.click();};});
@@ -42,8 +42,18 @@ function renderData(d){
  state.byId=new Map(d.edges.map(e=>[e.id,e]));state.nodes=new Map(d.nodes.map(n=>[n.id,n]));state.display=d.display_event_ids.map(id=>state.byId.get(id));
  const ids=[...new Set(state.display.flatMap(e=>[e.source,e.target]))].sort();state.positions=new Map(ids.map((id,i)=>{const angle=i*2*Math.PI/ids.length;return [id,{x:320+260*Math.cos(angle),y:210+170*Math.sin(angle)}];}));
  state.sorted=[...d.edges].sort((a,b)=>b.score-a.score||a.id.localeCompare(b.id));d.edges.forEach(e=>e.search=`${e.id} ${e.source_label} ${e.target_label} ${e.relation}`.toLowerCase());
- $('#scope-note').textContent=`上方统计覆盖完整候选窗口；图中按时间等间隔抽取 ${state.display.length} 条边，不按评分或剪枝结果选样。逐边评分表覆盖全部 ${fmt(d.edges.length)} 条边。`;
+ $('#scope-note').textContent=`上方统计覆盖完整候选窗口；图中为 80 条时间等间隔抽样，加上 Ground Truth POI 预设与当前 POI，共 ${state.display.length} 条；未按保留结果选样。逐边评分表覆盖全部 ${fmt(d.edges.length)} 条边。`;
  $('#run-log').textContent=d.logs.map((s,i)=>`${String(i+1).padStart(2,'0')}  ${s}`).join('\n');$('#truth-note').textContent=d.truth.note;$('#source-note').textContent=`数据：${d.dataset.source}；真值：${d.truth.source}；算法：${d.algorithm.name}，预算 ${d.algorithm.budget_ratio*100}%，稀有度：${d.algorithm.rarity}。`;
+ $('#selection-mode').value=d.algorithm.selection_mode||'context';
+ $('#edge-budget').value=String(d.algorithm.budget_ratio);
+ const contract=d.decision_contract,certificate=d.decision_certificate,diag=d.score_diagnostics;
+ if(contract){
+  $('#decision-summary').textContent=`${contract.mode==='evidence'?'证据子图':'扩展上下文'}：完整时序路径校验${certificate.complete_witnesses?'通过':'未通过'}，预算校验${certificate.budget_valid?'通过':'未通过'}；未使用 ${fmt(certificate.unused_budget)} 条预算。预算是上限，不要求填满。`;
+  $('#decision-rule').textContent=`入选条件：${contract.eligibility}。选择规则：${contract.selection}。同分规则：${contract.tie_break}。`;
+  $('#decision-limit').textContent=`${contract.score_meaning}。${contract.calibration}。${contract.mode==='evidence'?`可复算目标值 ${score(certificate.objective)} / 松弛上界 ${score(certificate.objective_upper_bound)}；此界限只针对定义的选择目标，不是攻击召回率保证。`:''}`;
+  $('#download-audit').href=`/api/datasets/${encodeURIComponent(d.dataset.id)}/decision-audit`;
+  $('#score-note').textContent=`原始不同分数 ${fmt(diag.exact_unique)} 种，四位小数仅 ${fmt(diag.rounded_four_unique)} 种。当前显示 9 位有效数字，悬停可看完整精度；真实同分不会被扰动。${diag.threshold_equivalent?'':'本次保留集合不能用一个单边分数阈值复现。'}`;
+ }
  const selected=d.poi;
  $('#poi-select').innerHTML=d.poi_presets.map(p=>`<option value="${esc(p.event_id)}">${esc(p.label)} · ${esc(localTime(p.timestamp))}</option>`).join('')+'<option value="custom">自定义事件 ID</option>';
  $('#poi-select').value=selected.groundtruth_backed?selected.event_id:'custom';$('#poi-id').value=selected.event_id;
@@ -77,13 +87,13 @@ $('#use-event-poi').onclick=()=>{
 $('#poi-form').onsubmit=async event=>{
  event.preventDefault();if(!state.data||state.busy)return;
  const id=$('#poi-id').value.trim();if(!id)return;
- state.busy=true;$('#apply-poi').disabled=true;$('#poi-select').disabled=true;$('#poi-id').disabled=true;
+ state.busy=true;$('#apply-poi').disabled=true;$('#poi-select').disabled=true;$('#poi-id').disabled=true;$('#selection-mode').disabled=true;$('#edge-budget').disabled=true;
  $('#prune-status').textContent='正在统计 POI 前全部历史并重新剪枝…';$('#error').hidden=true;
  try{
-  const response=await fetch(`/api/datasets/${encodeURIComponent(state.data.dataset.id)}/prune`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({poi_event_id:id})});
+  const response=await fetch(`/api/datasets/${encodeURIComponent(state.data.dataset.id)}/prune`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({poi_event_id:id,selection_mode:$('#selection-mode').value,budget_ratio:Number($('#edge-budget').value)})});
   const d=await response.json();if(!response.ok)throw new Error(d.error||'重算失败');
   $('#edge-search').value='';$('#edge-decision').value='all';$('#event-detail').open=false;
   renderData(d);$('#prune-status').textContent=`已应用 ${d.poi.label}，图、评分、频率和运行日志已更新。`;
  }catch(error){$('#prune-status').textContent='重算失败，原结果保持不变。';$('#error').hidden=false;$('#error').textContent=error.message;}
- finally{state.busy=false;$('#apply-poi').disabled=false;$('#poi-select').disabled=false;$('#poi-id').disabled=false;}
+ finally{state.busy=false;$('#apply-poi').disabled=false;$('#poi-select').disabled=false;$('#poi-id').disabled=false;$('#selection-mode').disabled=false;$('#edge-budget').disabled=false;}
 };

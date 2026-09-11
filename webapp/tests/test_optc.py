@@ -118,3 +118,27 @@ def test_api_recomputes_and_persists_manual_selection(dataset,tmp_path):
         assert cache.read_bytes()==saved
     assert client.post('/api/datasets/unknown/prune',json=dict(poi_event_id='seed')).status_code==404
     assert client.post('/api/datasets/optc-0201/prune',json=dict(poi_event_id='seed')).status_code==200
+
+
+def test_both_mode_audits_can_be_downloaded_and_replayed(dataset,tmp_path):
+    from webapp.scripts.verify_decision_audit import verify
+    cache=tmp_path/'cache.json'
+    for mode in ('evidence','context'):
+        data=rescore(copy.deepcopy(dataset),'seed',selection_mode=mode)
+        cache.write_text(json.dumps(data))
+        client=create_app(cache).test_client()
+        response=client.get('/api/datasets/optc-0201/decision-audit')
+        assert response.status_code==200
+        assert verify(response.json)['greedy_ranking_replayed']
+        assert response.json['decision_contract']['scalar_score_threshold'] is None
+        assert response.json['decision_contract']['statistical_fpr_guarantee'] is False
+        assert client.get('/api/datasets/missing/decision-audit').status_code==404
+
+
+def test_reference_labels_do_not_influence_decisions(dataset,monkeypatch):
+    import tc_pruning.optc_investigation as pipeline
+    a=rescore(copy.deepcopy(dataset),'seed',selection_mode='evidence')
+    monkeypatch.setattr(pipeline,'reference_evidence',lambda e:['fake label on every edge'])
+    b=rescore(copy.deepcopy(dataset),'seed',selection_mode='evidence')
+    assert [(e['score'],e['retained']) for e in a['edges']]==[(e['score'],e['retained']) for e in b['edges']]
+    assert a['decision_trace']==b['decision_trace']

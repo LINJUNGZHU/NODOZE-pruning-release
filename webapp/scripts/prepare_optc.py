@@ -61,6 +61,7 @@ def main():
     parser.add_argument('--poi',help='Explicit event ID; defaults to the ground-truth manifest default')
     parser.add_argument('--output',type=Path,default=ROOT/'webapp/runtime/optc-demo.json')
     parser.add_argument('--budget',type=float,default=.2)
+    parser.add_argument('--selection-mode',choices=['evidence','context'],default='context')
     args = parser.parse_args()
     if not args.input: parser.error('No source files found; specify --input')
     manifest = json.loads(args.poi_config.read_text())
@@ -88,7 +89,7 @@ def main():
                     truth=dict(source=args.truth.name,sha256=hashlib.sha256(args.truth.read_bytes()).hexdigest()),
                     algorithm=dict(name='RASP-D',budget_ratio=args.budget,quality_weight=.05,
                                    config=json.loads((ROOT/'configs/rasp_v1.json').read_text())))
-        rescore(data,args.poi or manifest['default_event_id'],args.budget)
+        rescore(data,args.poi or manifest['default_event_id'],args.budget,args.selection_mode)
         tmp = args.output.with_suffix('.tmp')
         tmp.write_text(json.dumps(data,ensure_ascii=False,allow_nan=False),encoding='utf-8')
         tmp.replace(args.output)

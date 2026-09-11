@@ -1,0 +1,85 @@
+{
+  "accessed": "2026-09-11",
+  "papers": [
+    {
+      "name": "nodoze",
+      "url": "https://kangkookjee.github.io/publications/nodoze-ndss2019.pdf",
+      "download_sha256": "37e48f65b866b7d8dbd9e7f317db155815c7162f8b4031a2993ecec720199ed1"
+    },
+    {
+      "name": "depimpact",
+      "url": "https://www.usenix.org/system/files/sec22-fang.pdf",
+      "download_sha256": "f1efdb39853a8fd99dd65c502264452f6319700146651777e8e52abea864c451"
+    },
+    {
+      "name": "nodlink",
+      "url": "https://www.ndss-symposium.org/wp-content/uploads/2024-204-paper.pdf",
+      "download_sha256": "3e5f782db02fa12e15d91d4e817fb516369b94726398df7cb2f7a67d889f40c5"
+    },
+    {
+      "name": "kairos",
+      "url": "https://arxiv.org/pdf/2308.05034",
+      "download_sha256": "451feb967312f5be97ff6d1ce8282165f7ba0ba904fa00cc2004105c59610c4d"
+    },
+    {
+      "name": "orthrus",
+      "url": "https://www.usenix.org/system/files/usenixsecurity25-jiang-baoxiang.pdf",
+      "download_sha256": "2a159e593a8567cea956ae80c7c5efb059bb99dfc62d3cf2a188ac29ffad485d"
+    },
+    {
+      "name": "pidsmaker",
+      "url": "https://www.usenix.org/system/files/usenixsecurity25-bilot.pdf",
+      "download_sha256": "c28526e9978567a267f5c7d621eb05baedaf8025ffac6f4dff0f0e9469a35345"
+    },
+    {
+      "name": "conformal",
+      "url": "https://arxiv.org/pdf/2104.08279",
+      "download_sha256": "1960e1bc7478ff80e07edb83d3afb66cd2495bf2ccb26bce8e3d69a1f5362ffb"
+    },
+    {
+      "name": "acm-survey",
+      "url": "https://cyberlab.usask.ca/papers/ACMSurvey23.pdf",
+      "download_sha256": "c30793660f742e48551202c014e9f6f4b9a1797dc03cbdbd8eda640add6bbc94"
+    }
+  ],
+  "repositories": [
+    {
+      "repository": "ubc-provenance/orthrus",
+      "commit": "e7f25dfee1ddd182a955b88f8a90a8cbd4a8e543",
+      "inspected_files": [
+        {
+          "path": "src/detection/evaluation_utils.py",
+          "url": "https://github.com/ubc-provenance/orthrus/blob/e7f25dfee1ddd182a955b88f8a90a8cbd4a8e543/src/detection/evaluation_utils.py"
+        },
+        {
+          "path": "src/detection/node_evaluation.py",
+          "url": "https://github.com/ubc-provenance/orthrus/blob/e7f25dfee1ddd182a955b88f8a90a8cbd4a8e543/src/detection/node_evaluation.py"
+        }
+      ]
+    },
+    {
+      "repository": "httpsperanza/NODLINK",
+      "commit": "434dbe2d0be88bd034c4af0c819aed641d2b3758",
+      "inspected_files": [
+        {
+          "path": "src/ETW/train.py",
+          "url": "https://github.com/httpsperanza/NODLINK/blob/434dbe2d0be88bd034c4af0c819aed641d2b3758/src/ETW/train.py"
+        },
+        {
+          "path": "src/README.md",
+          "url": "https://github.com/httpsperanza/NODLINK/blob/434dbe2d0be88bd034c4af0c819aed641d2b3758/src/README.md"
+        }
+      ]
+    },
+    {
+      "repository": "ubc-provenance/PIDSMaker",
+      "commit": "ae1e9fd42604c769c01b2eaed6fb7f65e27f3cac",
+      "inspected_files": [
+        {
+          "path": "pidsmaker/detection/evaluation_methods/evaluation_utils.py",
+          "url": "https://github.com/ubc-provenance/PIDSMaker/blob/ae1e9fd42604c769c01b2eaed6fb7f65e27f3cac/pidsmaker/detection/evaluation_methods/evaluation_utils.py"
+        }
+      ]
+    }
+  ]
+}

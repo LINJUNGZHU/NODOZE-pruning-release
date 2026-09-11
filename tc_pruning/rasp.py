@@ -64,11 +64,18 @@ def propagate(src, dst, relation, rarity, poi, process_nodes, config):
     uncontrasted = np.zeros(len(src))
     winner = np.full(len(src), -1, dtype=np.int64)
     diagnostics = []
+    margin_lower = np.full(len(src), -np.inf)
+    background_error = background_diag["residual_l1"] / config["restart"]
     for seed_edge in np.flatnonzero(poi):
         seed = np.zeros(n)
         seed[src[seed_edge]] += .5
         seed[dst[seed_edge]] += .5
         p, diag, _ = personalized_pagerank(a, b, weights, seed, **kwargs)
+        # Contraction gives ||p - p*||_1 <= residual / restart.
+        # Certify positive lift only when both endpoint differences exceed the
+        # combined numeric error bound, rather than testing floating-point > 0.
+        error = diag["residual_l1"] / config["restart"] + background_error
+        margin_lower = np.maximum(margin_lower, np.minimum(p[src]-background[src], p[dst]-background[dst])-error)
         plain = np.sqrt(p[src]*p[dst])*(floor+(1-floor)*rarity)
         if plain.max() > 0:
             plain /= plain.max()
@@ -96,6 +103,8 @@ def propagate(src, dst, relation, rarity, poi, process_nodes, config):
                    "uncontrasted": uncontrasted,
                    "contrast_only": contrast_only,
                    "unique_channels": len(a), "background": background_diag,
+                   "background_margin_lower": margin_lower,
+                   "positive_lift_certified": margin_lower > 0,
                    "personalized": diagnostics}
 
 

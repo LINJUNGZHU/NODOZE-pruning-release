@@ -46,3 +46,15 @@ def test_budget_includes_connectors_and_rejects_bad_inputs():
     assert kept.sum() <= 2 and not kept[2]
     with pytest.raises(ValueError):
         select_diverse(score, poi, back, parent, pivot, np.arange(3), 0, np.arange(3))
+
+
+def test_recording_legacy_trace_does_not_change_selection():
+    import numpy as np
+    from tc_pruning.rasp_diverse import select_diverse
+    score=np.array([1.,.6,.6,.4]);poi=np.array([1,0,0,0],bool)
+    back=np.array([-1,0,0,0]);parent=np.full(4,-1);pivot=np.arange(4);family=np.array([0,1,1,2]);ties=np.arange(4)
+    plain=select_diverse(score,poi,back,parent,pivot,family,3,ties)
+    audited=select_diverse(score,poi,back,parent,pivot,family,3,ties,record_audit=True)
+    assert np.array_equal(plain[0],audited[0])
+    assert np.array_equal(plain[1],audited[1])
+    assert audited[2]['trace'][-1]['used_after']==3

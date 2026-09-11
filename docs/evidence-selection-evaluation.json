@@ -1,0 +1,1793 @@
+{
+  "protocol": {
+    "budgets": [
+      0.01,
+      0.02,
+      0.05,
+      0.1,
+      0.2
+    ],
+    "all_configured_pois": true,
+    "evaluation": "development; single host/window, partial indicator labels",
+    "selection_uses_reference_labels": false,
+    "false_positive_rate_claim": false,
+    "baseline_status": "Existing RASP-D and score-only controls, NOT reproduced Kairos/Orthrus/NodLink results"
+  },
+  "results": [
+    {
+      "poi": {
+        "event_id": "7495bfe7-4803-4d75-987c-09dc23646d60",
+        "label": "下载 runme.bat",
+        "timestamp": "2019-09-23T11:23:43.956-04:00",
+        "object": "FILE",
+        "action": "CREATE",
+        "pid": 3520,
+        "file_suffix": "\\Downloads\\runme.bat",
+        "evidence": "PDF Day 1：11:23:29 下载 runme.bat；原始日志对应 11:23:43.956 文件创建。报告时间与遥测时间不完全相同。"
+      },
+      "grid": [
+        {
+          "mode": "context",
+          "budget_ratio": 0.01,
+          "retained": 270,
+          "candidate": 27011,
+          "nodes": 208,
+          "reference_retained": 12,
+          "reference_total": 301,
+          "reference_density": 0.044444444444444446,
+          "non_poi_reference_retained": 11,
+          "stages": [
+            {
+              "label": "runme.bat 文件相关",
+              "matched": 20,
+              "retained": 8
+            },
+            {
+              "label": "初始代理 PID 5452 的 C2",
+              "matched": 120,
+              "retained": 0
+            },
+            {
+              "label": "提权代理 PID 2952 的 C2",
+              "matched": 147,
+              "retained": 0
+            }
+          ],
+          "certificate": {
+            "budget_valid": true,
+            "poi_preserved": true,
+            "temporal_links_valid": true,
+            "complete_witnesses": true,
+            "ledger_replayed": true,
+            "unused_budget": 0,
+            "stop_reason": "legacy_context_policy",
+            "eligible_count": 13912,
+            "inputs_sha256": "9d1620514a7d2905e5a689235b92a9f22c5785719ea4248ee983867a54c838c9"
+          },
+          "scores": {
+            "exact_unique": 1798,
+            "rounded_four_unique": 302,
+            "largest_exact_tie": 3790,
+            "certified_evidence_edges": 10673,
+            "retained_without_positive_contrast": 0,
+            "threshold_equivalent": false
+          },
+          "runtime_seconds": 2.9650656320154667
+        },
+        {
+          "mode": "context",
+          "budget_ratio": 0.02,
+          "retained": 540,
+          "candidate": 27011,
+          "nodes": 330,
+          "reference_retained": 16,
+          "reference_total": 301,
+          "reference_density": 0.02962962962962963,
+          "non_poi_reference_retained": 15,
+          "stages": [
+            {
+              "label": "runme.bat 文件相关",
+              "matched": 20,
+              "retained": 12
+            },
+            {
+              "label": "初始代理 PID 5452 的 C2",
+              "matched": 120,
+              "retained": 0
+            },
+            {
+              "label": "提权代理 PID 2952 的 C2",
+              "matched": 147,
+              "retained": 0
+            }
+          ],
+          "certificate": {
+            "budget_valid": true,
+            "poi_preserved": true,
+            "temporal_links_valid": true,
+            "complete_witnesses": true,
+            "ledger_replayed": true,
+            "unused_budget": 0,
+            "stop_reason": "legacy_context_policy",
+            "eligible_count": 13912,
+            "inputs_sha256": "0e3cfc4e8854f4fa8a1248af10aa8eb5b3f99f6eec475f610123a0ec1a8ae458"
+          },
+          "scores": {
+            "exact_unique": 1798,
+            "rounded_four_unique": 302,
+            "largest_exact_tie": 3790,
+            "certified_evidence_edges": 10673,
+            "retained_without_positive_contrast": 2,
+            "threshold_equivalent": false
+          },
+          "runtime_seconds": 3.1090131625533104
+        },
+        {
+          "mode": "context",
+          "budget_ratio": 0.05,
+          "retained": 1350,
+          "candidate": 27011,
+          "nodes": 469,
+          "reference_retained": 34,
+          "reference_total": 301,
+          "reference_density": 0.025185185185185185,
+          "non_poi_reference_retained": 33,
+          "stages": [
+            {
+              "label": "runme.bat 文件相关",
+              "matched": 20,
+              "retained": 20
+            },
+            {
+              "label": "初始代理 PID 5452 的 C2",
+              "matched": 120,
+              "retained": 0
+            },
+            {
+              "label": "提权代理 PID 2952 的 C2",
+              "matched": 147,
+              "retained": 0
+            }
+          ],
+          "certificate": {
+            "budget_valid": true,
+            "poi_preserved": true,
+            "temporal_links_valid": true,
+            "complete_witnesses": true,
+            "ledger_replayed": true,
+            "unused_budget": 0,
+            "stop_reason": "legacy_context_policy",
+            "eligible_count": 13912,
+            "inputs_sha256": "b696eaf0e1e6db8e4c87aae04dae8b59cac71eae4fd0e1d3fbb612b20a88fc91"
+          },
+          "scores": {
+            "exact_unique": 1798,
+            "rounded_four_unique": 302,
+            "largest_exact_tie": 3790,
+            "certified_evidence_edges": 10673,
+            "retained_without_positive_contrast": 7,
+            "threshold_equivalent": false
+          },
+          "runtime_seconds": 3.1359491609036922
+        },
+        {
+          "mode": "context",
+          "budget_ratio": 0.1,
+          "retained": 2701,
+          "candidate": 27011,
+          "nodes": 1261,
+          "reference_retained": 34,
+          "reference_total": 301,
+          "reference_density": 0.012587930396149574,
+          "non_poi_reference_retained": 33,
+          "stages": [
+            {
+              "label": "runme.bat 文件相关",
+              "matched": 20,
+              "retained": 20
+            },
+            {
+              "label": "初始代理 PID 5452 的 C2",
+              "matched": 120,
+              "retained": 0
+            },
+            {
+              "label": "提权代理 PID 2952 的 C2",
+              "matched": 147,
+              "retained": 0
+            }
+          ],
+          "certificate": {
+            "budget_valid": true,
+            "poi_preserved": true,
+            "temporal_links_valid": true,
+            "complete_witnesses": true,
+            "ledger_replayed": true,
+            "unused_budget": 0,
+            "stop_reason": "legacy_context_policy",
+            "eligible_count": 13912,
+            "inputs_sha256": "b1f108ee9df42ee08dcf54a9b758be943fde1ba8e0cf8fd1f9d057549751e14b"
+          },
+          "scores": {
+            "exact_unique": 1798,
+            "rounded_four_unique": 302,
+            "largest_exact_tie": 3790,
+            "certified_evidence_edges": 10673,
+            "retained_without_positive_contrast": 7,
+            "threshold_equivalent": false
+          },
+          "runtime_seconds": 3.2214344032108784
+        },
+        {
+          "mode": "context",
+          "budget_ratio": 0.2,
+          "retained": 5402,
+          "candidate": 27011,
+          "nodes": 1425,
+          "reference_retained": 34,
+          "reference_total": 301,
+          "reference_density": 0.006293965198074787,
+          "non_poi_reference_retained": 33,
+          "stages": [
+            {
+              "label": "runme.bat 文件相关",
+              "matched": 20,
+              "retained": 20
+            },
+            {
+              "label": "初始代理 PID 5452 的 C2",
+              "matched": 120,
+              "retained": 0
+            },
+            {
+              "label": "提权代理 PID 2952 的 C2",
+              "matched": 147,
+              "retained": 0
+            }
+          ],
+          "certificate": {
+            "budget_valid": true,
+            "poi_preserved": true,
+            "temporal_links_valid": true,
+            "complete_witnesses": true,
+            "ledger_replayed": true,
+            "unused_budget": 0,
+            "stop_reason": "legacy_context_policy",
+            "eligible_count": 13912,
+            "inputs_sha256": "b1ef96012b7a02c5b50203d0489f852d55d1e7ad73b7d1dbe4b8752d25790a52"
+          },
+          "scores": {
+            "exact_unique": 1798,
+            "rounded_four_unique": 302,
+            "largest_exact_tie": 3790,
+            "certified_evidence_edges": 10673,
+            "retained_without_positive_contrast": 7,
+            "threshold_equivalent": false
+          },
+          "runtime_seconds": 3.5121052227914333
+        },
+        {
+          "mode": "evidence",
+          "budget_ratio": 0.01,
+          "retained": 270,
+          "candidate": 27011,
+          "nodes": 205,
+          "reference_retained": 12,
+          "reference_total": 301,
+          "reference_density": 0.044444444444444446,
+          "non_poi_reference_retained": 11,
+          "stages": [
+            {
+              "label": "runme.bat 文件相关",
+              "matched": 20,
+              "retained": 8
+            },
+            {
+              "label": "初始代理 PID 5452 的 C2",
+              "matched": 120,
+              "retained": 0
+            },
+            {
+              "label": "提权代理 PID 2952 的 C2",
+              "matched": 147,
+              "retained": 0
+            }
+          ],
+          "certificate": {
+            "budget_valid": true,
+            "poi_preserved": true,
+            "complete_witnesses": true,
+            "ledger_replayed": true,
+            "temporal_links_valid": true,
+            "objective": 95.29253434000147,
+            "objective_upper_bound": 361.0413930681227,
+            "objective_fraction_of_upper_bound": 0.2639379754498712,
+            "stop_reason": "budget_exhausted",
+            "unused_budget": 0,
+            "eligible_count": 8013,
+            "inputs_sha256": "b6da0fbc524d020b7bbc1de7ef970fb23e23d23cdc817a6af884665bdd833a88"
+          },
+          "scores": {
+            "exact_unique": 339,
+            "rounded_four_unique": 302,
+            "largest_exact_tie": 16338,
+            "certified_evidence_edges": 10673,
+            "retained_without_positive_contrast": 0,
+            "threshold_equivalent": false
+          },
+          "runtime_seconds": 3.444628469645977
+        },
+        {
+          "mode": "evidence",
+          "budget_ratio": 0.02,
+          "retained": 540,
+          "candidate": 27011,
+          "nodes": 347,
+          "reference_retained": 16,
+          "reference_total": 301,
+          "reference_density": 0.02962962962962963,
+          "non_poi_reference_retained": 15,
+          "stages": [
+            {
+              "label": "runme.bat 文件相关",
+              "matched": 20,
+              "retained": 12
+            },
+            {
+              "label": "初始代理 PID 5452 的 C2",
+              "matched": 120,
+              "retained": 0
+            },
+            {
+              "label": "提权代理 PID 2952 的 C2",
+              "matched": 147,
+              "retained": 0
+            }
+          ],
+          "certificate": {
+            "budget_valid": true,
+            "poi_preserved": true,
+            "complete_witnesses": true,
+            "ledger_replayed": true,
+            "temporal_links_valid": true,
+            "objective": 167.50157670446544,
+            "objective_upper_bound": 361.0413930681227,
+            "objective_fraction_of_upper_bound": 0.4639400908606083,
+            "stop_reason": "budget_exhausted",
+            "unused_budget": 0,
+            "eligible_count": 8013,
+            "inputs_sha256": "476a5d0b717bcd308eb490d5803f22b54f810bb5f281fb1cf3c39954d4c343cc"
+          },
+          "scores": {
+            "exact_unique": 339,
+            "rounded_four_unique": 302,
+            "largest_exact_tie": 16338,
+            "certified_evidence_edges": 10673,
+            "retained_without_positive_contrast": 0,
+            "threshold_equivalent": false
+          },
+          "runtime_seconds": 3.70677013322711
+        },
+        {
+          "mode": "evidence",
+          "budget_ratio": 0.05,
+          "retained": 1350,
+          "candidate": 27011,
+          "nodes": 470,
+          "reference_retained": 34,
+          "reference_total": 301,
+          "reference_density": 0.025185185185185185,
+          "non_poi_reference_retained": 33,
+          "stages": [
+            {
+              "label": "runme.bat 文件相关",
+              "matched": 20,
+              "retained": 20
+            },
+            {
+              "label": "初始代理 PID 5452 的 C2",
+              "matched": 120,
+              "retained": 0
+            },
+            {
+              "label": "提权代理 PID 2952 的 C2",
+              "matched": 147,
+              "retained": 0
+            }
+          ],
+          "certificate": {
+            "budget_valid": true,
+            "poi_preserved": true,
+            "complete_witnesses": true,
+            "ledger_replayed": true,
+            "temporal_links_valid": true,
+            "objective": 262.81296439982464,
+            "objective_upper_bound": 361.0413930681227,
+            "objective_fraction_of_upper_bound": 0.727930285683991,
+            "stop_reason": "budget_exhausted",
+            "unused_budget": 0,
+            "eligible_count": 8013,
+            "inputs_sha256": "aa38e673a37c9082e05ffbce96f9711a3d2d4c44d74f95c96636cba2d2f7b04f"
+          },
+          "scores": {
+            "exact_unique": 339,
+            "rounded_four_unique": 302,
+            "largest_exact_tie": 16338,
+            "certified_evidence_edges": 10673,
+            "retained_without_positive_contrast": 5,
+            "threshold_equivalent": false
+          },
+          "runtime_seconds": 4.854013081640005
+        },
+        {
+          "mode": "evidence",
+          "budget_ratio": 0.1,
+          "retained": 2701,
+          "candidate": 27011,
+          "nodes": 1138,
+          "reference_retained": 34,
+          "reference_total": 301,
+          "reference_density": 0.012587930396149574,
+          "non_poi_reference_retained": 33,
+          "stages": [
+            {
+              "label": "runme.bat 文件相关",
+              "matched": 20,
+              "retained": 20
+            },
+            {
+              "label": "初始代理 PID 5452 的 C2",
+              "matched": 120,
+              "retained": 0
+            },
+            {
+              "label": "提权代理 PID 2952 的 C2",
+              "matched": 147,
+              "retained": 0
+            }
+          ],
+          "certificate": {
+            "budget_valid": true,
+            "poi_preserved": true,
+            "complete_witnesses": true,
+            "ledger_replayed": true,
+            "temporal_links_valid": true,
+            "objective": 314.14924744975747,
+            "objective_upper_bound": 361.0413930681227,
+            "objective_fraction_of_upper_bound": 0.8701197521428867,
+            "stop_reason": "budget_exhausted",
+            "unused_budget": 0,
+            "eligible_count": 8013,
+            "inputs_sha256": "1e41324a89fa26ad9c895c78d7cad2a5af16b23292a7deec15a800051fe68ecb"
+          },
+          "scores": {
+            "exact_unique": 339,
+            "rounded_four_unique": 302,
+            "largest_exact_tie": 16338,
+            "certified_evidence_edges": 10673,
+            "retained_without_positive_contrast": 5,
+            "threshold_equivalent": false
+          },
+          "runtime_seconds": 7.159406960010529
+        },
+        {
+          "mode": "evidence",
+          "budget_ratio": 0.2,
+          "retained": 5402,
+          "candidate": 27011,
+          "nodes": 1425,
+          "reference_retained": 34,
+          "reference_total": 301,
+          "reference_density": 0.006293965198074787,
+          "non_poi_reference_retained": 33,
+          "stages": [
+            {
+              "label": "runme.bat 文件相关",
+              "matched": 20,
+              "retained": 20
+            },
+            {
+              "label": "初始代理 PID 5452 的 C2",
+              "matched": 120,
+              "retained": 0
+            },
+            {
+              "label": "提权代理 PID 2952 的 C2",
+              "matched": 147,
+              "retained": 0
+            }
+          ],
+          "certificate": {
+            "budget_valid": true,
+            "poi_preserved": true,
+            "complete_witnesses": true,
+            "ledger_replayed": true,
+            "temporal_links_valid": true,
+            "objective": 352.28691124375604,
+            "objective_upper_bound": 361.0413930681227,
+            "objective_fraction_of_upper_bound": 0.9757521381413603,
+            "stop_reason": "budget_exhausted",
+            "unused_budget": 0,
+            "eligible_count": 8013,
+            "inputs_sha256": "c922b6e145ce4db21ae33cd9094a9e66449b5352421c2c0fa271a31821ccb1a4"
+          },
+          "scores": {
+            "exact_unique": 339,
+            "rounded_four_unique": 302,
+            "largest_exact_tie": 16338,
+            "certified_evidence_edges": 10673,
+            "retained_without_positive_contrast": 7,
+            "threshold_equivalent": false
+          },
+          "runtime_seconds": 13.326901331543922
+        }
+      ],
+      "matched_size_context": {
+        "mode": "context",
+        "budget_ratio": 0.19999259560919627,
+        "retained": 5402,
+        "candidate": 27011,
+        "nodes": 1425,
+        "reference_retained": 34,
+        "reference_total": 301,
+        "reference_density": 0.006293965198074787,
+        "non_poi_reference_retained": 33,
+        "stages": [
+          {
+            "label": "runme.bat 文件相关",
+            "matched": 20,
+            "retained": 20
+          },
+          {
+            "label": "初始代理 PID 5452 的 C2",
+            "matched": 120,
+            "retained": 0
+          },
+          {
+            "label": "提权代理 PID 2952 的 C2",
+            "matched": 147,
+            "retained": 0
+          }
+        ],
+        "certificate": {
+          "budget_valid": true,
+          "poi_preserved": true,
+          "temporal_links_valid": true,
+          "complete_witnesses": true,
+          "ledger_replayed": true,
+          "unused_budget": 0,
+          "stop_reason": "legacy_context_policy",
+          "eligible_count": 13912,
+          "inputs_sha256": "b1ef96012b7a02c5b50203d0489f852d55d1e7ad73b7d1dbe4b8752d25790a52"
+        },
+        "scores": {
+          "exact_unique": 1798,
+          "rounded_four_unique": 302,
+          "largest_exact_tie": 3790,
+          "certified_evidence_edges": 10673,
+          "retained_without_positive_contrast": 7,
+          "threshold_equivalent": false
+        },
+        "comparison": "legacy at new method actual edge count"
+      },
+      "matched_size_score_only": {
+        "retained": 5402,
+        "reference_retained": 34,
+        "constraint": "ranking-only control; does not guarantee causal witness closure",
+        "without_temporal_witness": 353,
+        "canonical_witness_not_in_selection": 309
+      },
+      "tie_sensitivity": {
+        "budget_ratio": 0.01,
+        "tie_order_seeds": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "reference_retained": [
+          12,
+          12,
+          12,
+          12,
+          12
+        ],
+        "jaccard_against_first": [
+          1.0,
+          0.9708029197080292,
+          0.9636363636363636,
+          0.992619926199262,
+          0.978021978021978
+        ]
+      },
+      "input_order_invariant": true
+    },
+    {
+      "poi": {
+        "event_id": "7070c417-04cd-44ed-86a2-2e090d9052dc",
+        "label": "PowerShell 初始代理 C2 · PID 5452",
+        "timestamp": "2019-09-23T11:24:03.584-04:00",
+        "object": "FLOW",
+        "action": "START",
+        "pid": 5452,
+        "dest_ip": "132.197.158.98",
+        "dest_port": "80",
+        "evidence": "PDF Day 1 代理表：Sysclient0201 / VL8B5T3U / PID 5452；C2 132.197.158.98:80。11:24:54 报告 check-in，遥测连接始于 11:24:03.584。"
+      },
+      "grid": [
+        {
+          "mode": "context",
+          "budget_ratio": 0.01,
+          "retained": 270,
+          "candidate": 27011,
+          "nodes": 155,
+          "reference_retained": 139,
+          "reference_total": 301,
+          "reference_density": 0.5148148148148148,
+          "non_poi_reference_retained": 138,
+          "stages": [
+            {
+              "label": "runme.bat 文件相关",
+              "matched": 20,
+              "retained": 0
+            },
+            {
+              "label": "初始代理 PID 5452 的 C2",
+              "matched": 120,
+              "retained": 81
+            },
+            {
+              "label": "提权代理 PID 2952 的 C2",
+              "matched": 147,
+              "retained": 58
+            }
+          ],
+          "certificate": {
+            "budget_valid": true,
+            "poi_preserved": true,
+            "temporal_links_valid": true,
+            "complete_witnesses": true,
+            "ledger_replayed": true,
+            "unused_budget": 0,
+            "stop_reason": "legacy_context_policy",
+            "eligible_count": 14330,
+            "inputs_sha256": "ce2e52152e6f4383f8d33dd354d0e8d4b3151b0af3be6cd90dcc595281c68f43"
+          },
+          "scores": {
+            "exact_unique": 1850,
+            "rounded_four_unique": 117,
+            "largest_exact_tie": 3790,
+            "certified_evidence_edges": 688,
+            "retained_without_positive_contrast": 20,
+            "threshold_equivalent": false
+          },
+          "runtime_seconds": 3.1577185541391373
+        },
+        {
+          "mode": "context",
+          "budget_ratio": 0.02,
+          "retained": 540,
+          "candidate": 27011,
+          "nodes": 210,
+          "reference_retained": 179,
+          "reference_total": 301,
+          "reference_density": 0.3314814814814815,
+          "non_poi_reference_retained": 178,
+          "stages": [
+            {
+              "label": "runme.bat 文件相关",
+              "matched": 20,
+              "retained": 0
+            },
+            {
+              "label": "初始代理 PID 5452 的 C2",
+              "matched": 120,
+              "retained": 81
+            },
+            {
+              "label": "提权代理 PID 2952 的 C2",
+              "matched": 147,
+              "retained": 98
+            }
+          ],
+          "certificate": {
+            "budget_valid": true,
+            "poi_preserved": true,
+            "temporal_links_valid": true,
+            "complete_witnesses": true,
+            "ledger_replayed": true,
+            "unused_budget": 0,
+            "stop_reason": "legacy_context_policy",
+            "eligible_count": 14330,
+            "inputs_sha256": "4fb9452e48ce0443356801352705d270edf08ae77a575ef9213efa7e3754668c"
+          },
+          "scores": {
+            "exact_unique": 1850,
+            "rounded_four_unique": 117,
+            "largest_exact_tie": 3790,
+            "certified_evidence_edges": 688,
+            "retained_without_positive_contrast": 33,
+            "threshold_equivalent": false
+          },
+          "runtime_seconds": 3.2129923440515995
+        },
+        {
+          "mode": "context",
+          "budget_ratio": 0.05,
+          "retained": 1350,
+          "candidate": 27011,
+          "nodes": 443,
+          "reference_retained": 188,
+          "reference_total": 301,
+          "reference_density": 0.13925925925925925,
+          "non_poi_reference_retained": 187,
+          "stages": [
+            {
+              "label": "runme.bat 文件相关",
+              "matched": 20,
+              "retained": 9
+            },
+            {
+              "label": "初始代理 PID 5452 的 C2",
+              "matched": 120,
+              "retained": 81
+            },
+            {
+              "label": "提权代理 PID 2952 的 C2",
+              "matched": 147,
+              "retained": 98
+            }
+          ],
+          "certificate": {
+            "budget_valid": true,
+            "poi_preserved": true,
+            "temporal_links_valid": true,
+            "complete_witnesses": true,
+            "ledger_replayed": true,
+            "unused_budget": 0,
+            "stop_reason": "legacy_context_policy",
+            "eligible_count": 14330,
+            "inputs_sha256": "9b0875dbe47db346714c23f8eeddc2cbdf410b158dab663a92ebfe6aeca026c6"
+          },
+          "scores": {
+            "exact_unique": 1850,
+            "rounded_four_unique": 117,
+            "largest_exact_tie": 3790,
+            "certified_evidence_edges": 688,
+            "retained_without_positive_contrast": 822,
+            "threshold_equivalent": false
+          },
+          "runtime_seconds": 3.2879761829972267
+        },
+        {
+          "mode": "context",
+          "budget_ratio": 0.1,
+          "retained": 2701,
+          "candidate": 27011,
+          "nodes": 799,
+          "reference_retained": 200,
+          "reference_total": 301,
+          "reference_density": 0.07404664938911515,
+          "non_poi_reference_retained": 199,
+          "stages": [
+            {
+              "label": "runme.bat 文件相关",
+              "matched": 20,
+              "retained": 17
+            },
+            {
+              "label": "初始代理 PID 5452 的 C2",
+              "matched": 120,
+              "retained": 81
+            },
+            {
+              "label": "提权代理 PID 2952 的 C2",
+              "matched": 147,
+              "retained": 98
+            }
+          ],
+          "certificate": {
+            "budget_valid": true,
+            "poi_preserved": true,
+            "temporal_links_valid": true,
+            "complete_witnesses": true,
+            "ledger_replayed": true,
+            "unused_budget": 0,
+            "stop_reason": "legacy_context_policy",
+            "eligible_count": 14330,
+            "inputs_sha256": "1dbf309d1afc446ad09630c524d61198d11874af4822249b705ce0c52d4598c8"
+          },
+          "scores": {
+            "exact_unique": 1850,
+            "rounded_four_unique": 117,
+            "largest_exact_tie": 3790,
+            "certified_evidence_edges": 688,
+            "retained_without_positive_contrast": 2173,
+            "threshold_equivalent": false
+          },
+          "runtime_seconds": 3.354897912591696
+        },
+        {
+          "mode": "context",
+          "budget_ratio": 0.2,
+          "retained": 5402,
+          "candidate": 27011,
+          "nodes": 1798,
+          "reference_retained": 210,
+          "reference_total": 301,
+          "reference_density": 0.03887449092928545,
+          "non_poi_reference_retained": 209,
+          "stages": [
+            {
+              "label": "runme.bat 文件相关",
+              "matched": 20,
+              "retained": 19
+            },
+            {
+              "label": "初始代理 PID 5452 的 C2",
+              "matched": 120,
+              "retained": 81
+            },
+            {
+              "label": "提权代理 PID 2952 的 C2",
+              "matched": 147,
+              "retained": 98
+            }
+          ],
+          "certificate": {
+            "budget_valid": true,
+            "poi_preserved": true,
+            "temporal_links_valid": true,
+            "complete_witnesses": true,
+            "ledger_replayed": true,
+            "unused_budget": 0,
+            "stop_reason": "legacy_context_policy",
+            "eligible_count": 14330,
+            "inputs_sha256": "2dc530c2c23189783daacd4f61d3c1a78f9cbf56daa6723754d26b72906189ab"
+          },
+          "scores": {
+            "exact_unique": 1850,
+            "rounded_four_unique": 117,
+            "largest_exact_tie": 3790,
+            "certified_evidence_edges": 688,
+            "retained_without_positive_contrast": 4874,
+            "threshold_equivalent": false
+          },
+          "runtime_seconds": 3.6157639361917973
+        },
+        {
+          "mode": "evidence",
+          "budget_ratio": 0.01,
+          "retained": 270,
+          "candidate": 27011,
+          "nodes": 124,
+          "reference_retained": 32,
+          "reference_total": 301,
+          "reference_density": 0.11851851851851852,
+          "non_poi_reference_retained": 31,
+          "stages": [
+            {
+              "label": "runme.bat 文件相关",
+              "matched": 20,
+              "retained": 0
+            },
+            {
+              "label": "初始代理 PID 5452 的 C2",
+              "matched": 120,
+              "retained": 32
+            },
+            {
+              "label": "提权代理 PID 2952 的 C2",
+              "matched": 147,
+              "retained": 0
+            }
+          ],
+          "certificate": {
+            "budget_valid": true,
+            "poi_preserved": true,
+            "complete_witnesses": true,
+            "ledger_replayed": true,
+            "temporal_links_valid": true,
+            "objective": 44.66296399393883,
+            "objective_upper_bound": 56.20996943191332,
+            "objective_fraction_of_upper_bound": 0.794573710772761,
+            "stop_reason": "budget_exhausted",
+            "unused_budget": 0,
+            "eligible_count": 528,
+            "inputs_sha256": "522c429b1f2fa222b4652861f921126736d4bc1afff44a5c096fda57fb3be668"
+          },
+          "scores": {
+            "exact_unique": 124,
+            "rounded_four_unique": 117,
+            "largest_exact_tie": 26323,
+            "certified_evidence_edges": 688,
+            "retained_without_positive_contrast": 18,
+            "threshold_equivalent": false
+          },
+          "runtime_seconds": 3.302194643765688
+        },
+        {
+          "mode": "evidence",
+          "budget_ratio": 0.02,
+          "retained": 540,
+          "candidate": 27011,
+          "nodes": 208,
+          "reference_retained": 179,
+          "reference_total": 301,
+          "reference_density": 0.3314814814814815,
+          "non_poi_reference_retained": 178,
+          "stages": [
+            {
+              "label": "runme.bat 文件相关",
+              "matched": 20,
+              "retained": 0
+            },
+            {
+              "label": "初始代理 PID 5452 的 C2",
+              "matched": 120,
+              "retained": 81
+            },
+            {
+              "label": "提权代理 PID 2952 的 C2",
+              "matched": 147,
+              "retained": 98
+            }
+          ],
+          "certificate": {
+            "budget_valid": true,
+            "poi_preserved": true,
+            "complete_witnesses": true,
+            "ledger_replayed": true,
+            "temporal_links_valid": true,
+            "objective": 55.675380588391995,
+            "objective_upper_bound": 56.20996943191332,
+            "objective_fraction_of_upper_bound": 0.9904894300971134,
+            "stop_reason": "budget_exhausted",
+            "unused_budget": 0,
+            "eligible_count": 528,
+            "inputs_sha256": "423c158dee7b1cc59bb39e7063ab8ffb85b227accd5dc22b32dc44ab66dbbcb5"
+          },
+          "scores": {
+            "exact_unique": 124,
+            "rounded_four_unique": 117,
+            "largest_exact_tie": 26323,
+            "certified_evidence_edges": 688,
+            "retained_without_positive_contrast": 33,
+            "threshold_equivalent": false
+          },
+          "runtime_seconds": 3.4170173816382885
+        },
+        {
+          "mode": "evidence",
+          "budget_ratio": 0.05,
+          "retained": 561,
+          "candidate": 27011,
+          "nodes": 210,
+          "reference_retained": 179,
+          "reference_total": 301,
+          "reference_density": 0.31907308377896615,
+          "non_poi_reference_retained": 178,
+          "stages": [
+            {
+              "label": "runme.bat 文件相关",
+              "matched": 20,
+              "retained": 0
+            },
+            {
+              "label": "初始代理 PID 5452 的 C2",
+              "matched": 120,
+              "retained": 81
+            },
+            {
+              "label": "提权代理 PID 2952 的 C2",
+              "matched": 147,
+              "retained": 98
+            }
+          ],
+          "certificate": {
+            "budget_valid": true,
+            "poi_preserved": true,
+            "complete_witnesses": true,
+            "ledger_replayed": true,
+            "temporal_links_valid": true,
+            "objective": 56.20996943191332,
+            "objective_upper_bound": 56.20996943191332,
+            "objective_fraction_of_upper_bound": 1.0,
+            "stop_reason": "all_eligible_evidence_retained",
+            "unused_budget": 789,
+            "eligible_count": 528,
+            "inputs_sha256": "86861fc75c62042c9f32b83d6f1c0beeedd4e6433997e33bc215b1e4c93d4e81"
+          },
+          "scores": {
+            "exact_unique": 124,
+            "rounded_four_unique": 117,
+            "largest_exact_tie": 26323,
+            "certified_evidence_edges": 688,
+            "retained_without_positive_contrast": 33,
+            "threshold_equivalent": false
+          },
+          "runtime_seconds": 3.413388080894947
+        },
+        {
+          "mode": "evidence",
+          "budget_ratio": 0.1,
+          "retained": 561,
+          "candidate": 27011,
+          "nodes": 210,
+          "reference_retained": 179,
+          "reference_total": 301,
+          "reference_density": 0.31907308377896615,
+          "non_poi_reference_retained": 178,
+          "stages": [
+            {
+              "label": "runme.bat 文件相关",
+              "matched": 20,
+              "retained": 0
+            },
+            {
+              "label": "初始代理 PID 5452 的 C2",
+              "matched": 120,
+              "retained": 81
+            },
+            {
+              "label": "提权代理 PID 2952 的 C2",
+              "matched": 147,
+              "retained": 98
+            }
+          ],
+          "certificate": {
+            "budget_valid": true,
+            "poi_preserved": true,
+            "complete_witnesses": true,
+            "ledger_replayed": true,
+            "temporal_links_valid": true,
+            "objective": 56.20996943191332,
+            "objective_upper_bound": 56.20996943191332,
+            "objective_fraction_of_upper_bound": 1.0,
+            "stop_reason": "all_eligible_evidence_retained",
+            "unused_budget": 2140,
+            "eligible_count": 528,
+            "inputs_sha256": "3d96982c82b6ecf3e1b8381a39daea8526f6f02cabd31f26adbfe6f61da73e24"
+          },
+          "scores": {
+            "exact_unique": 124,
+            "rounded_four_unique": 117,
+            "largest_exact_tie": 26323,
+            "certified_evidence_edges": 688,
+            "retained_without_positive_contrast": 33,
+            "threshold_equivalent": false
+          },
+          "runtime_seconds": 3.420905262231827
+        },
+        {
+          "mode": "evidence",
+          "budget_ratio": 0.2,
+          "retained": 561,
+          "candidate": 27011,
+          "nodes": 210,
+          "reference_retained": 179,
+          "reference_total": 301,
+          "reference_density": 0.31907308377896615,
+          "non_poi_reference_retained": 178,
+          "stages": [
+            {
+              "label": "runme.bat 文件相关",
+              "matched": 20,
+              "retained": 0
+            },
+            {
+              "label": "初始代理 PID 5452 的 C2",
+              "matched": 120,
+              "retained": 81
+            },
+            {
+              "label": "提权代理 PID 2952 的 C2",
+              "matched": 147,
+              "retained": 98
+            }
+          ],
+          "certificate": {
+            "budget_valid": true,
+            "poi_preserved": true,
+            "complete_witnesses": true,
+            "ledger_replayed": true,
+            "temporal_links_valid": true,
+            "objective": 56.20996943191332,
+            "objective_upper_bound": 56.20996943191332,
+            "objective_fraction_of_upper_bound": 1.0,
+            "stop_reason": "all_eligible_evidence_retained",
+            "unused_budget": 4841,
+            "eligible_count": 528,
+            "inputs_sha256": "fd488a419e803bae2932c9c652728e8cdc6b25af0192c3e83daa7968e6fcfc2a"
+          },
+          "scores": {
+            "exact_unique": 124,
+            "rounded_four_unique": 117,
+            "largest_exact_tie": 26323,
+            "certified_evidence_edges": 688,
+            "retained_without_positive_contrast": 33,
+            "threshold_equivalent": false
+          },
+          "runtime_seconds": 3.4511008597910404
+        }
+      ],
+      "matched_size_context": {
+        "mode": "context",
+        "budget_ratio": 0.020769316204509277,
+        "retained": 561,
+        "candidate": 27011,
+        "nodes": 210,
+        "reference_retained": 179,
+        "reference_total": 301,
+        "reference_density": 0.31907308377896615,
+        "non_poi_reference_retained": 178,
+        "stages": [
+          {
+            "label": "runme.bat 文件相关",
+            "matched": 20,
+            "retained": 0
+          },
+          {
+            "label": "初始代理 PID 5452 的 C2",
+            "matched": 120,
+            "retained": 81
+          },
+          {
+            "label": "提权代理 PID 2952 的 C2",
+            "matched": 147,
+            "retained": 98
+          }
+        ],
+        "certificate": {
+          "budget_valid": true,
+          "poi_preserved": true,
+          "temporal_links_valid": true,
+          "complete_witnesses": true,
+          "ledger_replayed": true,
+          "unused_budget": 0,
+          "stop_reason": "legacy_context_policy",
+          "eligible_count": 14330,
+          "inputs_sha256": "86d6b3b0084e9e34d0fd15e37f343ea251ee9fc6e07d9539d9e5f3ff6b26d547"
+        },
+        "scores": {
+          "exact_unique": 1850,
+          "rounded_four_unique": 117,
+          "largest_exact_tie": 3790,
+          "certified_evidence_edges": 688,
+          "retained_without_positive_contrast": 33,
+          "threshold_equivalent": false
+        },
+        "comparison": "legacy at new method actual edge count"
+      },
+      "matched_size_score_only": {
+        "retained": 561,
+        "reference_retained": 267,
+        "constraint": "ranking-only control; does not guarantee causal witness closure",
+        "without_temporal_witness": 153,
+        "canonical_witness_not_in_selection": 138
+      },
+      "tie_sensitivity": {
+        "budget_ratio": 0.01,
+        "tie_order_seeds": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "reference_retained": [
+          32,
+          32,
+          32,
+          32,
+          32
+        ],
+        "jaccard_against_first": [
+          1.0,
+          0.8881118881118881,
+          0.8881118881118881,
+          0.8685121107266436,
+          0.8881118881118881
+        ]
+      },
+      "input_order_invariant": true
+    },
+    {
+      "poi": {
+        "event_id": "a6da9327-470e-4bd0-b390-470ae80d8189",
+        "label": "PowerShell 提权代理 C2 · PID 2952",
+        "timestamp": "2019-09-23T11:25:57.880-04:00",
+        "object": "FLOW",
+        "action": "START",
+        "pid": 2952,
+        "dest_ip": "132.197.158.98",
+        "dest_port": "80",
+        "evidence": "PDF Day 1 代理表：Sysclient0201 / LUAVR71T / PID 2952；C2 132.197.158.98:80。11:26:38 报告 elevated check-in，遥测连接始于 11:25:57.880。"
+      },
+      "grid": [
+        {
+          "mode": "context",
+          "budget_ratio": 0.01,
+          "retained": 270,
+          "candidate": 27011,
+          "nodes": 132,
+          "reference_retained": 103,
+          "reference_total": 301,
+          "reference_density": 0.3814814814814815,
+          "non_poi_reference_retained": 102,
+          "stages": [
+            {
+              "label": "runme.bat 文件相关",
+              "matched": 20,
+              "retained": 0
+            },
+            {
+              "label": "初始代理 PID 5452 的 C2",
+              "matched": 120,
+              "retained": 4
+            },
+            {
+              "label": "提权代理 PID 2952 的 C2",
+              "matched": 147,
+              "retained": 99
+            }
+          ],
+          "certificate": {
+            "budget_valid": true,
+            "poi_preserved": true,
+            "temporal_links_valid": true,
+            "complete_witnesses": true,
+            "ledger_replayed": true,
+            "unused_budget": 0,
+            "stop_reason": "legacy_context_policy",
+            "eligible_count": 14812,
+            "inputs_sha256": "633bfef33a7480693fe417762051cb61d1cbf98261c69f90fbae083f527ac83a"
+          },
+          "scores": {
+            "exact_unique": 1923,
+            "rounded_four_unique": 91,
+            "largest_exact_tie": 3790,
+            "certified_evidence_edges": 594,
+            "retained_without_positive_contrast": 8,
+            "threshold_equivalent": false
+          },
+          "runtime_seconds": 3.2151043601334095
+        },
+        {
+          "mode": "context",
+          "budget_ratio": 0.02,
+          "retained": 540,
+          "candidate": 27011,
+          "nodes": 222,
+          "reference_retained": 183,
+          "reference_total": 301,
+          "reference_density": 0.3388888888888889,
+          "non_poi_reference_retained": 182,
+          "stages": [
+            {
+              "label": "runme.bat 文件相关",
+              "matched": 20,
+              "retained": 0
+            },
+            {
+              "label": "初始代理 PID 5452 的 C2",
+              "matched": 120,
+              "retained": 84
+            },
+            {
+              "label": "提权代理 PID 2952 的 C2",
+              "matched": 147,
+              "retained": 99
+            }
+          ],
+          "certificate": {
+            "budget_valid": true,
+            "poi_preserved": true,
+            "temporal_links_valid": true,
+            "complete_witnesses": true,
+            "ledger_replayed": true,
+            "unused_budget": 0,
+            "stop_reason": "legacy_context_policy",
+            "eligible_count": 14812,
+            "inputs_sha256": "f1832f052fd57239aba730a8e884c54c095eafbe6f0f38a669a6280381f32bed"
+          },
+          "scores": {
+            "exact_unique": 1923,
+            "rounded_four_unique": 91,
+            "largest_exact_tie": 3790,
+            "certified_evidence_edges": 594,
+            "retained_without_positive_contrast": 56,
+            "threshold_equivalent": false
+          },
+          "runtime_seconds": 3.352171164005995
+        },
+        {
+          "mode": "context",
+          "budget_ratio": 0.05,
+          "retained": 1350,
+          "candidate": 27011,
+          "nodes": 498,
+          "reference_retained": 193,
+          "reference_total": 301,
+          "reference_density": 0.14296296296296296,
+          "non_poi_reference_retained": 192,
+          "stages": [
+            {
+              "label": "runme.bat 文件相关",
+              "matched": 20,
+              "retained": 10
+            },
+            {
+              "label": "初始代理 PID 5452 的 C2",
+              "matched": 120,
+              "retained": 84
+            },
+            {
+              "label": "提权代理 PID 2952 的 C2",
+              "matched": 147,
+              "retained": 99
+            }
+          ],
+          "certificate": {
+            "budget_valid": true,
+            "poi_preserved": true,
+            "temporal_links_valid": true,
+            "complete_witnesses": true,
+            "ledger_replayed": true,
+            "unused_budget": 0,
+            "stop_reason": "legacy_context_policy",
+            "eligible_count": 14812,
+            "inputs_sha256": "c83614f82b9acf838dabbff5608a86b1a78332b1d4913e9074819b1ec1996d7f"
+          },
+          "scores": {
+            "exact_unique": 1923,
+            "rounded_four_unique": 91,
+            "largest_exact_tie": 3790,
+            "certified_evidence_edges": 594,
+            "retained_without_positive_contrast": 866,
+            "threshold_equivalent": false
+          },
+          "runtime_seconds": 3.3329300954937935
+        },
+        {
+          "mode": "context",
+          "budget_ratio": 0.1,
+          "retained": 2701,
+          "candidate": 27011,
+          "nodes": 827,
+          "reference_retained": 204,
+          "reference_total": 301,
+          "reference_density": 0.07552758237689744,
+          "non_poi_reference_retained": 203,
+          "stages": [
+            {
+              "label": "runme.bat 文件相关",
+              "matched": 20,
+              "retained": 17
+            },
+            {
+              "label": "初始代理 PID 5452 的 C2",
+              "matched": 120,
+              "retained": 84
+            },
+            {
+              "label": "提权代理 PID 2952 的 C2",
+              "matched": 147,
+              "retained": 99
+            }
+          ],
+          "certificate": {
+            "budget_valid": true,
+            "poi_preserved": true,
+            "temporal_links_valid": true,
+            "complete_witnesses": true,
+            "ledger_replayed": true,
+            "unused_budget": 0,
+            "stop_reason": "legacy_context_policy",
+            "eligible_count": 14812,
+            "inputs_sha256": "035fdb05d3479ef6f226a57defe930ef2ff32e50f74ce0764b115aaf1291196d"
+          },
+          "scores": {
+            "exact_unique": 1923,
+            "rounded_four_unique": 91,
+            "largest_exact_tie": 3790,
+            "certified_evidence_edges": 594,
+            "retained_without_positive_contrast": 2217,
+            "threshold_equivalent": false
+          },
+          "runtime_seconds": 3.4380442425608635
+        },
+        {
+          "mode": "context",
+          "budget_ratio": 0.2,
+          "retained": 5402,
+          "candidate": 27011,
+          "nodes": 1765,
+          "reference_retained": 211,
+          "reference_total": 301,
+          "reference_density": 0.03905960755275824,
+          "non_poi_reference_retained": 210,
+          "stages": [
+            {
+              "label": "runme.bat 文件相关",
+              "matched": 20,
+              "retained": 20
+            },
+            {
+              "label": "初始代理 PID 5452 的 C2",
+              "matched": 120,
+              "retained": 84
+            },
+            {
+              "label": "提权代理 PID 2952 的 C2",
+              "matched": 147,
+              "retained": 99
+            }
+          ],
+          "certificate": {
+            "budget_valid": true,
+            "poi_preserved": true,
+            "temporal_links_valid": true,
+            "complete_witnesses": true,
+            "ledger_replayed": true,
+            "unused_budget": 0,
+            "stop_reason": "legacy_context_policy",
+            "eligible_count": 14812,
+            "inputs_sha256": "687fbe5847659fc77d38c57f7e0bf3cb1a09baff24d38e08e661da08bcbdbe81"
+          },
+          "scores": {
+            "exact_unique": 1923,
+            "rounded_four_unique": 91,
+            "largest_exact_tie": 3790,
+            "certified_evidence_edges": 594,
+            "retained_without_positive_contrast": 4918,
+            "threshold_equivalent": false
+          },
+          "runtime_seconds": 3.77367877215147
+        },
+        {
+          "mode": "evidence",
+          "budget_ratio": 0.01,
+          "retained": 270,
+          "candidate": 27011,
+          "nodes": 135,
+          "reference_retained": 83,
+          "reference_total": 301,
+          "reference_density": 0.3074074074074074,
+          "non_poi_reference_retained": 82,
+          "stages": [
+            {
+              "label": "runme.bat 文件相关",
+              "matched": 20,
+              "retained": 0
+            },
+            {
+              "label": "初始代理 PID 5452 的 C2",
+              "matched": 120,
+              "retained": 4
+            },
+            {
+              "label": "提权代理 PID 2952 的 C2",
+              "matched": 147,
+              "retained": 79
+            }
+          ],
+          "certificate": {
+            "budget_valid": true,
+            "poi_preserved": true,
+            "complete_witnesses": true,
+            "ledger_replayed": true,
+            "temporal_links_valid": true,
+            "objective": 31.694485265584483,
+            "objective_upper_bound": 35.36945031412404,
+            "objective_fraction_of_upper_bound": 0.8960977618848649,
+            "stop_reason": "budget_exhausted",
+            "unused_budget": 0,
+            "eligible_count": 484,
+            "inputs_sha256": "e88fc28b3b9f77c07cc97c8254db7e63cb45bc79f65651bd66dc187152ed6821"
+          },
+          "scores": {
+            "exact_unique": 98,
+            "rounded_four_unique": 91,
+            "largest_exact_tie": 26417,
+            "certified_evidence_edges": 594,
+            "retained_without_positive_contrast": 7,
+            "threshold_equivalent": false
+          },
+          "runtime_seconds": 3.3648286424577236
+        },
+        {
+          "mode": "evidence",
+          "budget_ratio": 0.02,
+          "retained": 498,
+          "candidate": 27011,
+          "nodes": 203,
+          "reference_retained": 183,
+          "reference_total": 301,
+          "reference_density": 0.3674698795180723,
+          "non_poi_reference_retained": 182,
+          "stages": [
+            {
+              "label": "runme.bat 文件相关",
+              "matched": 20,
+              "retained": 0
+            },
+            {
+              "label": "初始代理 PID 5452 的 C2",
+              "matched": 120,
+              "retained": 84
+            },
+            {
+              "label": "提权代理 PID 2952 的 C2",
+              "matched": 147,
+              "retained": 99
+            }
+          ],
+          "certificate": {
+            "budget_valid": true,
+            "poi_preserved": true,
+            "complete_witnesses": true,
+            "ledger_replayed": true,
+            "temporal_links_valid": true,
+            "objective": 35.36945031412404,
+            "objective_upper_bound": 35.36945031412404,
+            "objective_fraction_of_upper_bound": 1.0,
+            "stop_reason": "all_eligible_evidence_retained",
+            "unused_budget": 42,
+            "eligible_count": 484,
+            "inputs_sha256": "8ac04f738d4d719fc09c78b24776f21d1eb5532f509c576b813f977c0a2abbcf"
+          },
+          "scores": {
+            "exact_unique": 98,
+            "rounded_four_unique": 91,
+            "largest_exact_tie": 26417,
+            "certified_evidence_edges": 594,
+            "retained_without_positive_contrast": 14,
+            "threshold_equivalent": false
+          },
+          "runtime_seconds": 3.4400921799242496
+        },
+        {
+          "mode": "evidence",
+          "budget_ratio": 0.05,
+          "retained": 498,
+          "candidate": 27011,
+          "nodes": 203,
+          "reference_retained": 183,
+          "reference_total": 301,
+          "reference_density": 0.3674698795180723,
+          "non_poi_reference_retained": 182,
+          "stages": [
+            {
+              "label": "runme.bat 文件相关",
+              "matched": 20,
+              "retained": 0
+            },
+            {
+              "label": "初始代理 PID 5452 的 C2",
+              "matched": 120,
+              "retained": 84
+            },
+            {
+              "label": "提权代理 PID 2952 的 C2",
+              "matched": 147,
+              "retained": 99
+            }
+          ],
+          "certificate": {
+            "budget_valid": true,
+            "poi_preserved": true,
+            "complete_witnesses": true,
+            "ledger_replayed": true,
+            "temporal_links_valid": true,
+            "objective": 35.36945031412404,
+            "objective_upper_bound": 35.36945031412404,
+            "objective_fraction_of_upper_bound": 1.0,
+            "stop_reason": "all_eligible_evidence_retained",
+            "unused_budget": 852,
+            "eligible_count": 484,
+            "inputs_sha256": "9cc5a4e17991d9c350d52fc905c44d61630529fd0a961eede0fe9d8db8c21fb1"
+          },
+          "scores": {
+            "exact_unique": 98,
+            "rounded_four_unique": 91,
+            "largest_exact_tie": 26417,
+            "certified_evidence_edges": 594,
+            "retained_without_positive_contrast": 14,
+            "threshold_equivalent": false
+          },
+          "runtime_seconds": 3.3967205844819546
+        },
+        {
+          "mode": "evidence",
+          "budget_ratio": 0.1,
+          "retained": 498,
+          "candidate": 27011,
+          "nodes": 203,
+          "reference_retained": 183,
+          "reference_total": 301,
+          "reference_density": 0.3674698795180723,
+          "non_poi_reference_retained": 182,
+          "stages": [
+            {
+              "label": "runme.bat 文件相关",
+              "matched": 20,
+              "retained": 0
+            },
+            {
+              "label": "初始代理 PID 5452 的 C2",
+              "matched": 120,
+              "retained": 84
+            },
+            {
+              "label": "提权代理 PID 2952 的 C2",
+              "matched": 147,
+              "retained": 99
+            }
+          ],
+          "certificate": {
+            "budget_valid": true,
+            "poi_preserved": true,
+            "complete_witnesses": true,
+            "ledger_replayed": true,
+            "temporal_links_valid": true,
+            "objective": 35.36945031412404,
+            "objective_upper_bound": 35.36945031412404,
+            "objective_fraction_of_upper_bound": 1.0,
+            "stop_reason": "all_eligible_evidence_retained",
+            "unused_budget": 2203,
+            "eligible_count": 484,
+            "inputs_sha256": "f2de8d7a2f3739896ee824e48db6d474b9df06c3d00380aea96dc89c1c2c8cd2"
+          },
+          "scores": {
+            "exact_unique": 98,
+            "rounded_four_unique": 91,
+            "largest_exact_tie": 26417,
+            "certified_evidence_edges": 594,
+            "retained_without_positive_contrast": 14,
+            "threshold_equivalent": false
+          },
+          "runtime_seconds": 3.3673425428569317
+        },
+        {
+          "mode": "evidence",
+          "budget_ratio": 0.2,
+          "retained": 498,
+          "candidate": 27011,
+          "nodes": 203,
+          "reference_retained": 183,
+          "reference_total": 301,
+          "reference_density": 0.3674698795180723,
+          "non_poi_reference_retained": 182,
+          "stages": [
+            {
+              "label": "runme.bat 文件相关",
+              "matched": 20,
+              "retained": 0
+            },
+            {
+              "label": "初始代理 PID 5452 的 C2",
+              "matched": 120,
+              "retained": 84
+            },
+            {
+              "label": "提权代理 PID 2952 的 C2",
+              "matched": 147,
+              "retained": 99
+            }
+          ],
+          "certificate": {
+            "budget_valid": true,
+            "poi_preserved": true,
+            "complete_witnesses": true,
+            "ledger_replayed": true,
+            "temporal_links_valid": true,
+            "objective": 35.36945031412404,
+            "objective_upper_bound": 35.36945031412404,
+            "objective_fraction_of_upper_bound": 1.0,
+            "stop_reason": "all_eligible_evidence_retained",
+            "unused_budget": 4904,
+            "eligible_count": 484,
+            "inputs_sha256": "a11354270013aac3a69d930de571c2bd44601bf07d6bcf544d04646a18448c90"
+          },
+          "scores": {
+            "exact_unique": 98,
+            "rounded_four_unique": 91,
+            "largest_exact_tie": 26417,
+            "certified_evidence_edges": 594,
+            "retained_without_positive_contrast": 14,
+            "threshold_equivalent": false
+          },
+          "runtime_seconds": 3.385645776987076
+        }
+      ],
+      "matched_size_context": {
+        "mode": "context",
+        "budget_ratio": 0.01843693310132909,
+        "retained": 498,
+        "candidate": 27011,
+        "nodes": 203,
+        "reference_retained": 183,
+        "reference_total": 301,
+        "reference_density": 0.3674698795180723,
+        "non_poi_reference_retained": 182,
+        "stages": [
+          {
+            "label": "runme.bat 文件相关",
+            "matched": 20,
+            "retained": 0
+          },
+          {
+            "label": "初始代理 PID 5452 的 C2",
+            "matched": 120,
+            "retained": 84
+          },
+          {
+            "label": "提权代理 PID 2952 的 C2",
+            "matched": 147,
+            "retained": 99
+          }
+        ],
+        "certificate": {
+          "budget_valid": true,
+          "poi_preserved": true,
+          "temporal_links_valid": true,
+          "complete_witnesses": true,
+          "ledger_replayed": true,
+          "unused_budget": 0,
+          "stop_reason": "legacy_context_policy",
+          "eligible_count": 14812,
+          "inputs_sha256": "63b1afc9ea8ea19f3bbda3d097dabcac2ca026c1a5e196cec5d2f3d94ded1108"
+        },
+        "scores": {
+          "exact_unique": 1923,
+          "rounded_four_unique": 91,
+          "largest_exact_tie": 3790,
+          "certified_evidence_edges": 594,
+          "retained_without_positive_contrast": 14,
+          "threshold_equivalent": false
+        },
+        "comparison": "legacy at new method actual edge count"
+      },
+      "matched_size_score_only": {
+        "retained": 498,
+        "reference_retained": 214,
+        "constraint": "ranking-only control; does not guarantee causal witness closure",
+        "without_temporal_witness": 108,
+        "canonical_witness_not_in_selection": 27
+      },
+      "tie_sensitivity": {
+        "budget_ratio": 0.01,
+        "tie_order_seeds": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "reference_retained": [
+          83,
+          83,
+          83,
+          83,
+          83
+        ],
+        "jaccard_against_first": [
+          1.0,
+          0.8685121107266436,
+          0.875,
+          0.8815331010452961,
+          0.8947368421052632
+        ]
+      },
+      "input_order_invariant": true
+    }
+  ],
+  "implementation_sha256": {
+    "tc_pruning/rasp.py": "dc8d9ed0abaaabdf6e3a6125e2821201cc36b7222ba1b85b7e889ceeacce2bb0",
+    "tc_pruning/evidence_selection.py": "78ca0987619540946690b17b8fea07c78323c7113c00d7d345aa05601db1482b",
+    "tc_pruning/rasp_diverse.py": "bde83a15f02bf2d80f535e57a1085f6150c228b4f6dbb891186b0cc86097f569",
+    "tc_pruning/optc_investigation.py": "a13691a1f6c9bc77ef88c5f2d6984ee9f9cad201aac98aceb6805c15f332ec34"
+  }
+}

@@ -30,7 +30,7 @@ def marginal(score, weight, selected_mass, quality_weight):
     return quality_weight*score+(1-quality_weight)*weight*math.log1p(score/(weight+selected_mass))
 
 
-def select_diverse(score, poi, backward, parent, pivot, family, budget, tie_order, quality_weight=.05):
+def select_diverse(score, poi, backward, parent, pivot, family, budget, tie_order, quality_weight=.05, record_audit=False):
     score, poi, family = np.asarray(score), np.asarray(poi, dtype=bool), np.asarray(family)
     n = len(score)
     if not 0 <= quality_weight <= 1 or not int(poi.sum()) <= budget <= n:
@@ -70,6 +70,7 @@ def select_diverse(score, poi, backward, parent, pivot, family, budget, tie_orde
         cursor[group], end[group] = lo, hi
         push(group)
     used, step, recomputations, skipped = int(kept.sum()), 0, 0, 0
+    trace=[]; attempts={}
     while heap and used < budget:
         negative, tie, i, group = heapq.heappop(heap)
         if kept[i]:
@@ -94,7 +95,13 @@ def select_diverse(score, poi, backward, parent, pivot, family, budget, tie_orde
             if not kept[j]:
                 path.add(j)
             j = int(backward[j])
+        if record_audit:
+            attempts[int(i)]=dict(anchor=int(i),new_cost=len(path),remaining_before=budget-used,
+                                  anchor_priority=float(gain),accepted=len(path)<=budget-used)
         if len(path) <= budget-used:
+            if record_audit:
+                trace.append(dict(step=step+1,anchor=int(i),new_edges=sorted(path),new_cost=len(path),
+                                  used_before=used,used_after=used+len(path),anchor_priority=float(gain)))
             chosen = np.fromiter(path, dtype=np.int64)
             kept[chosen] = True
             anchors[i] = True
@@ -110,4 +117,4 @@ def select_diverse(score, poi, backward, parent, pivot, family, budget, tie_orde
     return kept, anchors, {"selection_priority": priority, "selected_step": selected_step,
                            "lazy_recomputations": recomputations, "skipped_over_cap": skipped,
                            "selected_families": int(np.count_nonzero(np.bincount(family[kept], minlength=group_count))),
-                           "total_families": group_count}
+                           "total_families": group_count, "trace":trace, "attempts":attempts}
