@@ -7,6 +7,7 @@ from playwright.sync_api import sync_playwright
 runtime=Path(__file__).resolve().parents[1]/'runtime'
 sys.path.insert(0,str(runtime.parents[1]))
 from webapp.scripts.verify_decision_audit import verify
+from webapp.scripts.verify_attack_report import verify as verify_attack
 with sync_playwright() as p:
     browser=p.chromium.launch(headless=True,args=['--no-sandbox','--no-proxy-server'])
     page=browser.new_page(viewport={'width':1440,'height':1100})
@@ -15,6 +16,32 @@ with sync_playwright() as p:
     page.goto('http://127.0.0.1:8000')
     page.wait_for_function("document.querySelector('#health').textContent === '数据就绪'",timeout=60000)
     data=page.request.get('http://127.0.0.1:8000/api/datasets/optc-0201/graph').json()
+    inferred={n['id'] for n in data['attack']['nodes'] if n['predicted_attack']}
+    assert page.locator('#attack-nodes tr[data-node]').count()==len(inferred)
+    assert '精确率' in page.locator('#attack-evaluation').inner_text()
+    page.fill('#attack-search','2952')
+    assert page.locator('#attack-nodes tr[data-node]').count()==1
+    page.locator('#attack-nodes tr[data-node]').first.click()
+    assert page.locator('#attack-node-detail').get_attribute('open') is not None
+    assert page.locator('#attack-node-events button').count()>0
+    page.locator('#attack-node-events button').first.click()
+    assert '攻击推断角色' in page.locator('#details').inner_text()
+    page.fill('#attack-search','')
+    page.select_option('#attack-filter','all')
+    assert page.locator('#attack-nodes tr[data-node]').count()==data['attack']['summary']['evaluated_process_nodes']
+    page.select_option('#attack-filter','predicted')
+    for path in data['attack']['paths']:
+        page.select_option('#attack-path-select',path['id'])
+        assert page.locator('#attack-graph [data-node]').count()==len(path['node_ids'])
+        assert page.locator('#attack-path-events button').count()==len(path['event_ids'])
+        if path['support_level']=='dependency_only':
+            assert '不能据此证明' in page.locator('#attack-path-note').inner_text()
+    with page.expect_download() as download:
+        page.click('#download-attack')
+    download.value.save_as(str(runtime/'optc-attack-report.json'))
+    assert verify_attack(json.loads((runtime/'optc-attack-report.json').read_text()))['roles_verified']
+    page.select_option('#attack-path-select',data['attack']['paths'][0]['id'])
+    page.locator('#attack-node-detail').evaluate('(e)=>e.open=false')
     sample=set(data['display_event_ids'])
     visible=[e for e in data['edges'] if e['id'] in sample]
     kept=sum(e['retained'] for e in visible)
@@ -74,6 +101,7 @@ with sync_playwright() as p:
             page.click('#apply-poi')
         page.wait_for_function("!document.querySelector('#apply-poi').disabled",timeout=60000)
         assert page.evaluate('state.data.decision_contract.mode')==mode
+        assert set(page.evaluate('state.data.attack.nodes.filter(n=>n.predicted_attack).map(n=>n.id)'))==inferred
         audit=page.request.get('http://127.0.0.1:8000/api/datasets/optc-0201/decision-audit').json()
         assert verify(audit)['greedy_ranking_replayed']
         (runtime/f'{mode}-decision-audit.json').write_text(json.dumps(audit))
@@ -85,11 +113,21 @@ with sync_playwright() as p:
             assert '完整时序路径连接边' in page.locator('#edge-rows').inner_text()
             page.click('#clear-edge')
     assert page.locator('#edge-rows td:nth-child(3)').first.get_attribute('title') is not None
+    page.select_option('#edge-decision','attack')
+    assert page.locator('#edge-rows tr[data-id]').count()>0
+    page.click('#clear-edge')
+    for q in ('0.95','0.9'):
+        page.select_option('#attack-quantile',q)
+        with page.expect_response(lambda r:r.url.endswith('/prune') and r.request.method=='POST',timeout=60000):
+            page.click('#apply-poi')
+        page.wait_for_function("!document.querySelector('#apply-poi').disabled",timeout=60000)
+        assert page.evaluate('state.data.attack.config.anomaly_quantile')==float(q)
+    page.locator('#attack-panel').screenshot(path=str(runtime/'attack-panel-desktop.png'))
     page.uncheck('#show-scores');page.evaluate('window.scrollTo(0,0)')
     page.screenshot(path=str(runtime/'optc-desktop.png'),full_page=True)
     page.set_viewport_size({'width':390,'height':844})
     assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
     page.screenshot(path=str(runtime/'optc-mobile.png'),full_page=True)
     assert not errors,errors
-    print(json.dumps({'before':len(visible),'after':kept,'candidate_edges':len(data['edges']),'browser_errors':errors,'mobile':'passed','manual_poi_recompute':'passed','invalid_poi_recovery':'passed','both_modes_audit_replay':'passed'}))
+    print(json.dumps({'before':len(visible),'after':kept,'candidate_edges':len(data['edges']),'browser_errors':errors,'mobile':'passed','manual_poi_recompute':'passed','invalid_poi_recovery':'passed','both_modes_audit_replay':'passed','attack_nodes_paths_download_and_threshold':'passed'}))
     browser.close()

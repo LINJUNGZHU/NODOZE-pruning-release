@@ -1,0 +1,151 @@
+import copy
+
+import pytest
+
+from tc_pruning.attack_inference import infer_attack, temporal_paths, check_path, process_metadata, command_signals
+from tc_pruning.attack_evaluation import node_metrics
+from tc_pruning.optc import parse_event
+
+
+def event(id, second, actor, target, obj='FLOW', action='START', pid=2, props=None):
+    raw=dict(id=id,hostname='test',timestamp=f'2019-09-23T11:20:{second:02d}-04:00',
+             actorID=actor,objectID=target,object=obj,action=action,pid=pid,ppid=1,
+             properties=props or dict(image_path='worker.exe',direction='outbound',dest_ip='203.0.113.5',dest_port='80'))
+    e=parse_event(raw)
+    e.update(evidence_score=.6,historical_count=0,decision=dict(certified_background_lift=True,temporal_witness=True))
+    return e
+
+
+def fixture():
+    return [event('birth',1,'parent','child','PROCESS','CREATE',props=dict(image_path='powershell.exe',parent_image_path='parent.exe',command_line='powershell -enc AAA -w Hidden')),
+            event('flow',2,'child','socket'),event('poi',3,'child','socket2')]
+
+
+def stable(report):
+    return {k:v for k,v in report.items() if k!='runtime_seconds'}
+
+
+def test_behaviour_requires_followup_and_does_not_taint_parent_or_resource():
+    edges=fixture();a=infer_attack(edges,'poi')
+    assert {n['id'] for n in a['nodes'] if n['predicted_attack']}=={'child'}
+    assert 'parent' in a['connector_node_ids']
+    assert 'socket' in a['resource_node_ids']
+    assert all(n['id'] not in ('socket','socket2') for n in a['nodes'])
+    assert not infer_attack([edges[0]],'birth')['summary']['inferred_attack_nodes']
+    # Equal-time outbound traffic cannot corroborate a creation event.
+    edges[1]['timestamp_ns']=edges[0]['timestamp_ns']
+    assert not infer_attack(edges[:2],'birth')['summary']['inferred_attack_nodes']
+
+
+def test_seed_is_not_an_automatic_detection_and_uniform_scores_abstain():
+    a=infer_attack([event('poi',1,'normal','socket')],'poi')
+    n=a['nodes'][0]
+    assert n['seed_node'] and not n['predicted_attack']
+    assert not a['paths']
+
+
+def test_detection_is_independent_of_retention_labels_order_and_duplicate_family():
+    edges=fixture();a=infer_attack(edges,'poi')
+    changed=copy.deepcopy(edges)
+    for e in changed:
+        e.update(retained=False,score=999,reference_evidence=['FAKE MALICIOUS'])
+    assert stable(a)==stable(infer_attack(list(reversed(changed)),'poi'))
+    duplicate=copy.deepcopy(edges[1]);duplicate['id']='duplicate';duplicate['timestamp_ns']+=1
+    b=infer_attack(edges+[duplicate],'poi')
+    assert [(n['id'],n['anomaly_score'],n['family_count'],n['predicted_attack']) for n in a['nodes']]==[(n['id'],n['anomaly_score'],n['family_count'],n['predicted_attack']) for n in b['nodes']]
+
+
+def test_process_identity_on_creation_is_child_not_parent():
+    m=process_metadata(fixture())
+    assert m['parent']['pids']==[1] and m['child']['pids']==[2]
+    assert m['parent']['images']==['parent.exe']
+
+
+@pytest.mark.parametrize('command',['powershell -Encoding UTF8 -w Hidden','powershell -enc AAA','powershell -w Hidden'])
+def test_single_command_feature_is_not_full_behavior(command):
+    r=fixture()[0]['raw'];r['properties']['command_line']=command
+    assert len(command_signals(r))<2
+
+
+def test_temporal_paths_preserve_direction_time_and_ignore_process_open():
+    edges=[event('a',1,'p','q','PROCESS','CREATE'),event('b',1,'q','r','PROCESS','CREATE'),
+           event('c',2,'q','s','PROCESS','OPEN'),event('d',3,'q','t','PROCESS','CREATE'),
+           event('reverse',4,'z','p','PROCESS','CREATE')]
+    paths=temporal_paths(edges,'p',0)
+    assert paths['t']==('a','d') and 'r' not in paths and 's' not in paths and 'z' not in paths
+    by_id={e['id']:e for e in edges}
+    assert check_path(['a','d'],by_id)
+    assert not check_path(['a','b'],by_id)
+    assert not check_path(['d','a'],by_id)
+    assert not check_path(['a','c'],by_id)
+
+
+def test_temporal_reachability_matches_independent_exhaustive_search():
+    edges=[event('a',1,'p','q','PROCESS','CREATE'),event('b',2,'q','r','PROCESS','CREATE'),
+           event('c',3,'r','p','PROCESS','CREATE'),event('d',2,'q','s','PROCESS','CREATE'),
+           event('e',4,'s','z','PROCESS','CREATE')]
+    reachable={'p'}
+    def walk(node,when):
+        for e in edges:
+            if e['source']==node and e['timestamp_ns']>when:
+                reachable.add(e['target']);walk(e['target'],e['timestamp_ns'])
+    walk('p',0)
+    assert set(temporal_paths(edges,'p',0))==reachable
+
+
+def test_unknown_labels_are_not_false_positives_or_true_negatives():
+    m=node_metrics(['a','b','c'],['a','b'],{'a':True})
+    assert m['tp']==1 and m['fp']==0 and m['tn']==0 and m['unreviewed_predictions']==1
+    assert m['precision'] is None and m['accuracy'] is None and m['f1'] is None
+    assert m['precision_bounds']==[.5,1.] and m['known_positive_recall']==1
+
+
+def test_complete_labels_produce_correct_confusion_matrix():
+    m=node_metrics(['a','b','c','d'],['a','b'],dict(a=True,b=False,c=True,d=False))
+    assert (m['tp'],m['fp'],m['fn'],m['tn'])==(1,1,1,1)
+    assert m['precision']==m['recall']==m['f1']==m['accuracy']==.5
+
+
+@pytest.mark.parametrize('quantile',[0,1,True,'0.9',float('nan')])
+def test_invalid_node_threshold_is_rejected(quantile):
+    with pytest.raises(ValueError,match='anomaly_quantile'):infer_attack(fixture(),'poi',dict(anomaly_quantile=quantile))
+
+
+def test_downloaded_path_audit_detects_tampering():
+    from webapp.scripts.verify_attack_report import verify
+    es=fixture();a=infer_attack(es,'poi');ids=set(a['path_event_ids'])|set(a['evidence_event_ids'])
+    doc=dict(attack=a,events=[e for e in es if e['id'] in ids])
+    assert verify(doc)['strict_temporal_paths_verified']
+    tampered=copy.deepcopy(doc);tampered['attack']['paths'][0]['event_ids'].reverse()
+    with pytest.raises(ValueError):verify(tampered)
+    tampered=copy.deepcopy(doc);tampered['events'][0]['timestamp_ns']+=1
+    with pytest.raises(ValueError,match='raw record'):verify(tampered)
+
+
+def test_public_label_import_preserves_granularity_and_checks_event_identity(tmp_path):
+    import json
+    import zipfile
+    from webapp.scripts.prepare_attack_reference import build
+    edges=fixture()
+    tasks=[dict(hostname='test',object_id='child',event_id='birth',labels=['malicious','process']),
+           dict(hostname='test',object_id='parent',event_id='birth',labels=['malicious','event']),
+           dict(hostname='test',object_id='parent',event_id='birth',labels=['malicious','process','invalid'])]
+    with zipfile.ZipFile(tmp_path/'tasks.zip','w') as z:z.writestr('tasks.json',json.dumps(tasks))
+    with zipfile.ZipFile(tmp_path/'malicious.zip','w') as z:z.writestr('malicious.json',json.dumps(edges[1]['raw'])+'\n')
+    report=build(dict(edges=edges),tmp_path)
+    assert report['node_labels']==dict(child=True,parent=False)
+    assert report['malicious_event_ids']==['flow']
+    altered=copy.deepcopy(edges[1]['raw']);altered['actorID']='wrong-process'
+    with zipfile.ZipFile(tmp_path/'malicious.zip','w') as z:z.writestr('malicious.json',json.dumps(altered)+'\n')
+    with pytest.raises(ValueError,match='disagree'):build(dict(edges=edges),tmp_path)
+
+
+def test_public_benchmark_does_not_apply_to_another_window(tmp_path,monkeypatch):
+    import json
+    import hashlib
+    import tc_pruning.attack_evaluation as evaluation
+    es=fixture();report=infer_attack(es,'poi')
+    source=tmp_path/'labels.json'
+    source.write_text(json.dumps(dict(scope=dict(event_ids_sha256='different-window',process_ids_sha256='different-processes'))))
+    monkeypatch.setattr(evaluation,'PUBLIC_LABELS',source)
+    assert 'published_benchmark' not in evaluation.evaluate_attack(report,es)

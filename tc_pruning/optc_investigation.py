@@ -13,6 +13,8 @@ from tc_pruning.rasp import propagate, temporal_routes, temporal_fork_routes
 from tc_pruning.rasp_diverse import event_families, select_diverse
 from tc_pruning.evidence_selection import select_evidence, audit_selection, validate_routes, witness_bundle
 from collections import Counter
+from tc_pruning.attack_inference import infer_attack
+from tc_pruning.attack_evaluation import evaluate_attack
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -68,7 +70,7 @@ def reference_evidence(e):
     return evidence
 
 
-def rescore(data, poi_id, budget_ratio=None, selection_mode=None):
+def rescore(data, poi_id, budget_ratio=None, selection_mode=None, attack_quantile=None):
     """Update one isolated cache value; truth only declares the manual seed."""
     started = time.monotonic()
     edges = sorted(data['edges'], key=lambda e:(e['timestamp_ns'],e['id']))
@@ -219,6 +221,12 @@ def rescore(data, poi_id, budget_ratio=None, selection_mode=None):
     data['algorithm'].update(budget_ratio=budget_ratio, selection_mode=selection_mode, rarity='1 / (1 + 严格早于 POI 的同语义交互次数)',
                              frequency='同语义交互次数 / POI 前全部历史事件数',
                              seed_source='manual groundtruth-backed configuration' if preset else 'manual user event ID')
+    quantile = attack_quantile if attack_quantile is not None else data.get('attack',{}).get('config',{}).get('anomaly_quantile',.90)
+    data['attack'] = infer_attack(edges, poi_id, dict(anomaly_quantile=quantile))
+    data['attack']['evaluation'] = evaluate_attack(data['attack'], edges)
+    attack_paths, attack_evidence = set(data['attack']['path_event_ids']), set(data['attack']['evidence_event_ids'])
+    for e in edges:
+        e['attack_role'] = 'path_and_evidence' if e['id'] in attack_paths & attack_evidence else 'path' if e['id'] in attack_paths else 'evidence' if e['id'] in attack_evidence else 'none'
     data['logs']=[f"读取 OPTC：{len(data['dataset'].get('sources',[]))} 份来源文件；主机 SysClient0201",
                   f"手动 POI：{data['poi']['label']} · {poi_id}",f"POI 时间 / 频率截止：{data['poi']['timestamp']}，严格小于，不含同刻事件",
                   f"累计历史：{history['history_edges']:,} 条；按原始事件 ID 去重，不按窗口对半切分",
@@ -226,5 +234,7 @@ def rescore(data, poi_id, budget_ratio=None, selection_mode=None):
                   f"RASP / {selection_mode}：保留 {int(kept.sum()):,} / {len(edges):,}，预算上限 {budget:,}",
                   f"PDF 指标参考保留 {retained} / {matched}；排除 POI 后 {data['truth']['non_poi_retained']} / {data['truth']['non_poi_matched']}",
                   f"判定审计：预算有效={certificate['budget_valid']}，完整时序见证={certificate['complete_witnesses']}，剩余预算={certificate['unused_budget']}",
+                  f"攻击推断：{data['attack']['summary']['inferred_attack_nodes']} 个进程假设，{data['attack']['summary']['paths']} 条时序路径；独立于剪枝预算",
+                  f"攻击节点评估：已知正例找回 {data['attack']['evaluation']['node_metrics']['tp']} / {data['attack']['evaluation']['node_metrics']['known_positive']}；未标注预测 {data['attack']['evaluation']['node_metrics']['unreviewed_predictions']} 个，不计为正常或误报",
                   f"重算完成，用时 {time.monotonic()-started:.2f} 秒"]
     return data

@@ -94,7 +94,7 @@ def create_app(cache_path: str | Path | None = None) -> Flask:
                 return jsonify({"error": "unknown dataset"}), 404
             if data.get("schema_version") != 2:
                 return jsonify({"error": "Rebuild the OPTC frequency index with prepare_optc.py"}), 503
-            rescore(data, payload["poi_event_id"], payload.get("budget_ratio"), payload.get("selection_mode"))
+            rescore(data, payload["poi_event_id"], payload.get("budget_ratio"), payload.get("selection_mode"),payload.get('attack_quantile'))
             target = app.config["DEMO_CACHE"]
             temporary = target.with_name(target.name + "." + uuid.uuid4().hex + ".tmp")
             try:
@@ -123,6 +123,22 @@ def create_app(cache_path: str | Path | None = None) -> Flask:
         response=jsonify({key:data[key] for key in ('dataset','poi','history','algorithm','metrics',
                           'decision_contract','decision_certificate','decision_trace','decision_inputs','score_diagnostics')})
         response.headers['Content-Disposition']='attachment; filename="optc-decision-audit.json"'
+        return response
+
+    @app.get('/api/datasets/<dataset_id>/attack-report')
+    def attack_report(dataset_id: str):
+        try:
+            data = load_cache()
+        except FileNotFoundError as exc:
+            return jsonify({'error': str(exc)}), 503
+        if dataset_id != data['dataset']['id']:
+            return jsonify({'error': 'unknown dataset'}), 404
+        if 'attack' not in data:
+            return jsonify({'error': 'Recompute the POI to generate attack hypotheses'}), 503
+        ids = set(data['attack']['path_event_ids']) | set(data['attack']['evidence_event_ids'])
+        response = jsonify(dict(dataset=data['dataset'],poi=data['poi'],history=data['history'],
+                                attack=data['attack'],events=[e for e in data['edges'] if e['id'] in ids]))
+        response.headers['Content-Disposition'] = 'attachment; filename="optc-attack-report.json"'
         return response
 
     def update_job(job_id: str, **changes) -> None:

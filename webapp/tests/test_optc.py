@@ -142,3 +142,25 @@ def test_reference_labels_do_not_influence_decisions(dataset,monkeypatch):
     b=rescore(copy.deepcopy(dataset),'seed',selection_mode='evidence')
     assert [(e['score'],e['retained']) for e in a['edges']]==[(e['score'],e['retained']) for e in b['edges']]
     assert a['decision_trace']==b['decision_trace']
+    assert {k:v for k,v in a['attack'].items() if k not in ('runtime_seconds','evaluation')}=={k:v for k,v in b['attack'].items() if k not in ('runtime_seconds','evaluation')}
+
+
+def test_attack_api_report_and_threshold_persistence(dataset,tmp_path):
+    from webapp.scripts.verify_attack_report import verify
+    cache=tmp_path/'cache.json';cache.write_text(json.dumps(rescore(dataset,'seed')))
+    client=create_app(cache).test_client()
+    response=client.get('/api/datasets/optc-0201/attack-report')
+    assert response.status_code==200 and 'attachment' in response.headers['Content-Disposition']
+    assert verify(response.json)['strict_temporal_paths_verified']
+    assert client.get('/api/datasets/missing/attack-report').status_code==404
+    r=client.post('/api/datasets/optc-0201/prune',json=dict(poi_event_id='seed',attack_quantile=.95))
+    assert r.status_code==200 and r.json['attack']['config']['anomaly_quantile']==.95
+    previous=cache.read_bytes()
+    r=client.post('/api/datasets/optc-0201/prune',json=dict(poi_event_id='seed',attack_quantile=1))
+    assert r.status_code==400 and cache.read_bytes()==previous
+
+
+def test_attack_predictions_do_not_depend_on_pruning_budget_or_mode(dataset):
+    reports=[rescore(copy.deepcopy(dataset),'seed',b,m)['attack'] for b,m in [(1.,'context'),(.01,'evidence')]]
+    strip=lambda a:{k:v for k,v in a.items() if k!='runtime_seconds'}
+    assert strip(reports[0])==strip(reports[1])

@@ -1,3 +1,5 @@
+> **攻击节点与路径已接入 OPTC 页面**：[判定方法与论文/源码依据](docs/attack-inference-method.md) · [节点准确率、漏检与路径实验](docs/attack-inference-evaluation.md)。默认 POI 在公开标注口径下 TP=3、FP=0、FN=5，Precision=100%、Recall=37.5%；不是独立测试或完整攻击链恢复保证。
+
 > **评分与判定审计更新**：[论文研读](docs/provenance-selection-literature.md)、[方法与证明范围](docs/evidence-selection-method.md)、[含负结果的对照实验](docs/evidence-selection-evaluation.md)。默认保留扩展上下文，可选证据子图；所有判定可下载并重放。
 
 > **OPTC Web 更新**：支持按 Ground Truth 手动设置 POI，频率统计使用全部严格早于 POI 的历史。

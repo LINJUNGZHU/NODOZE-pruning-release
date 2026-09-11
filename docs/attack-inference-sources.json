@@ -1,0 +1,75 @@
+{
+  "papers": [
+    {
+      "title": "ORTHRUS, USENIX Security 2025",
+      "url": "https://www.usenix.org/conference/usenixsecurity25/presentation/jiang-baoxiang",
+      "pdf_sha256": "2a159e593a8567cea956ae80c7c5efb059bb99dfc62d3cf2a188ac29ffad485d",
+      "implementation_decision": "Sections 4.4–4.5: validation-calibrated node detection, then dependency reconstruction. Our heuristic does not reproduce its GNN or calibration."
+    },
+    {
+      "title": "NODLINK, NDSS 2024",
+      "url": "https://www.ndss-symposium.org/ndss-paper/nodlink-an-online-system-for-fine-grained-apt-attack-detection-and-investigation/",
+      "pdf_sha256": "3e5f782db02fa12e15d91d4e817fb516369b94726398df7cb2f7a67d889f40c5",
+      "implementation_decision": "Detection terminals and connecting Steiner nodes serve different roles; no imported approximation guarantee."
+    },
+    {
+      "title": "KAIROS, IEEE S&P 2024",
+      "url": "https://arxiv.org/abs/2308.05034",
+      "pdf_sha256": "451feb967312f5be97ff6d1ce8282165f7ba0ba904fa00cc2004105c59610c4d",
+      "implementation_decision": "Anomaly evidence, alert formation and reconstruction are distinct stages."
+    },
+    {
+      "title": "Attack structure matters, Computers & Security 2025",
+      "url": "https://doi.org/10.1016/j.cose.2025.104578",
+      "pdf_sha256": "eed5d35036fc3d407fd7f9a0bec227f1c46d9f3198b61ee15f4f00d6f8a73854",
+      "implementation_decision": "Sections 3–5: node-set overlap misses causal structure. We audit directed temporal paths, but do not report SDTED without a complete ground-truth graph."
+    },
+    {
+      "title": "Sometimes Simpler is Better, USENIX Security 2025",
+      "url": "https://www.usenix.org/conference/usenixsecurity25/presentation/bilot",
+      "pdf_sha256": "c28526e9978567a267f5c7d621eb05baedaf8025ffac6f4dff0f0e9469a35345",
+      "implementation_decision": "Fixed threshold grid, ablations and disclosure of development-only evaluation."
+    }
+  ],
+  "repositories": [
+    {
+      "name": "orthrus",
+      "commit": "e7f25dfee1ddd182a955b88f8a90a8cbd4a8e543"
+    },
+    {
+      "name": "NODLINK",
+      "commit": "434dbe2d0be88bd034c4af0c819aed641d2b3758"
+    },
+    {
+      "name": "SDTED",
+      "commit": "7035cf3c9408ff32c3146b6fa5bbb42adeba6292"
+    },
+    {
+      "name": "SigmaHQ/sigma",
+      "commit": "5c9b21756f4e3ba137c1773ac9ba5a8332188961",
+      "files": [
+        "rules/windows/process_creation/proc_creation_win_powershell_encode.yml",
+        "rules/windows/process_creation/proc_creation_win_powershell_base64_encoded_cmd.yml"
+      ]
+    },
+    {
+      "name": "AT03380/optc-labels",
+      "commit": "64c9f9b2e1a15bf3c2789d89d93dc0724cb0d4fa",
+      "files": [
+        "supplementary/labels.md",
+        "supplementary/errata.md",
+        "labeler/matcher/matcher.go",
+        "tasks/tasks.zip",
+        "labels/malicious.zip"
+      ]
+    },
+    {
+      "name": "FiveDirections/OpTC-data",
+      "commit": "5b108604f11f767aa11ea79ff827595f3fad15fd",
+      "files": [
+        "errata.md"
+      ]
+    }
+  ],
+  "no_third_party_code_copied": true
+}

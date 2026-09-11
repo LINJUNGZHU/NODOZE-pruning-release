@@ -1,0 +1,15 @@
+{
+  "source": "OpTCRedTeamGroundTruth.pdf",
+  "page": 1,
+  "host": "SysClient0201.systemia.com",
+  "date": "2019-09-23",
+  "complete_node_labels": false,
+  "complete_path_labels": false,
+  "processes": [
+    {"pid": 5452, "image_basename": "powershell.exe", "label": "初始 Empire 代理", "evidence": "Day 1 客户端表：Sysclient0201 VL8B5T3U PID 5452"},
+    {"pid": 2952, "image_basename": "powershell.exe", "label": "提权 Empire 代理", "evidence": "Day 1 客户端表：Sysclient0201 LUAVR71T PID 2952"}
+  ],
+  "c2_ip": "132.197.158.98",
+  "download_basename": "runme.bat",
+  "scope_note": "按主机、日期、PID、PowerShell 映像及 PDF C2 通信绑定唯一代理 UUID；OpTC 存在重复进程对象，不按 PID 擅自合并。未被绑定的对象仍未标注。C2 路径仅评估可观测通信片段，不代表完整攻击链。"
+}
