@@ -1,3 +1,6 @@
+> **OPTC Web 更新**：支持按 Ground Truth 手动设置 POI，频率统计使用全部严格早于 POI 的历史。
+> [启动与页面说明](webapp/README.md) · [三个 POI 的真实评估结果](docs/optc-poi-evaluation.md)。
+
 # 稀有度与图扩散融合的溯源图自适应剪枝
 
 **当前默认：[RASP-D q=0 / 20% 边预算](docs/selected-default.md)**。四案例同预算平均攻击事件召回 95.87%；按已有开发结果选型，不是泛化保证。默认命令入口为 `python -m scripts.run_selected_rasp`，网页已同步；旧实验和流式原型保留独立入口。

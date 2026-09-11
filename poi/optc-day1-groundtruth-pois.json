@@ -1,0 +1,32 @@
+{
+  "dataset": "optc-0201",
+  "host": "SysClient0201.systemia.com",
+  "truth_file": "OpTCRedTeamGroundTruth.pdf",
+  "default_event_id": "a6da9327-470e-4bd0-b390-470ae80d8189",
+  "pois": [
+    {
+      "event_id": "7495bfe7-4803-4d75-987c-09dc23646d60",
+      "label": "下载 runme.bat",
+      "timestamp": "2019-09-23T11:23:43.956-04:00",
+      "object": "FILE", "action": "CREATE", "pid": 3520,
+      "file_suffix": "\\Downloads\\runme.bat",
+      "evidence": "PDF Day 1：11:23:29 下载 runme.bat；原始日志对应 11:23:43.956 文件创建。报告时间与遥测时间不完全相同。"
+    },
+    {
+      "event_id": "7070c417-04cd-44ed-86a2-2e090d9052dc",
+      "label": "PowerShell 初始代理 C2 · PID 5452",
+      "timestamp": "2019-09-23T11:24:03.584-04:00",
+      "object": "FLOW", "action": "START", "pid": 5452,
+      "dest_ip": "132.197.158.98", "dest_port": "80",
+      "evidence": "PDF Day 1 代理表：Sysclient0201 / VL8B5T3U / PID 5452；C2 132.197.158.98:80。11:24:54 报告 check-in，遥测连接始于 11:24:03.584。"
+    },
+    {
+      "event_id": "a6da9327-470e-4bd0-b390-470ae80d8189",
+      "label": "PowerShell 提权代理 C2 · PID 2952",
+      "timestamp": "2019-09-23T11:25:57.880-04:00",
+      "object": "FLOW", "action": "START", "pid": 2952,
+      "dest_ip": "132.197.158.98", "dest_port": "80",
+      "evidence": "PDF Day 1 代理表：Sysclient0201 / LUAVR71T / PID 2952；C2 132.197.158.98:80。11:26:38 报告 elevated check-in，遥测连接始于 11:25:57.880。"
+    }
+  ]
+}

@@ -1,3 +1,7 @@
+> Web 页面已切换为精简 OPTC 版本：`python webapp/scripts/prepare_optc.py` 准备真实窗口，
+> `python webapp/backend/app.py` 启动，访问 http://127.0.0.1:8000 。
+> 页面支持 Ground Truth 手动 POI、POI 前全部历史频率、剪枝对比、逐边评分及运行日志。范围和真值口径见 [webapp/README.md](webapp/README.md)。
+
 # NODOZE 稀有度与图扩散剪枝项目
 
 这是从原工程中提取的独立源码和数据包，用于展示和复现实验。未包含 KAIROS、DEPIMPACT 二进制工程、其他论文仓库和无关历史输出。

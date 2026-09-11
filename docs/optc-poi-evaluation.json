@@ -1,0 +1,212 @@
+{
+  "dataset": {
+    "id": "optc-0201",
+    "sources": [
+      "AIA-201-225.ecar-2019-12-08T11-05-10.046.json.gz",
+      "AIA-201-225.ecar-last.json.gz"
+    ],
+    "window": "2019-09-23 11:20–11:30 (UTC−04:00)"
+  },
+  "algorithm": {
+    "name": "RASP-D",
+    "budget_ratio": 0.2,
+    "quality_weight": 0.05,
+    "config": {
+      "algorithm": "RASP-v1-fork",
+      "restart": 0.15,
+      "iterations": 200,
+      "tolerance": 1e-10,
+      "rarity_floor": 0.2,
+      "escape_floor": 1e-06,
+      "budgets": [
+        0.01,
+        0.05,
+        0.1,
+        0.2
+      ],
+      "primary_budget": 0.2,
+      "selection": "temporal_causal_fork_bundles",
+      "parameter_policy": "fixed before evaluation; THEIA and CADETS are development benchmarks, not unseen tests"
+    },
+    "rarity": "1 / (1 + 严格早于 POI 的同语义交互次数)",
+    "frequency": "同语义交互次数 / POI 前全部历史事件数",
+    "seed_source": "manual groundtruth-backed configuration"
+  },
+  "results": [
+    {
+      "poi": {
+        "event_id": "7495bfe7-4803-4d75-987c-09dc23646d60",
+        "timestamp": "2019-09-23T11:23:43.956-04:00",
+        "label": "下载 runme.bat",
+        "evidence": "PDF Day 1：11:23:29 下载 runme.bat；原始日志对应 11:23:43.956 文件创建。报告时间与遥测时间不完全相同。",
+        "groundtruth_backed": true
+      },
+      "history": {
+        "history_edges": 467690,
+        "start_ns": 1569243973671000000,
+        "last_event_ns": 1569252223954000000,
+        "cutoff_ns": 1569252223956000000,
+        "comparison": "timestamp_ns < poi.timestamp_ns",
+        "scope": "所提供 OPTC 日志中，同主机全部可用历史；未截取一半窗口"
+      },
+      "metrics": {
+        "candidate_edges": 27011,
+        "retained_edges": 5402,
+        "candidate_nodes": 6992,
+        "retained_nodes": 1425,
+        "budget_edges": 5402,
+        "history_edges": 467690
+      },
+      "truth": {
+        "source": "OpTCRedTeamGroundTruth.pdf",
+        "sha256": "3ce93669715280f15d49a46b2bfe328a8340f0fdb3bbd709c28a74df5057b679",
+        "matched_events": 301,
+        "retained_events": 34,
+        "seed_event_id": "7495bfe7-4803-4d75-987c-09dc23646d60",
+        "retention_rate": 0.11295681063122924,
+        "non_poi_matched": 300,
+        "non_poi_retained": 33,
+        "stages": [
+          {
+            "label": "runme.bat 文件相关",
+            "matched": 20,
+            "retained": 20
+          },
+          {
+            "label": "初始代理 PID 5452 的 C2",
+            "matched": 120,
+            "retained": 0
+          },
+          {
+            "label": "提权代理 PID 2952 的 C2",
+            "matched": 147,
+            "retained": 0
+          }
+        ],
+        "note": "PDF 指标匹配是参考证据，不是完整攻击边标注。POI 由配置或用户手动指定；参考标签不参与其余边的打分和选边。"
+      },
+      "display_retained": 18
+    },
+    {
+      "poi": {
+        "event_id": "7070c417-04cd-44ed-86a2-2e090d9052dc",
+        "timestamp": "2019-09-23T11:24:03.584-04:00",
+        "label": "PowerShell 初始代理 C2 · PID 5452",
+        "evidence": "PDF Day 1 代理表：Sysclient0201 / VL8B5T3U / PID 5452；C2 132.197.158.98:80。11:24:54 报告 check-in，遥测连接始于 11:24:03.584。",
+        "groundtruth_backed": true
+      },
+      "history": {
+        "history_edges": 471842,
+        "start_ns": 1569243973671000000,
+        "last_event_ns": 1569252243544000000,
+        "cutoff_ns": 1569252243584000000,
+        "comparison": "timestamp_ns < poi.timestamp_ns",
+        "scope": "所提供 OPTC 日志中，同主机全部可用历史；未截取一半窗口"
+      },
+      "metrics": {
+        "candidate_edges": 27011,
+        "retained_edges": 5402,
+        "candidate_nodes": 6992,
+        "retained_nodes": 1798,
+        "budget_edges": 5402,
+        "history_edges": 471842
+      },
+      "truth": {
+        "source": "OpTCRedTeamGroundTruth.pdf",
+        "sha256": "3ce93669715280f15d49a46b2bfe328a8340f0fdb3bbd709c28a74df5057b679",
+        "matched_events": 301,
+        "retained_events": 210,
+        "seed_event_id": "7070c417-04cd-44ed-86a2-2e090d9052dc",
+        "retention_rate": 0.6976744186046512,
+        "non_poi_matched": 300,
+        "non_poi_retained": 209,
+        "stages": [
+          {
+            "label": "runme.bat 文件相关",
+            "matched": 20,
+            "retained": 19
+          },
+          {
+            "label": "初始代理 PID 5452 的 C2",
+            "matched": 120,
+            "retained": 81
+          },
+          {
+            "label": "提权代理 PID 2952 的 C2",
+            "matched": 147,
+            "retained": 98
+          }
+        ],
+        "note": "PDF 指标匹配是参考证据，不是完整攻击边标注。POI 由配置或用户手动指定；参考标签不参与其余边的打分和选边。"
+      },
+      "display_retained": 15
+    },
+    {
+      "poi": {
+        "event_id": "a6da9327-470e-4bd0-b390-470ae80d8189",
+        "timestamp": "2019-09-23T11:25:57.88-04:00",
+        "label": "PowerShell 提权代理 C2 · PID 2952",
+        "evidence": "PDF Day 1 代理表：Sysclient0201 / LUAVR71T / PID 2952；C2 132.197.158.98:80。11:26:38 报告 elevated check-in，遥测连接始于 11:25:57.880。",
+        "groundtruth_backed": true
+      },
+      "history": {
+        "history_edges": 477500,
+        "start_ns": 1569243973671000000,
+        "last_event_ns": 1569252357854000000,
+        "cutoff_ns": 1569252357880000000,
+        "comparison": "timestamp_ns < poi.timestamp_ns",
+        "scope": "所提供 OPTC 日志中，同主机全部可用历史；未截取一半窗口"
+      },
+      "metrics": {
+        "candidate_edges": 27011,
+        "retained_edges": 5402,
+        "candidate_nodes": 6992,
+        "retained_nodes": 1765,
+        "budget_edges": 5402,
+        "history_edges": 477500
+      },
+      "truth": {
+        "source": "OpTCRedTeamGroundTruth.pdf",
+        "sha256": "3ce93669715280f15d49a46b2bfe328a8340f0fdb3bbd709c28a74df5057b679",
+        "matched_events": 301,
+        "retained_events": 211,
+        "seed_event_id": "a6da9327-470e-4bd0-b390-470ae80d8189",
+        "retention_rate": 0.7009966777408638,
+        "non_poi_matched": 300,
+        "non_poi_retained": 210,
+        "stages": [
+          {
+            "label": "runme.bat 文件相关",
+            "matched": 20,
+            "retained": 20
+          },
+          {
+            "label": "初始代理 PID 5452 的 C2",
+            "matched": 120,
+            "retained": 84
+          },
+          {
+            "label": "提权代理 PID 2952 的 C2",
+            "matched": 147,
+            "retained": 99
+          }
+        ],
+        "note": "PDF 指标匹配是参考证据，不是完整攻击边标注。POI 由配置或用户手动指定；参考标签不参与其余边的打分和选边。"
+      },
+      "display_retained": 14
+    }
+  ],
+  "limitations": [
+    "单主机十分钟调查窗口，非完整 OPTC 泛化评估",
+    "PDF 指标匹配包含相关正常读写，不是逐边恶意真值；未匹配不能视为正常",
+    "POI 是已知真值支持的人工调查起点，非独立检测评估",
+    "历史覆盖仅限提供的两个分片；按事件时间统计，不保证涵盖所有原始数据",
+    "固定候选窗口包含 POI 之后事件；其频率不使用 POI 之后日志"
+  ],
+  "implementation_sha256": {
+    "tc_pruning/optc.py": "5174038e7eaa41888c92cd5bd422b6bb774ef8134031d92d12db18c504955edb",
+    "tc_pruning/optc_investigation.py": "43c6ae7d0a434c88e7bc023aa2cd3ba1f0367d538d804263b2494845e73741b5",
+    "tc_pruning/rasp.py": "59bf79ae4d95883dad307ae8e6a8149e790903aafe8b9106ab721764fcc84b2c",
+    "tc_pruning/rasp_diverse.py": "244c7a931fa858a6d73f8a6613aff3ebc3326434621fb8fad3c6deef93b64dc9"
+  }
+}

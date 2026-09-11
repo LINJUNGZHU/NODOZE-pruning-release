@@ -21,3 +21,6 @@ psutil>=5.9.0
 # DEPIMPACT's deterministic KMeans++ + Fisher-LDA projection).
 numpy>=1.26.0
 hdbscan>=0.8.40
+
+# OpTC ground-truth PDF ingestion
+pypdf>=5.0.0

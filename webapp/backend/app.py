@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 import subprocess
+import sys
 import threading
 import time
 import uuid
@@ -14,10 +15,12 @@ from werkzeug.utils import secure_filename
 
 WEBAPP_DIR = Path(__file__).resolve().parents[1]
 PROJECT_DIR = WEBAPP_DIR.parent
+sys.path.insert(0, str(PROJECT_DIR))
+from tc_pruning.optc_investigation import rescore
 FRONTEND_DIR = WEBAPP_DIR / "frontend"
 RUNTIME_DIR = WEBAPP_DIR / "runtime"
 UPLOAD_DIR = RUNTIME_DIR / "uploads"
-DEFAULT_CACHE = RUNTIME_DIR / "theia-case3-demo.json"
+DEFAULT_CACHE = RUNTIME_DIR / "optc-demo.json"
 ALLOWED_UPLOAD_SUFFIXES = {".json", ".jsonl", ".gz", ".avro"}
 
 
@@ -31,6 +34,7 @@ def create_app(cache_path: str | Path | None = None) -> Flask:
     )
     jobs: dict[str, dict] = {}
     jobs_lock = threading.Lock()
+    pruning_lock = threading.Lock()
 
     @app.get("/")
     def index():
@@ -48,7 +52,7 @@ def create_app(cache_path: str | Path | None = None) -> Flask:
         path = app.config["DEMO_CACHE"]
         if not path.is_file():
             raise FileNotFoundError(
-                f"Demo cache is missing: {path}. Run webapp/scripts/prepare_demo.py"
+                f"Demo cache is missing: {path}. Run python webapp/scripts/prepare_optc.py"
             )
         return json.loads(path.read_text(encoding="utf-8"))
 
@@ -76,6 +80,35 @@ def create_app(cache_path: str | Path | None = None) -> Flask:
         if dataset_id != data["dataset"]["id"]:
             return jsonify({"error": "unknown dataset"}), 404
         return jsonify(data)
+
+    @app.post("/api/datasets/<dataset_id>/prune")
+    def prune(dataset_id: str):
+        payload = request.get_json(silent=True)
+        if not isinstance(payload, dict) or not isinstance(payload.get("poi_event_id"), str):
+            return jsonify({"error": "poi_event_id must be an explicit event ID"}), 400
+        if not pruning_lock.acquire(blocking=False):
+            return jsonify({"error": "Another pruning run is active; retry when it finishes"}), 409
+        try:
+            data = load_cache()
+            if dataset_id != data["dataset"]["id"]:
+                return jsonify({"error": "unknown dataset"}), 404
+            if data.get("schema_version") != 2:
+                return jsonify({"error": "Rebuild the OPTC frequency index with prepare_optc.py"}), 503
+            rescore(data, payload["poi_event_id"], payload.get("budget_ratio"))
+            target = app.config["DEMO_CACHE"]
+            temporary = target.with_name(target.name + "." + uuid.uuid4().hex + ".tmp")
+            try:
+                temporary.write_text(json.dumps(data, ensure_ascii=False, allow_nan=False), encoding="utf-8")
+                temporary.replace(target)
+            finally:
+                temporary.unlink(missing_ok=True)
+            return jsonify(data)
+        except FileNotFoundError as exc:
+            return jsonify({"error": str(exc)}), 503
+        except ValueError as exc:
+            return jsonify({"error": str(exc)}), 400
+        finally:
+            pruning_lock.release()
 
     def update_job(job_id: str, **changes) -> None:
         with jobs_lock:
