@@ -1,133 +1,101 @@
-"""Check the actual OPTC page against the API, including mobile and interactions."""
+"""Exercise the redesigned workspace against actual full-size cases and APIs."""
 import json
+import os
 from pathlib import Path
 import sys
+import time
 from playwright.sync_api import sync_playwright
 
-runtime=Path(__file__).resolve().parents[1]/'runtime'
-sys.path.insert(0,str(runtime.parents[1]))
-from webapp.scripts.verify_decision_audit import verify
+ROOT=Path(__file__).resolve().parents[2];sys.path.insert(0,str(ROOT))
 from webapp.scripts.verify_attack_report import verify as verify_attack
-with sync_playwright() as p:
-    browser=p.chromium.launch(headless=True,args=['--no-sandbox','--no-proxy-server'])
-    page=browser.new_page(viewport={'width':1440,'height':1100})
-    errors=[]
-    page.on('pageerror',lambda error:errors.append(str(error)))
-    page.goto('http://127.0.0.1:8000')
-    page.wait_for_function("document.querySelector('#health').textContent === '数据就绪'",timeout=60000)
-    data=page.request.get('http://127.0.0.1:8000/api/datasets/optc-0201/graph').json()
-    inferred={n['id'] for n in data['attack']['nodes'] if n['predicted_attack']}
-    assert page.locator('#attack-nodes tr[data-node]').count()==len(inferred)
-    assert '精确率' in page.locator('#attack-evaluation').inner_text()
-    page.fill('#attack-search','2952')
-    assert page.locator('#attack-nodes tr[data-node]').count()==1
-    page.locator('#attack-nodes tr[data-node]').first.click()
-    assert page.locator('#attack-node-detail').get_attribute('open') is not None
-    assert page.locator('#attack-node-events button').count()>0
-    page.locator('#attack-node-events button').first.click()
-    assert '攻击推断角色' in page.locator('#details').inner_text()
-    page.fill('#attack-search','')
-    page.select_option('#attack-filter','all')
-    assert page.locator('#attack-nodes tr[data-node]').count()==data['attack']['summary']['evaluated_process_nodes']
-    page.select_option('#attack-filter','predicted')
-    for path in data['attack']['paths']:
-        page.select_option('#attack-path-select',path['id'])
-        assert page.locator('#attack-graph [data-node]').count()==len(path['node_ids'])
-        assert page.locator('#attack-path-events button').count()==len(path['event_ids'])
-        if path['support_level']=='dependency_only':
-            assert '不能据此证明' in page.locator('#attack-path-note').inner_text()
-    with page.expect_download() as download:
-        page.click('#download-attack')
-    download.value.save_as(str(runtime/'optc-attack-report.json'))
-    assert verify_attack(json.loads((runtime/'optc-attack-report.json').read_text()))['roles_verified']
-    page.select_option('#attack-path-select',data['attack']['paths'][0]['id'])
-    page.locator('#attack-node-detail').evaluate('(e)=>e.open=false')
-    sample=set(data['display_event_ids'])
-    visible=[e for e in data['edges'] if e['id'] in sample]
-    kept=sum(e['retained'] for e in visible)
-    assert page.locator('#before-count').inner_text().startswith(f'{len(visible)} 边')
-    assert page.locator('#after-count').inner_text().startswith(f'{kept} 边')
-    assert 0<kept<len(visible)
-    assert page.locator('#before [stroke-dasharray]').count()>0
-    assert page.locator('#after [stroke-dasharray]').count()==0
-    assert page.locator('#run-log').inner_text().count('\n')>=4
-    assert page.locator('#edge-rows tr').count()==30
-    page.check('#show-scores')
-    assert page.locator('#before .graph-edge text').count()==len(visible)
-    page.locator('#before .graph-edge').first.click(force=True)
-    assert page.locator('#event-detail').get_attribute('open') is not None
-    page.select_option('#edge-decision','removed')
-    assert set(page.locator('#edge-rows .badge').all_text_contents())=={'删除'}
-    page.click('#next-page');assert '第 2 /' in page.locator('#page-info').inner_text()
-    page.click('#clear-edge')
-    seed=data['truth']['seed_event_id']
-    page.fill('#edge-search',seed)
-    assert page.locator('#edge-rows tr').count()==1
-    page.locator('#edge-rows tr').first.click()
-    assert seed in page.locator('#details').inner_text()
-    page.click('#clear-edge')
-    page.select_option('#edge-decision','reference')
-    assert str(data['truth']['matched_events']) in page.locator('#edge-total').inner_text()
-    page.click('#clear-edge');page.locator('#event-detail').evaluate('(e)=>e.open=false')
-    original_poi=data['poi']['event_id']
-    other=next(preset for preset in data['poi_presets'] if preset['event_id']!=original_poi)
-    page.select_option('#poi-select',other['event_id'])
-    assert page.input_value('#poi-id')==other['event_id']
-    with page.expect_response(lambda r:r.url.endswith('/prune') and r.request.method=='POST',timeout=60000) as response:
-        page.click('#apply-poi')
-    assert response.value.status==200
-    page.wait_for_function("!document.querySelector('#apply-poi').disabled",timeout=60000)
-    changed=page.evaluate('({poi:state.data.poi,history:state.data.history})')
-    assert changed['poi']['event_id']==other['event_id']
-    assert changed['history']['history_edges']!=data['history']['history_edges']
-    assert changed['history']['last_event_ns']<changed['history']['cutoff_ns']
-    assert page.locator('#poi-evidence').inner_text().startswith('当前 POI：')
-    assert '已应用' in page.locator('#prune-status').inner_text()
-    page.fill('#poi-id','not-an-event')
-    page.click('#apply-poi')
-    page.wait_for_function("document.querySelector('#prune-status').textContent.includes('重算失败')",timeout=60000)
-    assert not page.locator('#error').is_hidden()
-    page.select_option('#poi-select',original_poi)
-    with page.expect_response(lambda r:r.url.endswith('/prune') and r.request.method=='POST',timeout=60000):
-        page.click('#apply-poi')
-    page.wait_for_function("!document.querySelector('#apply-poi').disabled",timeout=60000)
-    assert page.input_value('#poi-id')==original_poi
-    assert page.locator('#error').is_hidden()
-    assert page.locator('#edge-rows td:nth-child(4)').count()==30
+from webapp.scripts.verify_decision_audit import verify as verify_decision
 
-    for mode in ('evidence','context'):
-        page.select_option('#selection-mode',mode)
-        with page.expect_response(lambda r:r.url.endswith('/prune') and r.request.method=='POST',timeout=60000):
-            page.click('#apply-poi')
-        page.wait_for_function("!document.querySelector('#apply-poi').disabled",timeout=60000)
-        assert page.evaluate('state.data.decision_contract.mode')==mode
-        assert set(page.evaluate('state.data.attack.nodes.filter(n=>n.predicted_attack).map(n=>n.id)'))==inferred
-        audit=page.request.get('http://127.0.0.1:8000/api/datasets/optc-0201/decision-audit').json()
-        assert verify(audit)['greedy_ranking_replayed']
-        (runtime/f'{mode}-decision-audit.json').write_text(json.dumps(audit))
-        assert '完整时序路径校验通过' in page.locator('#decision-summary').inner_text()
-        assert '真实同分不会被扰动' in page.locator('#score-note').inner_text()
-        if mode=='evidence':
-            page.select_option('#edge-decision','connector')
-            assert page.locator('#edge-rows tr[data-id]').count()>0
-            assert '完整时序路径连接边' in page.locator('#edge-rows').inner_text()
-            page.click('#clear-edge')
-    assert page.locator('#edge-rows td:nth-child(3)').first.get_attribute('title') is not None
-    page.select_option('#edge-decision','attack')
-    assert page.locator('#edge-rows tr[data-id]').count()>0
-    page.click('#clear-edge')
-    for q in ('0.95','0.9'):
-        page.select_option('#attack-quantile',q)
-        with page.expect_response(lambda r:r.url.endswith('/prune') and r.request.method=='POST',timeout=60000):
-            page.click('#apply-poi')
-        page.wait_for_function("!document.querySelector('#apply-poi').disabled",timeout=60000)
-        assert page.evaluate('state.data.attack.config.anomaly_quantile')==float(q)
-    page.locator('#attack-panel').screenshot(path=str(runtime/'attack-panel-desktop.png'))
-    page.uncheck('#show-scores');page.evaluate('window.scrollTo(0,0)')
-    page.screenshot(path=str(runtime/'optc-desktop.png'),full_page=True)
-    page.set_viewport_size({'width':390,'height':844})
-    assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
-    page.screenshot(path=str(runtime/'optc-mobile.png'),full_page=True)
-    assert not errors,errors
-    print(json.dumps({'before':len(visible),'after':kept,'candidate_edges':len(data['edges']),'browser_errors':errors,'mobile':'passed','manual_poi_recompute':'passed','invalid_poi_recovery':'passed','both_modes_audit_replay':'passed','attack_nodes_paths_download_and_threshold':'passed'}))
-    browser.close()
+
+def main():
+    url=os.environ.get('NODOZE_TEST_URL','http://127.0.0.1:8000');runtime=ROOT/'webapp/runtime'
+    with sync_playwright() as p:
+        browser=p.chromium.launch(headless=True,args=['--no-sandbox','--no-proxy-server'])
+        page=browser.new_page(viewport={'width':1440,'height':1100});errors=[]
+        page.on('pageerror',lambda e:errors.append(str(e)))
+        page.goto(url);page.wait_for_function('state.data && !state.busy',timeout=90000)
+        original=page.evaluate('({id:state.data.dataset.id,poi:state.data.poi.event_id,algorithm:state.data.algorithm,detector:state.data.attack.detector,q:state.data.attack.config.anomaly_quantile})')
+        base=url+'/api/datasets/'+original['id'];catalog=page.request.get(url+'/api/datasets').json()['datasets']
+        snapshots=[]
+        def run():
+            with page.expect_response(lambda r:r.url.endswith('/prune') and r.request.method=='POST',timeout=90000) as response:page.click('#apply-poi')
+            page.wait_for_function('!state.busy',timeout=90000)
+            return response.value
+        try:
+            assert len(catalog)>=4
+            for entry in catalog:
+                start=time.monotonic();page.click(f'[data-case="{entry["id"]}"]')
+                page.wait_for_function('(id)=>state.data?.dataset.id===id && !state.busy',arg=entry['id'],timeout=90000)
+                page.wait_for_function('document.querySelector("#before").dataset.renderedEdges===String(state.data.metrics.candidate_edges)',timeout=90000)
+                counts=page.evaluate('({raw:Number(document.querySelector("#before").dataset.renderedEdges),kept:Number(document.querySelector("#after").dataset.renderedEdges),m:state.data.metrics,sampled:state.data.graph.sampled,unique:new Set(state.data.graph.edges.map(e=>e[0])).size})')
+                assert counts['raw']==counts['unique']==entry['metrics']['candidate_edges']
+                assert counts['kept']==counts['m']['retained_edges'] and not counts['sampled']
+                snapshots.append(dict(id=entry['id'],edges=counts['raw'],kept=counts['kept'],load_and_draw_seconds=time.monotonic()-start))
+                print('Full graph verified',snapshots[-1],flush=True)
+                if entry['id'].endswith('60m'):
+                    page.screenshot(path=str(runtime/'workspace-large.png'),full_page=True)
+                    page.set_viewport_size({'width':390,'height':844})
+                    assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
+                    page.screenshot(path=str(runtime/'workspace-mobile.png'),full_page=True);page.set_viewport_size({'width':1440,'height':1100})
+            page.click(f'[data-case="{original["id"]}"]');page.wait_for_function('(id)=>state.data.dataset.id===id&&!state.busy',arg=original['id'],timeout=90000)
+            inferred=page.evaluate('state.data.attack.nodes.filter(n=>n.predicted_attack).map(n=>n.id)')
+            assert page.locator('#attack-nodes [data-node]').count()==len(inferred)
+            page.locator('#attack-nodes [data-node]').first.click();assert page.locator('#detail-dialog').is_visible()
+            assert page.locator('#detail-content [data-event]').count()>0
+            page.locator('#detail-content [data-event]').first.click();page.wait_for_function('document.querySelector("#detail-title").textContent==="原始事件与评分依据"')
+            assert '来源行' in page.locator('#detail-content').inner_text();page.click('#close-detail')
+            report=page.request.get(base+'/attack-report').json();assert verify_attack(report)['roles_verified']
+            for path in report['attack']['paths']:
+                page.select_option('#attack-path-select',path['id'])
+                assert page.locator('#attack-path [data-path-node]').count()==len(path['node_ids'])
+                assert page.locator('#attack-path-events button').count()==len(path['event_ids'])
+            page.click('#tab-events');page.wait_for_selector('#edge-rows [data-event]')
+            assert page.locator('#edge-rows tr').count()==20
+            page.select_option('#edge-decision','removed');page.wait_for_function('state.table?.edges.length && state.table.edges.every(e=>!e.retained)')
+            page.click('#next-page');page.wait_for_function('state.table.page===1')
+            page.click('#clear-edge');page.fill('#edge-search',original['poi'])
+            page.wait_for_function('(id)=>state.table?.total===1 && state.table.edges[0].id===id',arg=original['poi'])
+            page.locator('#edge-rows [data-event]').first.click();page.wait_for_selector('#use-event-poi');page.click('#use-event-poi')
+            assert page.input_value('#poi-id')==original['poi']
+            page.click('#clear-edge');page.click('#tab-attack')
+            other=page.evaluate('(id)=>state.data.poi_presets.find(p=>p.event_id!==id).event_id',original['poi'])
+            old_history=page.evaluate('state.data.history.history_edges');page.select_option('#poi-select',other)
+            assert run().status==200
+            assert page.evaluate('state.data.history.history_edges')!=old_history
+            assert page.evaluate('state.data.history.last_event_ns < state.data.history.cutoff_ns')
+            page.select_option('#poi-select','custom');page.fill('#poi-id','not-an-event')
+            assert run().status==400
+            assert page.evaluate('state.data.poi.event_id')==other
+            page.select_option('#poi-select',original['poi']);assert run().status==200
+            assert page.locator('#error').is_hidden()
+            page.select_option('#detector','neural');assert run().status==200
+            assert page.evaluate('state.data.attack.detector')=='neural'
+            assert page.evaluate('state.data.attack.contract.truth_used') is False
+            assert page.evaluate('state.data.attack.model.weights_sha256')
+            assert '深度学习' in page.locator('#attack-summary').inner_text()
+            neural_report=page.request.get(base+'/attack-report').json();assert verify_attack(neural_report)['roles_verified']
+            page.screenshot(path=str(runtime/'workspace-neural.png'),full_page=True)
+            page.select_option('#detector','rules');assert run().status==200
+            assert set(page.evaluate('state.data.attack.nodes.filter(n=>n.predicted_attack).map(n=>n.id)'))==set(inferred)
+            # Both pruning modes still have replayable decision certificates.
+            for mode in ('evidence','context'):
+                page.locator('.advanced').first.evaluate('(e)=>e.open=true');page.select_option('#selection-mode',mode)
+                assert run().status==200
+                assert verify_decision(page.request.get(base+'/decision-audit').json())['greedy_ranking_replayed']
+            page.locator('.advanced').first.evaluate('(e)=>e.open=false');page.screenshot(path=str(runtime/'workspace-desktop.png'),full_page=True)
+            assert not errors,errors
+        finally:
+            restored=page.request.post(base+'/prune',data=dict(poi_event_id=original['poi'],budget_ratio=original['algorithm']['budget_ratio'],
+                    selection_mode=original['algorithm']['selection_mode'],detector=original['detector'],attack_quantile=original['q'],compact=True),timeout=90000)
+            assert restored.status==200
+            browser.close()
+        result=dict(cases=snapshots,browser_errors=errors,mobile_overflow=False,checks=['all events drawn once','all four real cases','node evidence and paths','paginated event search','manual POI and failure recovery','neural and rules recompute','download audit replay','original state restored'])
+        (ROOT/'docs/workspace-browser-verification.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n')
+        print(json.dumps(result,ensure_ascii=False),flush=True)
+
+
+if __name__=='__main__':main()

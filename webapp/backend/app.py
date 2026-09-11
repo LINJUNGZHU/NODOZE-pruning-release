@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import json
+import copy
+import importlib.util
 import os
 import subprocess
 import sys
@@ -24,7 +26,7 @@ DEFAULT_CACHE = RUNTIME_DIR / "optc-demo.json"
 ALLOWED_UPLOAD_SUFFIXES = {".json", ".jsonl", ".gz", ".avro"}
 
 
-def create_app(cache_path: str | Path | None = None) -> Flask:
+def create_app(cache_path: str | Path | None = None, dataset_catalog: str | Path | None = None) -> Flask:
     app = Flask(__name__, static_folder=None)
     app.config["MAX_CONTENT_LENGTH"] = int(
         os.environ.get("NODOZE_MAX_UPLOAD_BYTES", 2 * 1024**3)
@@ -35,6 +37,11 @@ def create_app(cache_path: str | Path | None = None) -> Flask:
     jobs: dict[str, dict] = {}
     jobs_lock = threading.Lock()
     pruning_lock = threading.Lock()
+    cached = {}
+    catalog_path = Path(dataset_catalog) if dataset_catalog else RUNTIME_DIR/'examples/catalog.json'
+
+    def catalog():
+        return json.loads(catalog_path.read_text()) if (dataset_catalog or (cache_path is None and not os.environ.get('NODOZE_DEMO_CACHE'))) and catalog_path.is_file() else []
 
     @app.get("/")
     def index():
@@ -48,21 +55,39 @@ def create_app(cache_path: str | Path | None = None) -> Flask:
     def health():
         return jsonify({"status": "ok", "cache_ready": app.config["DEMO_CACHE"].is_file()})
 
-    def load_cache() -> dict:
+    def load_cache(dataset_id=None) -> dict:
         path = app.config["DEMO_CACHE"]
+        entry=next((e for e in catalog() if e['id']==dataset_id),None)
+        if entry:path=Path(entry['cache_path'])
         if not path.is_file():
             raise FileNotFoundError(
                 f"Demo cache is missing: {path}. Run python webapp/scripts/prepare_optc.py"
             )
-        return json.loads(path.read_text(encoding="utf-8"))
+        key=str(path.resolve());version=path.stat().st_mtime_ns
+        if key not in cached or cached[key][0]!=version:
+            cached[key]=(version,json.loads(path.read_text(encoding='utf-8')))
+        return cached[key][1]
+
+    def cache_target(dataset_id):
+        entry=next((e for e in catalog() if e['id']==dataset_id),None)
+        return Path(entry['cache_path']) if entry else app.config['DEMO_CACHE']
+
+    def neural_available():
+        from tc_pruning.deep_graph import available_model
+        return available_model() is not None and importlib.util.find_spec('torch') is not None
 
     @app.get("/api/datasets")
     def datasets():
+        entries=catalog()
+        if entries:
+            return jsonify(dict(datasets=[{k:v for k,v in e.items() if k!='cache_path'} for e in entries],
+                                neural_available=neural_available()))
         try:
             data = load_cache()
         except FileNotFoundError as exc:
             return jsonify({"datasets": [], "error": str(exc)}), 503
         return jsonify({
+            "neural_available": neural_available(),
             "datasets": [{
                 "id": data["dataset"]["id"],
                 "name": data["dataset"]["name"],
@@ -74,7 +99,7 @@ def create_app(cache_path: str | Path | None = None) -> Flask:
     @app.get("/api/datasets/<dataset_id>/graph")
     def graph(dataset_id: str):
         try:
-            data = load_cache()
+            data = load_cache(dataset_id)
         except FileNotFoundError as exc:
             return jsonify({"error": str(exc)}), 503
         if dataset_id != data["dataset"]["id"]:
@@ -89,31 +114,33 @@ def create_app(cache_path: str | Path | None = None) -> Flask:
         if not pruning_lock.acquire(blocking=False):
             return jsonify({"error": "Another pruning run is active; retry when it finishes"}), 409
         try:
-            data = load_cache()
+            data = copy.deepcopy(load_cache(dataset_id))
             if dataset_id != data["dataset"]["id"]:
                 return jsonify({"error": "unknown dataset"}), 404
             if data.get("schema_version") != 2:
                 return jsonify({"error": "Rebuild the OPTC frequency index with prepare_optc.py"}), 503
-            rescore(data, payload["poi_event_id"], payload.get("budget_ratio"), payload.get("selection_mode"),payload.get('attack_quantile'))
-            target = app.config["DEMO_CACHE"]
+            rescore(data, payload["poi_event_id"], payload.get("budget_ratio"), payload.get("selection_mode"),payload.get('attack_quantile'),payload.get('detector'))
+            target = cache_target(dataset_id)
             temporary = target.with_name(target.name + "." + uuid.uuid4().hex + ".tmp")
             try:
                 temporary.write_text(json.dumps(data, ensure_ascii=False, allow_nan=False), encoding="utf-8")
                 temporary.replace(target)
             finally:
                 temporary.unlink(missing_ok=True)
-            return jsonify(data)
+            return jsonify(view_payload(data) if payload.get('compact') else data)
         except FileNotFoundError as exc:
             return jsonify({"error": str(exc)}), 503
         except ValueError as exc:
             return jsonify({"error": str(exc)}), 400
+        except ImportError:
+            return jsonify({"error": "深度学习依赖未安装：pip install -r requirements-deep.txt"}), 503
         finally:
             pruning_lock.release()
 
     @app.get("/api/datasets/<dataset_id>/decision-audit")
     def decision_audit(dataset_id: str):
         try:
-            data = load_cache()
+            data = load_cache(dataset_id)
         except FileNotFoundError as exc:
             return jsonify({"error": str(exc)}), 503
         if dataset_id != data['dataset']['id']:
@@ -128,7 +155,7 @@ def create_app(cache_path: str | Path | None = None) -> Flask:
     @app.get('/api/datasets/<dataset_id>/attack-report')
     def attack_report(dataset_id: str):
         try:
-            data = load_cache()
+            data = load_cache(dataset_id)
         except FileNotFoundError as exc:
             return jsonify({'error': str(exc)}), 503
         if dataset_id != data['dataset']['id']:
@@ -140,6 +167,49 @@ def create_app(cache_path: str | Path | None = None) -> Flask:
                                 attack=data['attack'],events=[e for e in data['edges'] if e['id'] in ids]))
         response.headers['Content-Disposition'] = 'attachment; filename="optc-attack-report.json"'
         return response
+
+    def view_payload(data):
+        # Every raw event appears once in this compact canvas payload. No sampling.
+        nodes=data['nodes'];ids={n['id']:i for i,n in enumerate(nodes)}
+        fields=('dataset','metrics','poi','poi_presets','history','algorithm','truth','logs','attack')
+        return dict(**{k:data[k] for k in fields if k in data},
+                    graph=dict(nodes=[[n['id'],n['label'],n['type']] for n in nodes],
+                               edges=[[e['id'],ids[e['source']],ids[e['target']],int(e['retained']),e['score']] for e in data['edges']],
+                               full_event_count=len(data['edges']),sampled=False),
+                    decision_certificate=data.get('decision_certificate'),decision_contract=data.get('decision_contract'))
+
+    @app.get('/api/datasets/<dataset_id>/view')
+    def view(dataset_id):
+        try:data=load_cache(dataset_id)
+        except FileNotFoundError as exc:return jsonify(error=str(exc)),503
+        if data['dataset']['id']!=dataset_id:return jsonify(error='unknown dataset'),404
+        return jsonify(view_payload(data))
+
+    @app.get('/api/datasets/<dataset_id>/events/<event_id>')
+    def event_detail(dataset_id,event_id):
+        try:data=load_cache(dataset_id)
+        except FileNotFoundError as exc:return jsonify(error=str(exc)),503
+        if data['dataset']['id']!=dataset_id:return jsonify(error='unknown dataset'),404
+        event=next((e for e in data['edges'] if e['id']==event_id),None)
+        return jsonify(event) if event else (jsonify(error='unknown event'),404)
+
+    @app.get('/api/datasets/<dataset_id>/edges')
+    def edge_page(dataset_id):
+        try:data=load_cache(dataset_id)
+        except FileNotFoundError as exc:return jsonify(error=str(exc)),503
+        if data['dataset']['id']!=dataset_id:return jsonify(error='unknown dataset'),404
+        try:
+            page=max(0,int(request.args.get('page',0)));limit=min(100,max(1,int(request.args.get('limit',20))))
+        except ValueError:return jsonify(error='invalid pagination'),400
+        query=request.args.get('q','').lower().strip();decision=request.args.get('filter','all')
+        if decision not in ('all','retained','removed','attack'):return jsonify(error='unknown edge filter'),400
+        edges=[e for e in data['edges'] if
+               (decision=='all' or decision=='retained' and e['retained'] or decision=='removed' and not e['retained'] or
+                decision=='attack' and e.get('attack_role','none')!='none') and
+               (not query or query in f"{e['id']} {e['source']} {e['target']} {e['source_label']} {e['target_label']} {e['relation']}".lower())]
+        if request.args.get('sort','score')=='score':edges.sort(key=lambda e:(-e['score'],e['id']))
+        keys=('id','source_label','target_label','relation','timestamp','score','historical_count','retained','reason','attack_role')
+        return jsonify(total=len(edges),page=page,limit=limit,edges=[{k:e.get(k) for k in keys} for e in edges[page*limit:(page+1)*limit]])
 
     def update_job(job_id: str, **changes) -> None:
         with jobs_lock:

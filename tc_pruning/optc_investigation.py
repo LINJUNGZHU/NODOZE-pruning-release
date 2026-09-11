@@ -70,7 +70,7 @@ def reference_evidence(e):
     return evidence
 
 
-def rescore(data, poi_id, budget_ratio=None, selection_mode=None, attack_quantile=None):
+def rescore(data, poi_id, budget_ratio=None, selection_mode=None, attack_quantile=None, detector=None):
     """Update one isolated cache value; truth only declares the manual seed."""
     started = time.monotonic()
     edges = sorted(data['edges'], key=lambda e:(e['timestamp_ns'],e['id']))
@@ -201,10 +201,11 @@ def rescore(data, poi_id, budget_ratio=None, selection_mode=None, attack_quantil
                         ('提权代理 PID 2952 的 C2',np.array([e['raw'].get('pid')==2952 and e['raw']['object']=='FLOW' for e in edges]) & refs)]:
         stages.append(dict(label=label,matched=int(mask.sum()),retained=int((mask & kept).sum())))
     preset = next((p for p in data['poi_presets'] if p['event_id']==poi_id), None)
+    groundtruth_backed=bool(preset and preset.get('groundtruth_backed',True))
     data['poi'] = dict(event_id=poi_id,timestamp=edges[selected]['timestamp'],
                        label=preset['label'] if preset else '用户手动指定事件',
                        evidence=preset['evidence'] if preset else '用户手动输入；未声称此事件由 Ground Truth 证实',
-                       groundtruth_backed=preset is not None)
+                       groundtruth_backed=groundtruth_backed)
     data['history'] = history
     data['metrics'] = dict(candidate_edges=len(edges),retained_edges=int(kept.sum()),candidate_nodes=len(nodes),
                            retained_nodes=len({e[k] for e in edges if e['retained'] for k in ('source','target')}),
@@ -220,9 +221,9 @@ def rescore(data, poi_id, budget_ratio=None, selection_mode=None, attack_quantil
                          note='PDF 指标匹配是参考证据，不是完整攻击边标注。POI 由配置或用户手动指定；参考标签不参与其余边的打分和选边。')
     data['algorithm'].update(budget_ratio=budget_ratio, selection_mode=selection_mode, rarity='1 / (1 + 严格早于 POI 的同语义交互次数)',
                              frequency='同语义交互次数 / POI 前全部历史事件数',
-                             seed_source='manual groundtruth-backed configuration' if preset else 'manual user event ID')
+                             seed_source='manual groundtruth-backed configuration' if groundtruth_backed else 'manual user event ID')
     quantile = attack_quantile if attack_quantile is not None else data.get('attack',{}).get('config',{}).get('anomaly_quantile',.90)
-    data['attack'] = infer_attack(edges, poi_id, dict(anomaly_quantile=quantile))
+    data['attack'] = infer_attack(edges, poi_id, dict(anomaly_quantile=quantile),detector=detector if detector is not None else data.get('attack',{}).get('detector','rules'))
     data['attack']['evaluation'] = evaluate_attack(data['attack'], edges)
     attack_paths, attack_evidence = set(data['attack']['path_event_ids']), set(data['attack']['evidence_event_ids'])
     for e in edges:

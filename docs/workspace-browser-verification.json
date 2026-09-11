@@ -1,0 +1,40 @@
+{
+  "cases": [
+    {
+      "id": "optc-0201",
+      "edges": 27011,
+      "kept": 5402,
+      "load_and_draw_seconds": 0.30995675176382065
+    },
+    {
+      "id": "optc-0201-30m",
+      "edges": 86318,
+      "kept": 17263,
+      "load_and_draw_seconds": 4.461401589214802
+    },
+    {
+      "id": "optc-0201-60m",
+      "edges": 188609,
+      "kept": 37721,
+      "load_and_draw_seconds": 9.631364051252604
+    },
+    {
+      "id": "optc-0201-background",
+      "edges": 74654,
+      "kept": 14034,
+      "load_and_draw_seconds": 4.959486749023199
+    }
+  ],
+  "browser_errors": [],
+  "mobile_overflow": false,
+  "checks": [
+    "all events drawn once",
+    "all four real cases",
+    "node evidence and paths",
+    "paginated event search",
+    "manual POI and failure recovery",
+    "neural and rules recompute",
+    "download audit replay",
+    "original state restored"
+  ]
+}

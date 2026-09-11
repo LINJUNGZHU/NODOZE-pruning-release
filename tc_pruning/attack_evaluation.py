@@ -104,9 +104,11 @@ def evaluate_attack(report, edges, reference=None):
                                   full_attack_path_precision=None,full_attack_path_recall=None),
                 narrative_gaps=gaps,
                 limitation='已知正例找回率不是完整召回率；没有完整正常/攻击标签时 accuracy、F1 与完整路径准确率不报告。')
-    if PUBLIC_LABELS.is_file():
-        benchmark=json.loads(PUBLIC_LABELS.read_text())
-        digest=lambda ids:hashlib.sha256('\n'.join(sorted(ids)).encode()).hexdigest()
+    digest=lambda ids:hashlib.sha256('\n'.join(sorted(ids)).encode()).hexdigest()
+    extra=PUBLIC_LABELS.parent/'example-labels'/f'{digest(by_id)}.json'
+    label_file=extra if extra.is_file() else PUBLIC_LABELS
+    if label_file.is_file():
+        benchmark=json.loads(label_file.read_text())
         if (digest(by_id)==benchmark['scope']['event_ids_sha256'] and
             digest(universe)==benchmark['scope']['process_ids_sha256']):
             labels=benchmark['node_labels']

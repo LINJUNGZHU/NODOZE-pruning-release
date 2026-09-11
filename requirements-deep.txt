@@ -1,0 +1,4 @@
+# Optional trained graph detector. Rule detection and pruning do not import torch.
+# Tested with torch 2.4.1; CPU inference is supported, CUDA is optional for training.
+torch>=2.4,<3
+numpy>=1.26

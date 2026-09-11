@@ -1,0 +1,66 @@
+[
+  {
+    "id": "optc-0201",
+    "name": "入侵起点",
+    "description": "10 分钟 · 下载与代理上线",
+    "metrics": {
+      "candidate_edges": 27011,
+      "retained_edges": 5402,
+      "candidate_nodes": 6992,
+      "retained_nodes": 1765,
+      "budget_edges": 5402,
+      "history_edges": 477500
+    },
+    "window_start": "2019-09-23T11:20:00-04:00",
+    "window_end": "2019-09-23T11:30:00-04:00",
+    "background": false
+  },
+  {
+    "id": "optc-0201-30m",
+    "name": "扩大调查",
+    "description": "30 分钟 · 观察后续活动",
+    "metrics": {
+      "candidate_edges": 86318,
+      "retained_edges": 17263,
+      "candidate_nodes": 18633,
+      "retained_nodes": 3155,
+      "budget_edges": 17263,
+      "history_edges": 477500
+    },
+    "window_start": "2019-09-23T11:20:00-04:00",
+    "window_end": "2019-09-23T11:50:00-04:00",
+    "background": false
+  },
+  {
+    "id": "optc-0201-60m",
+    "name": "大图对照",
+    "description": "60 分钟 · 完整上下文",
+    "metrics": {
+      "candidate_edges": 188609,
+      "retained_edges": 37721,
+      "candidate_nodes": 32409,
+      "retained_nodes": 5180,
+      "budget_edges": 37721,
+      "history_edges": 477500
+    },
+    "window_start": "2019-09-23T11:20:00-04:00",
+    "window_end": "2019-09-23T12:20:00-04:00",
+    "background": false
+  },
+  {
+    "id": "optc-0201-background",
+    "name": "背景对照",
+    "description": "20 分钟 · 攻击前的保留时段",
+    "metrics": {
+      "candidate_edges": 74654,
+      "retained_edges": 14034,
+      "candidate_nodes": 13657,
+      "retained_nodes": 1787,
+      "budget_edges": 14930,
+      "history_edges": 357779
+    },
+    "window_start": "2019-09-23T10:50:00-04:00",
+    "window_end": "2019-09-23T11:10:00-04:00",
+    "background": true
+  }
+]

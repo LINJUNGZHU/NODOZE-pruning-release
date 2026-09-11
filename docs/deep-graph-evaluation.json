@@ -1,0 +1,1736 @@
+{
+  "model_id": "optc-gmae-v1",
+  "weights_sha256": "0b0ab73ca81dd93016a64a18e4b7be3486c1c8fd0b03f9118019bb64ea94b4f9",
+  "split_audit": {
+    "train": {
+      "events": 167872,
+      "matched_malicious_events": 0,
+      "process_ids_with_lifetime_attack_label": 0
+    },
+    "validation": {
+      "events": 60445,
+      "matched_malicious_events": 0,
+      "process_ids_with_lifetime_attack_label": 0
+    },
+    "calibration": {
+      "events": 80399,
+      "matched_malicious_events": 0,
+      "process_ids_with_lifetime_attack_label": 0
+    },
+    "normal_test": {
+      "events": 74654,
+      "matched_malicious_events": 0,
+      "process_ids_with_lifetime_attack_label": 0
+    }
+  },
+  "comparison_note": "Overlapping same-host windows; exploratory evaluation, not independent benchmarks or proof of generalization. Earlier reconstruction trial failed and motivated latent-distance experiment. No attack-label threshold tuning.",
+  "threshold_protocol": "Maximum score per process UUID over each window; q=0.99 in disjoint earlier calibration interval. Longer windows change maximum-score distribution; no guaranteed FPR.",
+  "examples": [
+    {
+      "id": "optc-0201",
+      "events": 27011,
+      "processes": 113,
+      "retained_edges": 5402,
+      "rules": {
+        "nodes": {
+          "tp": 3,
+          "fp": 0,
+          "fn": 5,
+          "tn": 105,
+          "predicted": 3,
+          "known_positive": 8,
+          "known_negative": 105,
+          "unknown_nodes": 0,
+          "unreviewed_predictions": 0,
+          "known_positive_recall": 0.375,
+          "precision": 1.0,
+          "recall": 0.375,
+          "accuracy": 0.9557522123893806,
+          "f1": 0.5454545454545454,
+          "precision_bounds": [
+            1.0,
+            1.0
+          ],
+          "complete_labels": true,
+          "excluding_seed_nodes": {
+            "tp": 2,
+            "fp": 0,
+            "fn": 5,
+            "tn": 105,
+            "predicted": 2,
+            "known_positive": 7,
+            "known_negative": 105,
+            "unknown_nodes": 0,
+            "unreviewed_predictions": 0,
+            "known_positive_recall": 0.2857142857142857,
+            "precision": 1.0,
+            "recall": 0.2857142857142857,
+            "accuracy": 0.9553571428571429,
+            "f1": 0.4444444444444444,
+            "precision_bounds": [
+              1.0,
+              1.0
+            ],
+            "complete_labels": true
+          }
+        },
+        "path_events": {
+          "predicted_events": 8,
+          "labeled_malicious_events": 735,
+          "matched_events": 8,
+          "precision": 1.0,
+          "recall": 0.010884353741496598,
+          "paths_with_all_events_labeled_malicious": 6
+        },
+        "runtime_seconds": 0.5330483354628086
+      },
+      "neural": {
+        "nodes": {
+          "tp": 0,
+          "fp": 3,
+          "fn": 8,
+          "tn": 102,
+          "predicted": 3,
+          "known_positive": 8,
+          "known_negative": 105,
+          "unknown_nodes": 0,
+          "unreviewed_predictions": 0,
+          "known_positive_recall": 0.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "accuracy": 0.9026548672566371,
+          "f1": 0.0,
+          "precision_bounds": [
+            0.0,
+            0.0
+          ],
+          "complete_labels": true,
+          "excluding_seed_nodes": {
+            "tp": 0,
+            "fp": 3,
+            "fn": 7,
+            "tn": 102,
+            "predicted": 3,
+            "known_positive": 7,
+            "known_negative": 105,
+            "unknown_nodes": 0,
+            "unreviewed_predictions": 0,
+            "known_positive_recall": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "accuracy": 0.9107142857142857,
+            "f1": 0.0,
+            "precision_bounds": [
+              0.0,
+              0.0
+            ],
+            "complete_labels": true
+          }
+        },
+        "path_events": {
+          "predicted_events": 6,
+          "labeled_malicious_events": 735,
+          "matched_events": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "paths_with_all_events_labeled_malicious": 0
+        },
+        "runtime_seconds": 1.7390338256955147,
+        "threshold": 8.686048650741581,
+        "predictions": [
+          {
+            "id": "07a3cea1-2550-4fb5-b95f-a8f46e91e90d",
+            "pids": [
+              3464
+            ],
+            "label": "\\Device\\HarddiskVolume1\\Windows\\system32\\SearchFilterHost.exe",
+            "score": 11.02073860168457,
+            "reference": false
+          },
+          {
+            "id": "73253dc3-5864-44a3-b53e-5d30e88d512b",
+            "pids": [
+              3464
+            ],
+            "label": "\\Device\\HarddiskVolume1\\Program Files\\WindowsApps\\Microsoft.WindowsStore_11701.1001.87.0_x64__8wekyb3d8bbwe\\WinStore.App.exe",
+            "score": 9.442940711975098,
+            "reference": false
+          },
+          {
+            "id": "fad56a01-8370-4506-ad87-ac59b2e63c95",
+            "pids": [
+              4
+            ],
+            "label": "System",
+            "score": 8.961840629577637,
+            "reference": false
+          }
+        ],
+        "paths": {
+          "inferred_attack_nodes": 3,
+          "evaluated_process_nodes": 113,
+          "paths": 3,
+          "path_edges": 6,
+          "resource_nodes": 3,
+          "connector_nodes": 2,
+          "path_anchor_nodes": 3,
+          "untraced_predictions": 0,
+          "execution_paths": 2,
+          "dependency_only_paths": 1
+        }
+      },
+      "ablations": {
+        "reconstruction_only": {
+          "threshold": 1.4131694722175598,
+          "metrics": {
+            "tp": 0,
+            "fp": 3,
+            "fn": 8,
+            "tn": 102,
+            "predicted": 3,
+            "known_positive": 8,
+            "known_negative": 105,
+            "unknown_nodes": 0,
+            "unreviewed_predictions": 0,
+            "known_positive_recall": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "accuracy": 0.9026548672566371,
+            "f1": 0.0,
+            "precision_bounds": [
+              0.0,
+              0.0
+            ],
+            "complete_labels": true
+          }
+        },
+        "raw_feature_distance": {
+          "threshold": 1.6563786327838907,
+          "metrics": {
+            "tp": 0,
+            "fp": 2,
+            "fn": 8,
+            "tn": 103,
+            "predicted": 2,
+            "known_positive": 8,
+            "known_negative": 105,
+            "unknown_nodes": 0,
+            "unreviewed_predictions": 0,
+            "known_positive_recall": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "accuracy": 0.911504424778761,
+            "f1": 0.0,
+            "precision_bounds": [
+              0.0,
+              0.0
+            ],
+            "complete_labels": true
+          }
+        },
+        "raw_feature_knn": {
+          "threshold": 6.3563076877594025,
+          "metrics": {
+            "tp": 3,
+            "fp": 8,
+            "fn": 5,
+            "tn": 97,
+            "predicted": 11,
+            "known_positive": 8,
+            "known_negative": 105,
+            "unknown_nodes": 0,
+            "unreviewed_predictions": 0,
+            "known_positive_recall": 0.375,
+            "precision": 0.2727272727272727,
+            "recall": 0.375,
+            "accuracy": 0.8849557522123894,
+            "f1": 0.3157894736842105,
+            "precision_bounds": [
+              0.2727272727272727,
+              0.2727272727272727
+            ],
+            "complete_labels": true
+          }
+        },
+        "latent_seed_731": {
+          "threshold": 5.097562656402591,
+          "metrics": {
+            "tp": 0,
+            "fp": 2,
+            "fn": 8,
+            "tn": 103,
+            "predicted": 2,
+            "known_positive": 8,
+            "known_negative": 105,
+            "unknown_nodes": 0,
+            "unreviewed_predictions": 0,
+            "known_positive_recall": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "accuracy": 0.911504424778761,
+            "f1": 0.0,
+            "precision_bounds": [
+              0.0,
+              0.0
+            ],
+            "complete_labels": true
+          }
+        },
+        "latent_seed_732": {
+          "threshold": 3.8506907987594614,
+          "metrics": {
+            "tp": 0,
+            "fp": 5,
+            "fn": 8,
+            "tn": 100,
+            "predicted": 5,
+            "known_positive": 8,
+            "known_negative": 105,
+            "unknown_nodes": 0,
+            "unreviewed_predictions": 0,
+            "known_positive_recall": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "accuracy": 0.8849557522123894,
+            "f1": 0.0,
+            "precision_bounds": [
+              0.0,
+              0.0
+            ],
+            "complete_labels": true
+          }
+        },
+        "latent_seed_733": {
+          "threshold": 5.064068579673772,
+          "metrics": {
+            "tp": 0,
+            "fp": 3,
+            "fn": 8,
+            "tn": 102,
+            "predicted": 3,
+            "known_positive": 8,
+            "known_negative": 105,
+            "unknown_nodes": 0,
+            "unreviewed_predictions": 0,
+            "known_positive_recall": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "accuracy": 0.9026548672566371,
+            "f1": 0.0,
+            "precision_bounds": [
+              0.0,
+              0.0
+            ],
+            "complete_labels": true
+          }
+        }
+      },
+      "evaluation_seconds": 2.167139455676079
+    },
+    {
+      "id": "optc-0201-30m",
+      "events": 86318,
+      "processes": 355,
+      "retained_edges": 17263,
+      "rules": {
+        "nodes": {
+          "tp": 3,
+          "fp": 0,
+          "fn": 5,
+          "tn": 347,
+          "predicted": 3,
+          "known_positive": 8,
+          "known_negative": 347,
+          "unknown_nodes": 0,
+          "unreviewed_predictions": 0,
+          "known_positive_recall": 0.375,
+          "precision": 1.0,
+          "recall": 0.375,
+          "accuracy": 0.9859154929577465,
+          "f1": 0.5454545454545454,
+          "precision_bounds": [
+            1.0,
+            1.0
+          ],
+          "complete_labels": true,
+          "excluding_seed_nodes": {
+            "tp": 2,
+            "fp": 0,
+            "fn": 5,
+            "tn": 347,
+            "predicted": 2,
+            "known_positive": 7,
+            "known_negative": 347,
+            "unknown_nodes": 0,
+            "unreviewed_predictions": 0,
+            "known_positive_recall": 0.2857142857142857,
+            "precision": 1.0,
+            "recall": 0.2857142857142857,
+            "accuracy": 0.9858757062146892,
+            "f1": 0.4444444444444444,
+            "precision_bounds": [
+              1.0,
+              1.0
+            ],
+            "complete_labels": true
+          }
+        },
+        "path_events": {
+          "predicted_events": 8,
+          "labeled_malicious_events": 1550,
+          "matched_events": 8,
+          "precision": 1.0,
+          "recall": 0.005161290322580645,
+          "paths_with_all_events_labeled_malicious": 6
+        },
+        "runtime_seconds": 1.8520459681749344
+      },
+      "neural": {
+        "nodes": {
+          "tp": 2,
+          "fp": 27,
+          "fn": 6,
+          "tn": 320,
+          "predicted": 29,
+          "known_positive": 8,
+          "known_negative": 347,
+          "unknown_nodes": 0,
+          "unreviewed_predictions": 0,
+          "known_positive_recall": 0.25,
+          "precision": 0.06896551724137931,
+          "recall": 0.25,
+          "accuracy": 0.9070422535211268,
+          "f1": 0.10810810810810811,
+          "precision_bounds": [
+            0.06896551724137931,
+            0.06896551724137931
+          ],
+          "complete_labels": true,
+          "excluding_seed_nodes": {
+            "tp": 2,
+            "fp": 27,
+            "fn": 5,
+            "tn": 320,
+            "predicted": 29,
+            "known_positive": 7,
+            "known_negative": 347,
+            "unknown_nodes": 0,
+            "unreviewed_predictions": 0,
+            "known_positive_recall": 0.2857142857142857,
+            "precision": 0.06896551724137931,
+            "recall": 0.2857142857142857,
+            "accuracy": 0.9096045197740112,
+            "f1": 0.1111111111111111,
+            "precision_bounds": [
+              0.06896551724137931,
+              0.06896551724137931
+            ],
+            "complete_labels": true
+          }
+        },
+        "path_events": {
+          "predicted_events": 2,
+          "labeled_malicious_events": 1550,
+          "matched_events": 2,
+          "precision": 1.0,
+          "recall": 0.0012903225806451613,
+          "paths_with_all_events_labeled_malicious": 1
+        },
+        "runtime_seconds": 4.116884857416153,
+        "threshold": 8.686048650741581,
+        "predictions": [
+          {
+            "id": "19ecba71-74f0-4b1b-bdb2-0066d71db5cd",
+            "pids": [
+              2144
+            ],
+            "label": "\\Device\\HarddiskVolume1\\Windows\\system32\\svchost.exe",
+            "score": 11.111345291137695,
+            "reference": false
+          },
+          {
+            "id": "2ef956fb-3d21-4f24-915a-e1fca686cd32",
+            "pids": [
+              6024
+            ],
+            "label": "\\Device\\HarddiskVolume1\\Windows\\system32\\conhost.exe",
+            "score": 11.111345291137695,
+            "reference": true
+          },
+          {
+            "id": "35b2649d-abda-46c0-8756-591747e86110",
+            "pids": [],
+            "label": "35b2649d-abda-46c0-8756-591747e86110",
+            "score": 11.111345291137695,
+            "reference": false
+          },
+          {
+            "id": "35f35b39-d5f3-43a1-a4d8-c6d952197bf3",
+            "pids": [],
+            "label": "35f35b39-d5f3-43a1-a4d8-c6d952197bf3",
+            "score": 11.111345291137695,
+            "reference": false
+          },
+          {
+            "id": "37c7ea0c-ba78-4299-8710-962d264f71c6",
+            "pids": [],
+            "label": "37c7ea0c-ba78-4299-8710-962d264f71c6",
+            "score": 11.111345291137695,
+            "reference": false
+          },
+          {
+            "id": "38b8eb41-5834-46cd-a5c1-cf230340d458",
+            "pids": [],
+            "label": "38b8eb41-5834-46cd-a5c1-cf230340d458",
+            "score": 11.111345291137695,
+            "reference": false
+          },
+          {
+            "id": "392e7a21-f3fc-40c1-928f-6877731c057c",
+            "pids": [],
+            "label": "392e7a21-f3fc-40c1-928f-6877731c057c",
+            "score": 11.111345291137695,
+            "reference": false
+          },
+          {
+            "id": "439c8808-c31c-4342-87c7-26b20823a54e",
+            "pids": [
+              280
+            ],
+            "label": "\\Device\\HarddiskVolume1\\Windows\\system32\\svchost.exe",
+            "score": 11.111345291137695,
+            "reference": false
+          },
+          {
+            "id": "4cf94c9c-afa5-45d5-811f-028170a13fa8",
+            "pids": [
+              1608
+            ],
+            "label": "\\Device\\HarddiskVolume1\\Program Files (x86)\\Google\\Update\\GoogleUpdate.exe",
+            "score": 11.111345291137695,
+            "reference": false
+          },
+          {
+            "id": "717d5cd1-3ec8-45eb-abbd-ff5e86afe5a4",
+            "pids": [],
+            "label": "717d5cd1-3ec8-45eb-abbd-ff5e86afe5a4",
+            "score": 11.111345291137695,
+            "reference": false
+          },
+          {
+            "id": "7d706b78-bf92-4698-ba7a-33b72f8a1090",
+            "pids": [],
+            "label": "7d706b78-bf92-4698-ba7a-33b72f8a1090",
+            "score": 11.111345291137695,
+            "reference": false
+          },
+          {
+            "id": "88ae3013-0244-48fe-88af-784d19137718",
+            "pids": [],
+            "label": "88ae3013-0244-48fe-88af-784d19137718",
+            "score": 11.111345291137695,
+            "reference": false
+          },
+          {
+            "id": "9004afe1-3e10-4c1b-80f9-e4dc6178bbba",
+            "pids": [],
+            "label": "9004afe1-3e10-4c1b-80f9-e4dc6178bbba",
+            "score": 11.111345291137695,
+            "reference": false
+          },
+          {
+            "id": "97f2d77d-8d9e-454b-b2f6-f8a7d7eef5bc",
+            "pids": [
+              2164
+            ],
+            "label": "\\Device\\HarddiskVolume1\\Program Files\\VMware\\VMware Tools\\vmtoolsd.exe",
+            "score": 11.111345291137695,
+            "reference": false
+          },
+          {
+            "id": "9b31fb22-b364-4edc-96e3-eb034ef2121f",
+            "pids": [],
+            "label": "9b31fb22-b364-4edc-96e3-eb034ef2121f",
+            "score": 11.111345291137695,
+            "reference": false
+          },
+          {
+            "id": "c2b8782c-71f4-41d7-a164-5872f26fcb1b",
+            "pids": [],
+            "label": "c2b8782c-71f4-41d7-a164-5872f26fcb1b",
+            "score": 11.111345291137695,
+            "reference": false
+          },
+          {
+            "id": "c2f46c9a-d4fe-4004-9004-bb2bf7ff10e2",
+            "pids": [
+              3724
+            ],
+            "label": "\\Device\\HarddiskVolume1\\Windows\\system32\\SearchIndexer.exe",
+            "score": 11.111345291137695,
+            "reference": false
+          },
+          {
+            "id": "c9dc030f-bd30-4b77-85ec-07170dfcfc4a",
+            "pids": [],
+            "label": "c9dc030f-bd30-4b77-85ec-07170dfcfc4a",
+            "score": 11.111345291137695,
+            "reference": false
+          },
+          {
+            "id": "d9ea7f28-dd1d-4abb-9cdd-43cdb70b01a3",
+            "pids": [],
+            "label": "d9ea7f28-dd1d-4abb-9cdd-43cdb70b01a3",
+            "score": 11.111345291137695,
+            "reference": false
+          },
+          {
+            "id": "f0981930-92ff-4479-ad6c-91a44d54b0c4",
+            "pids": [],
+            "label": "f0981930-92ff-4479-ad6c-91a44d54b0c4",
+            "score": 11.111345291137695,
+            "reference": false
+          },
+          {
+            "id": "f5d1c003-1f65-4a8a-ba8c-413da99d70f2",
+            "pids": [
+              4632
+            ],
+            "label": "\\Device\\HarddiskVolume1\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+            "score": 11.111345291137695,
+            "reference": true
+          },
+          {
+            "id": "07a3cea1-2550-4fb5-b95f-a8f46e91e90d",
+            "pids": [
+              3464
+            ],
+            "label": "\\Device\\HarddiskVolume1\\Windows\\system32\\SearchFilterHost.exe",
+            "score": 11.02073860168457,
+            "reference": false
+          },
+          {
+            "id": "67a6d111-2034-4375-a6dd-c0f9ee867a1e",
+            "pids": [
+              4032
+            ],
+            "label": "taskhostw.exe",
+            "score": 10.375836372375488,
+            "reference": false
+          },
+          {
+            "id": "fad56a01-8370-4506-ad87-ac59b2e63c95",
+            "pids": [
+              4
+            ],
+            "label": "System",
+            "score": 10.333398818969727,
+            "reference": false
+          },
+          {
+            "id": "c7a9f715-3221-428a-b4d8-2144e8b6f88d",
+            "pids": [
+              5320
+            ],
+            "label": "\\Device\\HarddiskVolume1\\Windows\\system32\\conhost.exe",
+            "score": 9.479400634765625,
+            "reference": false
+          },
+          {
+            "id": "73253dc3-5864-44a3-b53e-5d30e88d512b",
+            "pids": [
+              3464
+            ],
+            "label": "\\Device\\HarddiskVolume1\\Program Files\\WindowsApps\\Microsoft.WindowsStore_11701.1001.87.0_x64__8wekyb3d8bbwe\\WinStore.App.exe",
+            "score": 9.442940711975098,
+            "reference": false
+          },
+          {
+            "id": "bba262df-0cc9-4ed8-89be-dbd1737d04f0",
+            "pids": [
+              5216
+            ],
+            "label": "\\Device\\HarddiskVolume1\\Windows\\System32\\svchost.exe",
+            "score": 9.116230964660645,
+            "reference": false
+          },
+          {
+            "id": "2f016449-765c-4896-bfca-5be85b4da8aa",
+            "pids": [
+              2236
+            ],
+            "label": "\\Device\\HarddiskVolume1\\Python27\\python.exe",
+            "score": 9.077118873596191,
+            "reference": false
+          },
+          {
+            "id": "ae66bcb7-c077-48b7-86b3-032f26fcff2a",
+            "pids": [
+              636
+            ],
+            "label": "\\\\?\\C:\\Program Files (x86)\\Mozilla Firefox\\firefox.exe",
+            "score": 9.007753372192383,
+            "reference": false
+          }
+        ],
+        "paths": {
+          "inferred_attack_nodes": 29,
+          "evaluated_process_nodes": 355,
+          "paths": 1,
+          "path_edges": 2,
+          "resource_nodes": 0,
+          "connector_nodes": 1,
+          "path_anchor_nodes": 12,
+          "untraced_predictions": 17,
+          "execution_paths": 1,
+          "dependency_only_paths": 0
+        }
+      },
+      "ablations": {
+        "reconstruction_only": {
+          "threshold": 1.4131694722175598,
+          "metrics": {
+            "tp": 0,
+            "fp": 8,
+            "fn": 8,
+            "tn": 339,
+            "predicted": 8,
+            "known_positive": 8,
+            "known_negative": 347,
+            "unknown_nodes": 0,
+            "unreviewed_predictions": 0,
+            "known_positive_recall": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "accuracy": 0.9549295774647887,
+            "f1": 0.0,
+            "precision_bounds": [
+              0.0,
+              0.0
+            ],
+            "complete_labels": true
+          }
+        },
+        "raw_feature_distance": {
+          "threshold": 1.6563786327838907,
+          "metrics": {
+            "tp": 0,
+            "fp": 6,
+            "fn": 8,
+            "tn": 341,
+            "predicted": 6,
+            "known_positive": 8,
+            "known_negative": 347,
+            "unknown_nodes": 0,
+            "unreviewed_predictions": 0,
+            "known_positive_recall": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "accuracy": 0.9605633802816902,
+            "f1": 0.0,
+            "precision_bounds": [
+              0.0,
+              0.0
+            ],
+            "complete_labels": true
+          }
+        },
+        "raw_feature_knn": {
+          "threshold": 6.3563076877594025,
+          "metrics": {
+            "tp": 3,
+            "fp": 26,
+            "fn": 5,
+            "tn": 321,
+            "predicted": 29,
+            "known_positive": 8,
+            "known_negative": 347,
+            "unknown_nodes": 0,
+            "unreviewed_predictions": 0,
+            "known_positive_recall": 0.375,
+            "precision": 0.10344827586206896,
+            "recall": 0.375,
+            "accuracy": 0.9126760563380282,
+            "f1": 0.16216216216216217,
+            "precision_bounds": [
+              0.10344827586206896,
+              0.10344827586206896
+            ],
+            "complete_labels": true
+          }
+        },
+        "latent_seed_731": {
+          "threshold": 5.097562656402591,
+          "metrics": {
+            "tp": 0,
+            "fp": 9,
+            "fn": 8,
+            "tn": 338,
+            "predicted": 9,
+            "known_positive": 8,
+            "known_negative": 347,
+            "unknown_nodes": 0,
+            "unreviewed_predictions": 0,
+            "known_positive_recall": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "accuracy": 0.952112676056338,
+            "f1": 0.0,
+            "precision_bounds": [
+              0.0,
+              0.0
+            ],
+            "complete_labels": true
+          }
+        },
+        "latent_seed_732": {
+          "threshold": 3.8506907987594614,
+          "metrics": {
+            "tp": 0,
+            "fp": 11,
+            "fn": 8,
+            "tn": 336,
+            "predicted": 11,
+            "known_positive": 8,
+            "known_negative": 347,
+            "unknown_nodes": 0,
+            "unreviewed_predictions": 0,
+            "known_positive_recall": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "accuracy": 0.9464788732394366,
+            "f1": 0.0,
+            "precision_bounds": [
+              0.0,
+              0.0
+            ],
+            "complete_labels": true
+          }
+        },
+        "latent_seed_733": {
+          "threshold": 5.064068579673772,
+          "metrics": {
+            "tp": 2,
+            "fp": 38,
+            "fn": 6,
+            "tn": 309,
+            "predicted": 40,
+            "known_positive": 8,
+            "known_negative": 347,
+            "unknown_nodes": 0,
+            "unreviewed_predictions": 0,
+            "known_positive_recall": 0.25,
+            "precision": 0.05,
+            "recall": 0.25,
+            "accuracy": 0.8760563380281691,
+            "f1": 0.08333333333333333,
+            "precision_bounds": [
+              0.05,
+              0.05
+            ],
+            "complete_labels": true
+          }
+        }
+      },
+      "evaluation_seconds": 6.625427041202784
+    },
+    {
+      "id": "optc-0201-60m",
+      "events": 188609,
+      "processes": 898,
+      "retained_edges": 37721,
+      "rules": {
+        "nodes": {
+          "tp": 3,
+          "fp": 0,
+          "fn": 5,
+          "tn": 890,
+          "predicted": 3,
+          "known_positive": 8,
+          "known_negative": 890,
+          "unknown_nodes": 0,
+          "unreviewed_predictions": 0,
+          "known_positive_recall": 0.375,
+          "precision": 1.0,
+          "recall": 0.375,
+          "accuracy": 0.9944320712694877,
+          "f1": 0.5454545454545454,
+          "precision_bounds": [
+            1.0,
+            1.0
+          ],
+          "complete_labels": true,
+          "excluding_seed_nodes": {
+            "tp": 2,
+            "fp": 0,
+            "fn": 5,
+            "tn": 890,
+            "predicted": 2,
+            "known_positive": 7,
+            "known_negative": 890,
+            "unknown_nodes": 0,
+            "unreviewed_predictions": 0,
+            "known_positive_recall": 0.2857142857142857,
+            "precision": 1.0,
+            "recall": 0.2857142857142857,
+            "accuracy": 0.9944258639910813,
+            "f1": 0.4444444444444444,
+            "precision_bounds": [
+              1.0,
+              1.0
+            ],
+            "complete_labels": true
+          }
+        },
+        "path_events": {
+          "predicted_events": 8,
+          "labeled_malicious_events": 2583,
+          "matched_events": 8,
+          "precision": 1.0,
+          "recall": 0.003097173828881146,
+          "paths_with_all_events_labeled_malicious": 6
+        },
+        "runtime_seconds": 4.175059080123901
+      },
+      "neural": {
+        "nodes": {
+          "tp": 2,
+          "fp": 35,
+          "fn": 6,
+          "tn": 855,
+          "predicted": 37,
+          "known_positive": 8,
+          "known_negative": 890,
+          "unknown_nodes": 0,
+          "unreviewed_predictions": 0,
+          "known_positive_recall": 0.25,
+          "precision": 0.05405405405405406,
+          "recall": 0.25,
+          "accuracy": 0.9543429844097996,
+          "f1": 0.08888888888888889,
+          "precision_bounds": [
+            0.05405405405405406,
+            0.05405405405405406
+          ],
+          "complete_labels": true,
+          "excluding_seed_nodes": {
+            "tp": 2,
+            "fp": 35,
+            "fn": 5,
+            "tn": 855,
+            "predicted": 37,
+            "known_positive": 7,
+            "known_negative": 890,
+            "unknown_nodes": 0,
+            "unreviewed_predictions": 0,
+            "known_positive_recall": 0.2857142857142857,
+            "precision": 0.05405405405405406,
+            "recall": 0.2857142857142857,
+            "accuracy": 0.955406911928651,
+            "f1": 0.09090909090909091,
+            "precision_bounds": [
+              0.05405405405405406,
+              0.05405405405405406
+            ],
+            "complete_labels": true
+          }
+        },
+        "path_events": {
+          "predicted_events": 2,
+          "labeled_malicious_events": 2583,
+          "matched_events": 2,
+          "precision": 1.0,
+          "recall": 0.0007742934572202865,
+          "paths_with_all_events_labeled_malicious": 1
+        },
+        "runtime_seconds": 10.731659471988678,
+        "threshold": 8.686048650741581,
+        "predictions": [
+          {
+            "id": "0ebf1eb2-7148-467c-be4b-0869d9ea2ede",
+            "pids": [
+              2172
+            ],
+            "label": "MemCompression",
+            "score": 11.39335823059082,
+            "reference": false
+          },
+          {
+            "id": "19ecba71-74f0-4b1b-bdb2-0066d71db5cd",
+            "pids": [
+              2144
+            ],
+            "label": "\\Device\\HarddiskVolume1\\Windows\\system32\\svchost.exe",
+            "score": 11.111345291137695,
+            "reference": false
+          },
+          {
+            "id": "2ef956fb-3d21-4f24-915a-e1fca686cd32",
+            "pids": [
+              6024
+            ],
+            "label": "\\Device\\HarddiskVolume1\\Windows\\system32\\conhost.exe",
+            "score": 11.111345291137695,
+            "reference": true
+          },
+          {
+            "id": "35b2649d-abda-46c0-8756-591747e86110",
+            "pids": [],
+            "label": "35b2649d-abda-46c0-8756-591747e86110",
+            "score": 11.111345291137695,
+            "reference": false
+          },
+          {
+            "id": "35f35b39-d5f3-43a1-a4d8-c6d952197bf3",
+            "pids": [],
+            "label": "35f35b39-d5f3-43a1-a4d8-c6d952197bf3",
+            "score": 11.111345291137695,
+            "reference": false
+          },
+          {
+            "id": "37c7ea0c-ba78-4299-8710-962d264f71c6",
+            "pids": [],
+            "label": "37c7ea0c-ba78-4299-8710-962d264f71c6",
+            "score": 11.111345291137695,
+            "reference": false
+          },
+          {
+            "id": "38b8eb41-5834-46cd-a5c1-cf230340d458",
+            "pids": [],
+            "label": "38b8eb41-5834-46cd-a5c1-cf230340d458",
+            "score": 11.111345291137695,
+            "reference": false
+          },
+          {
+            "id": "392e7a21-f3fc-40c1-928f-6877731c057c",
+            "pids": [],
+            "label": "392e7a21-f3fc-40c1-928f-6877731c057c",
+            "score": 11.111345291137695,
+            "reference": false
+          },
+          {
+            "id": "439c8808-c31c-4342-87c7-26b20823a54e",
+            "pids": [
+              280
+            ],
+            "label": "\\Device\\HarddiskVolume1\\Windows\\system32\\svchost.exe",
+            "score": 11.111345291137695,
+            "reference": false
+          },
+          {
+            "id": "4cf94c9c-afa5-45d5-811f-028170a13fa8",
+            "pids": [
+              1608
+            ],
+            "label": "\\Device\\HarddiskVolume1\\Program Files (x86)\\Google\\Update\\GoogleUpdate.exe",
+            "score": 11.111345291137695,
+            "reference": false
+          },
+          {
+            "id": "717d5cd1-3ec8-45eb-abbd-ff5e86afe5a4",
+            "pids": [],
+            "label": "717d5cd1-3ec8-45eb-abbd-ff5e86afe5a4",
+            "score": 11.111345291137695,
+            "reference": false
+          },
+          {
+            "id": "7d706b78-bf92-4698-ba7a-33b72f8a1090",
+            "pids": [],
+            "label": "7d706b78-bf92-4698-ba7a-33b72f8a1090",
+            "score": 11.111345291137695,
+            "reference": false
+          },
+          {
+            "id": "88ae3013-0244-48fe-88af-784d19137718",
+            "pids": [],
+            "label": "88ae3013-0244-48fe-88af-784d19137718",
+            "score": 11.111345291137695,
+            "reference": false
+          },
+          {
+            "id": "9004afe1-3e10-4c1b-80f9-e4dc6178bbba",
+            "pids": [],
+            "label": "9004afe1-3e10-4c1b-80f9-e4dc6178bbba",
+            "score": 11.111345291137695,
+            "reference": false
+          },
+          {
+            "id": "97f2d77d-8d9e-454b-b2f6-f8a7d7eef5bc",
+            "pids": [
+              2164
+            ],
+            "label": "\\Device\\HarddiskVolume1\\Program Files\\VMware\\VMware Tools\\vmtoolsd.exe",
+            "score": 11.111345291137695,
+            "reference": false
+          },
+          {
+            "id": "9b31fb22-b364-4edc-96e3-eb034ef2121f",
+            "pids": [],
+            "label": "9b31fb22-b364-4edc-96e3-eb034ef2121f",
+            "score": 11.111345291137695,
+            "reference": false
+          },
+          {
+            "id": "c2b8782c-71f4-41d7-a164-5872f26fcb1b",
+            "pids": [],
+            "label": "c2b8782c-71f4-41d7-a164-5872f26fcb1b",
+            "score": 11.111345291137695,
+            "reference": false
+          },
+          {
+            "id": "c2f46c9a-d4fe-4004-9004-bb2bf7ff10e2",
+            "pids": [
+              3724
+            ],
+            "label": "\\Device\\HarddiskVolume1\\Windows\\system32\\SearchIndexer.exe",
+            "score": 11.111345291137695,
+            "reference": false
+          },
+          {
+            "id": "c9dc030f-bd30-4b77-85ec-07170dfcfc4a",
+            "pids": [],
+            "label": "c9dc030f-bd30-4b77-85ec-07170dfcfc4a",
+            "score": 11.111345291137695,
+            "reference": false
+          },
+          {
+            "id": "d9ea7f28-dd1d-4abb-9cdd-43cdb70b01a3",
+            "pids": [],
+            "label": "d9ea7f28-dd1d-4abb-9cdd-43cdb70b01a3",
+            "score": 11.111345291137695,
+            "reference": false
+          },
+          {
+            "id": "f0981930-92ff-4479-ad6c-91a44d54b0c4",
+            "pids": [],
+            "label": "f0981930-92ff-4479-ad6c-91a44d54b0c4",
+            "score": 11.111345291137695,
+            "reference": false
+          },
+          {
+            "id": "f5d1c003-1f65-4a8a-ba8c-413da99d70f2",
+            "pids": [
+              4632
+            ],
+            "label": "\\Device\\HarddiskVolume1\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+            "score": 11.111345291137695,
+            "reference": true
+          },
+          {
+            "id": "07a3cea1-2550-4fb5-b95f-a8f46e91e90d",
+            "pids": [
+              3464
+            ],
+            "label": "\\Device\\HarddiskVolume1\\Windows\\system32\\SearchFilterHost.exe",
+            "score": 11.02073860168457,
+            "reference": false
+          },
+          {
+            "id": "6f48009d-0acb-4ae8-b9d8-ad0ae78a5388",
+            "pids": [
+              1780
+            ],
+            "label": "\\Device\\HarddiskVolume1\\Windows\\system32\\cmd.exe",
+            "score": 10.857931137084961,
+            "reference": false
+          },
+          {
+            "id": "67a6d111-2034-4375-a6dd-c0f9ee867a1e",
+            "pids": [
+              4032
+            ],
+            "label": "taskhostw.exe",
+            "score": 10.375836372375488,
+            "reference": false
+          },
+          {
+            "id": "fad56a01-8370-4506-ad87-ac59b2e63c95",
+            "pids": [
+              4
+            ],
+            "label": "System",
+            "score": 10.333398818969727,
+            "reference": false
+          },
+          {
+            "id": "1404b405-e255-488d-ae49-069307de36a4",
+            "pids": [
+              2020
+            ],
+            "label": "\\Device\\HarddiskVolume1\\Windows\\System32\\svchost.exe",
+            "score": 10.295809745788574,
+            "reference": false
+          },
+          {
+            "id": "0d73418a-b4ef-4686-8ac1-d2b704bea167",
+            "pids": [
+              5752
+            ],
+            "label": "shutdown.exe",
+            "score": 9.62513256072998,
+            "reference": false
+          },
+          {
+            "id": "c7a9f715-3221-428a-b4d8-2144e8b6f88d",
+            "pids": [
+              5320
+            ],
+            "label": "\\Device\\HarddiskVolume1\\Windows\\system32\\conhost.exe",
+            "score": 9.479400634765625,
+            "reference": false
+          },
+          {
+            "id": "73253dc3-5864-44a3-b53e-5d30e88d512b",
+            "pids": [
+              3464
+            ],
+            "label": "\\Device\\HarddiskVolume1\\Program Files\\WindowsApps\\Microsoft.WindowsStore_11701.1001.87.0_x64__8wekyb3d8bbwe\\WinStore.App.exe",
+            "score": 9.442940711975098,
+            "reference": false
+          },
+          {
+            "id": "23adf80c-6ea0-4768-811a-c4db0f31f3ab",
+            "pids": [
+              708
+            ],
+            "label": "\\Device\\HarddiskVolume1\\Windows\\SysNative\\qwinsta.exe",
+            "score": 9.274053573608398,
+            "reference": false
+          },
+          {
+            "id": "bba262df-0cc9-4ed8-89be-dbd1737d04f0",
+            "pids": [
+              5216
+            ],
+            "label": "\\Device\\HarddiskVolume1\\Windows\\System32\\svchost.exe",
+            "score": 9.116230964660645,
+            "reference": false
+          },
+          {
+            "id": "01eed655-bd4f-4d4e-b0b2-99131c91a511",
+            "pids": [
+              5756
+            ],
+            "label": "\\Device\\HarddiskVolume1\\Windows\\system32\\cmd.exe",
+            "score": 9.10983943939209,
+            "reference": false
+          },
+          {
+            "id": "702f21e4-2c1d-409b-8632-e4ec8d5140cc",
+            "pids": [
+              980
+            ],
+            "label": "findstr.exe",
+            "score": 9.081830978393555,
+            "reference": false
+          },
+          {
+            "id": "2f016449-765c-4896-bfca-5be85b4da8aa",
+            "pids": [
+              2236
+            ],
+            "label": "\\Device\\HarddiskVolume1\\Python27\\python.exe",
+            "score": 9.077118873596191,
+            "reference": false
+          },
+          {
+            "id": "ae66bcb7-c077-48b7-86b3-032f26fcff2a",
+            "pids": [
+              636
+            ],
+            "label": "\\\\?\\C:\\Program Files (x86)\\Mozilla Firefox\\firefox.exe",
+            "score": 9.007753372192383,
+            "reference": false
+          },
+          {
+            "id": "9b45071e-39c0-434b-bb85-36c1fc99de46",
+            "pids": [
+              4892
+            ],
+            "label": "cmd.exe",
+            "score": 8.889823913574219,
+            "reference": false
+          }
+        ],
+        "paths": {
+          "inferred_attack_nodes": 37,
+          "evaluated_process_nodes": 898,
+          "paths": 1,
+          "path_edges": 2,
+          "resource_nodes": 0,
+          "connector_nodes": 1,
+          "path_anchor_nodes": 12,
+          "untraced_predictions": 25,
+          "execution_paths": 1,
+          "dependency_only_paths": 0
+        }
+      },
+      "ablations": {
+        "reconstruction_only": {
+          "threshold": 1.4131694722175598,
+          "metrics": {
+            "tp": 0,
+            "fp": 9,
+            "fn": 8,
+            "tn": 881,
+            "predicted": 9,
+            "known_positive": 8,
+            "known_negative": 890,
+            "unknown_nodes": 0,
+            "unreviewed_predictions": 0,
+            "known_positive_recall": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "accuracy": 0.9810690423162584,
+            "f1": 0.0,
+            "precision_bounds": [
+              0.0,
+              0.0
+            ],
+            "complete_labels": true
+          }
+        },
+        "raw_feature_distance": {
+          "threshold": 1.6563786327838907,
+          "metrics": {
+            "tp": 0,
+            "fp": 7,
+            "fn": 8,
+            "tn": 883,
+            "predicted": 7,
+            "known_positive": 8,
+            "known_negative": 890,
+            "unknown_nodes": 0,
+            "unreviewed_predictions": 0,
+            "known_positive_recall": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "accuracy": 0.9832962138084632,
+            "f1": 0.0,
+            "precision_bounds": [
+              0.0,
+              0.0
+            ],
+            "complete_labels": true
+          }
+        },
+        "raw_feature_knn": {
+          "threshold": 6.3563076877594025,
+          "metrics": {
+            "tp": 3,
+            "fp": 29,
+            "fn": 5,
+            "tn": 861,
+            "predicted": 32,
+            "known_positive": 8,
+            "known_negative": 890,
+            "unknown_nodes": 0,
+            "unreviewed_predictions": 0,
+            "known_positive_recall": 0.375,
+            "precision": 0.09375,
+            "recall": 0.375,
+            "accuracy": 0.9621380846325167,
+            "f1": 0.15,
+            "precision_bounds": [
+              0.09375,
+              0.09375
+            ],
+            "complete_labels": true
+          }
+        },
+        "latent_seed_731": {
+          "threshold": 5.097562656402591,
+          "metrics": {
+            "tp": 0,
+            "fp": 14,
+            "fn": 8,
+            "tn": 876,
+            "predicted": 14,
+            "known_positive": 8,
+            "known_negative": 890,
+            "unknown_nodes": 0,
+            "unreviewed_predictions": 0,
+            "known_positive_recall": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "accuracy": 0.9755011135857461,
+            "f1": 0.0,
+            "precision_bounds": [
+              0.0,
+              0.0
+            ],
+            "complete_labels": true
+          }
+        },
+        "latent_seed_732": {
+          "threshold": 3.8506907987594614,
+          "metrics": {
+            "tp": 0,
+            "fp": 25,
+            "fn": 8,
+            "tn": 865,
+            "predicted": 25,
+            "known_positive": 8,
+            "known_negative": 890,
+            "unknown_nodes": 0,
+            "unreviewed_predictions": 0,
+            "known_positive_recall": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "accuracy": 0.9632516703786191,
+            "f1": 0.0,
+            "precision_bounds": [
+              0.0,
+              0.0
+            ],
+            "complete_labels": true
+          }
+        },
+        "latent_seed_733": {
+          "threshold": 5.064068579673772,
+          "metrics": {
+            "tp": 2,
+            "fp": 48,
+            "fn": 6,
+            "tn": 842,
+            "predicted": 50,
+            "known_positive": 8,
+            "known_negative": 890,
+            "unknown_nodes": 0,
+            "unreviewed_predictions": 0,
+            "known_positive_recall": 0.25,
+            "precision": 0.04,
+            "recall": 0.25,
+            "accuracy": 0.9398663697104677,
+            "f1": 0.06896551724137931,
+            "precision_bounds": [
+              0.04,
+              0.04
+            ],
+            "complete_labels": true
+          }
+        }
+      },
+      "evaluation_seconds": 15.720946077257395
+    },
+    {
+      "id": "optc-0201-background",
+      "events": 74654,
+      "processes": 315,
+      "retained_edges": 14034,
+      "rules": {
+        "nodes": {
+          "tp": 0,
+          "fp": 4,
+          "fn": 0,
+          "tn": 311,
+          "predicted": 4,
+          "known_positive": 0,
+          "known_negative": 315,
+          "unknown_nodes": 0,
+          "unreviewed_predictions": 0,
+          "known_positive_recall": null,
+          "precision": 0.0,
+          "recall": null,
+          "accuracy": 0.9873015873015873,
+          "f1": 0.0,
+          "precision_bounds": [
+            0.0,
+            0.0
+          ],
+          "complete_labels": true,
+          "excluding_seed_nodes": {
+            "tp": 0,
+            "fp": 2,
+            "fn": 0,
+            "tn": 311,
+            "predicted": 2,
+            "known_positive": 0,
+            "known_negative": 313,
+            "unknown_nodes": 0,
+            "unreviewed_predictions": 0,
+            "known_positive_recall": null,
+            "precision": 0.0,
+            "recall": null,
+            "accuracy": 0.9936102236421726,
+            "f1": 0.0,
+            "precision_bounds": [
+              0.0,
+              0.0
+            ],
+            "complete_labels": true
+          }
+        },
+        "path_events": {
+          "predicted_events": 9,
+          "labeled_malicious_events": 0,
+          "matched_events": 0,
+          "precision": 0.0,
+          "recall": null,
+          "paths_with_all_events_labeled_malicious": 0
+        },
+        "runtime_seconds": 1.5542982518672943
+      },
+      "neural": {
+        "nodes": {
+          "tp": 0,
+          "fp": 5,
+          "fn": 0,
+          "tn": 310,
+          "predicted": 5,
+          "known_positive": 0,
+          "known_negative": 315,
+          "unknown_nodes": 0,
+          "unreviewed_predictions": 0,
+          "known_positive_recall": null,
+          "precision": 0.0,
+          "recall": null,
+          "accuracy": 0.9841269841269841,
+          "f1": 0.0,
+          "precision_bounds": [
+            0.0,
+            0.0
+          ],
+          "complete_labels": true,
+          "excluding_seed_nodes": {
+            "tp": 0,
+            "fp": 5,
+            "fn": 0,
+            "tn": 308,
+            "predicted": 5,
+            "known_positive": 0,
+            "known_negative": 313,
+            "unknown_nodes": 0,
+            "unreviewed_predictions": 0,
+            "known_positive_recall": null,
+            "precision": 0.0,
+            "recall": null,
+            "accuracy": 0.9840255591054313,
+            "f1": 0.0,
+            "precision_bounds": [
+              0.0,
+              0.0
+            ],
+            "complete_labels": true
+          }
+        },
+        "path_events": {
+          "predicted_events": 3,
+          "labeled_malicious_events": 0,
+          "matched_events": 0,
+          "precision": 0.0,
+          "recall": null,
+          "paths_with_all_events_labeled_malicious": 0
+        },
+        "runtime_seconds": 3.3501172177493572,
+        "threshold": 8.686048650741581,
+        "predictions": [
+          {
+            "id": "547913ec-51d3-42fa-9bf5-cc15543aa726",
+            "pids": [
+              3104
+            ],
+            "label": "\\Device\\HarddiskVolume1\\Windows\\system32\\conhost.exe",
+            "score": 9.7086820602417,
+            "reference": false
+          },
+          {
+            "id": "74cd62cb-4a1e-4382-bdb4-095b42dcc184",
+            "pids": [
+              3544
+            ],
+            "label": "\\Device\\HarddiskVolume1\\Windows\\system32\\conhost.exe",
+            "score": 9.03498363494873,
+            "reference": false
+          },
+          {
+            "id": "3cc056ce-f064-4979-8306-a9313362d6ae",
+            "pids": [
+              1812
+            ],
+            "label": "\\Device\\HarddiskVolume1\\Windows\\system32\\conhost.exe",
+            "score": 9.034318923950195,
+            "reference": false
+          },
+          {
+            "id": "fad56a01-8370-4506-ad87-ac59b2e63c95",
+            "pids": [
+              4
+            ],
+            "label": "System",
+            "score": 8.948110580444336,
+            "reference": false
+          },
+          {
+            "id": "c773ab40-6870-454c-b52e-cfac9cc16b04",
+            "pids": [
+              2312
+            ],
+            "label": "\\Device\\HarddiskVolume1\\Windows\\system32\\conhost.exe",
+            "score": 8.72535514831543,
+            "reference": false
+          }
+        ],
+        "paths": {
+          "inferred_attack_nodes": 5,
+          "evaluated_process_nodes": 315,
+          "paths": 2,
+          "path_edges": 3,
+          "resource_nodes": 1,
+          "connector_nodes": 2,
+          "path_anchor_nodes": 5,
+          "untraced_predictions": 0,
+          "execution_paths": 2,
+          "dependency_only_paths": 0
+        }
+      },
+      "ablations": {
+        "reconstruction_only": {
+          "threshold": 1.4131694722175598,
+          "metrics": {
+            "tp": 0,
+            "fp": 10,
+            "fn": 0,
+            "tn": 305,
+            "predicted": 10,
+            "known_positive": 0,
+            "known_negative": 315,
+            "unknown_nodes": 0,
+            "unreviewed_predictions": 0,
+            "known_positive_recall": null,
+            "precision": 0.0,
+            "recall": null,
+            "accuracy": 0.9682539682539683,
+            "f1": 0.0,
+            "precision_bounds": [
+              0.0,
+              0.0
+            ],
+            "complete_labels": true
+          }
+        },
+        "raw_feature_distance": {
+          "threshold": 1.6563786327838907,
+          "metrics": {
+            "tp": 0,
+            "fp": 8,
+            "fn": 0,
+            "tn": 307,
+            "predicted": 8,
+            "known_positive": 0,
+            "known_negative": 315,
+            "unknown_nodes": 0,
+            "unreviewed_predictions": 0,
+            "known_positive_recall": null,
+            "precision": 0.0,
+            "recall": null,
+            "accuracy": 0.9746031746031746,
+            "f1": 0.0,
+            "precision_bounds": [
+              0.0,
+              0.0
+            ],
+            "complete_labels": true
+          }
+        },
+        "raw_feature_knn": {
+          "threshold": 6.3563076877594025,
+          "metrics": {
+            "tp": 0,
+            "fp": 43,
+            "fn": 0,
+            "tn": 272,
+            "predicted": 43,
+            "known_positive": 0,
+            "known_negative": 315,
+            "unknown_nodes": 0,
+            "unreviewed_predictions": 0,
+            "known_positive_recall": null,
+            "precision": 0.0,
+            "recall": null,
+            "accuracy": 0.8634920634920635,
+            "f1": 0.0,
+            "precision_bounds": [
+              0.0,
+              0.0
+            ],
+            "complete_labels": true
+          }
+        },
+        "latent_seed_731": {
+          "threshold": 5.097562656402591,
+          "metrics": {
+            "tp": 0,
+            "fp": 3,
+            "fn": 0,
+            "tn": 312,
+            "predicted": 3,
+            "known_positive": 0,
+            "known_negative": 315,
+            "unknown_nodes": 0,
+            "unreviewed_predictions": 0,
+            "known_positive_recall": null,
+            "precision": 0.0,
+            "recall": null,
+            "accuracy": 0.9904761904761905,
+            "f1": 0.0,
+            "precision_bounds": [
+              0.0,
+              0.0
+            ],
+            "complete_labels": true
+          }
+        },
+        "latent_seed_732": {
+          "threshold": 3.8506907987594614,
+          "metrics": {
+            "tp": 0,
+            "fp": 7,
+            "fn": 0,
+            "tn": 308,
+            "predicted": 7,
+            "known_positive": 0,
+            "known_negative": 315,
+            "unknown_nodes": 0,
+            "unreviewed_predictions": 0,
+            "known_positive_recall": null,
+            "precision": 0.0,
+            "recall": null,
+            "accuracy": 0.9777777777777777,
+            "f1": 0.0,
+            "precision_bounds": [
+              0.0,
+              0.0
+            ],
+            "complete_labels": true
+          }
+        },
+        "latent_seed_733": {
+          "threshold": 5.064068579673772,
+          "metrics": {
+            "tp": 0,
+            "fp": 6,
+            "fn": 0,
+            "tn": 309,
+            "predicted": 6,
+            "known_positive": 0,
+            "known_negative": 315,
+            "unknown_nodes": 0,
+            "unreviewed_predictions": 0,
+            "known_positive_recall": null,
+            "precision": 0.0,
+            "recall": null,
+            "accuracy": 0.9809523809523809,
+            "f1": 0.0,
+            "precision_bounds": [
+              0.0,
+              0.0
+            ],
+            "complete_labels": true
+          }
+        }
+      },
+      "evaluation_seconds": 4.286471735686064
+    }
+  ]
+}

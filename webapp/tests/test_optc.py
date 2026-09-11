@@ -164,3 +164,48 @@ def test_attack_predictions_do_not_depend_on_pruning_budget_or_mode(dataset):
     reports=[rescore(copy.deepcopy(dataset),'seed',b,m)['attack'] for b,m in [(1.,'context'),(.01,'evidence')]]
     strip=lambda a:{k:v for k,v in a.items() if k!='runtime_seconds'}
     assert strip(reports[0])==strip(reports[1])
+
+
+def test_compact_view_keeps_every_edge_and_paginated_logs(dataset,tmp_path):
+    cache=tmp_path/'demo.json';data=rescore(dataset,'seed');cache.write_text(json.dumps(data))
+    client=create_app(cache).test_client();base='/api/datasets/optc-0201'
+    view=client.get(base+'/view').json
+    assert view['graph']['sampled'] is False
+    assert {e[0] for e in view['graph']['edges']}=={e['id'] for e in data['edges']}
+    assert len(view['graph']['edges'])==view['metrics']['candidate_edges']
+    assert 'raw' not in json.dumps(view['graph'])
+    pages=[client.get(base+f'/edges?page={p}&limit=2').json for p in range(3)]
+    assert len({e['id'] for page in pages for e in page['edges']})==len(data['edges'])
+    node=data['edges'][0]['source']
+    found=client.get(base+'/edges',query_string={'q':node}).json
+    assert found['total']==sum(node in (e['source'],e['target']) for e in data['edges'])
+    for e in data['edges']:
+        assert client.get(base+'/events/'+e['id']).json==e
+    assert client.get(base+'/events/missing').status_code==404
+    assert client.get(base+'/edges?filter=retained').json['total']==data['metrics']['retained_edges']
+    for suffix in ['/view','/edges','/events/seed']:
+        assert client.get('/api/datasets/missing'+suffix).status_code==404
+    assert client.get(base+'/edges?page=bad').status_code==400
+    assert client.get(base+'/edges?filter=typo').status_code==400
+    assert client.get(base+'/edges?limit=99999').json['limit']==100
+    saved=cache.read_bytes()
+    assert client.post(base+'/prune',json=dict(poi_event_id='seed',detector='invalid',compact=True)).status_code==400
+    assert cache.read_bytes()==saved
+    update=client.post(base+'/prune',json=dict(poi_event_id='seed2',compact=True))
+    assert update.status_code==200 and 'graph' in update.json and 'edges' not in update.json
+    assert client.get(base+'/view').json['poi']['event_id']=='seed2'
+
+
+def test_multiple_cases_persist_independently(dataset,tmp_path):
+    data=rescore(dataset,'seed');one=tmp_path/'one.json';two=tmp_path/'two.json';one.write_text(json.dumps(data))
+    other=copy.deepcopy(data);other['dataset']['id']='second';two.write_text(json.dumps(other))
+    catalog=tmp_path/'catalog.json';catalog.write_text(json.dumps([dict(id='optc-0201',cache_path=str(one)),dict(id='second',cache_path=str(two))]))
+    client=create_app(one,dataset_catalog=catalog).test_client()
+    assert len(client.get('/api/datasets').json['datasets'])==2
+    assert all('cache_path' not in d for d in client.get('/api/datasets').json['datasets'])
+    before=one.read_bytes()
+    r=client.post('/api/datasets/second/prune',json=dict(poi_event_id='seed2',compact=True))
+    assert r.status_code==200
+    assert one.read_bytes()==before
+    assert client.get('/api/datasets/optc-0201/view').json['poi']['event_id']=='seed'
+    assert client.get('/api/datasets/second/view').json['poi']['event_id']=='seed2'

@@ -19,7 +19,7 @@ from tc_pruning.optc import signature
 
 VERSION = 'attack-hypothesis-v1'
 DEFAULT_CONFIG = dict(anomaly_quantile=.90, min_families=2, top_families=3,
-                      max_lineage_hops=12)
+                      max_lineage_hops=12,max_path_anchors=12)
 
 
 def process_metadata(edges):
@@ -94,13 +94,17 @@ def check_path(event_ids, by_id):
         for a,b in zip(es, es[1:]))
 
 
-def infer_attack(edges, poi_id, config=None):
+def infer_attack(edges, poi_id, config=None, detector='rules', neural_scores=None):
     started = time.monotonic()
     cfg = dict(DEFAULT_CONFIG, **(config or {}))
+    if detector not in ('rules','neural'):raise ValueError('unknown attack detector')
+    if detector=='neural' and neural_scores is None:
+        from tc_pruning.deep_graph import score_nodes
+        neural_scores=score_nodes(edges)
     q = cfg['anomaly_quantile']
     if isinstance(q, bool) or not isinstance(q, (float,int)) or not 0 < q < 1:
         raise ValueError('anomaly_quantile must be in (0, 1)')
-    for key in ('min_families', 'top_families', 'max_lineage_hops'):
+    for key in ('min_families', 'top_families', 'max_lineage_hops','max_path_anchors'):
         if type(cfg[key]) is not int or cfg[key] < 1: raise ValueError(f'invalid {key}')
     edges = sorted(edges, key=lambda e:(e['timestamp_ns'], e['id']))
     by_id = {e['id']:e for e in edges}
@@ -157,6 +161,18 @@ def infer_attack(edges, poi_id, config=None):
         if outlier: row['reasons'].append(f"{row['family_count']} 个不同历史异常交互，聚合分严格超过当前窗口 {q:.0%} 分位线")
         if not row['reasons']: row['reasons'].append('未满足攻击假设判定；不等于已确认正常')
         row['status'] = 'inferred_attack' if row['predicted_attack'] else 'manual_seed' if row['seed_node'] else 'unclassified'
+    if detector=='neural':
+        for row in rows:
+            neural=neural_scores['nodes'].get(row['id'])
+            row['rule_prediction']=row['predicted_attack']
+            row['predicted_attack']=bool(neural and neural['predicted'])
+            row['neural']=neural
+            row['behavioral_match']=False;row['anomaly_match']=False
+            row['anomaly_score']=neural['score'] if neural else 0.
+            row['evidence_event_ids']=neural['evidence_event_ids'] if neural else []
+            row['first_support_ns']=min((by_id[i]['timestamp_ns'] for i in row['evidence_event_ids']),default=None)
+            row['reasons']=[f"学习到的图表示与历史近邻距离 {row['anomaly_score']:.5g} {'超过' if row['predicted_attack'] else '未超过'} 独立校准线 {neural_scores['threshold']:.5g}；规则不参与本次判定"]
+            row['status']='inferred_attack' if row['predicted_attack'] else 'manual_seed' if row['seed_node'] else 'unclassified'
     rows.sort(key=lambda r:(not r['predicted_attack'],not r['behavioral_match'],-r['anomaly_score'],r['id']))
     for rank,row in enumerate(rows,1): row['rank']=rank
     predicted = {r['id']:r for r in rows if r['predicted_attack']}
@@ -175,7 +191,8 @@ def infer_attack(edges, poi_id, config=None):
                           lineage_truncated=truncated,temporal_valid=True,
                           support_level='dependency_only' if shared_resource else 'execution_trace',
                           interpretation='共享文件的读写关联可能来自正常缓存；不能据此证明攻击载荷传递或提权机制' if shared_resource else '真实进程启动/通信轨迹；不表示所有祖先进程恶意'))
-    for nid,row in predicted.items():
+    path_anchors=dict(list(predicted.items())[:cfg['max_path_anchors']])
+    for nid,row in path_anchors.items():
         birth = births.get(nid)
         chain = [birth['id']] if birth else []
         cursor = birth
@@ -192,7 +209,7 @@ def infer_attack(edges, poi_id, config=None):
         if chain: append_path(chain,'execution_lineage',nid,truncated)
         start = row['first_support_ns']
         reached = temporal_paths(edges,nid,start) if start is not None else {}
-        for target in sorted(predicted):
+        for target in sorted(path_anchors):
             if nid==target: continue
             if target in reached: append_path(reached[target],'between_inferred_nodes',nid)
             else: disconnected.append(dict(source=nid,target=target,reason='首个支持证据之后未找到严格时序有向路径；不自动补边'))
@@ -208,6 +225,7 @@ def infer_attack(edges, poi_id, config=None):
                   summary=dict(inferred_attack_nodes=len(predicted),evaluated_process_nodes=len(rows),
                                paths=len(paths),path_edges=len(path_event_ids),resource_nodes=len(resource_ids),
                                connector_nodes=len(connectors),
+                               path_anchor_nodes=len(path_anchors),untraced_predictions=len(predicted)-len(path_anchors),
                                execution_paths=sum(p['support_level']=='execution_trace' for p in paths),
                                dependency_only_paths=sum(p['support_level']=='dependency_only' for p in paths)),
                   threshold=dict(value=threshold,quantile=q,population_size=len(population),comparison='strict >',
@@ -217,6 +235,12 @@ def infer_attack(edges, poi_id, config=None):
                                 classification='behavioral evidence OR high-tail anomaly; seeds are not forced predictions',
                                 resources='参与路径的文件/网络对象不是自动判定的恶意节点',
                                 paths='真实事件的严格时序有向路径；路径存在不证明每个节点或事件恶意'))
+    report['detector']=detector
+    if detector=='neural':
+        report['model']={k:v for k,v in neural_scores.items() if k!='nodes'}
+        report['threshold']=dict(value=neural_scores['threshold'],comparison='strict >',calibration=neural_scores['calibration'])
+        report['contract']['classification']='Learned graph embedding neighbor distance only; no rule or POI gating'
+        report['contract']['scope']='Retrospective minute-level graphs in the candidate window; model/calibration strictly earlier'
     inputs = [dict(id=e['id'],source=e['source'],target=e['target'],timestamp_ns=e['timestamp_ns'],raw=e['raw'],
                    evidence_score=e.get('evidence_score'),historical_count=e.get('historical_count'),
                    certified=e.get('decision',{}).get('certified_background_lift'),
