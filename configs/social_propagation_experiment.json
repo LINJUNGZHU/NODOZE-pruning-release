@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "budgets": [0.05, 0.1, 0.2],
+  "primary_budget": 0.2,
+  "primary_method": "hybrid_relation_temporal",
+  "survival": 0.85,
+  "rarity_floor": 0.2,
+  "quality_weight": 0.0,
+  "scoring_config": "configs/rasp_v1.json",
+  "parameter_policy": "Fixed before new measurements; all variants reported; existing development candidates and analyst POIs reused."
+}

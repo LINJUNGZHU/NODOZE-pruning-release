@@ -1,0 +1,47 @@
+{
+  "scope": "Post-evaluation diagnosis only; never fed back into predictions",
+  "case": "E3-CADETS/node_Nginx_Backdoor_12.csv",
+  "method": "reserve_0.25@0.2",
+  "nodes": {
+    "1131CD42-3DC3-11E8-A5CA-3FA3753A265A": {
+      "incident_events": 9599,
+      "temporal_reachable": 0,
+      "best_temporal": 0.0
+    },
+    "1AC05B7A-3DC3-11E8-A5CB-3FA3753A265A": {
+      "incident_events": 4,
+      "temporal_reachable": 0,
+      "best_temporal": 0.0
+    },
+    "B2C5B97D-3E7F-11E8-A5CB-3FA3753A265A": {
+      "incident_events": 10,
+      "temporal_reachable": 0,
+      "best_temporal": 0.0
+    },
+    "81E2003D-3E7B-11E8-A5CB-3FA3753A265A": {
+      "incident_events": 10,
+      "temporal_reachable": 0,
+      "best_temporal": 0.0
+    },
+    "15FD3B4A-3DC3-11E8-A5CB-3FA3753A265A": {
+      "incident_events": 4,
+      "temporal_reachable": 0,
+      "best_temporal": 0.0
+    },
+    "1902FFA3-6F80-2052-806F-3D6A2220819E": {
+      "incident_events": 1,
+      "temporal_reachable": 0,
+      "best_temporal": 0.0
+    },
+    "7D2E10B3-3E7B-11E8-A5CB-3FA3753A265A": {
+      "incident_events": 11,
+      "temporal_reachable": 0,
+      "best_temporal": 0.0
+    },
+    "AE11D308-3E7F-11E8-A5CB-3FA3753A265A": {
+      "incident_events": 11,
+      "temporal_reachable": 0,
+      "best_temporal": 0.0
+    }
+  }
+}

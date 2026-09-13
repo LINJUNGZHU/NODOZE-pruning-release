@@ -1,0 +1,6 @@
+{
+  "fractions": [0.1, 0.25],
+  "status": "exploratory_followup",
+  "motivation": "After viewing first three development cases, reserve a small part of the edge cap for temporal node coverage and use the rest for RASP evidence detail.",
+  "parameter_policy": "Both fractions fixed before follow-up evaluation; report both, no independent validation claim; union may use less than full budget."
+}
