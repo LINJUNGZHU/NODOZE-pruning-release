@@ -1,0 +1,23 @@
+{
+  "eligible": [],
+  "skipped": [
+    {
+      "id": "optc-0201",
+      "reason": "PDF only confirms a subset of agents; no complete attack-node, negative-node or attack-path labels. Background is not certified benign."
+    },
+    {
+      "id": "optc-0201-30m",
+      "reason": "PDF only confirms a subset of agents; no complete attack-node, negative-node or attack-path labels. Background is not certified benign."
+    },
+    {
+      "id": "optc-0201-60m",
+      "reason": "PDF only confirms a subset of agents; no complete attack-node, negative-node or attack-path labels. Background is not certified benign."
+    },
+    {
+      "id": "optc-0201-background",
+      "reason": "PDF only confirms a subset of agents; no complete attack-node, negative-node or attack-path labels. Background is not certified benign."
+    }
+  ],
+  "mode": "formal",
+  "policy_sha256": "45bd2a8c3bb525f981be24737bcc7fd90076a22abbdf68b4b6e63745c8e84525"
+}

@@ -4,6 +4,12 @@
 
 [网页启动与操作说明](webapp/README.md) · [PDF 真值与最新实测](docs/pdf-groundtruth-study.md) · [逐边选择方法与证明范围](docs/evidence-selection-method.md)
 
+## 最新研究与数据使用范围
+
+已整理 [2025—2026 社交网络传播论文与项目适配方案](docs/social-propagation-study.md)：优先考虑关系分离、反向源定位与正向证据核验、长链分组；新传播方案尚未替换默认算法。
+
+**当前 OPTC 四个窗口暂停用于正式攻击节点/路径基准**，保留历史展示和局部标注诊断。默认 PDF 评估脚本已接入 [数据准入清单](configs/benchmark-admission.json)，会跳过暂停及未经审核的场景；显式 `--diagnostic` 才复算局部标签并另存结果。四个 UUID 已核验的 DARPA 场景仍可用于 CSV 正例实体保留评估，不能据此报告完整分类正确率。下面的 OPTC 数值属于历史局部诊断。
+
 ## 当前算法思路（OPTC 网页主流程）
 
 ```mermaid

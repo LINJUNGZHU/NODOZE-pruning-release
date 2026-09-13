@@ -1,0 +1,117 @@
+{
+  "schema_version": 1,
+  "reviewed_on": "2026-09-13",
+  "default_formal_evaluation": false,
+  "scope": "No current dataset admitted for complete attack-node/path classification. Four audited DARPA cases remain usable for positive entity retention only. Missing labels are not proof of incorrect labels.",
+  "audit_sha256": "b291021778df7a4b4e3b79899cfc9c066a61f274445f97e9f061dc2b15cba7ac",
+  "cases": {
+    "optc-0201": {
+      "status": "paused_incomplete_truth",
+      "formal_evaluation": false,
+      "reason": "PDF only confirms a subset of agents; no complete attack-node, negative-node or attack-path labels. Background is not certified benign.",
+      "resume_when": "Independent node/path annotation and host/time identity review completed; freeze independent splits."
+    },
+    "optc-0201-30m": {
+      "status": "paused_incomplete_truth",
+      "formal_evaluation": false,
+      "reason": "PDF only confirms a subset of agents; no complete attack-node, negative-node or attack-path labels. Background is not certified benign.",
+      "resume_when": "Independent node/path annotation and host/time identity review completed; freeze independent splits."
+    },
+    "optc-0201-60m": {
+      "status": "paused_incomplete_truth",
+      "formal_evaluation": false,
+      "reason": "PDF only confirms a subset of agents; no complete attack-node, negative-node or attack-path labels. Background is not certified benign.",
+      "resume_when": "Independent node/path annotation and host/time identity review completed; freeze independent splits."
+    },
+    "optc-0201-background": {
+      "status": "paused_incomplete_truth",
+      "formal_evaluation": false,
+      "reason": "PDF only confirms a subset of agents; no complete attack-node, negative-node or attack-path labels. Background is not certified benign.",
+      "resume_when": "Independent node/path annotation and host/time identity review completed; freeze independent splits."
+    },
+    "E3-CADETS/node_Nginx_Backdoor_06.csv": {
+      "status": "eligible_positive_node_retention",
+      "formal_evaluation": false,
+      "positive_node_retention": true,
+      "source_sha256": "8905ffa57f99e4cbbf4b78179850073020a70089ff3ce05716f15eb3e2357c69",
+      "reason": "UUID audit supports positive entity retention only; CSV does not label full attack paths or negatives."
+    },
+    "E3-CADETS/node_Nginx_Backdoor_12.csv": {
+      "status": "eligible_positive_node_retention",
+      "formal_evaluation": false,
+      "positive_node_retention": true,
+      "source_sha256": "41b60345dcb551b5899b11fb116dc240493931a97ea3acd92c19d9a8a7730e88",
+      "reason": "UUID audit supports positive entity retention only; CSV does not label full attack paths or negatives."
+    },
+    "E3-CADETS/node_Nginx_Backdoor_13.csv": {
+      "status": "eligible_positive_node_retention",
+      "formal_evaluation": false,
+      "positive_node_retention": true,
+      "source_sha256": "1234a11304ba52cc7a9f0e6a4d006f1c14dc044a5a9201eec1e7ba7e42fa2bff",
+      "reason": "UUID audit supports positive entity retention only; CSV does not label full attack paths or negatives."
+    },
+    "E3-CLEARSCOPE/node_clearscope_e3_firefox_0411.csv": {
+      "status": "paused_missing_database",
+      "formal_evaluation": false,
+      "positive_node_retention": false,
+      "source_sha256": "4960ce62439656152acb93a6f01448b8cacab3d67939cbe917d60c1375aba76c",
+      "reason": "no_matching_local_database"
+    },
+    "E3-THEIA/node_Browser_Extension_Drakon_Dropper.csv": {
+      "status": "eligible_positive_node_retention",
+      "formal_evaluation": false,
+      "positive_node_retention": true,
+      "source_sha256": "3744eb81ee3b9c9daf913b98dd8a85335fbc1c29736ad345f7a13236ccb91250",
+      "reason": "UUID audit supports positive entity retention only; CSV does not label full attack paths or negatives."
+    },
+    "E3-THEIA/node_Firefox_Backdoor_Drakon_In_Memory.csv": {
+      "status": "paused_incomplete_run",
+      "formal_evaluation": false,
+      "positive_node_retention": false,
+      "source_sha256": "290da59a00161618e08020ccea25873a65c81c8ae26706b3f1b42257f4b62ca6",
+      "reason": "database_available_no_completed_prediction"
+    },
+    "E5-CADETS/node_Nginx_Drakon_APT.csv": {
+      "status": "paused_missing_database",
+      "formal_evaluation": false,
+      "positive_node_retention": false,
+      "source_sha256": "2e5327b94fef4751c9edc8f530b5ff6b5cea867ef403fff33280d2672fa42c07",
+      "reason": "no_matching_local_database"
+    },
+    "E5-CADETS/node_Nginx_Drakon_APT_17.csv": {
+      "status": "paused_missing_database",
+      "formal_evaluation": false,
+      "positive_node_retention": false,
+      "source_sha256": "10c3d8f11aa11f53a1fefa7fb84519e5a7a52be31ba805a696bb92e034949918",
+      "reason": "no_matching_local_database"
+    },
+    "E5-CLEARSCOPE/node_clearscope_e5_appstarter_0515.csv": {
+      "status": "paused_missing_database",
+      "formal_evaluation": false,
+      "positive_node_retention": false,
+      "source_sha256": "6f2253b0eb68f15d856d4764b034786e4eb83c5c7457ad0dfb3d7a185de6fef6",
+      "reason": "no_matching_local_database"
+    },
+    "E5-CLEARSCOPE/node_clearscope_e5_lockwatch_0517.csv": {
+      "status": "paused_missing_database",
+      "formal_evaluation": false,
+      "positive_node_retention": false,
+      "source_sha256": "cef24f7ae329961dceb328d9d022fa53623a8905c2a338bcf8c60b3c7e3f562e",
+      "reason": "no_matching_local_database"
+    },
+    "E5-CLEARSCOPE/node_clearscope_e5_tester_0517.csv": {
+      "status": "paused_missing_database",
+      "formal_evaluation": false,
+      "positive_node_retention": false,
+      "source_sha256": "484fd8b9689a827c5c6c8dbcd6876954f37463823a6599f6da46dcfd4d2e8567",
+      "reason": "no_matching_local_database"
+    },
+    "E5-THEIA/node_THEIA_1_Firefox_Drakon_APT_BinFmt_Elevate_Inject.csv": {
+      "status": "paused_missing_database",
+      "formal_evaluation": false,
+      "positive_node_retention": false,
+      "source_sha256": "f13984a6cbdb01039605a8aa6ed1ab735bb49258a1cb543ab42bc5f1f6cd8a9b",
+      "reason": "no_matching_local_database"
+    }
+  }
+}

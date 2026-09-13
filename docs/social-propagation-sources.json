@@ -1,0 +1,58 @@
+{
+  "as_of": "2026-09-13",
+  "papers": [
+    {
+      "id": "www26",
+      "url": "https://www.comp.hkbu.edu.hk/~xinhuang/publications/pdfs/WWW2026-Diffusion.pdf",
+      "pages": 10,
+      "sha256": "fe1776dc58c38be9a265c66b5db50b672b47f335536124678679c6158779b297",
+      "reading_scope": "Methods, evaluation and relevant proof assumptions; not a full reproduction."
+    },
+    {
+      "id": "sphere",
+      "url": "https://yang-ya-jun.github.io/yjyang/publications/kdd25.pdf",
+      "pages": 11,
+      "sha256": "6032a16d298fc3dcca687903bace219c5dcac162bbd930d4c57838b2e733dd03",
+      "reading_scope": "Methods, evaluation and relevant proof assumptions; not a full reproduction."
+    },
+    {
+      "id": "gdfsl",
+      "url": "https://www.ijcai.org/proceedings/2025/0325.pdf",
+      "pages": 9,
+      "sha256": "80db29f02175fb3cfb9e72f8df9d36429409a37ed6cd06898b92c25d03c38736",
+      "reading_scope": "Methods, evaluation and relevant proof assumptions; not a full reproduction."
+    },
+    {
+      "id": "blocker",
+      "url": "https://link.springer.com/content/pdf/10.1007/s00778-026-01003-4.pdf",
+      "pages": 26,
+      "sha256": "6cf18558afdac4ac9ecefdb89f64380e485fc992c48eb0235b622d911fa0241a",
+      "reading_scope": "Methods, evaluation and relevant proof assumptions; not a full reproduction."
+    },
+    {
+      "id": "pdsl",
+      "url": "https://arxiv.org/html/2605.03550v1",
+      "reading_scope": "Author full text sections III and IV, training and inference algorithms; IEEE typeset text unavailable.",
+      "doi": "10.1109/TNSE.2026.3688551"
+    }
+  ],
+  "code_files": [
+    {
+      "file": "blocker-main.code",
+      "sha256": "c9a40992832af1072287307978917bc06c0912a498087a2efb53849d6fbae064"
+    },
+    {
+      "file": "gdfsl-model.code",
+      "sha256": "bbc1a9a737e554f777b2c92ce44f8aa0e3163d70399afe0b55eab358ade21c00"
+    },
+    {
+      "file": "gdfsl-main.code",
+      "sha256": "62492413f4480dd30ec4fdd7f529329d0efffd7c9828fc93f32362d14853d67b"
+    },
+    {
+      "file": "blocker-h.code",
+      "sha256": "0d61f065b973ef85585726c8019510acede01c63edd67aadfd3fb6b4ec4dc1f2"
+    }
+  ],
+  "code_run": false
+}
