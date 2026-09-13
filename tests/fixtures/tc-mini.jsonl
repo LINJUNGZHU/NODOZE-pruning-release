@@ -1,0 +1,11 @@
+{"datum":{"com.bbn.tc.schema.avro.cdm20.Subject":{"uuid":"p-alert","type":"SUBJECT_PROCESS","cmdLine":{"string":"/bin/sh"},"hostId":"h1"}},"CDMVersion":"20"}
+{"datum":{"com.bbn.tc.schema.avro.cdm20.Subject":{"uuid":"p-attack","type":"SUBJECT_PROCESS","cmdLine":{"string":"/tmp/payload"},"hostId":"h1"}},"CDMVersion":"20"}
+{"datum":{"com.bbn.tc.schema.avro.cdm20.Subject":{"uuid":"p-benign","type":"SUBJECT_PROCESS","cmdLine":{"string":"/bin/cat"},"hostId":"h1"}},"CDMVersion":"20"}
+{"datum":{"com.bbn.tc.schema.avro.cdm20.FileObject":{"uuid":"f-common","type":"FILE_OBJECT_FILE","url":{"string":"file:///etc/hosts"},"hostId":"h1"}},"CDMVersion":"20"}
+{"datum":{"com.bbn.tc.schema.avro.cdm20.FileObject":{"uuid":"f-secret","type":"FILE_OBJECT_FILE","url":{"string":"file:///srv/secret"},"hostId":"h1"}},"CDMVersion":"20"}
+{"datum":{"com.bbn.tc.schema.avro.cdm20.NetFlowObject":{"uuid":"s-c2","remoteAddress":"203.0.113.9","remotePort":4444,"hostId":"h1"}},"CDMVersion":"20"}
+{"datum":{"com.bbn.tc.schema.avro.cdm20.Event":{"uuid":"e-common-1","type":"EVENT_READ","subject":{"com.bbn.tc.schema.avro.cdm20.UUID":"p-benign"},"predicateObject":{"com.bbn.tc.schema.avro.cdm20.UUID":"f-common"},"timestampNanos":1,"hostId":"h1"}},"CDMVersion":"20"}
+{"datum":{"com.bbn.tc.schema.avro.cdm20.Event":{"uuid":"e-common-2","type":"EVENT_READ","subject":{"com.bbn.tc.schema.avro.cdm20.UUID":"p-alert"},"predicateObject":{"com.bbn.tc.schema.avro.cdm20.UUID":"f-common"},"timestampNanos":2,"hostId":"h1"}},"CDMVersion":"20"}
+{"datum":{"com.bbn.tc.schema.avro.cdm20.Event":{"uuid":"e-fork","type":"EVENT_FORK","subject":{"com.bbn.tc.schema.avro.cdm20.UUID":"p-alert"},"predicateObject":{"com.bbn.tc.schema.avro.cdm20.UUID":"p-attack"},"timestampNanos":3,"hostId":"h1"}},"CDMVersion":"20"}
+{"datum":{"com.bbn.tc.schema.avro.cdm20.Event":{"uuid":"e-secret","type":"EVENT_READ","subject":{"com.bbn.tc.schema.avro.cdm20.UUID":"p-attack"},"predicateObject":{"com.bbn.tc.schema.avro.cdm20.UUID":"f-secret"},"timestampNanos":4,"hostId":"h1"}},"CDMVersion":"20"}
+{"datum":{"com.bbn.tc.schema.avro.cdm20.Event":{"uuid":"e-c2","type":"EVENT_CONNECT","subject":{"com.bbn.tc.schema.avro.cdm20.UUID":"p-attack"},"predicateObject":{"com.bbn.tc.schema.avro.cdm20.UUID":"s-c2"},"timestampNanos":5,"hostId":"h1"}},"CDMVersion":"20"}

@@ -76,18 +76,23 @@ def create_app(cache_path: str | Path | None = None, dataset_catalog: str | Path
         from tc_pruning.deep_graph import available_model
         return available_model() is not None and importlib.util.find_spec('torch') is not None
 
+    def multiview_available():
+        from tc_pruning.multiview import available_model
+        return available_model() is not None and importlib.util.find_spec('torch') is not None
+
     @app.get("/api/datasets")
     def datasets():
         entries=catalog()
         if entries:
             return jsonify(dict(datasets=[{k:v for k,v in e.items() if k!='cache_path'} for e in entries],
-                                neural_available=neural_available()))
+                                neural_available=neural_available(),multiview_available=multiview_available()))
         try:
             data = load_cache()
         except FileNotFoundError as exc:
             return jsonify({"datasets": [], "error": str(exc)}), 503
         return jsonify({
             "neural_available": neural_available(),
+            "multiview_available": multiview_available(),
             "datasets": [{
                 "id": data["dataset"]["id"],
                 "name": data["dataset"]["name"],
@@ -162,7 +167,7 @@ def create_app(cache_path: str | Path | None = None, dataset_catalog: str | Path
             return jsonify({'error': 'unknown dataset'}), 404
         if 'attack' not in data:
             return jsonify({'error': 'Recompute the POI to generate attack hypotheses'}), 503
-        ids = set(data['attack']['path_event_ids']) | set(data['attack']['evidence_event_ids']) | set(data['attack'].get('activity_event_ids',[]))
+        ids = set(data['attack']['path_event_ids']) | set(data['attack']['evidence_event_ids']) | set(data['attack'].get('activity_event_ids',[])) | set(data['attack'].get('context_event_ids',[]))
         response = jsonify(dict(dataset=data['dataset'],poi=data['poi'],history=data['history'],
                                 attack=data['attack'],events=[e for e in data['edges'] if e['id'] in ids]))
         response.headers['Content-Disposition'] = 'attachment; filename="optc-attack-report.json"'
@@ -172,7 +177,13 @@ def create_app(cache_path: str | Path | None = None, dataset_catalog: str | Path
         # Every raw event appears once in this compact canvas payload. No sampling.
         nodes=data['nodes'];ids={n['id']:i for i,n in enumerate(nodes)}
         fields=('dataset','metrics','poi','poi_presets','history','algorithm','truth','logs','attack')
-        return dict(**{k:data[k] for k in fields if k in data},
+        payload={k:data[k] for k in fields if k in data}
+        if 'attack' in payload:
+            payload['attack']=dict(payload['attack'])
+            if 'model' in payload['attack']:
+                payload['attack']['model']={k:v for k,v in payload['attack']['model'].items() if k!='context_index'}
+            payload['attack'].pop('context_event_ids',None)
+        return dict(**payload,
                     graph=dict(nodes=[[n['id'],n['label'],n['type']] for n in nodes],
                                edges=[[e['id'],ids[e['source']],ids[e['target']],int(e['retained']),e['score']] for e in data['edges']],
                                full_event_count=len(data['edges']),sampled=False),

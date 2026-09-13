@@ -93,7 +93,7 @@ async function showEvent(id){
  }catch(e){fail(e);}
 }
 function selectTab(name){document.querySelectorAll('[data-tab]').forEach(b=>{const selected=b.dataset.tab===name;b.classList.toggle('active',selected);b.setAttribute('aria-selected',String(selected));$('#panel-'+b.dataset.tab).hidden=!selected;});if(name==='events')renderTable();}
-function updateDetectorControl(){$('#quantile-control').hidden=$('#detector').value==='neural';}
+function updateDetectorControl(){$('#quantile-control').hidden=['neural','multiview'].includes($('#detector').value);}
 $('#detector').onchange=updateDetectorControl;
 $('#close-detail').onclick=()=>$('#detail-dialog').close();$('#detail-dialog').onclick=e=>{if(e.target===$('#detail-dialog')){const r=e.target.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)e.target.close();}};
 document.querySelectorAll('[data-tab]').forEach(b=>{b.onclick=()=>selectTab(b.dataset.tab);b.onkeydown=e=>{if(!['ArrowLeft','ArrowRight'].includes(e.key))return;e.preventDefault();const tabs=[...document.querySelectorAll('[data-tab]')],next=tabs[(tabs.indexOf(b)+(e.key==='ArrowRight'?1:tabs.length-1))%tabs.length];next.focus();selectTab(next.dataset.tab);};});
@@ -101,5 +101,5 @@ let searchTimer;$('#edge-search').oninput=()=>{clearTimeout(searchTimer);searchT
 $('#poi-select').onchange=()=>{const p=state.data?.poi_presets.find(p=>p.event_id===$('#poi-select').value);$('#poi-id').value=p?p.event_id:'';$('#poi-evidence').textContent=p?`待应用：${p.label}。点击“重新分析”生效。`:'在自定义设置中输入候选图内的事件 ID。';if(!p){$('.advanced').open=true;$('#poi-id').focus();}};
 $('#poi-id').oninput=()=>{const p=state.data?.poi_presets.find(p=>p.event_id===$('#poi-id').value.trim());$('#poi-select').value=p?p.event_id:'custom';$('#poi-evidence').textContent='新的起点尚未生效。点击“重新分析”后更新结果。';};
 $('#poi-form').onsubmit=async e=>{e.preventDefault();if(!state.data||state.busy)return;setBusy(true);$('#error').hidden=true;$('#prune-status').textContent='正在重新统计 POI 前频次、剪枝并识别进程…';try{const d=await api(base()+'/prune',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({poi_event_id:$('#poi-id').value.trim(),budget_ratio:Number($('#edge-budget').value),selection_mode:$('#selection-mode').value,attack_quantile:Number($('#attack-quantile').value),detector:$('#detector').value,compact:true})});render(d);$('#prune-status').textContent='分析完成，结果已保存。';}catch(e){fail(e);$('#prune-status').textContent='本次未完成，仍显示上一次成功的结果。';}finally{setBusy(false);}};
-async function boot(){try{const d=await api('/api/datasets');state.cases=d.datasets;$('#detector option[value="neural"]').disabled=!d.neural_available;renderCases();if(!d.datasets.length)throw Error('没有已准备的案例。');await loadCase(d.datasets[0].id);}catch(e){fail(e);}}
+async function boot(){try{const d=await api('/api/datasets');state.cases=d.datasets;$('#detector option[value="neural"]').disabled=!d.neural_available;$('#detector option[value="multiview"]').disabled=!d.multiview_available;renderCases();if(!d.datasets.length)throw Error('没有已准备的案例。');await loadCase(d.datasets[0].id);}catch(e){fail(e);}}
 initCanvas();boot();

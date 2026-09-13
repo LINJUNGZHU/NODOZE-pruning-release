@@ -1,0 +1,385 @@
+{
+  "note": "Seeds declared before evaluation; seed913 remains default rather than selecting the best test seed.",
+  "results": [
+    {
+      "seed": 914,
+      "weights_sha256": "1efd9096fdf9546df1486312076e2a200dbce56a9a93a3eee83bd7e729347d5b",
+      "cases": [
+        {
+          "id": "optc-0201",
+          "seconds": 2.5045900009572506,
+          "published_benchmark": {
+            "tp": 2,
+            "fp": 10,
+            "fn": 6,
+            "tn": 95,
+            "predicted": 12,
+            "known_positive": 8,
+            "known_negative": 105,
+            "unknown_nodes": 0,
+            "unreviewed_predictions": 0,
+            "known_positive_recall": 0.25,
+            "precision": 0.16666666666666666,
+            "recall": 0.25,
+            "accuracy": 0.8584070796460177,
+            "f1": 0.2,
+            "precision_bounds": [
+              0.16666666666666666,
+              0.16666666666666666
+            ],
+            "complete_labels": true
+          },
+          "tapas_benchmark": {
+            "tp": 5,
+            "fp": 7,
+            "fn": 39,
+            "tn": 62,
+            "predicted": 12,
+            "known_positive": 44,
+            "known_negative": 69,
+            "unknown_nodes": 0,
+            "unreviewed_predictions": 0,
+            "known_positive_recall": 0.11363636363636363,
+            "precision": 0.4166666666666667,
+            "recall": 0.11363636363636363,
+            "accuracy": 0.5929203539823009,
+            "f1": 0.17857142857142858,
+            "precision_bounds": [
+              0.4166666666666667,
+              0.4166666666666667
+            ],
+            "complete_labels": true
+          }
+        },
+        {
+          "id": "optc-0201-30m",
+          "seconds": 3.5648843199014664,
+          "published_benchmark": {
+            "tp": 2,
+            "fp": 25,
+            "fn": 6,
+            "tn": 322,
+            "predicted": 27,
+            "known_positive": 8,
+            "known_negative": 347,
+            "unknown_nodes": 0,
+            "unreviewed_predictions": 0,
+            "known_positive_recall": 0.25,
+            "precision": 0.07407407407407407,
+            "recall": 0.25,
+            "accuracy": 0.9126760563380282,
+            "f1": 0.11428571428571428,
+            "precision_bounds": [
+              0.07407407407407407,
+              0.07407407407407407
+            ],
+            "complete_labels": true
+          },
+          "tapas_benchmark": {
+            "tp": 12,
+            "fp": 15,
+            "fn": 57,
+            "tn": 271,
+            "predicted": 27,
+            "known_positive": 69,
+            "known_negative": 286,
+            "unknown_nodes": 0,
+            "unreviewed_predictions": 0,
+            "known_positive_recall": 0.17391304347826086,
+            "precision": 0.4444444444444444,
+            "recall": 0.17391304347826086,
+            "accuracy": 0.7971830985915493,
+            "f1": 0.25,
+            "precision_bounds": [
+              0.4444444444444444,
+              0.4444444444444444
+            ],
+            "complete_labels": true
+          }
+        },
+        {
+          "id": "optc-0201-60m",
+          "seconds": 7.641765058040619,
+          "published_benchmark": {
+            "tp": 2,
+            "fp": 27,
+            "fn": 6,
+            "tn": 863,
+            "predicted": 29,
+            "known_positive": 8,
+            "known_negative": 890,
+            "unknown_nodes": 0,
+            "unreviewed_predictions": 0,
+            "known_positive_recall": 0.25,
+            "precision": 0.06896551724137931,
+            "recall": 0.25,
+            "accuracy": 0.9632516703786191,
+            "f1": 0.10810810810810811,
+            "precision_bounds": [
+              0.06896551724137931,
+              0.06896551724137931
+            ],
+            "complete_labels": true
+          },
+          "tapas_benchmark": {
+            "tp": 12,
+            "fp": 17,
+            "fn": 58,
+            "tn": 811,
+            "predicted": 29,
+            "known_positive": 70,
+            "known_negative": 828,
+            "unknown_nodes": 0,
+            "unreviewed_predictions": 0,
+            "known_positive_recall": 0.17142857142857143,
+            "precision": 0.41379310344827586,
+            "recall": 0.17142857142857143,
+            "accuracy": 0.9164810690423163,
+            "f1": 0.24242424242424243,
+            "precision_bounds": [
+              0.41379310344827586,
+              0.41379310344827586
+            ],
+            "complete_labels": true
+          }
+        },
+        {
+          "id": "optc-0201-background",
+          "seconds": 3.0767743661999702,
+          "published_benchmark": {
+            "tp": 0,
+            "fp": 20,
+            "fn": 0,
+            "tn": 295,
+            "predicted": 20,
+            "known_positive": 0,
+            "known_negative": 315,
+            "unknown_nodes": 0,
+            "unreviewed_predictions": 0,
+            "known_positive_recall": null,
+            "precision": 0.0,
+            "recall": null,
+            "accuracy": 0.9365079365079365,
+            "f1": 0.0,
+            "precision_bounds": [
+              0.0,
+              0.0
+            ],
+            "complete_labels": true
+          },
+          "tapas_benchmark": {
+            "tp": 6,
+            "fp": 14,
+            "fn": 44,
+            "tn": 251,
+            "predicted": 20,
+            "known_positive": 50,
+            "known_negative": 265,
+            "unknown_nodes": 0,
+            "unreviewed_predictions": 0,
+            "known_positive_recall": 0.12,
+            "precision": 0.3,
+            "recall": 0.12,
+            "accuracy": 0.8158730158730159,
+            "f1": 0.17142857142857143,
+            "precision_bounds": [
+              0.3,
+              0.3
+            ],
+            "complete_labels": true
+          }
+        }
+      ]
+    },
+    {
+      "seed": 915,
+      "weights_sha256": "72f6863218bb35b9d0e0375cbff2269db188fe31a7e9d3fe43a5813aab96e7f8",
+      "cases": [
+        {
+          "id": "optc-0201",
+          "seconds": 1.0960780084133148,
+          "published_benchmark": {
+            "tp": 2,
+            "fp": 7,
+            "fn": 6,
+            "tn": 98,
+            "predicted": 9,
+            "known_positive": 8,
+            "known_negative": 105,
+            "unknown_nodes": 0,
+            "unreviewed_predictions": 0,
+            "known_positive_recall": 0.25,
+            "precision": 0.2222222222222222,
+            "recall": 0.25,
+            "accuracy": 0.8849557522123894,
+            "f1": 0.23529411764705882,
+            "precision_bounds": [
+              0.2222222222222222,
+              0.2222222222222222
+            ],
+            "complete_labels": true
+          },
+          "tapas_benchmark": {
+            "tp": 4,
+            "fp": 5,
+            "fn": 40,
+            "tn": 64,
+            "predicted": 9,
+            "known_positive": 44,
+            "known_negative": 69,
+            "unknown_nodes": 0,
+            "unreviewed_predictions": 0,
+            "known_positive_recall": 0.09090909090909091,
+            "precision": 0.4444444444444444,
+            "recall": 0.09090909090909091,
+            "accuracy": 0.6017699115044248,
+            "f1": 0.1509433962264151,
+            "precision_bounds": [
+              0.4444444444444444,
+              0.4444444444444444
+            ],
+            "complete_labels": true
+          }
+        },
+        {
+          "id": "optc-0201-30m",
+          "seconds": 3.4239011593163013,
+          "published_benchmark": {
+            "tp": 2,
+            "fp": 15,
+            "fn": 6,
+            "tn": 332,
+            "predicted": 17,
+            "known_positive": 8,
+            "known_negative": 347,
+            "unknown_nodes": 0,
+            "unreviewed_predictions": 0,
+            "known_positive_recall": 0.25,
+            "precision": 0.11764705882352941,
+            "recall": 0.25,
+            "accuracy": 0.9408450704225352,
+            "f1": 0.16,
+            "precision_bounds": [
+              0.11764705882352941,
+              0.11764705882352941
+            ],
+            "complete_labels": true
+          },
+          "tapas_benchmark": {
+            "tp": 7,
+            "fp": 10,
+            "fn": 62,
+            "tn": 276,
+            "predicted": 17,
+            "known_positive": 69,
+            "known_negative": 286,
+            "unknown_nodes": 0,
+            "unreviewed_predictions": 0,
+            "known_positive_recall": 0.10144927536231885,
+            "precision": 0.4117647058823529,
+            "recall": 0.10144927536231885,
+            "accuracy": 0.7971830985915493,
+            "f1": 0.16279069767441862,
+            "precision_bounds": [
+              0.4117647058823529,
+              0.4117647058823529
+            ],
+            "complete_labels": true
+          }
+        },
+        {
+          "id": "optc-0201-60m",
+          "seconds": 7.638814672827721,
+          "published_benchmark": {
+            "tp": 2,
+            "fp": 18,
+            "fn": 6,
+            "tn": 872,
+            "predicted": 20,
+            "known_positive": 8,
+            "known_negative": 890,
+            "unknown_nodes": 0,
+            "unreviewed_predictions": 0,
+            "known_positive_recall": 0.25,
+            "precision": 0.1,
+            "recall": 0.25,
+            "accuracy": 0.9732739420935412,
+            "f1": 0.14285714285714285,
+            "precision_bounds": [
+              0.1,
+              0.1
+            ],
+            "complete_labels": true
+          },
+          "tapas_benchmark": {
+            "tp": 8,
+            "fp": 12,
+            "fn": 62,
+            "tn": 816,
+            "predicted": 20,
+            "known_positive": 70,
+            "known_negative": 828,
+            "unknown_nodes": 0,
+            "unreviewed_predictions": 0,
+            "known_positive_recall": 0.11428571428571428,
+            "precision": 0.4,
+            "recall": 0.11428571428571428,
+            "accuracy": 0.9175946547884187,
+            "f1": 0.17777777777777778,
+            "precision_bounds": [
+              0.4,
+              0.4
+            ],
+            "complete_labels": true
+          }
+        },
+        {
+          "id": "optc-0201-background",
+          "seconds": 2.9750900641083717,
+          "published_benchmark": {
+            "tp": 0,
+            "fp": 17,
+            "fn": 0,
+            "tn": 298,
+            "predicted": 17,
+            "known_positive": 0,
+            "known_negative": 315,
+            "unknown_nodes": 0,
+            "unreviewed_predictions": 0,
+            "known_positive_recall": null,
+            "precision": 0.0,
+            "recall": null,
+            "accuracy": 0.946031746031746,
+            "f1": 0.0,
+            "precision_bounds": [
+              0.0,
+              0.0
+            ],
+            "complete_labels": true
+          },
+          "tapas_benchmark": {
+            "tp": 5,
+            "fp": 12,
+            "fn": 45,
+            "tn": 253,
+            "predicted": 17,
+            "known_positive": 50,
+            "known_negative": 265,
+            "unknown_nodes": 0,
+            "unreviewed_predictions": 0,
+            "known_positive_recall": 0.1,
+            "precision": 0.29411764705882354,
+            "recall": 0.1,
+            "accuracy": 0.819047619047619,
+            "f1": 0.14925373134328357,
+            "precision_bounds": [
+              0.29411764705882354,
+              0.29411764705882354
+            ],
+            "complete_labels": true
+          }
+        }
+      ]
+    }
+  ]
+}

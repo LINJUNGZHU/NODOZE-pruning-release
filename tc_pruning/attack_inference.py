@@ -97,9 +97,12 @@ def check_path(event_ids, by_id):
 def infer_attack(edges, poi_id, config=None, detector='rules', neural_scores=None):
     started = time.monotonic()
     cfg = dict(DEFAULT_CONFIG, **(config or {}))
-    if detector not in ('rules','rules_legacy','neural'):raise ValueError('unknown attack detector')
+    if detector not in ('rules','rules_legacy','neural','multiview'):raise ValueError('unknown attack detector')
     if detector=='neural' and neural_scores is None:
         from tc_pruning.deep_graph import score_nodes
+        neural_scores=score_nodes(edges)
+    if detector=='multiview' and neural_scores is None:
+        from tc_pruning.multiview import score_nodes
         neural_scores=score_nodes(edges)
     q = cfg['anomaly_quantile']
     if isinstance(q, bool) or not isinstance(q, (float,int)) or not 0 < q < 1:
@@ -170,7 +173,7 @@ def infer_attack(edges, poi_id, config=None, detector='rules', neural_scores=Non
     if detector=='rules':
         from tc_pruning.rule_lineage import expand_lineage
         rule_summary=expand_lineage(rows,edges,cfg)
-    if detector=='neural':
+    if detector in ('neural','multiview'):
         for row in rows:
             neural=neural_scores['nodes'].get(row['id'])
             row['rule_prediction']=row['predicted_attack']
@@ -182,6 +185,9 @@ def infer_attack(edges, poi_id, config=None, detector='rules', neural_scores=Non
             row['first_support_ns']=min((by_id[i]['timestamp_ns'] for i in row['evidence_event_ids']),default=None)
             row['reasons']=[f"学习到的图表示与历史近邻距离 {row['anomaly_score']:.5g} {'超过' if row['predicted_attack'] else '未超过'} 独立校准线 {neural_scores['threshold']:.5g}；规则不参与本次判定"]
             row['status']='inferred_attack' if row['predicted_attack'] else 'manual_seed' if row['seed_node'] else 'unclassified'
+            if detector=='multiview':
+                row['multiview']=neural;row.pop('neural',None)
+                row['reasons']=[f"属性、结构、事件预测三个视角共获得 {neural['votes'] if neural else 0}/7 票；至少 4 票产生异常候选，校准线固定于更早数据。"]
     rows.sort(key=lambda r:(not r['predicted_attack'],not r['behavioral_match'],-r['anomaly_score'],r['id']))
     for rank,row in enumerate(rows,1): row['rank']=rank
     predicted = {r['id']:r for r in rows if r['predicted_attack']}
@@ -271,6 +277,18 @@ def infer_attack(edges, poi_id, config=None, detector='rules', neural_scores=Non
         report['threshold']=dict(value=neural_scores['threshold'],comparison='strict >',calibration=neural_scores['calibration'])
         report['contract']['classification']='Learned graph embedding neighbor distance only; no rule or POI gating'
         report['contract']['scope']='Retrospective minute-level graphs in the candidate window; model/calibration strictly earlier'
+    if detector=='multiview':
+        report['version']='attack-hypothesis-v3-multiview'
+        report['model']={k:v for k,v in neural_scores.items() if k!='nodes'}
+        report['threshold']=dict(value=4,comparison='>=',calibration=neural_scores['calibration'])
+        report['contract']['classification']='Seven empirical dimensions from three learned views; at least four votes; no rule or POI gating'
+        report['contract']['scope']='Retrospective minute-local views; causal predictor sees strictly earlier actor history; frozen earlier calibration'
+        from tc_pruning.multiview import resolve_context
+        report['context_event_ids']=sorted({eid for row in rows if row['predicted_attack']
+            for view in row['multiview']['views'].values()
+            for eid in resolve_context(view,neural_scores.get('context_index',{}))})
+    from tc_pruning.attack_story import build_story
+    report['story']=build_story(report,edges)
     inputs = [dict(id=e['id'],source=e['source'],target=e['target'],timestamp_ns=e['timestamp_ns'],raw=e['raw'],
                    evidence_score=e.get('evidence_score'),historical_count=e.get('historical_count'),
                    certified=e.get('decision',{}).get('certified_background_lift'),

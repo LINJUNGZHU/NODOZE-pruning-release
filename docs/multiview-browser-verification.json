@@ -1,0 +1,79 @@
+{
+  "cases": [
+    {
+      "id": "optc-0201",
+      "full_edges": 27011,
+      "predictions": 14,
+      "verification": {
+        "multiview_references_verified": true,
+        "learned_scores_recomputed": false,
+        "story_facts_verified": true,
+        "activity_membership_verified": true,
+        "rule_witnesses_verified": false,
+        "raw_events_verified": true,
+        "strict_temporal_paths_verified": true,
+        "roles_verified": true,
+        "paths": 26,
+        "maliciousness_proven": false,
+        "limitation": "Checks internal event/route consistency, not log authenticity, model optimality or ground-truth correctness."
+      }
+    },
+    {
+      "id": "optc-0201-30m",
+      "full_edges": 86318,
+      "predictions": 23,
+      "verification": {
+        "multiview_references_verified": true,
+        "learned_scores_recomputed": false,
+        "story_facts_verified": true,
+        "activity_membership_verified": true,
+        "rule_witnesses_verified": false,
+        "raw_events_verified": true,
+        "strict_temporal_paths_verified": true,
+        "roles_verified": true,
+        "paths": 23,
+        "maliciousness_proven": false,
+        "limitation": "Checks internal event/route consistency, not log authenticity, model optimality or ground-truth correctness."
+      }
+    },
+    {
+      "id": "optc-0201-60m",
+      "full_edges": 188609,
+      "predictions": 27,
+      "verification": {
+        "multiview_references_verified": true,
+        "learned_scores_recomputed": false,
+        "story_facts_verified": true,
+        "activity_membership_verified": true,
+        "rule_witnesses_verified": false,
+        "raw_events_verified": true,
+        "strict_temporal_paths_verified": true,
+        "roles_verified": true,
+        "paths": 27,
+        "maliciousness_proven": false,
+        "limitation": "Checks internal event/route consistency, not log authenticity, model optimality or ground-truth correctness."
+      }
+    },
+    {
+      "id": "optc-0201-background",
+      "full_edges": 74654,
+      "predictions": 26,
+      "verification": {
+        "multiview_references_verified": true,
+        "learned_scores_recomputed": false,
+        "story_facts_verified": true,
+        "activity_membership_verified": true,
+        "rule_witnesses_verified": false,
+        "raw_events_verified": true,
+        "strict_temporal_paths_verified": true,
+        "roles_verified": true,
+        "paths": 23,
+        "maliciousness_proven": false,
+        "limitation": "Checks internal event/route consistency, not log authenticity, model optimality or ground-truth correctness."
+      }
+    }
+  ],
+  "errors": [],
+  "desktop_overflow": false,
+  "mobile_overflow": false
+}

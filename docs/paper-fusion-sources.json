@@ -1,0 +1,40 @@
+{
+  "accessed": "2026-09-13",
+  "papers": [
+    {
+      "name": "ocr-apt.pdf",
+      "sha256": "80c15e666cd69945cb935da045f2ee3da6940f08a5e7a2849cd3f9b09c6bf9eb",
+      "bytes": 1260314
+    },
+    {
+      "name": "provfusion.pdf",
+      "sha256": "4d8022a17acfe719b568629c777eefa817b0363365171fafa1d46bc6b330650c",
+      "bytes": 1212815
+    },
+    {
+      "name": "slot.pdf",
+      "sha256": "c80f5b61433ce2f7f2fb4b0c5bfa2d68dc310ec7e8cefabb098da168b5244880",
+      "bytes": 5190329
+    }
+  ],
+  "repositories": {
+    "Joney-Yf/ProvFusion": {
+      "commit": "9364b16d6915ca7d48555c5405f1d4fb97215e9a",
+      "files": [
+        "Open_Source_ProvFusion/ProvFusion.py",
+        "Open_Source_ProvFusion/try_different_threshold.py",
+        "Open_Source_ProvFusion/link_prediction_evaluation.py"
+      ]
+    },
+    "CoDS-GCS/OCR-APT": {
+      "commit": "d927daf6057c80a46bdc5e44d7aa373d4a3ad5d3",
+      "files": [
+        "src/pygod/detector/ocrgcn.py",
+        "src/detect_anomalous_subgraphs.py",
+        "src/ocrapt_llm_investigator.py",
+        "src/llm_prompt.py"
+      ]
+    }
+  },
+  "slot_code": "No author-confirmed public implementation located in this review"
+}

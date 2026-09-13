@@ -4,3 +4,5 @@
 .reference-comparison{font-size:12px;line-height:1.8;background:#f7f4ec;border-left:3px solid #b49c65;padding:10px 14px;margin-top:10px;color:#716041}
 
 .activity-row{display:flex;align-items:center;gap:15px;justify-content:space-between;margin:12px 0}.activity-row button{font-size:12px;white-space:nowrap}@media(max-width:580px){.activity-row{align-items:flex-start;flex-direction:column}}
+
+#attack-story{margin-top:24px;border-top:1px solid var(--line,#e2e5e9);padding-top:16px}.story-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.story-grid article{min-width:0;padding:12px 0}.story-grid h4{margin:0 0 8px}.view-evidence{display:grid;gap:12px;margin:16px 0}.view-evidence>div{display:grid;gap:5px}.view-evidence meter{width:100%}.view-evidence span{font-size:13px;color:#586174}@media(max-width:760px){.story-grid{grid-template-columns:1fr}}

@@ -28,8 +28,40 @@ def verify(document):
     if path_union!=set(attack['path_event_ids']): raise ValueError('path event union mismatch')
     evidence={i for n in attack['nodes'] if n['predicted_attack'] for i in n['evidence_event_ids']}
     if evidence!=set(attack['evidence_event_ids']): raise ValueError('evidence union mismatch')
+    multiview_verified=False;context_union=set()
+    context_index=attack.get('model',{}).get('context_index',{})
+    for node in attack['nodes']:
+        mv=node.get('multiview')
+        if not mv or not node['predicted_attack']:continue
+        if set(mv.get('views',{}))!={'attribute','structural','causal'}:raise ValueError('invalid view set')
+        view_union={eid for view in mv['views'].values() for eid in view['evidence_event_ids']}
+        if not view_union<=set(by_id) or view_union!=set(node['evidence_event_ids']) or view_union!=set(mv['evidence_event_ids']):
+            raise ValueError('view evidence union mismatch')
+        for view in mv['views'].values():
+            if not set(view.get('target_event_ids',[]))<=set(view['evidence_event_ids']):raise ValueError('view target evidence missing')
+            from tc_pruning.multiview import resolve_context
+            resolved=set(resolve_context(view,context_index))
+            if not resolved<=set(by_id):raise ValueError('view scoring context missing')
+            scope=view.get('context_scope')
+            if scope is not None:
+                if any(by_id[eid]['timestamp_ns']//60_000_000_000!=scope['minute'] for eid in resolved):
+                    raise ValueError('view context minute mismatch')
+                if 'before_ns' in scope:
+                    targets=view.get('target_event_ids',[])
+                    if len(targets)!=1 or by_id[targets[0]]['timestamp_ns']!=scope['before_ns']:
+                        raise ValueError('view context cutoff mismatch')
+            context_union.update(resolved)
+        if len(mv['flags'])!=7 or any(type(flag) is not bool for flag in mv['flags']) or sum(mv['flags'])!=mv['votes']:
+            raise ValueError('view voting mismatch')
+        if mv['predicted']!=(mv['votes']>=4) or node['predicted_attack']!=mv['predicted']:
+            raise ValueError('view prediction mismatch')
+        multiview_verified=True
+    if context_union!=set(attack.get('context_event_ids',[])):raise ValueError('view context union mismatch')
+    for entries in context_index.values():
+        for eid,timestamp in entries:
+            if eid in context_union and by_id[eid]['timestamp_ns']!=timestamp:raise ValueError('view context timestamp mismatch')
     activity=set(attack.get('activity_event_ids',[]))
-    if set(by_id)!=path_union|evidence|activity: raise ValueError('missing/extra supporting event')
+    if set(by_id)!=path_union|evidence|activity|context_union: raise ValueError('missing/extra supporting event')
     processes={n['id'] for n in attack['nodes']};predicted={n['id'] for n in attack['nodes'] if n['predicted_attack']}
     path_nodes={n for p in attack['paths'] for n in p['node_ids']}
     if set(attack['connector_node_ids'])!=(path_nodes&processes)-predicted: raise ValueError('connector role mismatch')
@@ -69,7 +101,11 @@ def verify(document):
                            (e['relation']=='PROCESS_CREATE' or e['raw']['object']=='FLOW' and e['raw']['properties'].get('direction','').lower()=='outbound') for e in support):
                     raise ValueError('behavioral root corroboration is outside lifetime')
         rule_verified=True
-    return dict(activity_membership_verified=activity_verified,rule_witnesses_verified=rule_verified,raw_events_verified=True,strict_temporal_paths_verified=True,roles_verified=True,
+    story_verified=False
+    if 'story' in attack:
+        from tc_pruning.attack_story import verify_story
+        story_verified=verify_story(attack,events)
+    return dict(multiview_references_verified=multiview_verified,learned_scores_recomputed=False,story_facts_verified=story_verified,activity_membership_verified=activity_verified,rule_witnesses_verified=rule_verified,raw_events_verified=True,strict_temporal_paths_verified=True,roles_verified=True,
                 paths=len(attack['paths']),maliciousness_proven=False,
                 limitation='Checks internal event/route consistency, not log authenticity, model optimality or ground-truth correctness.')
 

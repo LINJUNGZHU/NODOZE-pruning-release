@@ -14,6 +14,7 @@
 *.sqlite3
 *.jsonl
 *.jsonl.gz
+!tests/fixtures/tc-mini.jsonl
 
 # Python caches, coverage, and virtual environments
 __pycache__/
