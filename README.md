@@ -4,6 +4,39 @@
 
 [网页启动与操作说明](webapp/README.md) · [PDF 真值与最新实测](docs/pdf-groundtruth-study.md) · [逐边选择方法与证明范围](docs/evidence-selection-method.md)
 
+## 接手速览：前后端与 GitHub
+
+本机主仓库：`/root/NODOZE-pruning-release`，主分支：`main`。GitHub：[LINJUNGZHU/NODOZE-pruning-release](https://github.com/LINJUNGZHU/NODOZE-pruning-release)，`origin` 使用 SSH：`git@github.com:LINJUNGZHU/NODOZE-pruning-release.git`；本机已配置并成功推送。
+
+| 部分 | 入口与用途 |
+|---|---|
+| 前端 | `webapp/frontend/`：`index.html` 页面、`styles.css` 样式、`app.js` 案例/图/日志交互、`attack.js` 攻击线索展示；原生 HTML/CSS/JS，无需 npm 构建。 |
+| 后端 | `webapp/backend/app.py`：Flask，同时提供静态页面与分析 API，连接案例、POI、剪枝及攻击报告。 |
+| 算法与实验 | `tc_pruning/` 算法；`scripts/` 离线实验；`webapp/scripts/` 案例准备、评估和报告核验。社交传播新方法仍是离线实验，未替换网页默认算法。 |
+| 本地数据 | `webapp/runtime/` 存放案例缓存与研究数据；`output/` 存放实验输出。原始日志、数据库、真值归档不随 Git 上传，新机器需按 [网页说明](webapp/README.md) 准备数据。 |
+
+已有数据的服务器启动方式：
+
+```bash
+cd /root/NODOZE-pruning-release
+python webapp/backend/app.py
+```
+
+访问 `http://127.0.0.1:8000`，远程可通过 SSH 端口转发；监听地址和端口由 `NODOZE_WEB_HOST`、`NODOZE_WEB_PORT` 设置。页面按“选案例与 POI → 重新分析 → 看原图/剪枝图、逐边评分与攻击线索”使用；启动前先确认已有服务，避免重复占用端口。
+
+上传修改时，在主仓库核对分支与差异，只暂存本次文件（以下以 README 为例）：
+
+```bash
+git status --short --branch
+git diff -- README.md
+git add README.md
+git diff --cached --check
+git commit -m "docs: update project handoff"
+git push origin main
+```
+
+其他窗口可能有未提交修改，接手时先检查工作区，不要一起提交或覆盖。推送源码不会自动重启网页服务；后端修改需重启，前端修改需刷新页面。算法与前后端改动应运行对应测试，数据文件遵守 `.gitignore`。
+
 ## 最新研究与数据使用范围
 
 [社交传播适配实验已完成](docs/social-propagation-experiment.md)：四个准入 DARPA 场景、84 组同预算上限对照。20% 边预算下，预设融合使实体保留宏平均从 84.93% 升至 87.02%；探索性 25% 预算分配达到 93.27%，但参考事件保留从 95.87% 降至 93.18%。这些是正例实体/参考事件保留，不是分类正确率，默认算法保留。
