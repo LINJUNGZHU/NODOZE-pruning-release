@@ -1,0 +1,717 @@
+{
+  "schema_version": 1,
+  "source": "OpTCRedTeamGroundTruth.pdf",
+  "sha256": "3ce93669715280f15d49a46b2bfe328a8340f0fdb3bbd709c28a74df5057b679",
+  "resolution_tolerance_seconds": 60,
+  "time_policy": "红队操作记录采用 UTC−04；查找遥测身份允许首尾各 60 秒记录偏差，明确报告，未根据模型结果调整。",
+  "agents": [
+    {
+      "id": "VL8B5T3U",
+      "host": "Sysclient0201",
+      "date": "2019-09-23",
+      "pid": 5452,
+      "reported_ip": "142.20.56.202",
+      "c2_ip": "132.197.158.98",
+      "page": 1,
+      "excerpt": "Sysclient0201 VL8B5T3U 142.20.56.202 5452",
+      "active_start": "2019-09-23T11:24:54-04:00",
+      "active_end": "2019-09-23T11:26:56-04:00",
+      "time_source_pages": [
+        1,
+        2
+      ],
+      "c2_source": {
+        "page": 1,
+        "excerpt": "ip -- 132.197.158.98"
+      },
+      "start_source": {
+        "page": 1,
+        "excerpt": "09/23/19 11:24:54 -- Successfull checkin for Agent VL8B5T3U on Sysclient0201 ip 142.20.56.202"
+      },
+      "end_source": {
+        "page": 1,
+        "excerpt": "09/23/19 11:26:56 -- On Sysclient0201, killing agent VL8B5T3U"
+      }
+    },
+    {
+      "id": "LUAVR71T",
+      "host": "Sysclient0201",
+      "date": "2019-09-23",
+      "pid": 2952,
+      "reported_ip": "142.20.56.202",
+      "c2_ip": "132.197.158.98",
+      "page": 1,
+      "excerpt": "Sysclient0201 LUAVR71T 142.20.56.202 2952",
+      "active_start": "2019-09-23T11:26:38-04:00",
+      "active_end": "2019-09-23T14:06:01-04:00",
+      "time_source_pages": [
+        1,
+        2
+      ],
+      "c2_source": {
+        "page": 1,
+        "excerpt": "ip -- 132.197.158.98"
+      },
+      "start_source": {
+        "page": 1,
+        "excerpt": "09/23/19 11:26:38 -- On sysclient0201, successful checkin of elevated agent LUAVR71T"
+      },
+      "end_source": {
+        "page": 2,
+        "excerpt": "09/23/19 14:06:01 -- Killed agents Sysclient0201 LUAVR71T, Sysclient0402 NEK5H8GX and Sysclient0660 DS29HY41"
+      }
+    },
+    {
+      "id": "NEK5H8GX",
+      "host": "Sysclient0402",
+      "date": "2019-09-23",
+      "pid": 3168,
+      "reported_ip": "142.20.57.147",
+      "c2_ip": "132.197.158.98",
+      "page": 1,
+      "excerpt": "Sysclient0402 NEK5H8GX 142.20.57.147 3168",
+      "active_start": "2019-09-23T13:25:41-04:00",
+      "active_end": "2019-09-23T14:06:01-04:00",
+      "time_source_pages": [
+        1,
+        2
+      ],
+      "c2_source": {
+        "page": 1,
+        "excerpt": "ip -- 132.197.158.98"
+      },
+      "start_source": {
+        "page": 2,
+        "excerpt": "09/23/19 13:25:41 -- On sysclient0402 agent NEK5H8GX checked in as an elevated agent"
+      },
+      "end_source": {
+        "page": 2,
+        "excerpt": "09/23/19 14:06:01 -- Killed agents Sysclient0201 LUAVR71T, Sysclient0402 NEK5H8GX and Sysclient0660 DS29HY41"
+      }
+    },
+    {
+      "id": "DS29HY41",
+      "host": "Sysclient0660",
+      "date": "2019-09-23",
+      "pid": 880,
+      "reported_ip": "142.20.58.149",
+      "c2_ip": "132.197.158.98",
+      "page": 1,
+      "excerpt": "Sysclient0660 DS29HY41 142.20.58.149 880",
+      "active_start": "2019-09-23T13:35:22-04:00",
+      "active_end": "2019-09-23T14:06:01-04:00",
+      "time_source_pages": [
+        1,
+        2
+      ],
+      "c2_source": {
+        "page": 1,
+        "excerpt": "ip -- 132.197.158.98"
+      },
+      "start_source": {
+        "page": 2,
+        "excerpt": "09/23/19 13:35:22 -- On Sysclient0402 agent NEK5H8GX, pivoted to Sysclient0660 using invoke_wmi. Agent DS29HY41 checks in."
+      },
+      "end_source": {
+        "page": 2,
+        "excerpt": "09/23/19 14:06:01 -- Killed agents Sysclient0201 LUAVR71T, Sysclient0402 NEK5H8GX and Sysclient0660 DS29HY41"
+      }
+    },
+    {
+      "id": "K9SW73AF",
+      "host": "SYSCLIENT0104",
+      "date": "2019-09-23",
+      "pid": 3160,
+      "reported_ip": "142.20.56.105",
+      "c2_ip": "132.197.158.98",
+      "page": 1,
+      "excerpt": "SYSCLIENT0104 K9SW73AF 142.20.56.105 3160",
+      "active_start": "2019-09-23T14:45:13-04:00",
+      "active_end": "2019-09-23T15:24:33-04:00",
+      "time_source_pages": [
+        1,
+        2
+      ],
+      "c2_source": {
+        "page": 1,
+        "excerpt": "ip -- 132.197.158.98"
+      },
+      "start_source": {
+        "page": 2,
+        "excerpt": "09/23/19 14:45:13 -- On DC1 agent XH32VTK5, used Invoke_wmi to spread to:"
+      },
+      "end_source": {
+        "page": 2,
+        "excerpt": "09/23/19 15:24:33 -- On DC1 agent XH32VTK5, kill agents on:"
+      }
+    },
+    {
+      "id": "MX9LTPSF",
+      "host": "SYSCLIENT0205",
+      "date": "2019-09-23",
+      "pid": 5012,
+      "reported_ip": "142.20.56.206",
+      "c2_ip": "132.197.158.98",
+      "page": 1,
+      "excerpt": "SYSCLIENT0205 MX9LTPSF 142.20.56.206 5012",
+      "active_start": "2019-09-23T14:45:13-04:00",
+      "active_end": "2019-09-23T15:24:33-04:00",
+      "time_source_pages": [
+        1,
+        2
+      ],
+      "c2_source": {
+        "page": 1,
+        "excerpt": "ip -- 132.197.158.98"
+      },
+      "start_source": {
+        "page": 2,
+        "excerpt": "09/23/19 14:45:13 -- On DC1 agent XH32VTK5, used Invoke_wmi to spread to:"
+      },
+      "end_source": {
+        "page": 2,
+        "excerpt": "09/23/19 15:24:33 -- On DC1 agent XH32VTK5, kill agents on:"
+      }
+    },
+    {
+      "id": "AC5BVNRP",
+      "host": "SYSCLIENT0321",
+      "date": "2019-09-23",
+      "pid": 2980,
+      "reported_ip": "142.20.57.66",
+      "c2_ip": "132.197.158.98",
+      "page": 1,
+      "excerpt": "SYSCLIENT0321 AC5BVNRP 142.20.57.66 2980",
+      "active_start": "2019-09-23T14:45:13-04:00",
+      "active_end": "2019-09-23T15:24:33-04:00",
+      "time_source_pages": [
+        1,
+        2
+      ],
+      "c2_source": {
+        "page": 1,
+        "excerpt": "ip -- 132.197.158.98"
+      },
+      "start_source": {
+        "page": 2,
+        "excerpt": "09/23/19 14:45:13 -- On DC1 agent XH32VTK5, used Invoke_wmi to spread to:"
+      },
+      "end_source": {
+        "page": 2,
+        "excerpt": "09/23/19 15:24:33 -- On DC1 agent XH32VTK5, kill agents on:"
+      }
+    },
+    {
+      "id": "HR3PK2ZF",
+      "host": "SYSCLIENT0255",
+      "date": "2019-09-23",
+      "pid": 3472,
+      "reported_ip": "142.20.57.0",
+      "c2_ip": "132.197.158.98",
+      "page": 1,
+      "excerpt": "SYSCLIENT0255 HR3PK2ZF 142.20.57.0 3472",
+      "active_start": "2019-09-23T14:45:13-04:00",
+      "active_end": "2019-09-23T15:24:33-04:00",
+      "time_source_pages": [
+        1,
+        2
+      ],
+      "c2_source": {
+        "page": 1,
+        "excerpt": "ip -- 132.197.158.98"
+      },
+      "start_source": {
+        "page": 2,
+        "excerpt": "09/23/19 14:45:13 -- On DC1 agent XH32VTK5, used Invoke_wmi to spread to:"
+      },
+      "end_source": {
+        "page": 2,
+        "excerpt": "09/23/19 15:24:33 -- On DC1 agent XH32VTK5, kill agents on:"
+      }
+    },
+    {
+      "id": "A83TU4KL",
+      "host": "SYSCLIENT0355",
+      "date": "2019-09-23",
+      "pid": 1884,
+      "reported_ip": "142.20.57.100",
+      "c2_ip": "132.197.158.98",
+      "page": 1,
+      "excerpt": "SYSCLIENT0355 A83TU4KL 142.20.57.100 1884",
+      "active_start": "2019-09-23T14:45:13-04:00",
+      "active_end": "2019-09-23T15:24:33-04:00",
+      "time_source_pages": [
+        1,
+        2
+      ],
+      "c2_source": {
+        "page": 1,
+        "excerpt": "ip -- 132.197.158.98"
+      },
+      "start_source": {
+        "page": 2,
+        "excerpt": "09/23/19 14:45:13 -- On DC1 agent XH32VTK5, used Invoke_wmi to spread to:"
+      },
+      "end_source": {
+        "page": 2,
+        "excerpt": "09/23/19 15:24:33 -- On DC1 agent XH32VTK5, kill agents on:"
+      }
+    },
+    {
+      "id": "872METCN",
+      "host": "SYSCLIENT0503",
+      "date": "2019-09-23",
+      "pid": 1472,
+      "reported_ip": "142.20.57.248",
+      "c2_ip": "132.197.158.98",
+      "page": 1,
+      "excerpt": "SYSCLIENT0503 872METCN 142.20.57.248 1472",
+      "active_start": "2019-09-23T14:45:13-04:00",
+      "active_end": "2019-09-23T15:24:33-04:00",
+      "time_source_pages": [
+        1,
+        2
+      ],
+      "c2_source": {
+        "page": 1,
+        "excerpt": "ip -- 132.197.158.98"
+      },
+      "start_source": {
+        "page": 2,
+        "excerpt": "09/23/19 14:45:13 -- On DC1 agent XH32VTK5, used Invoke_wmi to spread to:"
+      },
+      "end_source": {
+        "page": 2,
+        "excerpt": "09/23/19 15:24:33 -- On DC1 agent XH32VTK5, kill agents on:"
+      }
+    },
+    {
+      "id": "FNP6XK89",
+      "host": "SYSCLIENT0462",
+      "date": "2019-09-23",
+      "pid": 2536,
+      "reported_ip": "142.20.57.207",
+      "c2_ip": "132.197.158.98",
+      "page": 1,
+      "excerpt": "SYSCLIENT0462 FNP6XK89 142.20.57.207 2536",
+      "active_start": "2019-09-23T14:45:13-04:00",
+      "active_end": "2019-09-23T15:24:33-04:00",
+      "time_source_pages": [
+        1,
+        2
+      ],
+      "c2_source": {
+        "page": 1,
+        "excerpt": "ip -- 132.197.158.98"
+      },
+      "start_source": {
+        "page": 2,
+        "excerpt": "09/23/19 14:45:13 -- On DC1 agent XH32VTK5, used Invoke_wmi to spread to:"
+      },
+      "end_source": {
+        "page": 2,
+        "excerpt": "09/23/19 15:24:33 -- On DC1 agent XH32VTK5, kill agents on:"
+      }
+    },
+    {
+      "id": "ANP2E69T",
+      "host": "SYSCLIENT0559",
+      "date": "2019-09-23",
+      "pid": 1400,
+      "reported_ip": "142.20.58.48",
+      "c2_ip": "132.197.158.98",
+      "page": 1,
+      "excerpt": "SYSCLIENT0559 ANP2E69T 142.20.58.48 1400",
+      "active_start": "2019-09-23T14:45:13-04:00",
+      "active_end": "2019-09-23T15:24:33-04:00",
+      "time_source_pages": [
+        1,
+        2
+      ],
+      "c2_source": {
+        "page": 1,
+        "excerpt": "ip -- 132.197.158.98"
+      },
+      "start_source": {
+        "page": 2,
+        "excerpt": "09/23/19 14:45:13 -- On DC1 agent XH32VTK5, used Invoke_wmi to spread to:"
+      },
+      "end_source": {
+        "page": 2,
+        "excerpt": "09/23/19 15:24:33 -- On DC1 agent XH32VTK5, kill agents on:"
+      }
+    },
+    {
+      "id": "XS3AWFB9",
+      "host": "SYSCLIENT0419",
+      "date": "2019-09-23",
+      "pid": 1700,
+      "reported_ip": "142.20.57.164",
+      "c2_ip": "132.197.158.98",
+      "page": 1,
+      "excerpt": "SYSCLIENT0419 XS3AWFB9 142.20.57.164 1700",
+      "active_start": "2019-09-23T14:45:13-04:00",
+      "active_end": "2019-09-23T15:24:33-04:00",
+      "time_source_pages": [
+        1,
+        2
+      ],
+      "c2_source": {
+        "page": 1,
+        "excerpt": "ip -- 132.197.158.98"
+      },
+      "start_source": {
+        "page": 2,
+        "excerpt": "09/23/19 14:45:13 -- On DC1 agent XH32VTK5, used Invoke_wmi to spread to:"
+      },
+      "end_source": {
+        "page": 2,
+        "excerpt": "09/23/19 15:24:33 -- On DC1 agent XH32VTK5, kill agents on:"
+      }
+    },
+    {
+      "id": "325T9FEN",
+      "host": "SYSCLIENT0609",
+      "date": "2019-09-23",
+      "pid": 3460,
+      "reported_ip": "142.20.58.98",
+      "c2_ip": "132.197.158.98",
+      "page": 1,
+      "excerpt": "SYSCLIENT0609 325T9FEN 142.20.58.98 3460",
+      "active_start": "2019-09-23T14:45:13-04:00",
+      "active_end": "2019-09-23T15:24:33-04:00",
+      "time_source_pages": [
+        1,
+        2
+      ],
+      "c2_source": {
+        "page": 1,
+        "excerpt": "ip -- 132.197.158.98"
+      },
+      "start_source": {
+        "page": 2,
+        "excerpt": "09/23/19 14:45:13 -- On DC1 agent XH32VTK5, used Invoke_wmi to spread to:"
+      },
+      "end_source": {
+        "page": 2,
+        "excerpt": "09/23/19 15:24:33 -- On DC1 agent XH32VTK5, kill agents on:"
+      }
+    },
+    {
+      "id": "75HYXEL3",
+      "host": "SYSCLIENT0771",
+      "date": "2019-09-23",
+      "pid": 4244,
+      "reported_ip": "142.20.59.4",
+      "c2_ip": "132.197.158.98",
+      "page": 1,
+      "excerpt": "SYSCLIENT0771 75HYXEL3 142.20.59.4 4244",
+      "active_start": "2019-09-23T14:45:13-04:00",
+      "active_end": "2019-09-23T15:24:33-04:00",
+      "time_source_pages": [
+        1,
+        2
+      ],
+      "c2_source": {
+        "page": 1,
+        "excerpt": "ip -- 132.197.158.98"
+      },
+      "start_source": {
+        "page": 2,
+        "excerpt": "09/23/19 14:45:13 -- On DC1 agent XH32VTK5, used Invoke_wmi to spread to:"
+      },
+      "end_source": {
+        "page": 2,
+        "excerpt": "09/23/19 15:24:33 -- On DC1 agent XH32VTK5, kill agents on:"
+      }
+    },
+    {
+      "id": "98GKNAFX",
+      "host": "SYSCLIENT0955",
+      "date": "2019-09-23",
+      "pid": 4760,
+      "reported_ip": "142.20.59.188",
+      "c2_ip": "132.197.158.98",
+      "page": 1,
+      "excerpt": "SYSCLIENT0955 98GKNAFX 142.20.59.188 4760",
+      "active_start": "2019-09-23T14:45:13-04:00",
+      "active_end": "2019-09-23T15:24:33-04:00",
+      "time_source_pages": [
+        1,
+        2
+      ],
+      "c2_source": {
+        "page": 1,
+        "excerpt": "ip -- 132.197.158.98"
+      },
+      "start_source": {
+        "page": 2,
+        "excerpt": "09/23/19 14:45:13 -- On DC1 agent XH32VTK5, used Invoke_wmi to spread to:"
+      },
+      "end_source": {
+        "page": 2,
+        "excerpt": "09/23/19 15:24:33 -- On DC1 agent XH32VTK5, kill agents on:"
+      }
+    },
+    {
+      "id": "LZFHNCES",
+      "host": "SYSCLIENT0874",
+      "date": "2019-09-23",
+      "pid": 5224,
+      "reported_ip": "142.20.59.107",
+      "c2_ip": "132.197.158.98",
+      "page": 1,
+      "excerpt": "SYSCLIENT0874 LZFHNCES 142.20.59.107 5224",
+      "active_start": "2019-09-23T14:45:13-04:00",
+      "active_end": "2019-09-23T15:24:33-04:00",
+      "time_source_pages": [
+        1,
+        2
+      ],
+      "c2_source": {
+        "page": 1,
+        "excerpt": "ip -- 132.197.158.98"
+      },
+      "start_source": {
+        "page": 2,
+        "excerpt": "09/23/19 14:45:13 -- On DC1 agent XH32VTK5, used Invoke_wmi to spread to:"
+      },
+      "end_source": {
+        "page": 2,
+        "excerpt": "09/23/19 15:24:33 -- On DC1 agent XH32VTK5, kill agents on:"
+      }
+    },
+    {
+      "id": "UD9R6S7T",
+      "host": "SYSCLIENT0170",
+      "date": "2019-09-23",
+      "pid": 644,
+      "reported_ip": "142.20.56.171",
+      "c2_ip": "132.197.158.98",
+      "page": 1,
+      "excerpt": "SYSCLIENT0170 UD9R6S7T 142.20.56.171 644",
+      "active_start": "2019-09-23T14:45:13-04:00",
+      "active_end": "2019-09-23T15:24:33-04:00",
+      "time_source_pages": [
+        1,
+        2
+      ],
+      "c2_source": {
+        "page": 1,
+        "excerpt": "ip -- 132.197.158.98"
+      },
+      "start_source": {
+        "page": 2,
+        "excerpt": "09/23/19 14:45:13 -- On DC1 agent XH32VTK5, used Invoke_wmi to spread to:"
+      },
+      "end_source": {
+        "page": 2,
+        "excerpt": "09/23/19 15:24:33 -- On DC1 agent XH32VTK5, kill agents on:"
+      }
+    },
+    {
+      "id": "XH32VTK5",
+      "host": "DC1",
+      "date": "2019-09-23",
+      "pid": 1852,
+      "reported_ip": "142.20.61.130",
+      "c2_ip": "132.197.158.98",
+      "page": 1,
+      "excerpt": "DC1 XH32VTK5 142.20.61.130 1852",
+      "active_start": "2019-09-23T14:04:45-04:00",
+      "active_end": "2019-09-23T15:24:33-04:00",
+      "time_source_pages": [
+        1,
+        2
+      ],
+      "c2_source": {
+        "page": 1,
+        "excerpt": "ip -- 132.197.158.98"
+      },
+      "start_source": {
+        "page": 2,
+        "excerpt": "09/23/19 14:04:45 -- On Sysclient0660 agent DS29HY41, used invoke_wmi to pivto to domain controller 1. XH32VTK5 checks in on ip"
+      },
+      "end_source": {
+        "page": 2,
+        "excerpt": "09/23/19 15:24:33 -- On DC1 agent XH32VTK5, kill agents on:"
+      }
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "runme-bat",
+      "host": "Sysclient0201",
+      "basename": "runme.bat",
+      "start": "2019-09-23T11:23:29-04:00",
+      "end": "2019-09-23T11:24:19-04:00",
+      "page": 1,
+      "excerpt": "09/23/19 11:23:29 -- Manually accessed console on Sysclient0201 and navigated to :8000 to download runme.bat, a malicousnews.com",
+      "start_source": {
+        "page": 1,
+        "excerpt": "09/23/19 11:23:29 -- Manually accessed console on Sysclient0201 and navigated to :8000 to download runme.bat, a malicousnews.com"
+      },
+      "end_source": {
+        "page": 1,
+        "excerpt": "09/23/19 11:24:19 -- Sysclient0201, closed firefox tab and deleted runme.bat"
+      }
+    }
+  ],
+  "activities": [
+    {
+      "id": "initial_download",
+      "kind": "initial_download",
+      "page": 1,
+      "excerpt": "09/23/19 11:23:29 -- Manually accessed console on Sysclient0201 and navigated to :8000 to download runme.bat, a malicousnews.com",
+      "outcome": "observed",
+      "creates_additional_positive_uuid": false
+    },
+    {
+      "id": "uac_bypass",
+      "kind": "uac_bypass",
+      "page": 1,
+      "excerpt": "09/23/19 11:26:02 -- On Sysclient0201 agent VL8B5T3U, Used PowershellEmpire Module Bypasses UAC, which performs a registry modification",
+      "outcome": "reported_success",
+      "creates_additional_positive_uuid": false
+    },
+    {
+      "id": "credentials",
+      "kind": "credentials",
+      "page": 1,
+      "excerpt": "09/23/19 11:33:14 -- On Sysclient0201 agent LUAVR71T, ran mimikatz to collect clear text passwords in memory",
+      "outcome": "execution_reported",
+      "creates_additional_positive_uuid": false
+    },
+    {
+      "id": "lsass_injection_failed",
+      "kind": "lsass_injection_failed",
+      "page": 1,
+      "excerpt": "09/23/19 11:38:09 -- On Sysclient0201 agent LUAVR71T, Process injection seems to have failed.",
+      "outcome": "failed",
+      "creates_additional_positive_uuid": false
+    },
+    {
+      "id": "lsass_injection_retry",
+      "kind": "lsass_injection_retry",
+      "page": 1,
+      "excerpt": "09/23/19 11:41:50 -- On Sysclient0201 agent LUAVR71T, retried psinject into lsass",
+      "outcome": "outcome_not_reported",
+      "creates_additional_positive_uuid": false
+    },
+    {
+      "id": "persistence",
+      "kind": "persistence",
+      "page": 1,
+      "excerpt": "09/23/19 11:39:25 -- On Sysclient0201 agent LUAVR71T, established persistence by modifying",
+      "outcome": "reported_success",
+      "creates_additional_positive_uuid": false
+    },
+    {
+      "id": "lateral_wmi",
+      "kind": "lateral_wmi",
+      "page": 2,
+      "excerpt": "09/23/19 13:24:36 -- On Sysclient0201 agent LUAVR71T, pivoted to Sysclient0402 using invoke_wmi",
+      "outcome": "reported_success",
+      "creates_additional_positive_uuid": false
+    },
+    {
+      "id": "day3_lsass_migration",
+      "kind": "day3_lsass_migration",
+      "page": 4,
+      "excerpt": "09/25/19 10:40:39 -- On Sysclient 0051, migrated from process 2712 cKfGW.exe to lsass 568",
+      "outcome": "reported_success",
+      "creates_additional_positive_uuid": false
+    },
+    {
+      "id": "day3_lwabeat_migration",
+      "kind": "day3_lwabeat_migration",
+      "page": 4,
+      "excerpt": "09/25/19 11:24:30 -- On Sysclient0351, migrated from process 1932 to 1256 lwabeat.",
+      "outcome": "reported_success",
+      "creates_additional_positive_uuid": false
+    }
+  ],
+  "other_day_agent_inventory": [
+    {
+      "day": 2,
+      "host": "Sysclient0501",
+      "agent": "4BW2MKUF",
+      "pid": 648,
+      "page": 2,
+      "excerpt": "Sysclient0501 4BW2MKUF 142.20.57.246 648"
+    },
+    {
+      "day": 2,
+      "host": "Sysclient0501",
+      "agent": "9HUGDCRL",
+      "pid": 5076,
+      "page": 2,
+      "excerpt": "Sysclient0501 9HUGDCRL 142.20.57.246 5076"
+    },
+    {
+      "day": 2,
+      "host": "Sysclient0501",
+      "agent": "6H8SZPCW",
+      "pid": 1748,
+      "page": 2,
+      "excerpt": "Sysclient0501 6H8SZPCW 142.20.57.246 1748"
+    },
+    {
+      "day": 2,
+      "host": "Sysclient0811",
+      "agent": "DS8V3RNH",
+      "pid": 3780,
+      "page": 2,
+      "excerpt": "Sysclient0811 DS8V3RNH 142.20.59.44 3780"
+    },
+    {
+      "day": 2,
+      "host": "Sysclient0010",
+      "agent": "6FEZ8L4N",
+      "pid": 3584,
+      "page": 2,
+      "excerpt": "Sysclient0010 6FEZ8L4N 142.20.56.11 3584"
+    },
+    {
+      "day": 2,
+      "host": "Sysclient0069",
+      "agent": "EMK3VW7F",
+      "pid": 4152,
+      "page": 2,
+      "excerpt": "Sysclient0069 EMK3VW7F 142.20.56.70 4152"
+    },
+    {
+      "day": 2,
+      "host": "Sysclient0203",
+      "agent": "UXCSTKZ9",
+      "pid": 5388,
+      "page": 2,
+      "excerpt": "Sysclient0203 UXCSTKZ9 142.20.56.204 5388"
+    },
+    {
+      "day": 2,
+      "host": "Sysclient0358",
+      "agent": "PE54DBYX",
+      "pid": 2984,
+      "page": 2,
+      "excerpt": "Sysclient0358 PE54DBYX 142.20.57.103 2984"
+    },
+    {
+      "day": 2,
+      "host": "Sysclient0618",
+      "agent": "73FCWS1G",
+      "pid": 4060,
+      "page": 2,
+      "excerpt": "Sysclient0618 73FCWS1G 142.20.58.107 4060"
+    },
+    {
+      "day": 2,
+      "host": "Sysclient0851",
+      "agent": "5BUEZALX",
+      "pid": 4652,
+      "page": 2,
+      "excerpt": "Sysclient0851 5BUEZALX 142.20.59.84 4652"
+    }
+  ],
+  "omitted_scope_note": "第 2/3 天及其他主机没有当前网页匹配窗口，不混入当前召回分母。第 3 天明确记载成功迁移，第 1 天失败不能混同。"
+}

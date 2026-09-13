@@ -1,0 +1,37 @@
+{
+  "cases": {
+    "E3-CADETS/node_Nginx_Backdoor_06.csv": {
+      "database": "/root/NODOZE-pruning-release/output/tc/cadets-e3-from-raw-2026-09-07_15-27-47.db",
+      "annotation": "/root/NODOZE-pruning-release/output/tc/ubc-cadets-e3/cadets-e3-ubc-06-annotations.json",
+      "comparison": "/root/NODOZE-pruning-release/output/tc/selected-rasp-CADETS-06-2026-09-10_18-49-06/comparison.json",
+      "decisions": "/root/NODOZE-pruning-release/output/tc/selected-rasp-CADETS-06-2026-09-10_18-49-06/diverse-decisions.jsonl.gz",
+      "ledger": "/root/NODOZE-pruning-release/output/tc/poi-prefix-sweep/2026-09-09_10-47-48/scenario-06/poi-prefix-3-ledger/edge-scores.jsonl.gz"
+    },
+    "E3-CADETS/node_Nginx_Backdoor_12.csv": {
+      "database": "/root/NODOZE-pruning-release/output/tc/cadets-e3-from-raw-2026-09-07_15-27-47.db",
+      "annotation": "/root/NODOZE-pruning-release/output/tc/ubc-cadets-e3/cadets-e3-ubc-12-annotations.json",
+      "comparison": "/root/NODOZE-pruning-release/output/tc/selected-rasp-CADETS-12-2026-09-10_18-49-06/comparison.json",
+      "decisions": "/root/NODOZE-pruning-release/output/tc/selected-rasp-CADETS-12-2026-09-10_18-49-06/diverse-decisions.jsonl.gz",
+      "ledger": "/root/NODOZE-pruning-release/output/tc/poi-prefix-sweep/2026-09-09_10-47-48/scenario-12/poi-prefix-8-ledger/edge-scores.jsonl.gz"
+    },
+    "E3-CADETS/node_Nginx_Backdoor_13.csv": {
+      "database": "/root/NODOZE-pruning-release/output/tc/cadets-e3-from-raw-2026-09-07_15-27-47.db",
+      "annotation": "/root/NODOZE-pruning-release/output/tc/ubc-cadets-e3/cadets-e3-ubc-13-annotations.json",
+      "comparison": "/root/NODOZE-pruning-release/output/tc/selected-rasp-CADETS-13-2026-09-10_18-49-06/comparison.json",
+      "decisions": "/root/NODOZE-pruning-release/output/tc/selected-rasp-CADETS-13-2026-09-10_18-49-06/diverse-decisions.jsonl.gz",
+      "ledger": "/root/NODOZE-pruning-release/output/tc/poi-prefix-sweep/2026-09-09_10-47-48/scenario-13/poi-prefix-3-ledger/edge-scores.jsonl.gz"
+    },
+    "E3-THEIA/node_Browser_Extension_Drakon_Dropper.csv": {
+      "database": "/root/NODOZE-pruning-release/output/tc/theia-depimpact-case3-2026-09-09_15-32-25.db",
+      "annotation": "/root/NODOZE-pruning-release/darpa/E3-THEIA/theia-case3-derived-groundtruth.json",
+      "comparison": "/root/NODOZE-pruning-release/output/tc/selected-rasp-THEIA-2026-09-10_18-49-06/comparison.json",
+      "decisions": "/root/NODOZE-pruning-release/output/tc/selected-rasp-THEIA-2026-09-10_18-49-06/diverse-decisions.jsonl.gz",
+      "ledger": "/root/NODOZE-pruning-release/output/tc/theia-case3-poi-prefix-fixed-2026-09-09_23-36-33/scenario-theia-case3/poi-prefix-3-ledger/edge-scores.jsonl.gz"
+    },
+    "E3-THEIA/node_Firefox_Backdoor_Drakon_In_Memory.csv": {
+      "database": "/root/NODOZE-pruning-release/output/tc/theia-depimpact-case1-2026-09-09_15-35-45.db",
+      "annotation": "/root/NODOZE-pruning-release/darpa/E3-THEIA/theia-case1-derived-groundtruth.json",
+      "incomplete_run": "/root/NODOZE-pruning-release/output/tc/theia-case1-poi-prefix-fixed-2026-09-09_15-57-01/scenario-theia-case1/poi-prefix-1.incomplete.json"
+    }
+  }
+}

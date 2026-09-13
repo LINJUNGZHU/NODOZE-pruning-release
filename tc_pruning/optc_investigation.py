@@ -225,6 +225,8 @@ def rescore(data, poi_id, budget_ratio=None, selection_mode=None, attack_quantil
     quantile = attack_quantile if attack_quantile is not None else data.get('attack',{}).get('config',{}).get('anomaly_quantile',.90)
     data['attack'] = infer_attack(edges, poi_id, dict(anomaly_quantile=quantile),detector=detector if detector is not None else data.get('attack',{}).get('detector','rules'))
     data['attack']['evaluation'] = evaluate_attack(data['attack'], edges)
+    from tc_pruning.context_graph import build_context
+    data['context_graph']=build_context(data['attack'],edges)
     attack_paths, attack_evidence = set(data['attack']['path_event_ids']), set(data['attack']['evidence_event_ids'])
     attack_activity=set(data['attack'].get('activity_event_ids',[]))
     for e in edges:
@@ -234,13 +236,13 @@ def rescore(data, poi_id, budget_ratio=None, selection_mode=None, attack_quantil
                   f"累计历史：{history['history_edges']:,} 条；按原始事件 ID 去重，不按窗口对半切分",
                   f"候选窗口保持不变：{len(edges):,} 条（包含 POI 前后事件；仅评分历史截止 POI）",
                   f"RASP / {selection_mode}：保留 {int(kept.sum()):,} / {len(edges):,}，预算上限 {budget:,}",
-                  f"PDF 指标参考保留 {retained} / {matched}；排除 POI 后 {data['truth']['non_poi_retained']} / {data['truth']['non_poi_matched']}",
+                  f"宽泛 IOC 匹配（历史口径）保留 {retained} / {matched}；排除 POI 后 {data['truth']['non_poi_retained']} / {data['truth']['non_poi_matched']}",
                   f"判定审计：预算有效={certificate['budget_valid']}，完整时序见证={certificate['complete_witnesses']}，剩余预算={certificate['unused_budget']}",
                   f"攻击推断：{data['attack']['summary']['inferred_attack_nodes']} 个进程假设，{data['attack']['summary']['paths']} 条时序路径；独立于剪枝预算",
                   f"攻击节点评估：已知正例找回 {data['attack']['evaluation']['node_metrics']['tp']} / {data['attack']['evaluation']['node_metrics']['known_positive']}；未标注预测 {data['attack']['evaluation']['node_metrics']['unreviewed_predictions']} 个，不计为正常或误报",
                   f"重算完成，用时 {time.monotonic()-started:.2f} 秒"]
-    for key,label in [('published_benchmark','公开进程标注'),('tapas_benchmark','TAPAS 静态进程清单')]:
+    for key,label in [('pdf_benchmark','PDF 直接代理标注')]:
         benchmark=data['attack']['evaluation'].get(key)
         if benchmark:
-            m=benchmark['node_metrics'];data['logs'].insert(-1,f"{label}：命中 {m['tp']} / {m['known_positive']}，误报 {m['fp']}，漏报 {m['fn']}")
+            m=benchmark['node_metrics'];data['logs'].insert(-1,f"{label}：命中 {m['tp']} / {m['known_positive']}，未判定预测 {m['unreviewed_predictions']}，已知漏报 {m['fn']}")
     return data

@@ -168,8 +168,10 @@ def create_app(cache_path: str | Path | None = None, dataset_catalog: str | Path
         if 'attack' not in data:
             return jsonify({'error': 'Recompute the POI to generate attack hypotheses'}), 503
         ids = set(data['attack']['path_event_ids']) | set(data['attack']['evidence_event_ids']) | set(data['attack'].get('activity_event_ids',[])) | set(data['attack'].get('context_event_ids',[]))
+        context=data.get('context_graph')
+        if context:ids.update(context['event_ids'])
         response = jsonify(dict(dataset=data['dataset'],poi=data['poi'],history=data['history'],
-                                attack=data['attack'],events=[e for e in data['edges'] if e['id'] in ids]))
+                                attack=data['attack'],context_graph=context,events=[e for e in data['edges'] if e['id'] in ids]))
         response.headers['Content-Disposition'] = 'attachment; filename="optc-attack-report.json"'
         return response
 
@@ -183,10 +185,13 @@ def create_app(cache_path: str | Path | None = None, dataset_catalog: str | Path
             if 'model' in payload['attack']:
                 payload['attack']['model']={k:v for k,v in payload['attack']['model'].items() if k!='context_index'}
             payload['attack'].pop('context_event_ids',None)
+        context=data.get('context_graph')
+        if context:payload['context_graph']={k:context[k] for k in ('summary','contract','config','predicted_process_ids','context_process_ids','boundary_node_ids')}
         return dict(**payload,
                     graph=dict(nodes=[[n['id'],n['label'],n['type']] for n in nodes],
                                edges=[[e['id'],ids[e['source']],ids[e['target']],int(e['retained']),e['score']] for e in data['edges']],
-                               full_event_count=len(data['edges']),sampled=False),
+                               full_event_count=len(data['edges']),sampled=False,
+                               context_bundles=[[ids[b['source']],ids[b['target']],b['event_count']] for b in context['bundles']] if context else []),
                     decision_certificate=data.get('decision_certificate'),decision_contract=data.get('decision_contract'))
 
     @app.get('/api/datasets/<dataset_id>/view')
@@ -213,11 +218,12 @@ def create_app(cache_path: str | Path | None = None, dataset_catalog: str | Path
             page=max(0,int(request.args.get('page',0)));limit=min(100,max(1,int(request.args.get('limit',20))))
         except ValueError:return jsonify(error='invalid pagination'),400
         query=request.args.get('q','').lower().strip();decision=request.args.get('filter','all')
-        if decision not in ('all','retained','removed','attack','activity'):return jsonify(error='unknown edge filter'),400
+        if decision not in ('all','retained','removed','attack','activity','context_graph'):return jsonify(error='unknown edge filter'),400
         activity_ids=set(data.get('attack',{}).get('activity_event_ids',[])) if decision=='activity' else set()
+        context_ids=set(data.get('context_graph',{}).get('event_ids',[]))
         edges=[e for e in data['edges'] if
                (decision=='all' or decision=='retained' and e['retained'] or decision=='removed' and not e['retained'] or
-                decision=='attack' and e.get('attack_role','none')!='none' or decision=='activity' and e['id'] in activity_ids) and
+                decision=='attack' and e.get('attack_role','none')!='none' or decision=='activity' and e['id'] in activity_ids or decision=='context_graph' and e['id'] in context_ids) and
                (not query or query in f"{e['id']} {e['source']} {e['target']} {e['source_label']} {e['target_label']} {e['relation']}".lower())]
         if request.args.get('sort','score')=='score':edges.sort(key=lambda e:(-e['score'],e['id']))
         keys=('id','source_label','target_label','relation','timestamp','score','historical_count','retained','reason','attack_role')

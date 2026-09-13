@@ -39,7 +39,7 @@ def main():
                 analyze('multiview')
                 page.wait_for_function('Number(document.querySelector("#before").dataset.renderedEdges)===state.data.metrics.candidate_edges',timeout=90000)
                 assert page.locator('#quantile-control').is_hidden()
-                assert 'TAPAS' in page.locator('#tapas-evaluation').inner_text()
+                assert 'PDF' in page.locator('#attack-evaluation').inner_text()
                 assert page.locator('#attack-story').is_visible()
                 page.locator('#attack-nodes [data-node]').first.click()
                 assert page.locator('.view-evidence meter').count()==3

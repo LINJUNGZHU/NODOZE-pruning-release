@@ -1,0 +1,478 @@
+{
+  "checked_date": "2026-09-13",
+  "fulltext_count": 6,
+  "partial_count": 9,
+  "papers": [
+    {
+      "id": "tered",
+      "title": "TeRed: Normal Behavior-Based Efficient Provenance Graph Reduction for Large-Scale Attack Forensics",
+      "authors": [
+        "Xiaoxiang Li",
+        "Xinyu Jiang",
+        "Hai Wan",
+        "Xibin Zhao"
+      ],
+      "doi": "10.1109/tifs.2025.3601381",
+      "venue": "IEEE Transactions on Information Forensics and Security",
+      "volume": "20",
+      "pages_or_article": "9463-9476",
+      "year": 2025,
+      "checked_date": "2026-09-13",
+      "full_text_read": false,
+      "full_text_status": "not_retrieved_closed_access",
+      "official_code_status": "not_found_after_search_not_proof_absent",
+      "primary_metadata_url": "https://api.crossref.org/works/10.1109/tifs.2025.3601381",
+      "metadata_local": "/root/NODOZE-pruning-release/webapp/runtime/research/groundtruth-study/reduction/tered-metadata.json",
+      "openalex_access": {
+        "is_oa": false,
+        "oa_status": "closed",
+        "oa_url": null,
+        "any_repository_has_fulltext": false
+      },
+      "url": "https://ieeexplore.ieee.org/document/11133429/",
+      "read_scope": [
+        "publisher abstract"
+      ],
+      "sections_unread": [
+        "algorithm details",
+        "dataset identities",
+        "tables",
+        "proofs",
+        "limitations"
+      ],
+      "method": "Learns normal behavior patterns using unit tests, then uses the patterns for provenance graph reduction.",
+      "reported_evaluation": "Publisher abstract claims all attack-related information retained on five datasets without compromising detection/investigation; exact numerical reductions unavailable.",
+      "guarantee": "Empirical preservation claim; no universal losslessness theorem verified.",
+      "concerns": [
+        "Normal-template coverage and contamination must be audited.",
+        "Unknown exact template identity and matching semantics.",
+        "Do not generalize from normal test coverage to maliciousness or harmlessness."
+      ],
+      "adaptation": "Use independently collected normal workload templates as a reversible ranking feature. Preserve original event IDs and temporal witnesses. Do not exempt every event of a normal executable."
+    },
+    {
+      "id": "pdcleaner",
+      "title": "PDCleaner: A multi-view collaborative data compression method for provenance graph-based APT detection systems",
+      "authors": [
+        "Jiaobo Jin",
+        "Tiantian Zhu",
+        "Qixuan Yuan",
+        "Tieming Chen",
+        "Mingqi Lv",
+        "Chenbin Zheng",
+        "Jian-Ping Mei",
+        "Xiang Pan"
+      ],
+      "doi": "10.1016/j.cose.2025.104359",
+      "venue": "Computers &amp; Security",
+      "volume": "152",
+      "pages_or_article": "104359",
+      "year": 2025,
+      "checked_date": "2026-09-13",
+      "full_text_read": false,
+      "full_text_status": "not_retrieved_closed_access",
+      "official_code_status": "not_found_after_search_not_proof_absent",
+      "primary_metadata_url": "https://api.crossref.org/works/10.1016/j.cose.2025.104359",
+      "metadata_local": "/root/NODOZE-pruning-release/webapp/runtime/research/groundtruth-study/reduction/pdcleaner-metadata.json",
+      "openalex_access": {
+        "is_oa": false,
+        "oa_status": "closed",
+        "oa_url": null,
+        "any_repository_has_fulltext": false
+      },
+      "url": "https://www.sciencedirect.com/science/article/pii/S0167404825000483",
+      "read_scope": [
+        "publisher abstract",
+        "introduction",
+        "methodology/evaluation/discussion section snippets"
+      ],
+      "sections_unread": [
+        "complete method",
+        "semantic-loss definition",
+        "full experiment tables",
+        "label/split details"
+      ],
+      "method": "Combines global-semantic event deletion, behavior-preserving entity aggregation, and event-chain merging using Levenshtein similarity.",
+      "reported_evaluation": "Five realistic scenarios: 14.43x compression, 4.98% average semantic loss, up to 20.22% shorter model training and +0.051 F1.",
+      "guarantee": "Explicitly allows semantic loss; not an exact evidence-preserving algorithm as a whole.",
+      "concerns": [
+        "Precise semantic-loss metric and aggregation denominator unavailable.",
+        "Similarity can collapse rare distinguishing malicious steps.",
+        "Training/inference compression consistency and attack-label use unverified."
+      ],
+      "adaptation": "Begin with reversible duplicate-event aggregation, retaining multiplicity, type, timestamps and source event IDs. Evaluate event/entity/chain ablations separately against downstream detection and witness preservation."
+    },
+    {
+      "id": "mpca",
+      "title": "MPCA: Constructing the APTs provenance graphs through multi-perspective confidence and association",
+      "authors": [
+        "Zhao Zhang",
+        "Senlin Luo",
+        "Yingdan Guan",
+        "Limin Pan"
+      ],
+      "doi": "10.1016/j.infsof.2025.107670",
+      "venue": "Information and Software Technology",
+      "volume": "180",
+      "pages_or_article": "107670",
+      "year": 2025,
+      "checked_date": "2026-09-13",
+      "full_text_read": false,
+      "full_text_status": "not_retrieved_closed_access",
+      "official_code_status": "not_found_after_search_not_proof_absent",
+      "primary_metadata_url": "https://api.crossref.org/works/10.1016/j.infsof.2025.107670",
+      "metadata_local": "/root/NODOZE-pruning-release/webapp/runtime/research/groundtruth-study/reduction/mpca-metadata.json",
+      "openalex_access": {
+        "is_oa": false,
+        "oa_status": "closed",
+        "oa_url": null,
+        "any_repository_has_fulltext": false
+      },
+      "url": "https://www.sciencedirect.com/science/article/abs/pii/S0950584925000096",
+      "read_scope": [
+        "publisher abstract",
+        "introduction",
+        "section snippets including discussion"
+      ],
+      "sections_unread": [
+        "scoring equations",
+        "training/split protocol",
+        "metric definitions",
+        "full parameter sensitivity"
+      ],
+      "method": "Merges semantically consistent parallel branches in process-connected subgraphs; evaluates subject-relation-object event confidence and event-to-alarm association to suppress benign dependencies and emphasize attack events.",
+      "reported_evaluation": "CADETS and TRACE; introduction reports reduction rate 44.16% higher, accuracy improved by 82%, and FPR reduced by 21% relative to previous work.",
+      "guarantee": "No formal semantics or temporal-reachability preservation guarantee verified. Relative percentage definitions not recovered.",
+      "concerns": [
+        "Alarm seed selection must be separated from truth.",
+        "The word confidence does not establish calibrated attack probability.",
+        "Label supervision and hyperparameter selection are not available."
+      ],
+      "adaptation": "Keep local event suspiciousness separate from alarm/POI association. Use strict temporal paths to gate evidence association and retain parallel branches as expandable groups."
+    },
+    {
+      "id": "finegcp",
+      "title": "FineGCP: Fine-grained dependency graph community partitioning for attack investigation",
+      "authors": [
+        "Zhaoyang Wang",
+        "Yanfei Hu",
+        "Yu Wen",
+        "Boyang Zhang",
+        "Shuailou Li",
+        "Wenbo Wang",
+        "Zheng Liu",
+        "Dan Meng"
+      ],
+      "doi": "10.1016/j.cose.2024.104311",
+      "venue": "Computers &amp; Security",
+      "volume": "151",
+      "pages_or_article": "104311",
+      "year": 2025,
+      "checked_date": "2026-09-13",
+      "full_text_read": false,
+      "full_text_status": "not_retrieved_closed_access",
+      "official_code_status": "not_found_after_search_not_proof_absent",
+      "primary_metadata_url": "https://api.crossref.org/works/10.1016/j.cose.2024.104311",
+      "metadata_local": "/root/NODOZE-pruning-release/webapp/runtime/research/groundtruth-study/reduction/finegcp-metadata.json",
+      "openalex_access": {
+        "is_oa": false,
+        "oa_status": "closed",
+        "oa_url": null,
+        "any_repository_has_fulltext": false
+      },
+      "url": "https://www.sciencedirect.com/science/article/pii/S0167404824006175",
+      "read_scope": [
+        "publisher abstract",
+        "introduction",
+        "method/evaluation/discussion snippets"
+      ],
+      "sections_unread": [
+        "exact execution-unit partition rules",
+        "GNN loss",
+        "hyperparameters",
+        "full labels/metric denominators"
+      ],
+      "method": "Partitions entities into task-oriented execution units, learns GNN node representations, and aggregates similar units using Louvain communities.",
+      "reported_evaluation": "Atlas-DS and DARPA TC: attack nodes average 1.34 communities; 97% attack-node proportion inside attack-containing communities. Modularity/coverage/performance 0.68/0.77/0.94; runtimes 156.91s and 389.63s.",
+      "guarantee": "Community purity is not detector recall or precision. No proof verified that one selected community contains an entire attack.",
+      "concerns": [
+        "Execution units differ from original process UUID ground truth.",
+        "POI community may omit remaining attack communities.",
+        "Training labels and transductive evaluation not verified."
+      ],
+      "adaptation": "Introduce reversible per-process activity segments as investigative context; preserve UUID-to-segment mapping and cross-segment edges. Never label every segment or community member malicious from one member."
+    },
+    {
+      "id": "multisource",
+      "title": "A multi-source log semantic analysis-based attack investigation approach",
+      "authors": [
+        "Yubo Song",
+        "Kanghui Wang",
+        "Xin Sun",
+        "Zhongyuan Qin",
+        "Hua Dai",
+        "Weiwei Chen",
+        "Bang Lv",
+        "Jiaqi Chen"
+      ],
+      "doi": "10.1016/j.cose.2024.104303",
+      "venue": "Computers &amp; Security",
+      "volume": "150",
+      "pages_or_article": "104303",
+      "year": 2025,
+      "checked_date": "2026-09-13",
+      "full_text_read": false,
+      "full_text_status": "not_retrieved_closed_access",
+      "official_code_status": "not_found_after_search_not_proof_absent",
+      "primary_metadata_url": "https://api.crossref.org/works/10.1016/j.cose.2024.104303",
+      "metadata_local": "/root/NODOZE-pruning-release/webapp/runtime/research/groundtruth-study/reduction/multisource-metadata.json",
+      "openalex_access": {
+        "is_oa": false,
+        "oa_status": "closed",
+        "oa_url": null,
+        "any_repository_has_fulltext": false
+      },
+      "url": "https://www.sciencedirect.com/science/article/pii/S0167404824006096",
+      "read_scope": [
+        "publisher abstract",
+        "introduction"
+      ],
+      "sections_unread": [
+        "graph matching loss",
+        "exact seven stages",
+        "evaluation datasets and denominators",
+        "pruning conditions"
+      ],
+      "method": "Normalizes application and OS logs, refines graph entities, merges repeated events, drops unreachable and temporary-file nodes, then matches report-derived attack subgraphs through a GNN-based seven-stage investigation.",
+      "reported_evaluation": "Abstract reports precision +15.1%, recall +12.2%, investigation time reduced >60% with F1 decrease <2%; distinct comparisons cannot be reconstructed from abstract.",
+      "guarantee": "Retaining main structure is not proof of temporal witness or forensic evidence preservation.",
+      "concerns": [
+        "Threat-report templates can leak the evaluated campaign.",
+        "Missing application telemetry is a substantive input limitation.",
+        "Temporary files can carry attack payloads or credentials."
+      ],
+      "adaptation": "Add source-aware event normalization only for real available telemetry. Require actual evidence for each stage and report unknown stages; never blindly prune temporary files."
+    },
+    {
+      "id": "lintracer",
+      "title": "LinTracer: An efficient tracking system for cyberattack chains fusing entity and event semantics",
+      "authors": [
+        "Tiantian Zhu",
+        "Wenya He",
+        "Tieming Chen",
+        "Jiabo Zhang",
+        "Mingqi Lv",
+        "Hongmei Li",
+        "Aohan Zheng",
+        "Jie Zheng",
+        "Mingjun Ma",
+        "Xiangyang Zheng",
+        "Zhengqiu Weng",
+        "Shuying Wu"
+      ],
+      "doi": "10.1016/j.cose.2025.104413",
+      "venue": "Computers &amp; Security",
+      "volume": "154",
+      "pages_or_article": "104413",
+      "year": 2025,
+      "checked_date": "2026-09-13",
+      "full_text_read": false,
+      "full_text_status": "not_retrieved_closed_access",
+      "official_code_status": "not_found_after_search_not_proof_absent",
+      "primary_metadata_url": "https://api.crossref.org/works/10.1016/j.cose.2025.104413",
+      "metadata_local": "/root/NODOZE-pruning-release/webapp/runtime/research/groundtruth-study/reduction/lintracer-metadata.json",
+      "openalex_access": {
+        "is_oa": false,
+        "oa_status": "closed",
+        "oa_url": null,
+        "any_repository_has_fulltext": false
+      },
+      "url": "https://www.sciencedirect.com/science/article/pii/S0167404825001026",
+      "read_scope": [
+        "publisher abstract",
+        "introduction",
+        "overview/design/experimental-setup/conclusion snippets"
+      ],
+      "sections_unread": [
+        "complete feature set/equations",
+        "tag vocabulary/rules",
+        "full experimental results",
+        "ground-truth generation"
+      ],
+      "method": "Linux auditing and compression feed backward causal analysis from an alarm. Local/global feature scores propagate backward to locate entries; ATT&CK entity-semantic tags propagate forward, followed by path-level analysis. Conclusion mentions K-SUMS clustering and linear-discriminant feature projection.",
+      "reported_evaluation": "About 64 million events across lab data (January 15–21, 2024; Ubuntu 16.04/SPADE) and DARPA Engagement 4. Setup calls the DARPA data not publicly available.",
+      "guarantee": "No universal attack-chain or tag-propagation correctness guarantee verified.",
+      "concerns": [
+        "ATT&CK semantic tags are not event ground-truth labels.",
+        "Need exact label requirements for linear-discriminant projection.",
+        "Linux-specific features require explicit Windows/OPTC mapping."
+      ],
+      "adaptation": "Represent backward entry candidates and forward impact hypotheses separately. Require timestamp-valid original-event witnesses and typed tag transfer. Keep malicious actors, resources and context separate."
+    },
+    {
+      "id": "ORTHRUS",
+      "title": "ORTHRUS: Achieving High Quality of Attribution in Provenance-based Intrusion Detection Systems",
+      "authors": [
+        "Baoxiang Jiang",
+        "Tristan Bilot",
+        "Nour El Madhoun",
+        "Khaldoun Al Agha",
+        "Anis Zouaoui",
+        "Shahrear Iqbal",
+        "Xueyuan Han",
+        "Thomas Pasquier"
+      ],
+      "venue": "USENIX Security 2025",
+      "pages": "7173–7192",
+      "primary_url": "https://www.usenix.org/conference/usenixsecurity25/presentation/jiang-baoxiang",
+      "fulltext_url": "https://www.usenix.org/system/files/usenixsecurity25-jiang-baoxiang.pdf",
+      "local_pdf": "orthrus.pdf",
+      "reading_scope": "Full text obtained, main methods §4.1–4.5, evaluation §5.1–5.5, discussion §6 read; appendices not comprehensively read.",
+      "official_code": "https://github.com/ubc-provenance/orthrus",
+      "commit": "e7f25dfee1ddd182a955b88f8a90a8cbd4a8e543",
+      "code_scope": "README and config/orthrus.yml read; no implementation execution",
+      "local_pdf_sha256": "2a159e593a8567cea956ae80c7c5efb059bb99dfc62d3cf2a188ac29ffad485d",
+      "full_text_read": true
+    },
+    {
+      "id": "ProHunter",
+      "title": "ProHunter: A comprehensive APT hunting system based on whole-system provenance",
+      "authors_published": [
+        "Xuebo Qiu",
+        "Mingqi Lv",
+        "Tiantian Zhu",
+        "Yimei Zhang",
+        "Tieming Chen"
+      ],
+      "authors_arxiv": [
+        "Xuebo Qiu",
+        "Mingqi Lv",
+        "Yimei Zhang",
+        "Tiantian Zhu",
+        "Tieming Chen"
+      ],
+      "venue": "Computers & Security 167 (2026), 104907",
+      "doi": "10.1016/j.cose.2026.104907",
+      "primary_url": "https://www.sciencedirect.com/science/article/pii/S0167404826000830",
+      "fulltext_url": "https://arxiv.org/pdf/2603.19658",
+      "local_pdf": "prohunter.pdf",
+      "reading_scope": "Author preprint v1 full text obtained (19p); §3 methods, §4 evaluation/protocol/limitations read. Journal full text blocked 403, publisher abstract/snippets verified.",
+      "official_code": "https://github.com/xueboQiu/ProHunter",
+      "upstream_code": "https://github.com/xueboQiu/PPG",
+      "commit": "baa28661cebc99dc350fd5c18d91559435deb10f",
+      "code_scope": "ProHunter readme.md, graph_matching.py, selected train/eval portions pretrain_gmpt_cl.py and upstream PPG README read; not executed",
+      "local_pdf_sha256": "f68f3a8282bd8ea7a28676ce08e8e1e38b1af4b807babec47f46e1f1d9be02c6",
+      "full_text_read": true
+    },
+    {
+      "id": "ProGrasp",
+      "title": "ProGrasp: Storage-efficient provenance graph compression for APT forensics via structure prediction and attribute aggregation",
+      "authors": [
+        "Tiantian Zhu",
+        "Yiqian Yang",
+        "Zhengqiu Weng",
+        "Haofei Sun",
+        "Zhizhong Ma",
+        "Guolang Chen"
+      ],
+      "venue": "Knowledge-Based Systems 343 (15 June 2026), 115986",
+      "doi": "10.1016/j.knosys.2026.115986",
+      "primary_url": "https://www.sciencedirect.com/science/article/pii/S0950705126007124",
+      "reading_scope": "Publisher abstract, introduction, section previews only; full text purchase/institution access, direct fetch 403. Full methods/equations not read.",
+      "official_code": null,
+      "code_scope": "No verified author code found; robotic PROGrasp is unrelated",
+      "full_text_read": false
+    },
+    {
+      "id": "TraceBack",
+      "title": "TraceBack: Sequence-enhanced and causality-driven attack scenario reconstruction from provenance graphs",
+      "authors": [
+        "Tiantian Zhu",
+        "Mingda Li",
+        "Zijun Wang",
+        "Wenrui Cheng",
+        "Qianqian Chen",
+        "Jiaobo Jin",
+        "Mingjun Ma",
+        "Han Wu",
+        "Zhengqiu Weng",
+        "Guolang Chen"
+      ],
+      "venue": "Knowledge-Based Systems (2026), 116816",
+      "doi": "10.1016/j.knosys.2026.116816",
+      "primary_url": "https://www.sciencedirect.com/science/article/abs/pii/S095070512601542X",
+      "preprint_url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5351687",
+      "reading_scope": "Publisher abstract/introduction/section previews and author SSRN abstract read. Publisher/SSRN fulltext requests 403; no full PDF obtained.",
+      "official_code": null,
+      "code_scope": "No verified author code found",
+      "full_text_read": false
+    },
+    {
+      "id": "VGAE4PG",
+      "title": "VGAE4PG: A semantically preserved unsupervised provenance graph reduction framework",
+      "authors": [
+        "Ao Lv",
+        "Guige Ouyang",
+        "Yongzhong Huang"
+      ],
+      "venue": "29th CSCWD, 13–15 May 2026; IEEE added 6 July 2026",
+      "doi": "10.1109/CSCWD68734.2026.11581538",
+      "primary_url": "https://doi.org/10.1109/CSCWD68734.2026.11581538",
+      "authors_source": "https://fyust.edu.cn/gjhyqk/cscwd2026/program.pdf",
+      "reading_scope": "IEEE search-accessible abstract/introduction and conference program author entry. IEEE direct page bot/JavaScript challenge, no full text obtained; methods not read.",
+      "official_code": null,
+      "code_scope": "No verified author code found",
+      "full_text_read": false
+    },
+    {
+      "id": "ProGQL",
+      "title": "ProGQL: A Provenance Graph Query System for Cyber Attack Investigation",
+      "authors": [
+        "Fei Shao",
+        "Jia Zou",
+        "Zhichao Cao",
+        "Xusheng Xiao"
+      ],
+      "venue": "ICDE 2026",
+      "primary_url": "https://arxiv.org/abs/2510.22400",
+      "venue_source": "https://search.asu.edu/profile/4082902/cv",
+      "fulltext_url": "https://xusheng-xiao.github.io/papers/progql_icde2026.pdf",
+      "local_pdf": "progql-published.pdf",
+      "additional_pdf": "progql.pdf",
+      "reading_scope": "Author ICDE paper (15p) and arXiv v2 technical report (19p) obtained. §IV engine/methods, §V protocol/evaluation and §VI discussion read; published evaluation caveat cross-checked.",
+      "official_code": "https://github.com/ProGQL/ProGQL",
+      "commit": "29a1e9ee20a048e42e9a1d6afd1703fbb20ff212",
+      "code_scope": "README/repository tree and documented Java artifacts examined; no Java implementation executed",
+      "local_pdf_sha256": "af72119c2571794995935d76572b857f41993cc38ff9d055c898857bb30e68ae",
+      "additional_pdf_sha256": "229d1d981e7d48a30185c62930c6fdb3f6314fcfe647db1b4861319b1de83413",
+      "full_text_read": true
+    },
+    {
+      "id": "CONTEXTS",
+      "title": "CONnecting The EXtra doTS (CONTEXTS): Correlating External Information about Point of Interest for Attack Investigation",
+      "fulltext_url": "https://azadeht.github.io/papers/CONTEXTS-sp25.pdf",
+      "full_text_read": true,
+      "reading_scope": "Full text downloaded; methods, evaluation and relevant limitations read.",
+      "local_pdf_sha256": "a77b2c7c01fcd306c8955d59b74f7697df726ac6bc74e302f0bb131c384e63f4",
+      "pages": 19
+    },
+    {
+      "id": "TAPAS",
+      "title": "TAPAS: An Efficient Online APT Detection with Task-guided Process Provenance Graph Segmentation and Analysis",
+      "fulltext_url": "https://www.usenix.org/system/files/usenixsecurity25-zhang-bo-tapas.pdf",
+      "full_text_read": true,
+      "reading_scope": "Full text downloaded; methods, evaluation and relevant limitations read.",
+      "local_pdf_sha256": "da98a22f1cf297cffd47349f7f1081bfcb69fafe0aa498cc671ede6e1f7dcbf0",
+      "pages": 19
+    },
+    {
+      "id": "SLOT",
+      "title": "Slot: Provenance-Driven APT Detection through Graph Reinforcement Learning",
+      "fulltext_url": "https://yebof.github.io/assets/pdf/qiao2025ccs.pdf",
+      "full_text_read": true,
+      "reading_scope": "Full text downloaded; methods, evaluation and relevant limitations read.",
+      "local_pdf_sha256": "c80f5b61433ce2f7f2fb4b0c5bfa2d68dc310ec7e8cefabb098da168b5244880",
+      "pages": 15
+    }
+  ]
+}

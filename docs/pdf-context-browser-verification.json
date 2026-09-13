@@ -1,0 +1,281 @@
+{
+  "cases": [
+    {
+      "id": "optc-0201",
+      "context": {
+        "bundle_count": 606,
+        "bundle_reduction": 0.18548387096774188,
+        "candidate_events": 27011,
+        "event_reduction": 0.9724556662100625,
+        "preserved_required_events": 13,
+        "required_events": 13,
+        "selected_events": 744,
+        "selected_nodes": 361
+      },
+      "pdf": {
+        "accuracy": null,
+        "complete_labels": false,
+        "excluding_seed_nodes": {
+          "accuracy": null,
+          "complete_labels": false,
+          "f1": null,
+          "fn": 0,
+          "fp": 0,
+          "known_negative": 0,
+          "known_positive": 1,
+          "known_positive_recall": 1.0,
+          "precision": null,
+          "precision_bounds": [
+            0.125,
+            1.0
+          ],
+          "predicted": 8,
+          "recall": null,
+          "tn": 0,
+          "tp": 1,
+          "unknown_nodes": 111,
+          "unreviewed_predictions": 7
+        },
+        "f1": null,
+        "fn": 0,
+        "fp": 0,
+        "known_negative": 0,
+        "known_positive": 2,
+        "known_positive_recall": 1.0,
+        "precision": null,
+        "precision_bounds": [
+          0.2222222222222222,
+          1.0
+        ],
+        "predicted": 9,
+        "recall": null,
+        "tn": 0,
+        "tp": 2,
+        "unknown_nodes": 111,
+        "unreviewed_predictions": 7
+      },
+      "verification": {
+        "context_bundle_references_verified": true,
+        "context_selection_recomputed": false,
+        "multiview_references_verified": false,
+        "learned_scores_recomputed": false,
+        "story_facts_verified": true,
+        "activity_membership_verified": true,
+        "rule_witnesses_verified": true,
+        "raw_events_verified": true,
+        "strict_temporal_paths_verified": true,
+        "roles_verified": true,
+        "paths": 23,
+        "maliciousness_proven": false,
+        "limitation": "Checks internal event/route consistency, not log authenticity, model optimality or ground-truth correctness."
+      }
+    },
+    {
+      "id": "optc-0201-30m",
+      "context": {
+        "bundle_count": 1397,
+        "bundle_reduction": 0.099290780141844,
+        "candidate_events": 86318,
+        "event_reduction": 0.9820315577283997,
+        "preserved_required_events": 13,
+        "required_events": 13,
+        "selected_events": 1551,
+        "selected_nodes": 907
+      },
+      "pdf": {
+        "accuracy": null,
+        "complete_labels": false,
+        "excluding_seed_nodes": {
+          "accuracy": null,
+          "complete_labels": false,
+          "f1": null,
+          "fn": 0,
+          "fp": 0,
+          "known_negative": 0,
+          "known_positive": 1,
+          "known_positive_recall": 1.0,
+          "precision": null,
+          "precision_bounds": [
+            0.125,
+            1.0
+          ],
+          "predicted": 8,
+          "recall": null,
+          "tn": 0,
+          "tp": 1,
+          "unknown_nodes": 353,
+          "unreviewed_predictions": 7
+        },
+        "f1": null,
+        "fn": 0,
+        "fp": 0,
+        "known_negative": 0,
+        "known_positive": 2,
+        "known_positive_recall": 1.0,
+        "precision": null,
+        "precision_bounds": [
+          0.2222222222222222,
+          1.0
+        ],
+        "predicted": 9,
+        "recall": null,
+        "tn": 0,
+        "tp": 2,
+        "unknown_nodes": 353,
+        "unreviewed_predictions": 7
+      },
+      "verification": {
+        "context_bundle_references_verified": true,
+        "context_selection_recomputed": false,
+        "multiview_references_verified": false,
+        "learned_scores_recomputed": false,
+        "story_facts_verified": true,
+        "activity_membership_verified": true,
+        "rule_witnesses_verified": true,
+        "raw_events_verified": true,
+        "strict_temporal_paths_verified": true,
+        "roles_verified": true,
+        "paths": 23,
+        "maliciousness_proven": false,
+        "limitation": "Checks internal event/route consistency, not log authenticity, model optimality or ground-truth correctness."
+      }
+    },
+    {
+      "id": "optc-0201-60m",
+      "context": {
+        "bundle_count": 2430,
+        "bundle_reduction": 0.059597523219814263,
+        "candidate_events": 188609,
+        "event_reduction": 0.9862996993780785,
+        "preserved_required_events": 13,
+        "required_events": 13,
+        "selected_events": 2584,
+        "selected_nodes": 1595
+      },
+      "pdf": {
+        "accuracy": null,
+        "complete_labels": false,
+        "excluding_seed_nodes": {
+          "accuracy": null,
+          "complete_labels": false,
+          "f1": null,
+          "fn": 0,
+          "fp": 0,
+          "known_negative": 0,
+          "known_positive": 1,
+          "known_positive_recall": 1.0,
+          "precision": null,
+          "precision_bounds": [
+            0.125,
+            1.0
+          ],
+          "predicted": 8,
+          "recall": null,
+          "tn": 0,
+          "tp": 1,
+          "unknown_nodes": 896,
+          "unreviewed_predictions": 7
+        },
+        "f1": null,
+        "fn": 0,
+        "fp": 0,
+        "known_negative": 0,
+        "known_positive": 2,
+        "known_positive_recall": 1.0,
+        "precision": null,
+        "precision_bounds": [
+          0.2222222222222222,
+          1.0
+        ],
+        "predicted": 9,
+        "recall": null,
+        "tn": 0,
+        "tp": 2,
+        "unknown_nodes": 896,
+        "unreviewed_predictions": 7
+      },
+      "verification": {
+        "context_bundle_references_verified": true,
+        "context_selection_recomputed": false,
+        "multiview_references_verified": false,
+        "learned_scores_recomputed": false,
+        "story_facts_verified": true,
+        "activity_membership_verified": true,
+        "rule_witnesses_verified": true,
+        "raw_events_verified": true,
+        "strict_temporal_paths_verified": true,
+        "roles_verified": true,
+        "paths": 23,
+        "maliciousness_proven": false,
+        "limitation": "Checks internal event/route consistency, not log authenticity, model optimality or ground-truth correctness."
+      }
+    },
+    {
+      "id": "optc-0201-background",
+      "context": {
+        "bundle_count": 0,
+        "bundle_reduction": 0,
+        "candidate_events": 74654,
+        "event_reduction": 1.0,
+        "preserved_required_events": 0,
+        "required_events": 0,
+        "selected_events": 0,
+        "selected_nodes": 0
+      },
+      "pdf": {
+        "accuracy": null,
+        "complete_labels": false,
+        "excluding_seed_nodes": {
+          "accuracy": null,
+          "complete_labels": false,
+          "f1": null,
+          "fn": 0,
+          "fp": 0,
+          "known_negative": 0,
+          "known_positive": 0,
+          "known_positive_recall": null,
+          "precision": null,
+          "precision_bounds": null,
+          "predicted": 0,
+          "recall": null,
+          "tn": 0,
+          "tp": 0,
+          "unknown_nodes": 313,
+          "unreviewed_predictions": 0
+        },
+        "f1": null,
+        "fn": 0,
+        "fp": 0,
+        "known_negative": 0,
+        "known_positive": 0,
+        "known_positive_recall": null,
+        "precision": null,
+        "precision_bounds": null,
+        "predicted": 0,
+        "recall": null,
+        "tn": 0,
+        "tp": 0,
+        "unknown_nodes": 315,
+        "unreviewed_predictions": 0
+      },
+      "verification": {
+        "context_bundle_references_verified": true,
+        "context_selection_recomputed": false,
+        "multiview_references_verified": false,
+        "learned_scores_recomputed": false,
+        "story_facts_verified": true,
+        "activity_membership_verified": true,
+        "rule_witnesses_verified": true,
+        "raw_events_verified": true,
+        "strict_temporal_paths_verified": true,
+        "roles_verified": true,
+        "paths": 0,
+        "maliciousness_proven": false,
+        "limitation": "Checks internal event/route consistency, not log authenticity, model optimality or ground-truth correctness."
+      }
+    }
+  ],
+  "page_errors": [],
+  "desktop_overflow": false,
+  "mobile_overflow": false
+}

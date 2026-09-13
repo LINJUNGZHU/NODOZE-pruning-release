@@ -225,11 +225,11 @@ def test_tapas_membership_is_separate_and_scope_bound(tmp_path,monkeypatch):
     path=tmp_path/'tapas.json';path.write_text(json.dumps(dict(source_path='fixture',source_sha256='abc',source_node_count=2,
         granularity='static membership',limitation='no timestamps',windows={digest(ids):dict(node_ids_sha256=digest(nodes),positive_node_ids=['agent','service'],matched_types=dict(process=2,file=0,flow=0))})))
     monkeypatch.setattr(evaluation,'TAPAS_LABELS',path)
-    before=copy.deepcopy(report);result=evaluation.evaluate_attack(report,es)
+    before=copy.deepcopy(report);result=evaluation.evaluate_attack(report,es,include_tapas=True)
     assert report==before  # truth cannot mutate a prediction
     m=result['tapas_benchmark']['node_metrics'];assert (m['tp'],m['fn'],m['fp'])==(1,1,3)
     assert result['tapas_benchmark']['full_attack_path_recall'] is None
-    assert 'tapas_benchmark' not in evaluation.evaluate_attack(report,es[:-1])
+    assert 'tapas_benchmark' not in evaluation.evaluate_attack(report,es[:-1],include_tapas=True)
 
 
 def test_tapas_reference_export_rejects_invalid_ids_and_preserves_types(tmp_path):

@@ -1,0 +1,4 @@
+case,raw,saved_pruning,evidence_events,bundles,pdf_reference,saved_pruning_pdf_matched,evidence_pdf_matched
+optc-0201,27011,498,744,606,278,183,265
+optc-0201-30m,86318,17263,1551,1397,947,639,934
+optc-0201-60m,188609,37721,2584,2430,1979,1328,1966

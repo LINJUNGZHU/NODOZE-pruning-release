@@ -1,0 +1,147 @@
+{
+  "database_inventory_scope": "/root/NODOZE-pruning-release/output/tc",
+  "database_inventory": [
+    {
+      "path": "/root/NODOZE-pruning-release/output/tc/cadets-e3-from-raw-2026-09-07_15-27-47.db",
+      "bytes": 23126298624
+    },
+    {
+      "path": "/root/NODOZE-pruning-release/output/tc/theia-depimpact-case1-2026-09-09_15-35-45.db",
+      "bytes": 5091393536
+    },
+    {
+      "path": "/root/NODOZE-pruning-release/output/tc/theia-depimpact-case3-2026-09-09_15-32-25.db",
+      "bytes": 5025497088
+    },
+    {
+      "path": "/root/NODOZE-pruning-release/output/tc/theia-depimpact-cases13-2026-09-09_15-25-43.db",
+      "bytes": 3966812160
+    },
+    {
+      "path": "/root/NODOZE-pruning-release/output/tc/trace-case5-shard-2026-09-09_15-00-06.db",
+      "bytes": 2909782016
+    },
+    {
+      "path": "/root/NODOZE-pruning-release/output/tc/trace-e3-from-tapas-2026-09-09_14-51-29.db",
+      "bytes": 45056
+    },
+    {
+      "path": "/root/NODOZE-pruning-release/output/tc/trace-e3-from-tapas-2026-09-09_14-53-07.db",
+      "bytes": 19250462720
+    }
+  ],
+  "theia_case1_latest_fixed_run": {
+    "path": "/root/NODOZE-pruning-release/output/tc/theia-case1-poi-prefix-fixed-2026-09-09_15-57-01/scenario-theia-case1/poi-prefix-1.incomplete.json",
+    "sha256": "0e865433e1824b1a166d2eabfc3d0eb5c46878c9451ce27744387fad12a1603e",
+    "incomplete": true,
+    "completion_status": "candidate_construction_truncated",
+    "candidate_construction": {
+      "mode": "window_context",
+      "window_count": 1,
+      "alert_count": 1,
+      "processed_window_count": 1,
+      "queried_event_count": 255000,
+      "unique_candidate_event_count": 250000,
+      "pages_read": 51,
+      "database_query_seconds": 2.8288554213941097,
+      "baseline_rss_mb": 156.90625,
+      "peak_rss_mb": 319.625,
+      "elapsed_seconds": 2.9081934466958046,
+      "incomplete": true,
+      "truncation_reason": "candidate_event_limit",
+      "pending_state_count": 0,
+      "enqueued_state_count": 0,
+      "expanded_state_count": 0,
+      "reused_state_count": 0,
+      "cache_hits": 0,
+      "cache_size": 0,
+      "complete_path_count": 0,
+      "truncated_path_count": 1,
+      "termination_reasons": {
+        "candidate_event_limit": 1
+      }
+    }
+  },
+  "theia_case1_historical_different_protocol": {
+    "path": "/root/NODOZE-pruning-release/output/tc/theia-case1-poi-prefix-2026-09-09_15-51-28/partial-summary.json",
+    "sha256": "293800a6287c60f83ee667ac823616e9e95358f16e28dd3c0173872b8c7f421f",
+    "incomplete": true,
+    "completed_prefix_runs": 1,
+    "rows": [
+      {
+        "scenario": "theia-case1",
+        "poi_count": 1,
+        "full_poi_count": 3,
+        "selected_poi_event_ids": [
+          "764AB6F2-DF26-2415-B8F5-3B0000000010"
+        ],
+        "candidate_events": 1,
+        "candidate_nodes": 2,
+        "kept_events": 1,
+        "requested_keep_ratio": 0.2,
+        "actual_keep_ratio": 1.0,
+        "event_compression_ratio": 0.0,
+        "attack_event_recall": 3.9655787762223894e-05,
+        "reference_paths": 3,
+        "retained_reference_paths": 0,
+        "complete_path_retention": 0.0,
+        "selected_terminal_paths": 1,
+        "retained_selected_terminal_paths": 0,
+        "selected_terminal_path_retention": 0.0,
+        "unselected_terminal_paths": 2,
+        "retained_unselected_terminal_paths": 0,
+        "unselected_terminal_path_retention": 0.0,
+        "marginal_restored_paths": 0,
+        "path_certificate_valid": true,
+        "path_certificate_status": "poi_only",
+        "strict_multistage_certificate_valid": false,
+        "causal_path_cover_certificate_valid": true,
+        "certificate_topology": "singleton",
+        "certificate_branch_count": 1,
+        "candidate_disconnected_stage_pairs": [],
+        "budget_feasible": true,
+        "budget_rounding_policy": "floor_hard_cap_minimum_one",
+        "budget_overflow_edges": 0,
+        "score_mass_retained": 1.0,
+        "stage_pairs": 0,
+        "connected_stage_pairs": 0,
+        "retained_stage_pairs": 0,
+        "prefix_jaccard": null,
+        "added_edges": 0,
+        "removed_previous_edges": 0,
+        "declared_allowed_removed_previous_edges": 0,
+        "allowed_removed_previous_edges": 0,
+        "budget_contraction_edges": 0,
+        "atomicity_churn_slack_edges": 0,
+        "churn_bound_satisfied": true,
+        "churn_constraint_status": "not_applicable",
+        "score_monotonicity_violations": 0,
+        "local_score_digest_violations": 0,
+        "unused_budget_edges": 0,
+        "zero_score_fill_stopped": false,
+        "score_ledger_manifest": "/root/NODOZE-pruning-release/output/tc/theia-case1-poi-prefix-2026-09-09_15-51-28/scenario-theia-case1/poi-prefix-1-ledger/manifest.json",
+        "score_ledger_valid": true,
+        "elapsed_seconds": 139.70088016986847,
+        "result_file": "/root/NODOZE-pruning-release/output/tc/theia-case1-poi-prefix-2026-09-09_15-51-28/scenario-theia-case1/poi-prefix-1.json",
+        "input_file": "/root/NODOZE-pruning-release/output/tc/theia-case1-poi-prefix-2026-09-09_15-51-28/scenario-theia-case1/poi-prefix-1-input.json",
+        "table7_attack_causality_s": 0.0013989657163619995,
+        "table7_edge_merge_s": 4.754960536956787e-05,
+        "table7_depimpact_weight_s": 0.0007823668420314789,
+        "table7_fixed_projection_weight_s": 0.0001934543251991272,
+        "table7_depimpact_propagation_s": 4.476681351661682e-05,
+        "table7_fixed_projection_propagation_s": 1.6730278730392456e-05,
+        "table7_nodoze_s": 86.22569189593196,
+        "table8_candidate_entries": 1,
+        "table8_attack_entries": 1,
+        "table8_covered_attack_entries": 1,
+        "table8_attack_entry_coverage": 1.0,
+        "table8_temporal_only_average_rank": 1.0,
+        "table8_temporal_data_average_rank": 1.0,
+        "table8_fixed_projection_average_rank": 1.0,
+        "table8_uniform_random_average_rank": 1.0,
+        "table8_depimpact_average_rank": 1.0
+      }
+    ]
+  },
+  "historical_result_interpretation": "one-event causal candidate graph; not comparable with later corrected window-context experiment; recorded separately instead of substituting it for a completed corrected run"
+}

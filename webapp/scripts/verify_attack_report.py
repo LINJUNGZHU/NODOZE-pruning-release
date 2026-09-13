@@ -61,7 +61,8 @@ def verify(document):
         for eid,timestamp in entries:
             if eid in context_union and by_id[eid]['timestamp_ns']!=timestamp:raise ValueError('view context timestamp mismatch')
     activity=set(attack.get('activity_event_ids',[]))
-    if set(by_id)!=path_union|evidence|activity|context_union: raise ValueError('missing/extra supporting event')
+    graph_context=set((document.get('context_graph') or {}).get('event_ids',[]))
+    if set(by_id)!=path_union|evidence|activity|context_union|graph_context: raise ValueError('missing/extra supporting event')
     processes={n['id'] for n in attack['nodes']};predicted={n['id'] for n in attack['nodes'] if n['predicted_attack']}
     path_nodes={n for p in attack['paths'] for n in p['node_ids']}
     if set(attack['connector_node_ids'])!=(path_nodes&processes)-predicted: raise ValueError('connector role mismatch')
@@ -105,7 +106,11 @@ def verify(document):
     if 'story' in attack:
         from tc_pruning.attack_story import verify_story
         story_verified=verify_story(attack,events)
-    return dict(multiview_references_verified=multiview_verified,learned_scores_recomputed=False,story_facts_verified=story_verified,activity_membership_verified=activity_verified,rule_witnesses_verified=rule_verified,raw_events_verified=True,strict_temporal_paths_verified=True,roles_verified=True,
+    context_verified=False
+    if document.get('context_graph'):
+        from tc_pruning.context_graph import verify_context_export
+        context_verified=verify_context_export(document['context_graph'],attack,events)
+    return dict(context_bundle_references_verified=context_verified,context_selection_recomputed=False,multiview_references_verified=multiview_verified,learned_scores_recomputed=False,story_facts_verified=story_verified,activity_membership_verified=activity_verified,rule_witnesses_verified=rule_verified,raw_events_verified=True,strict_temporal_paths_verified=True,roles_verified=True,
                 paths=len(attack['paths']),maliciousness_proven=False,
                 limitation='Checks internal event/route consistency, not log authenticity, model optimality or ground-truth correctness.')
 

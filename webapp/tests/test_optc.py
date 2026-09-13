@@ -162,7 +162,11 @@ def test_attack_api_report_and_threshold_persistence(dataset,tmp_path):
 
 def test_attack_predictions_do_not_depend_on_pruning_budget_or_mode(dataset):
     reports=[rescore(copy.deepcopy(dataset),'seed',b,m)['attack'] for b,m in [(1.,'context'),(.01,'evidence')]]
-    strip=lambda a:{k:v for k,v in a.items() if k!='runtime_seconds'}
+    def strip(a):
+        result=copy.deepcopy(a);result.pop('runtime_seconds',None)
+        # Only pruning evaluation is allowed to change with the pruning budget.
+        result['evaluation']['pdf_benchmark'].pop('pruning')
+        return result
     assert strip(reports[0])==strip(reports[1])
 
 

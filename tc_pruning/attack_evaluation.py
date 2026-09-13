@@ -37,7 +37,7 @@ def node_metrics(node_ids, predicted, labels):
                 complete_labels=fully_labeled)
 
 
-def evaluate_attack(report, edges, reference=None):
+def evaluate_attack(report, edges, reference=None, *, include_tapas=False):
     reference = json.loads(REFERENCE.read_text()) if reference is None else reference
     scoped = [e for e in edges if e['raw']['hostname'].lower()==reference['host'].lower()
               and e['timestamp'].startswith(reference['date'])]
@@ -134,7 +134,7 @@ def evaluate_attack(report, edges, reference=None):
                                         paths_with_all_events_labeled_malicious=all_labeled),
                 path_process_coverage=node_metrics(universe,path_processes,labels),
                 note='公开标签按其作者的补集规则计正常；含继承标签和已知数据错误。过程节点、路径上的上下文节点、逐事件与完整路径是不同评估单位，不能互换。')
-    if TAPAS_LABELS.is_file():
+    if include_tapas and TAPAS_LABELS.is_file():
         tapas=json.loads(TAPAS_LABELS.read_text())
         scope=tapas['windows'].get(digest(by_id))
         observed_nodes={n for e in edges for n in (e['source'],e['target'])}
@@ -151,4 +151,8 @@ def evaluate_attack(report, edges, reference=None):
                 false_positive_process_ids=sorted(n for n in predicted if not labels[n]),
                 disagreement_with_published_process_ids=conflicts,
                 full_attack_path_precision=None,full_attack_path_recall=None)
+    from tc_pruning.pdf_groundtruth import evaluate_pdf,load_reference
+    pdf_reference=load_reference()
+    result["pdf_benchmark"]=evaluate_pdf(report,edges,pdf_reference)
+    result["primary_reference"]="pdf_benchmark"
     return result

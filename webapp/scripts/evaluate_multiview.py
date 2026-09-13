@@ -21,7 +21,7 @@ def main():
         variants={}
         for detector in ('rules','neural','multiview'):
             report=infer_attack(edges,poi,detector=detector,neural_scores=scores if detector=='multiview' else None)
-            evaluation=evaluate_attack(report,edges);report['evaluation']=evaluation
+            evaluation=evaluate_attack(report,edges,include_tapas=True);report['evaluation']=evaluation
             variants[detector]=dict(public=evaluation['published_benchmark']['node_metrics'],
                 tapas=evaluation['tapas_benchmark']['node_metrics'],
                 activity={k:v for k,v in evaluation['published_benchmark']['activity_event_metrics'].items() if not k.endswith('_event_ids')},

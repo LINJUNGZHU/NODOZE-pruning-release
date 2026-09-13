@@ -37,7 +37,7 @@ function render(d){
  $('#download-audit').href=base()+'/decision-audit';
  const c=d.decision_certificate;$('#decision-summary').textContent=c?`预算校验：${c.budget_valid?'通过':'未通过'}；完整时序见证：${c.complete_witnesses?'通过':'未通过'}；剩余 ${fmt(c.unused_budget)} 条预算。保留比例是上限，不强制填满。`:'';
  $('#source-note').textContent=JSON.stringify({数据范围:d.dataset,真值参考:d.truth.source,边评分与选择:d.decision_contract},null,2);
- renderCases();layoutGraph();scheduleDraw();renderAttack();if(!$('#panel-events').hidden)renderTable();
+ renderCases();layoutGraph();setGraphView();renderAttack();if(!$('#panel-events').hidden)renderTable();
 }
 // Process hubs share one deterministic layout; resource placement uses actual neighbors.
 function layoutGraph(){
@@ -57,7 +57,9 @@ function drawGraph(after){
  if(canvas.width!==Math.round(t.rect.width*ratio)||canvas.height!==Math.round(t.rect.height*ratio)){canvas.width=Math.round(t.rect.width*ratio);canvas.height=Math.round(t.rect.height*ratio);}
  ctx.setTransform(ratio,0,0,ratio,0,0);ctx.clearRect(0,0,t.rect.width,t.rect.height);ctx.translate(t.ox,t.oy);ctx.scale(t.scale,t.scale);ctx.translate(-500,-340);
  const es=state.data.graph.edges,pos=state.positions,nodes=state.data.graph.nodes;ctx.strokeStyle=after?'#328e8038':'#617f7c38';ctx.lineWidth=.42/t.scale;let count=0;
- for(const e of es){if(after&&!e[3])continue;const a=pos[e[1]],b=pos[e[2]];ctx.beginPath();ctx.moveTo(a[0],a[1]);if(e[1]===e[2])ctx.arc(a[0]+2,a[1],2,Math.PI,3*Math.PI);else ctx.lineTo(b[0],b[1]);count++;ctx.stroke();}
+ const contextMode=after&&$('#graph-view').value==='investigation';
+ const drawn=contextMode?(state.data.graph.context_bundles||[]).map(b=>[null,b[0],b[1],true,b[2]]):es;
+ for(const e of drawn){if(after&&!e[3])continue;const a=pos[e[1]],b=pos[e[2]];ctx.beginPath();ctx.moveTo(a[0],a[1]);if(e[1]===e[2])ctx.arc(a[0]+2,a[1],2,Math.PI,3*Math.PI);else ctx.lineTo(b[0],b[1]);count+=contextMode?e[4]:1;ctx.stroke();}
  const drawNodes=(process)=>{ctx.fillStyle=process?(after?'#28695f':'#576f72'):(after?'#73b2a6':'#a6b7b5');ctx.beginPath();nodes.forEach((n,i)=>{if((n[2]==='process')!==process||(after&&!state.keptNodes.has(i)))return;const p=pos[i],r=(process?1.6:.55)/Math.sqrt(t.scale);ctx.moveTo(p[0]+r,p[1]);ctx.arc(p[0],p[1],r,0,Math.PI*2);});ctx.fill();};drawNodes(false);drawNodes(true);
  ctx.fillStyle='#c05b40';nodes.forEach((n,i)=>{if(!state.predicted.has(n[0])||(after&&!state.keptNodes.has(i)))return;const p=pos[i];ctx.beginPath();ctx.arc(p[0],p[1],3/Math.sqrt(t.scale),0,Math.PI*2);ctx.fill();});
  canvas.dataset.renderedEdges=String(count);canvas.dataset.sampled='false';
@@ -103,3 +105,18 @@ $('#poi-id').oninput=()=>{const p=state.data?.poi_presets.find(p=>p.event_id===$
 $('#poi-form').onsubmit=async e=>{e.preventDefault();if(!state.data||state.busy)return;setBusy(true);$('#error').hidden=true;$('#prune-status').textContent='正在重新统计 POI 前频次、剪枝并识别进程…';try{const d=await api(base()+'/prune',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({poi_event_id:$('#poi-id').value.trim(),budget_ratio:Number($('#edge-budget').value),selection_mode:$('#selection-mode').value,attack_quantile:Number($('#attack-quantile').value),detector:$('#detector').value,compact:true})});render(d);$('#prune-status').textContent='分析完成，结果已保存。';}catch(e){fail(e);$('#prune-status').textContent='本次未完成，仍显示上一次成功的结果。';}finally{setBusy(false);}};
 async function boot(){try{const d=await api('/api/datasets');state.cases=d.datasets;$('#detector option[value="neural"]').disabled=!d.neural_available;$('#detector option[value="multiview"]').disabled=!d.multiview_available;renderCases();if(!d.datasets.length)throw Error('没有已准备的案例。');await loadCase(d.datasets[0].id);}catch(e){fail(e);}}
 initCanvas();boot();
+
+function setGraphView(){
+ if(!state.data)return;const mode=$('#graph-view').value==='investigation',c=state.data.context_graph,m=state.data.metrics;
+ state.keptNodes=new Set(mode?(state.data.graph.context_bundles||[]).flatMap(b=>[b[0],b[1]]):state.data.graph.edges.filter(e=>e[3]).flatMap(e=>[e[1],e[2]]));
+ const visibleCount=mode&&c?c.summary.selected_events:m.retained_edges,visibleNodes=mode&&c?c.summary.selected_nodes:m.retained_nodes;
+ const cards=$('#metrics').children;
+ cards[1].children[0].textContent=mode?'证据图原始事件':'预算保留事件';cards[1].children[1].textContent=fmt(visibleCount);cards[1].children[2].textContent=`${fmt(visibleNodes)} 个节点`;
+ cards[2].children[1].textContent=`${(100*(1-visibleCount/m.candidate_edges)).toFixed(1)}%`;cards[2].children[2].textContent=`${fmt(m.candidate_edges-visibleCount)} 条事件${mode?'未进入证据图':'已剪去'}`;
+ $('#after-title').textContent=mode?'证据聚合图':'剪枝后';
+ $('#after-count').textContent=mode&&c?`${fmt(c.summary.bundle_count)} 组 · ${fmt(c.summary.selected_events)} 条原始事件`:`${fmt(m.retained_edges)} 边 · ${fmt(m.retained_nodes)} 节点`;
+ $('#context-summary').textContent=c?`证据图：${fmt(c.summary.selected_events)} 条事件聚合为 ${fmt(c.summary.bundle_count)} 组，保留全部 ${fmt(c.summary.required_events)} 条判定与路径依据。上下文节点不自动判攻击。`:'';
+ $('#scope-note').textContent=mode?'左侧保留完整原图。右侧仅绘制证据子图，每组保留全部原始事件 ID；并行事件按端点、类型和分钟聚合，可在日志筛选“证据聚合图原始事件”或下载报告展开。此图不受上方剪枝预算约束。':'两图使用同一坐标，全量绘制原始事件，无抽样。拖动平移、滚轮缩放，点击节点查日志。重合事件仍按原始条数计算。';
+ scheduleDraw();
+}
+$('#graph-view').onchange=setGraphView;
