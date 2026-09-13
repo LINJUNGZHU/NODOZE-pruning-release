@@ -1,0 +1,312 @@
+{
+  "baseline_tests": {
+    "passed": 457,
+    "seconds": 9.5
+  },
+  "final_tests": {
+    "passed": 536,
+    "seconds": 10.3
+  },
+  "web_smoke": {
+    "candidate_source": "webapp/runtime/optc-demo.json",
+    "scope": "OPTC diagnostic only",
+    "results": [
+      {
+        "algorithm": "legacy",
+        "selection": "context",
+        "requested_keep_ratio": 0.2,
+        "metrics": {
+          "budget_edges": 5402,
+          "candidate_edges": 27011,
+          "candidate_nodes": 6992,
+          "history_edges": 477500,
+          "retained_edges": 5402,
+          "retained_nodes": 1765
+        },
+        "certificate": {
+          "budget_valid": true,
+          "certificate_kind": "ppr_residual_bound",
+          "complete_witnesses": true,
+          "eligible_count": 14812,
+          "inputs_sha256": "cb36dfea8fd237f8f1f1af9cbc9704d9d4963684ffc38903be6fb6300b99b3ce",
+          "ledger_replayed": true,
+          "poi_preserved": true,
+          "stop_reason": "legacy_context_policy",
+          "temporal_links_valid": true,
+          "unused_budget": 0
+        },
+        "seconds": 8.062801193445921
+      },
+      {
+        "algorithm": "relation_aware",
+        "selection": "context",
+        "requested_keep_ratio": 0.2,
+        "metrics": {
+          "budget_edges": 5402,
+          "candidate_edges": 27011,
+          "candidate_nodes": 6992,
+          "history_edges": 477500,
+          "retained_edges": 1201,
+          "retained_nodes": 536
+        },
+        "certificate": {
+          "budget_valid": true,
+          "certificate_kind": "exact_temporal_witness",
+          "complete_witnesses": true,
+          "eligible_count": 1201,
+          "inputs_sha256": "81244822f4b5b2e274d5f4a27a88ece88cda2022a09e11d6fbfca64709285897",
+          "ledger_replayed": true,
+          "poi_preserved": true,
+          "stop_reason": "legacy_context_policy",
+          "temporal_links_valid": true,
+          "unused_budget": 4201
+        },
+        "seconds": 11.188693922013044
+      },
+      {
+        "algorithm": "rcvp",
+        "selection": "progressive",
+        "requested_keep_ratio": 0.05,
+        "metrics": {
+          "budget_edges": 1350,
+          "candidate_edges": 27011,
+          "candidate_nodes": 6992,
+          "history_edges": 477500,
+          "retained_edges": 1350,
+          "retained_nodes": 725
+        },
+        "certificate": {
+          "budget_valid": true,
+          "certificate_kind": "exact_temporal_witness",
+          "complete_witnesses": true,
+          "eligible_count": 27011,
+          "examined_groups": 30371,
+          "inputs_sha256": "894178be2a2c8af34d60adef32c6e5d6cf796e002ffb42f192b597e88ebfbf34",
+          "ledger_replayed": true,
+          "poi_preserved": true,
+          "removal_rounds": 25661,
+          "stop_reason": "progressive_budget_reached",
+          "temporal_links_valid": true,
+          "unused_budget": 0
+        },
+        "seconds": 13.068474233150482
+      },
+      {
+        "algorithm": "rcvp",
+        "selection": "progressive",
+        "requested_keep_ratio": 0.1,
+        "metrics": {
+          "budget_edges": 2701,
+          "candidate_edges": 27011,
+          "candidate_nodes": 6992,
+          "history_edges": 477500,
+          "retained_edges": 2701,
+          "retained_nodes": 1448
+        },
+        "certificate": {
+          "budget_valid": true,
+          "certificate_kind": "exact_temporal_witness",
+          "complete_witnesses": true,
+          "eligible_count": 27011,
+          "examined_groups": 29011,
+          "inputs_sha256": "8875851d5e0f3298eef0274f8f41dc6396d3bb816e727f19c1a2d4c9f8b2b291",
+          "ledger_replayed": true,
+          "poi_preserved": true,
+          "removal_rounds": 24310,
+          "stop_reason": "progressive_budget_reached",
+          "temporal_links_valid": true,
+          "unused_budget": 0
+        },
+        "seconds": 14.04539967700839
+      },
+      {
+        "algorithm": "rcvp",
+        "selection": "progressive",
+        "requested_keep_ratio": 0.2,
+        "metrics": {
+          "budget_edges": 5402,
+          "candidate_edges": 27011,
+          "candidate_nodes": 6992,
+          "history_edges": 477500,
+          "retained_edges": 5402,
+          "retained_nodes": 3071
+        },
+        "certificate": {
+          "budget_valid": true,
+          "certificate_kind": "exact_temporal_witness",
+          "complete_witnesses": true,
+          "eligible_count": 27011,
+          "examined_groups": 25661,
+          "inputs_sha256": "07735d3f86d8dd9d5a2876792426d87b01789ec4f2766f49c5891397b26f068a",
+          "ledger_replayed": true,
+          "poi_preserved": true,
+          "removal_rounds": 21609,
+          "stop_reason": "progressive_budget_reached",
+          "temporal_links_valid": true,
+          "unused_budget": 0
+        },
+        "seconds": 14.49842643365264
+      },
+      {
+        "algorithm": "rcvp",
+        "selection": "progressive",
+        "requested_keep_ratio": 0.3,
+        "metrics": {
+          "budget_edges": 8103,
+          "candidate_edges": 27011,
+          "candidate_nodes": 6992,
+          "history_edges": 477500,
+          "retained_edges": 8103,
+          "retained_nodes": 4618
+        },
+        "certificate": {
+          "budget_valid": true,
+          "certificate_kind": "exact_temporal_witness",
+          "complete_witnesses": true,
+          "eligible_count": 27011,
+          "examined_groups": 22718,
+          "inputs_sha256": "c4f01195a30fedf4fdd5487c29566dfe885c4652d690b29c92632004216ffeb8",
+          "ledger_replayed": true,
+          "poi_preserved": true,
+          "removal_rounds": 18908,
+          "stop_reason": "progressive_budget_reached",
+          "temporal_links_valid": true,
+          "unused_budget": 0
+        },
+        "seconds": 13.549288302659988
+      }
+    ],
+    "timing_context": "concurrent final four-case benchmark load"
+  },
+  "browser": {
+    "success": true,
+    "errors": [],
+    "algorithm": "rcvp",
+    "selection": "progressive",
+    "budget": 0.1,
+    "edge_detail_rcvp_and_progressive": true,
+    "status": "分析完成，结果已保存。"
+  },
+  "profiling": {
+    "scope": "synthetic fixed-500-node repeated temporal interactions; exact full operator without optional legacy diagnostic; cProfile overhead included; concurrent evaluation load",
+    "results": [
+      {
+        "events": 10000,
+        "unique_channels": 500,
+        "roots": 32,
+        "propagation_seconds_profiled": 0.43055158853530884,
+        "progressive_seconds": 0.07099669054150581,
+        "examined_groups": 9000,
+        "removal_rounds": 9000
+      },
+      {
+        "events": 20000,
+        "unique_channels": 500,
+        "roots": 32,
+        "propagation_seconds_profiled": 0.8499692641198635,
+        "progressive_seconds": 0.15993261709809303,
+        "examined_groups": 18000,
+        "removal_rounds": 18000
+      },
+      {
+        "events": 40000,
+        "unique_channels": 500,
+        "roots": 32,
+        "propagation_seconds_profiled": 1.6664831601083279,
+        "progressive_seconds": 0.3127438575029373,
+        "examined_groups": 36000,
+        "removal_rounds": 36000
+      }
+    ]
+  },
+  "default_profiles_unchanged": [
+    "configs/tc_pruning.json",
+    "configs/tc_pruning_poi_alert.json"
+  ],
+  "local_screenshot": "output/rcvp-validation/rcvp-web.png",
+  "live_backend": {
+    "restarted": true,
+    "health": "ok",
+    "invalid_algorithm_http_status": 400
+  },
+  "atomic_audit_performance_regression": {
+    "case": "cadets-13",
+    "online_seconds_before": 204.220379576087,
+    "online_seconds_after": 67.89931632950902,
+    "G_5percent_select_before": 13.63309270516038,
+    "G_5percent_select_after": 2.195639096200466,
+    "decision_sha256_unchanged": true,
+    "audit_sha256_unchanged": true,
+    "note": "same machine, concurrent workload; fixed audit operation count and shared atomic group hashing, no parameter change"
+  },
+  "paired_timestamp_profile": {
+    "events": 20000,
+    "timestamp_group_size": 2,
+    "scores_bit_identical": true,
+    "results": [
+      {
+        "small_batch_cutoff": 0,
+        "seconds": 4.360894791781902
+      },
+      {
+        "small_batch_cutoff": 4,
+        "seconds": 0.40743305534124374
+      }
+    ]
+  },
+  "theia_pre_small_batch_aborted": {
+    "pid": 324880,
+    "sampled_peak_process_rss_mib": 10576.0234375,
+    "elapsed_seconds_since_process_start": 2342.509999997914,
+    "samples": 1497,
+    "sampling_seconds": 1,
+    "scope": "kernel VmHWM sampled during remaining process lifetime; includes pre-monitor high-water mark and serialization/evaluation while process lives",
+    "complete": true,
+    "benchmark_completed": false,
+    "stop_reason": "interrupted_for_confirmed_small_timestamp_batch_overhead_fix"
+  },
+  "theia_timestamp_distribution": {
+    "raw_events": 1132218,
+    "unique_timestamps": 566561,
+    "batch_size_histogram": {
+      "1": 927,
+      "2": 565617,
+      "3": 11,
+      "4": 6
+    },
+    "source": "frozen online candidate ledger; no labels used"
+  },
+  "independent_frozen_validator": {
+    "command": "PYTHONPATH=. python scripts/run_rcvp.py --validate output/rcvp-evaluation-20260913/cadets-13",
+    "valid": true,
+    "candidate_edges": 35967,
+    "method_budget_results": 36,
+    "audit_sha256": "da60473bc52955c58a1883ec334911babb18f060e9217194ab3178b0f93b2f4f"
+  },
+  "small_timestamp_batch_real_case_regression": {
+    "cadets-06": {
+      "decision_sha256": "397912edbacba5927c2ac4c22bb6323ce6e2db2d440974a0e607cb07f7c41b9e",
+      "decision_identical": true,
+      "audit_gzip_identical": false
+    },
+    "cadets-12": {
+      "decision_sha256": "544a28c50c27fc29d613eb606355fc7ab1f4cf4ec3d1588d431e84178805d6e1",
+      "decision_identical": true,
+      "audit_gzip_identical": false
+    },
+    "cadets-13": {
+      "decision_sha256": "578c5cedbcb2fdb8c4cc3e1e311f9914816944716dc4dbdc9c9b8ba3c9f1ea54",
+      "decision_identical": true,
+      "audit_gzip_identical": false
+    }
+  },
+  "delivery_scope": {
+    "cases": [
+      "CADETS-06",
+      "CADETS-12",
+      "CADETS-13"
+    ],
+    "method_budget_results": 108,
+    "theia": "excluded_by_user_request; existing process left running; no restart or waiting"
+  }
+}

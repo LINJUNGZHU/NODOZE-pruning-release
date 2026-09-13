@@ -14,6 +14,7 @@ from typing import Callable, Iterable, Mapping, Sequence
 
 from .models import Neighborhood, NodeRecord, StoredEdge
 from .rdp_guard import score_map_digest
+from .rcvp_ledger import prepare_extension, validate_extension
 
 
 SCHEMA_VERSION = "rdp-edge-score-ledger-v3"
@@ -505,6 +506,11 @@ def write_score_ledger(
     absolute_threshold: float = 0.8,
     high_score_quantile: float = 0.99,
     context: Mapping[str, object] | None = None,
+    propagation_evidence: Mapping[int, Mapping[str, object]] | None = None,
+    progressive_evidence: (
+        Mapping[str, Mapping[int, Mapping[str, object]]] | None
+    ) = None,
+    rcvp_context: Mapping[str, object] | None = None,
 ) -> dict[str, object]:
     """Write one complete, hash-verifiable row per candidate edge.
 
@@ -565,6 +571,14 @@ def write_score_ledger(
                 )
             normalized_kept[int(edge_id)] = normalized_reasons
         normalized_decisions[budget_key] = normalized_kept
+
+    rcvp_manifest, rcvp_rows = prepare_extension(
+        graph=graph,
+        decisions=normalized_decisions,
+        propagation_evidence=propagation_evidence,
+        progressive_evidence=progressive_evidence,
+        rcvp_context=rcvp_context,
+    )
 
     quantile_cutoff = _positive_quantile(
         list(normalized_scores.values()), high_score_quantile
@@ -775,6 +789,8 @@ def write_score_ledger(
                                 for budget_key in budget_keys
                             ],
                         }
+                        if rcvp_manifest is not None:
+                            row["rcvp"] = rcvp_rows[edge_id]
                         text.write(_canonical_json(row) + "\n")
                         if edge_id in high_ids:
                             yield {
@@ -849,6 +865,8 @@ def write_score_ledger(
     }
     if evidence_required:
         manifest["evidence_key_schema"] = evidence_key_schema
+    if rcvp_manifest is not None:
+        manifest["rcvp_extension"] = rcvp_manifest
     # Preserve an easy-to-audit top-level invariant even if callers place the
     # same declaration in context.
     if "online_uses_groundtruth" in (context or {}):
@@ -1080,6 +1098,8 @@ def verify_score_ledger(destination: str | Path) -> dict[str, object]:
     ledger_ids: list[int] = []
     ledger_scores: dict[int, float] = {}
     ledger_event_ids: dict[int, str] = {}
+    rcvp_rows: dict[int, Mapping[str, object]] = {}
+    verified_decisions: dict[str, dict[int, tuple[str, ...]]] = {}
     budget_keys_value = manifest.get("decision_budget_keys")
     if not isinstance(budget_keys_value, list) or any(
         not isinstance(key, str) for key in budget_keys_value
@@ -1343,6 +1363,12 @@ def verify_score_ledger(destination: str | Path) -> dict[str, object]:
             ranks_valid = False
             continue
         ledger_ids.append(edge_id)
+        if "rcvp" in row:
+            rcvp_value = row["rcvp"]
+            if isinstance(rcvp_value, Mapping):
+                rcvp_rows[edge_id] = rcvp_value
+            else:
+                add_error(f"{_SCORE_ARTIFACT} edge {edge_id}: rcvp must be an object")
         if isinstance(row.get("event_id"), str):
             ledger_event_ids.setdefault(edge_id, row["event_id"])
         if row.get("schema_version") != SCHEMA_VERSION:
@@ -1550,6 +1576,8 @@ def verify_score_ledger(destination: str | Path) -> dict[str, object]:
                     f"{_SCORE_ARTIFACT} edge {edge_id}, budget {budget_key}: "
                     "kept decision requires non-empty reasons"
                 )
+            if kept is True and isinstance(reasons, list):
+                verified_decisions.setdefault(budget_key, {})[edge_id] = tuple(reasons)
             if kept is False and reasons:
                 add_error(
                     f"{_SCORE_ARTIFACT} edge {edge_id}, budget {budget_key}: "
@@ -1670,6 +1698,24 @@ def verify_score_ledger(destination: str | Path) -> dict[str, object]:
             "high_importance_tail_not_detection_verdict"
         ):
             add_error(f"{_HIGH_SCORE_ARTIFACT}: invalid interpretation")
+
+    extension_value = manifest.get("rcvp_extension")
+    if extension_value is None:
+        if rcvp_rows:
+            add_error("ledger rows contain RCVP evidence without extension manifest")
+    elif not isinstance(extension_value, Mapping):
+        add_error("manifest.rcvp_extension: expected an object")
+    else:
+        extension_graph = Neighborhood(
+            {}, [StoredEdge(*candidate_edges[edge_id]) for edge_id in candidate_edge_ids]
+        )
+        complete_decisions = {
+            budget: verified_decisions.get(budget, {}) for budget in budget_keys
+        }
+        for message in validate_extension(
+            extension_graph, complete_decisions, extension_value, rcvp_rows
+        ):
+            add_error(message)
 
     scores_complete = (
         len(ledger_scores) == row_count

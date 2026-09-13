@@ -2,13 +2,14 @@ from __future__ import annotations
 
 import math
 import heapq
-from collections import Counter
-from dataclasses import dataclass
+from collections import Counter, deque
+from dataclasses import dataclass, field
 
 from .cdm import event_investigation_anchor
 from .diffusion import DiffusionResult
 from .models import Neighborhood, StoredEdge
 from .rdp_guard import fuse_rarity_diffusion
+from .progressive_pruning import progressive_select
 
 
 @dataclass(slots=True)
@@ -58,6 +59,7 @@ class PruningResult:
     zero_score_fill_stopped: bool = False
     escape_budget_edges: int = 0
     escape_selected_edges: int = 0
+    progressive_audit: dict[int, dict[str, object]] = field(default_factory=dict)
 
 
 def _bounded_atomic_subset(
@@ -341,6 +343,10 @@ def adaptive_prune(
     escape_eligible_edge_ids: set[int] | None = None,
     escape_quota_ratio: float = 0.0,
     escape_threshold: float = 0.0,
+    progressive_config: dict[str, object] | None = None,
+    progressive_dependencies: (
+        dict[tuple[int, ...], tuple[tuple[int, ...], ...]] | None
+    ) = None,
 ) -> PruningResult:
     """Keep high joint-score edges plus the causal backbone to alert seeds."""
     if not 0.0 < keep_ratio <= 1.0:
@@ -355,8 +361,10 @@ def adaptive_prune(
         raise ValueError("behavior_weight must be in [0, 1]")
     if rarity_weight + path_weight + impact_weight + behavior_weight > 1.0:
         raise ValueError("scoring weights must sum to <= 1")
-    if selection_mode not in {"ratio", "adaptive", "rdp_guard"}:
-        raise ValueError("selection_mode must be ratio, adaptive, or rdp_guard")
+    if selection_mode not in {"ratio", "adaptive", "rdp_guard", "progressive"}:
+        raise ValueError(
+            "selection_mode must be ratio, adaptive, rdp_guard, or progressive"
+        )
     if fusion_mode not in {"additive", "rdp_guard"}:
         raise ValueError("fusion_mode must be additive or rdp_guard")
     if not 0.0 <= churn_slack_ratio <= 1.0:
@@ -409,13 +417,35 @@ def adaptive_prune(
     edge_id_set = set(edge_by_id)
     if any(edge_id not in edge_id_set for edge_id in escape_eligible_edge_ids):
         raise ValueError("escape eligible edges must belong to the candidate graph")
-    member_to_group: dict[int, tuple[int, ...]] = {}
+    # Atomic declarations may overlap. Build their transitive closure so an
+    # edge can never be assigned to only the last declaration encountered.
+    parent = {edge_id: edge_id for edge_id in edge_by_id}
+
+    def find(edge_id: int) -> int:
+        while parent[edge_id] != edge_id:
+            parent[edge_id] = parent[parent[edge_id]]
+            edge_id = parent[edge_id]
+        return edge_id
+
+    def union(left: int, right: int) -> None:
+        left_root, right_root = find(left), find(right)
+        if left_root != right_root:
+            parent[max(left_root, right_root)] = min(left_root, right_root)
+
     for members in (atomic_edge_groups or {}).values():
-        present = tuple(edge_id for edge_id in members if edge_id in edge_by_id)
-        for edge_id in present:
-            member_to_group[edge_id] = present
+        present = [edge_id for edge_id in members if edge_id in edge_by_id]
+        for edge_id in present[1:]:
+            union(present[0], edge_id)
+    closed_groups: dict[int, list[int]] = {}
     for edge_id in edge_by_id:
-        member_to_group.setdefault(edge_id, (edge_id,))
+        closed_groups.setdefault(find(edge_id), []).append(edge_id)
+    canonical_groups = {
+        root: tuple(sorted(members)) for root, members in closed_groups.items()
+    }
+    member_to_group = {
+        edge_id: canonical_groups[find(edge_id)]
+        for edge_id in edge_by_id
+    }
     endpoint_diffusion_scores = {
         edge.edge_id: (
             diffusion.edge_scores.get(edge.edge_id, 0.0)
@@ -485,7 +515,7 @@ def adaptive_prune(
                 + behavior_weight * behavior_score
             )
 
-    unique_groups = {members for members in member_to_group.values()}
+    unique_groups = set(canonical_groups.values())
     ranked_groups = sorted(
         unique_groups,
         key=lambda members: (
@@ -614,7 +644,10 @@ def adaptive_prune(
     # pre-granting a worst-case group-size allowance.
     atomicity_churn_slack_edges = 0
     planned_prior_groups: set[tuple[int, ...]] | None = None
-    if previous_kept_edge_ids is not None and budget_feasible:
+    if (
+        selection_mode != "progressive"
+        and previous_kept_edge_ids is not None and budget_feasible
+    ):
         current_previous_overlap = len(selected & previous_present)
         required_declared_overlap = max(
             0,
@@ -728,6 +761,8 @@ def adaptive_prune(
         ),
     )
     for members in ranked_escape_groups:
+        if selection_mode == "progressive":
+            break
         if len(escape_selected) >= escape_budget_edges:
             break
         additions, new_core, bridges = trial_group(selected, members)
@@ -751,6 +786,8 @@ def adaptive_prune(
     # large alert windows quadratic in the requested number of retained edges.
     considered = 0
     for members in ranked_groups:
+        if selection_mode == "progressive":
+            break
         member_ids = set(members)
         if member_ids <= selected:
             continue
@@ -780,6 +817,113 @@ def adaptive_prune(
             break
         if len(selected) >= budget_edges:
             break
+    progressive_audit: dict[int, dict[str, object]] = {}
+    if selection_mode == "progressive":
+        group_dependencies: dict[
+            tuple[int, ...], set[tuple[int, ...]]
+        ] = {}
+        for dependent_refs, required_refs in (
+            progressive_dependencies or {}
+        ).items():
+            dependent_groups: set[tuple[int, ...]] = set()
+            for edge_id in dependent_refs:
+                if edge_id not in member_to_group:
+                    raise ValueError(
+                        f"progressive dependency references unknown edge {edge_id}"
+                    )
+                dependent_groups.add(member_to_group[edge_id])
+            required_groups: set[tuple[int, ...]] = set()
+            for required_ref in required_refs:
+                for edge_id in required_ref:
+                    if edge_id not in member_to_group:
+                        raise ValueError(
+                            "progressive dependency references unknown edge "
+                            f"{edge_id}"
+                        )
+                    required_groups.add(member_to_group[edge_id])
+            for dependent_group in dependent_groups:
+                normalized_required = required_groups - {dependent_group}
+                if normalized_required:
+                    group_dependencies.setdefault(
+                        dependent_group, set()
+                    ).update(normalized_required)
+        for members in ranked_groups:
+            required_groups = {
+                member_to_group[bridge]
+                for edge_id in members
+                for bridge in connectivity_paths.get(edge_id, ())
+                if bridge in member_to_group
+                and member_to_group[bridge] != members
+            }
+            if required_groups:
+                group_dependencies.setdefault(members, set()).update(required_groups)
+        eligible_groups = {
+            members
+            for members in ranked_groups
+            if (
+                not positive_score_only
+                or max(edge_scores[member] for member in members) > 0.0
+            )
+        }
+        eligible_groups.update(
+            member_to_group[edge_id]
+            for edge_id in mandatory_core | mandatory_bridges
+        )
+        pending = deque(sorted(eligible_groups))
+        while pending:
+            dependent_group = pending.popleft()
+            for required_group in group_dependencies.get(dependent_group, set()):
+                if required_group not in eligible_groups:
+                    eligible_groups.add(required_group)
+                    pending.append(required_group)
+        eligible_edge_ids = {
+            edge_id for members in eligible_groups for edge_id in members
+        }
+        group_dependencies = {
+            dependent: required & eligible_groups
+            for dependent, required in group_dependencies.items()
+            if dependent in eligible_groups and required & eligible_groups
+        }
+        progressive = progressive_select(
+            edge_scores=edge_scores,
+            groups=ranked_groups,
+            budget_edges=budget_edges,
+            mandatory_edge_ids=mandatory_core | mandatory_bridges,
+            eligible_edge_ids=eligible_edge_ids,
+            dependencies=group_dependencies,
+            previous_edge_ids=(
+                previous_present if previous_kept_edge_ids is not None else None
+            ),
+            max_removed_previous_edges=(
+                allowed_removed_previous_edges
+                if previous_kept_edge_ids is not None else None
+            ),
+            edge_evidence=getattr(diffusion, "edge_evidence", None),
+            config=progressive_config,
+        )
+        selected = set(progressive.selected_edge_ids)
+        core_selected = selected - mandatory_bridges
+        progressive_audit = progressive.audit
+        for edge_id in edge_id_set - eligible_edge_ids:
+            progressive_audit[edge_id] = {
+                "group_id": member_to_group[edge_id][0],
+                "raw_cost": len(member_to_group[edge_id]),
+                "removal_priority": edge_scores[edge_id],
+                "removal_attempted": False,
+                "attempt_count": 0,
+                "removal_allowed": True,
+                "removal_round": None,
+                "rejection_reason": "ineligible",
+            }
+        selection_candidate_edges_examined = progressive.examined_groups
+        budget_feasible = budget_feasible and progressive.budget_feasible
+        for edge_id in selected:
+            if not selection_reasons[edge_id]:
+                selection_reasons[edge_id].add("progressive_retained")
+        for required_groups in group_dependencies.values():
+            for required_group in required_groups:
+                for edge_id in set(required_group) & selected:
+                    selection_reasons[edge_id].add("progressive_dependency")
     mark(selected & previous_present, "prior_retention")
     before_connectivity = set(core_selected)
     threshold = min((edge_scores[edge_id] for edge_id in core_selected), default=1.0)
@@ -949,6 +1093,7 @@ def adaptive_prune(
         zero_score_fill_stopped=zero_score_fill_stopped,
         escape_budget_edges=escape_budget_edges,
         escape_selected_edges=len(escape_selected),
+        progressive_audit=progressive_audit,
     )
 
 

@@ -18,6 +18,8 @@ class DiffusionResult:
     diagnostics: list[dict[str, float | int]]
     edge_scores: dict[int, float] = field(default_factory=dict)
     mode: str = "undirected_ppr"
+    edge_evidence: dict[int, dict[str, object]] = field(default_factory=dict)
+    rcvp_diagnostics: dict[str, object] = field(default_factory=dict)
 
 
 def _hop_distances(
@@ -248,12 +250,18 @@ def diffuse_importance(
     max_iterations: int = 200,
     mode: str = "undirected_ppr",
     seed_edges: list[StoredEdge] | None = None,
+    rcvp_config: dict | None = None,
 ) -> DiffusionResult:
     """Run POI-affinity and rarity weighted personalized graph diffusion."""
     if not 0.0 <= damping < 1.0:
         raise ValueError("damping must be in [0, 1)")
-    if mode not in {"undirected_ppr", "time_respecting_bidir"}:
+    if mode not in {"undirected_ppr", "time_respecting_bidir", "relation_time_contrastive"}:
         raise ValueError("mode must be undirected_ppr or time_respecting_bidir")
+    if mode == 'relation_time_contrastive':
+        from .rcvp_adapter import diffuse_graph
+        resolved_rcvp = dict(rcvp_config or {})
+        resolved_rcvp.setdefault('damping', damping)
+        return diffuse_graph(graph, edge_rarity, list(seed_edges or []), resolved_rcvp)
     if mode == "time_respecting_bidir":
         return _time_respecting_bidirectional_diffusion(
             graph, seeds, edge_rarity, edge_affinity=edge_affinity,

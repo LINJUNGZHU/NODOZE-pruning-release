@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass, fields
+from dataclasses import dataclass, fields, field
 from pathlib import Path
 from typing import Any
 
@@ -39,6 +39,8 @@ class ExperimentConfig:
     score_ledger_enabled: bool
     high_score_threshold: float
     high_score_quantile: float
+    rcvp_config: dict = field(default_factory=dict)
+    progressive_config: dict = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         if not self.keep_ratios or any(
@@ -65,7 +67,7 @@ class ExperimentConfig:
             raise ValueError("scoring.path_decay must be in (0, 1]")
         if not 0.0 <= self.damping < 1.0:
             raise ValueError("scoring.damping must be in [0, 1)")
-        if self.diffusion_mode not in {"undirected_ppr", "time_respecting_bidir"}:
+        if self.diffusion_mode not in {"undirected_ppr", "time_respecting_bidir", "relation_time_contrastive"}:
             raise ValueError(
                 "scoring.diffusion_mode must be undirected_ppr or time_respecting_bidir"
             )
@@ -75,7 +77,7 @@ class ExperimentConfig:
             raise ValueError("scoring.poi_aggregation must be joint or noisy_or")
         if not 0.0 < self.score_mass_target <= 1.0:
             raise ValueError("scoring.score_mass_target must be in (0, 1]")
-        if self.pruning_mode not in {"ratio", "adaptive", "rdp_guard"}:
+        if self.pruning_mode not in {"ratio", "adaptive", "rdp_guard", "progressive"}:
             raise ValueError("pruning.mode must be ratio, adaptive, or rdp_guard")
         if self.pruning_scope not in {"auto", "merged", "per-alert"}:
             raise ValueError("pruning.scope must be auto, merged, or per-alert")
@@ -135,7 +137,7 @@ def load_experiment_config(path: str | Path) -> ExperimentConfig:
     unknown_sections = sorted(
         set(document) - {
             "causal_search", "scoring", "pruning", "depimpact", "behavior",
-            "evidence",
+            "evidence", "rcvp", "progressive",
         }
     )
     if unknown_sections:
@@ -207,6 +209,22 @@ def load_experiment_config(path: str | Path) -> ExperimentConfig:
     evidence_unknown = sorted(set(evidence) - evidence_allowed)
     if evidence_unknown:
         raise ValueError(f"unknown evidence fields: {', '.join(evidence_unknown)}")
+    from .rcvp_config import validate_config
+    raw_rcvp = document.get('rcvp', {})
+    if not isinstance(raw_rcvp, dict):
+        raise ValueError('rcvp config must be an object')
+    raw_rcvp = dict(raw_rcvp)
+    if scoring.get('diffusion_mode') == 'relation_time_contrastive' and 'damping' not in raw_rcvp:
+        raw_rcvp['damping'] = scoring['damping']
+    rcvp = validate_config(raw_rcvp) if ('rcvp' in document or scoring.get('diffusion_mode') == 'relation_time_contrastive') else {}
+    progressive = document.get('progressive', {})
+    if not isinstance(progressive, dict) or set(progressive) - {'consistency_weight', 'redundancy_weight'}:
+        raise ValueError('invalid progressive configuration')
+    for key, value in progressive.items():
+        import math
+        limit = .25 if key == 'redundancy_weight' else 1.
+        if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or not 0 <= value <= limit:
+            raise ValueError(f'invalid progressive.{key}')
 
     def strict_boolean(
         section: dict, field: str, default: bool, *, label: str
@@ -261,6 +279,8 @@ def load_experiment_config(path: str | Path) -> ExperimentConfig:
         ),
         high_score_threshold=float(evidence.get("high_score_threshold", 0.8)),
         high_score_quantile=float(evidence.get("high_score_quantile", 0.99)),
+        rcvp_config=rcvp,
+        progressive_config=dict(progressive),
     )
 
 

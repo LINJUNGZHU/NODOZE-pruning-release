@@ -315,13 +315,22 @@ def _next_suspicion(current: float | None, edge: float, momentum: float) -> floa
     return edge if current is None else momentum * current + (1.0 - momentum) * edge
 
 
+def fanout_partition(timestamp_ns, anchor_ns, partition_ns):
+    """Shared POI-relative time-slice identity for local raw-event fanout."""
+    return abs(timestamp_ns - anchor_ns) // partition_ns
+
+
+def fanout_priority_score(fanout: int) -> float:
+    return 1.0 / (1.0 + math.log1p(max(0, fanout - 1)))
+
+
 def _search_priority(
     rarity: float, delta_ns: int, fanout: int, config: CausalSearchConfig
 ) -> float:
     temporal = math.exp(
         -max(0, delta_ns) / (config.temporal_half_life_seconds * 1_000_000_000)
     )
-    fanout_score = 1.0 / (1.0 + math.log1p(max(0, fanout - 1)))
+    fanout_score = fanout_priority_score(fanout)
     return (
         config.rarity_priority_weight * rarity
         + config.temporal_priority_weight * temporal
@@ -425,7 +434,7 @@ def _expand_graph(
         if fanout >= config.high_frequency_degree:
             partition_ns = int(config.high_frequency_partition_seconds * 1_000_000_000)
             for _, edge in scored:
-                bucket = abs(edge.timestamp_ns - anchor) // partition_ns
+                bucket = fanout_partition(edge.timestamp_ns, anchor, partition_ns)
                 edge_partition[edge.edge_id] = bucket
                 partition_sizes[bucket] = partition_sizes.get(bucket, 0) + 1
             reasons["high_frequency_time_partitions"] += len(partition_sizes)

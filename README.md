@@ -4,6 +4,18 @@
 
 [网页启动与操作说明](webapp/README.md) · [PDF 真值与最新实测](docs/pdf-groundtruth-study.md) · [逐边选择方法与证明范围](docs/evidence-selection-method.md)
 
+## RASP-RCVP 实验分支
+
+已接入 CLI 和原网页：关系/时间感知对比传播、反向根定位与正向核验、证书保护渐进剪枝、逐边审计。网页可选“完整 RASP-RCVP”，剪枝设置可选“渐进式证据剪枝”；旧默认保持不变。
+
+[实现、公式与配置](docs/rasp-rcvp-method.md) · [多场景消融与负结果](docs/rasp-rcvp-report.md) · [研究来源](docs/rasp-rcvp-references.md)。CLI 完整配置为 `configs/rcvp_full.json`，传播单独启用可用 `configs/rcvp_relation_aware.json`。
+
+### 本轮评估范围：不执行 THEIA 数据集
+
+按用户要求，后续本轮 RASP-RCVP 评估**不启动、不重跑 THEIA 数据集**，仅使用已完成的 CADETS 06、12、13，汇总 3 场景 × 9 方法 × 4 预算（5%、10%、20%、30%），共 108 组结果。此前已启动的 THEIA 进程保留运行，不人为终止；本轮交付不等待它，也不将其未完成结果纳入结论。
+
+现有结果显示传播与核验在部分场景改善派生路径保留，但渐进剪枝在低预算下存在事件或正例实体保留退步，**不切换默认算法**。完整比较与标签限制见 [评估报告](docs/rasp-rcvp-report.md)。
+
 ## 接手速览：前后端与 GitHub
 
 本机主仓库：`/root/NODOZE-pruning-release`，主分支：`main`。GitHub：[LINJUNGZHU/NODOZE-pruning-release](https://github.com/LINJUNGZHU/NODOZE-pruning-release)，`origin` 使用 SSH：`git@github.com:LINJUNGZHU/NODOZE-pruning-release.git`；本机已配置并成功推送。

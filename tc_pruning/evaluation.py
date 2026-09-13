@@ -359,6 +359,8 @@ def _run_experiment_core(
     rarity_weight: float = 0.6,
     damping: float = 0.85,
     diffusion_mode: str = "undirected_ppr",
+    rcvp_config: dict | None = None,
+    progressive_config: dict | None = None,
     path_weight: float = 0.0,
     impact_weight: float = 0.0,
     behavior_weight: float = 0.0,
@@ -808,6 +810,7 @@ def _run_experiment_core(
                 "path_decay": path_decay,
                 "damping": damping,
                 "diffusion_mode": diffusion_mode,
+                "rcvp_config": rcvp_config,
                 "fusion_mode": fusion_mode,
                 "merge_threshold_seconds": merge_threshold_seconds,
                 "data_flow_alpha": data_flow_alpha,
@@ -914,6 +917,7 @@ def _run_experiment_core(
                 edge_affinity=local_impact.edge_importance,
                 damping=damping,
                 mode=diffusion_mode,
+                rcvp_config=rcvp_config,
                 seed_edges=[poi_edge],
             )
             diffusion_seconds += time.perf_counter() - local_started
@@ -941,6 +945,8 @@ def _run_experiment_core(
                 behavior_weight=behavior_weight,
             )
             active_prefix_accumulator.add(poi_edge.event_id, local_fused)
+            if local_diffusion.edge_evidence:
+                active_prefix_accumulator.add_rcvp_evidence(poi_edge.event_id, local_diffusion.edge_evidence, local_diffusion.rcvp_diagnostics)
             impact_analysis = local_impact
             behavior_analysis = local_behavior
             diffusion = local_diffusion
@@ -981,6 +987,9 @@ def _run_experiment_core(
         table7_depimpact_timings = (
             active_prefix_accumulator.auxiliary_phase_seconds
         )
+        if active_prefix_accumulator.winner_edge_evidence:
+            diffusion.edge_evidence = active_prefix_accumulator.winner_edge_evidence
+            diffusion.rcvp_diagnostics = active_prefix_accumulator.rcvp_context
         effective_pruning_scope = "prefix_stable_noisy_or"
     else:
         impact_started = time.perf_counter()
@@ -1036,6 +1045,7 @@ def _run_experiment_core(
             edge_affinity=impact_analysis.edge_importance,
             damping=damping,
             mode=diffusion_mode,
+            rcvp_config=rcvp_config,
             seed_edges=matched_poi_edges,
         )
         phase_seconds["poi_conditioned_diffusion"] = (
@@ -1081,6 +1091,7 @@ def _run_experiment_core(
                 edge_affinity=local_impact.edge_importance,
                 damping=damping,
                 mode=diffusion_mode,
+                rcvp_config=rcvp_config,
                 seed_edges=item["alert_edges"],
             )
             local_behavior = analyze_behaviors(
@@ -1133,6 +1144,7 @@ def _run_experiment_core(
     ledger_scores: dict[int, float] | None = None
     ledger_components: dict[int, dict[str, float]] | None = None
     ledger_decisions: dict[str, dict[int, tuple[str, ...]]] = {}
+    progressive_evidence: dict[str, dict] = {}
     previous_kept_edge_ids = {
         edge.edge_id
         for edge in graph.edges
@@ -1163,6 +1175,7 @@ def _run_experiment_core(
                     behavior_weight=behavior_weight,
                     protected_edge_ids=item["protected_edge_ids"],
                     selection_mode=pruning_mode,
+                    progressive_config=progressive_config,
                     protect_seed_incident_edges=False,
                     atomic_edge_groups=item["impact"].merge_groups,
                     connectivity_target_edge_ids=(
@@ -1185,6 +1198,8 @@ def _run_experiment_core(
                         components=local.edge_score_components or {},
                     ),
                 )
+                if item["diffusion"].edge_evidence:
+                    group_score_accumulator.add_rcvp_evidence(str(item["group_id"]), item["diffusion"].edge_evidence, item["diffusion"].rcvp_diagnostics)
                 thresholds.append(local.threshold)
                 group_pruning_rows.append(
                     {
@@ -1227,6 +1242,9 @@ def _run_experiment_core(
             combined_scores = group_aggregate.scores
             combined_components = group_aggregate.components
             score_provenance = group_aggregate.provenance
+            if group_score_accumulator.winner_edge_evidence:
+                diffusion.edge_evidence = group_score_accumulator.winner_edge_evidence
+                diffusion.rcvp_diagnostics = group_score_accumulator.rcvp_context
             # Per-POI proposals share events, so independent local rounding can
             # exceed the experiment's global raw-event budget. Consolidate the
             # proposals once on the union graph; local scores remain the signal,
@@ -1240,9 +1258,10 @@ def _run_experiment_core(
                 rarity_weight=1.0,
                 protected_edge_ids=protected_edge_ids,
                 selection_mode=(
-                    "rdp_guard" if pruning_mode == "rdp_guard" else "ratio"
+                    pruning_mode if pruning_mode in {"rdp_guard", "progressive"} else "ratio"
                 ),
                 protect_seed_incident_edges=False,
+                progressive_config=progressive_config,
                 atomic_edge_groups=impact_analysis.merge_groups,
                 connectivity_target_edge_ids=(
                     poi_edge_ids
@@ -1322,6 +1341,7 @@ def _run_experiment_core(
                 prefix_jaccard=consolidated.prefix_jaccard,
                 unused_budget_edges=consolidated.unused_budget_edges,
                 zero_score_fill_stopped=consolidated.zero_score_fill_stopped,
+                progressive_audit=consolidated.progressive_audit,
             )
         else:
             pruned = adaptive_prune(
@@ -1339,6 +1359,7 @@ def _run_experiment_core(
                 behavior_weight=behavior_weight,
                 protected_edge_ids=protected_edge_ids,
                 selection_mode=pruning_mode,
+                progressive_config=progressive_config,
                 protect_seed_incident_edges=not bool(annotations.seed_event_ids),
                 atomic_edge_groups=impact_analysis.merge_groups,
                 connectivity_target_edge_ids=(
@@ -1366,6 +1387,8 @@ def _run_experiment_core(
         elif pruned.edge_scores != ledger_scores:
             raise RuntimeError("edge scores changed across raw-event budgets")
         budget_key = format(float(keep_ratio), ".12g")
+        if pruned.progressive_audit:
+            progressive_evidence[budget_key] = pruned.progressive_audit
         ledger_decisions[budget_key] = {
             edge.edge_id: tuple(
                 (pruned.edge_selection_reasons or {}).get(edge.edge_id, ())
@@ -1667,6 +1690,7 @@ def _run_experiment_core(
         },
         "analysis_mode": analysis_mode,
         "diffusion_mode": diffusion.mode,
+        "rcvp_diagnostics": diffusion.rcvp_diagnostics,
         "seeds": sorted(effective_seeds),
         "annotated_seed_event_ids": sorted(annotations.seed_event_ids),
         "ordered_poi_event_sequences": [
@@ -1922,6 +1946,7 @@ def _run_experiment_core(
                 protected_edge_ids=protected_edge_ids,
                 selection_mode=ab_mode,
                 protect_seed_incident_edges=False,
+                progressive_config=progressive_config,
                 atomic_edge_groups=impact_analysis.merge_groups,
                 connectivity_target_edge_ids=(
                     poi_edge_ids
@@ -2129,6 +2154,9 @@ def _run_experiment_core(
             rarity_evidence=model.edge_rarity_evidence,
             decisions=ledger_decisions,
             score_provenance=score_provenance,
+            propagation_evidence=diffusion.edge_evidence or None,
+            progressive_evidence=progressive_evidence or None,
+            rcvp_context=diffusion.rcvp_diagnostics or None,
             local_score_contributions=(
                 aggregate_score_state.local_score_contributions
                 if aggregate_score_state is not None else None
@@ -2163,6 +2191,7 @@ def _run_experiment_core(
                     "path_decay": path_decay,
                     "damping": damping,
                     "diffusion_mode": diffusion_mode,
+                    "rcvp_config": rcvp_config,
                     "fusion_mode": fusion_mode,
                     "poi_aggregation": poi_aggregation,
                     "edge_score_aggregation": (
@@ -2187,6 +2216,7 @@ def _run_experiment_core(
                 "pruning_parameters": {
                     "keep_ratios": [float(value) for value in keep_ratios],
                     "selection_mode": pruning_mode,
+                    "progressive_config": progressive_config,
                     "connectivity_protection": connectivity_protection,
                     "protect_alert_edges": protect_alert_edges,
                     "churn_slack_ratio": churn_slack_ratio,

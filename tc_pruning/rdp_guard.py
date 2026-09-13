@@ -53,6 +53,49 @@ class PrefixScoreAccumulator:
         self._require_same_edge_ids = bool(require_same_edge_ids)
         self._auxiliary_node_scores: dict[str, dict[str, dict[str, float]]] = {}
         self._auxiliary_phase_seconds: dict[str, dict[str, float]] = {}
+        self._winner_edge_evidence: dict[int, dict[str, object]] = {}
+        self._rcvp_runs: dict[str, dict[str, object]] = {}
+
+    def add_rcvp_evidence(self, poi_event_id, edge_evidence, metadata):
+        """Keep evidence for exactly the immutable local-score winner.
+
+        This has O(E) storage rather than copying all channel arrays for every
+        prefix. The complete local score contributions remain separately stored.
+        """
+        poi = str(poi_event_id)
+        if poi not in self._digests:
+            raise ValueError('add local scores before their RCVP evidence')
+        run = dict(metadata)
+        declared = run.get('poi_event_ids', [])
+        if not isinstance(declared, list) or any(
+            not isinstance(value, str) or not value for value in declared
+        ) or len(declared) != len(set(declared)):
+            raise ValueError('RCVP metadata poi_event_ids must be unique strings')
+        self._rcvp_runs[poi] = run
+        for edge_id, row in edge_evidence.items():
+            if self._winner_pois.get(edge_id) == poi:
+                evidence = dict(row)
+                stated = evidence.get('poi_event_id')
+                if stated is not None and declared and stated not in declared:
+                    raise ValueError('edge RCVP POI must belong to its run metadata')
+                if stated is None:
+                    if len(declared) == 1:
+                        evidence['poi_event_id'] = declared[0]
+                    elif declared:
+                        evidence['poi_event_ids'] = list(declared)
+                    else:
+                        # Compatibility for pre-RCVP callers whose accumulator
+                        # key was itself the POI event ID.
+                        evidence['poi_event_id'] = poi
+                self._winner_edge_evidence[edge_id] = evidence
+
+    @property
+    def winner_edge_evidence(self):
+        return dict(self._winner_edge_evidence)
+
+    @property
+    def rcvp_context(self):
+        return {'scope': 'winner_poi', 'runs': dict(self._rcvp_runs)}
 
     def bind_context(self, context_digest: str) -> None:
         """Bind the accumulator to one immutable graph/scoring context."""

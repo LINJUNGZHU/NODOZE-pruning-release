@@ -116,6 +116,19 @@ def create_app(cache_path: str | Path | None = None, dataset_catalog: str | Path
         payload = request.get_json(silent=True)
         if not isinstance(payload, dict) or not isinstance(payload.get("poi_event_id"), str):
             return jsonify({"error": "poi_event_id must be an explicit event ID"}), 400
+        algorithm_mode = payload.get("algorithm_mode", "legacy")
+        selection_mode = payload.get("selection_mode")
+        budget_ratio = payload.get("budget_ratio")
+        if algorithm_mode not in ("legacy", "relation_aware", "rcvp"):
+            return jsonify({"error": "unknown algorithm mode"}), 400
+        if selection_mode is not None and selection_mode not in ("evidence", "context", "progressive"):
+            return jsonify({"error": "unknown selection mode"}), 400
+        if budget_ratio is not None and (
+            isinstance(budget_ratio, bool)
+            or not isinstance(budget_ratio, (int, float))
+            or not 0 < float(budget_ratio) <= 1
+        ):
+            return jsonify({"error": "budget_ratio must be a finite number in (0, 1]"}), 400
         if not pruning_lock.acquire(blocking=False):
             return jsonify({"error": "Another pruning run is active; retry when it finishes"}), 409
         try:
@@ -124,7 +137,9 @@ def create_app(cache_path: str | Path | None = None, dataset_catalog: str | Path
                 return jsonify({"error": "unknown dataset"}), 404
             if data.get("schema_version") != 2:
                 return jsonify({"error": "Rebuild the OPTC frequency index with prepare_optc.py"}), 503
-            rescore(data, payload["poi_event_id"], payload.get("budget_ratio"), payload.get("selection_mode"),payload.get('attack_quantile'),payload.get('detector'))
+            rescore(data, payload["poi_event_id"], budget_ratio, selection_mode,
+                    payload.get('attack_quantile'), payload.get('detector'),
+                    algorithm_mode=algorithm_mode)
             target = cache_target(dataset_id)
             temporary = target.with_name(target.name + "." + uuid.uuid4().hex + ".tmp")
             try:
