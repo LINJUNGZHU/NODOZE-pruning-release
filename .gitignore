@@ -33,6 +33,7 @@ venv/
 .vscode/
 
 # Temporary/runtime files
+.worktrees/
 *.tmp
 *.log
 nohup.out
