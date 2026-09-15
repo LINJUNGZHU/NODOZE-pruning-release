@@ -9,7 +9,7 @@ def test_velox_keeps_raw_origin_collision_and_support_in_contract():
     row = {'event_uuid': 'e#2', 'stored_event_id': 'e#2', 'original_event_id': 'e',
            'src_node_uuid': 'p', 'dst_node_uuid': 'c', 'loss': 2,
            'edge_type': 10, 'relation': 'EVENT_CLONE', 'raw_relation': 'EVENT_FORK',
-           'identity_collision': 'True', 'identity_origin': 'RAW_TC_EVENT',
+           'identity_collision': 'True', 'identity_origin': 'OTHER_STORED_ID',
            'supporting_event_ids': '["e#2","e3"]', 'time': 123}
     evidence = VeloxEvidenceAdapter(version='test').adapt([row], [1])[0]
     assert evidence.relation == 'EVENT_FORK'
@@ -17,7 +17,7 @@ def test_velox_keeps_raw_origin_collision_and_support_in_contract():
     assert evidence.detector_metadata['stored_event_id'] == 'e#2'
     assert evidence.detector_metadata['original_event_id'] == 'e'
     assert evidence.detector_metadata['identity_collision'] is True
-    assert evidence.detector_metadata['identity_origin'] == 'RAW_TC_EVENT'
+    assert evidence.detector_metadata['identity_origin'] == 'OTHER_STORED_ID'
     assert evidence.detector_metadata['supporting_event_ids'] == ('e#2', 'e3')
 
 
@@ -40,3 +40,11 @@ def test_invalid_native_collision_and_support_fail_closed():
         VeloxEvidenceAdapter(version='test').adapt([dict(row, identity_collision='maybe')], [1])
     with pytest.raises(ValueError):
         VeloxEvidenceAdapter(version='test').adapt([dict(row, supporting_event_ids='not JSON')], [1])
+
+
+def test_partial_identity_never_claims_exact_mapping():
+    row = {'event_uuid': 'e', 'src_node_uuid': 'p', 'dst_node_uuid': 'c', 'loss': 2}
+    evidence = VeloxEvidenceAdapter(version='test').adapt([row], [1])[0]
+    assert evidence.mapping_quality.value != 'EXACT'
+    with pytest.raises(ValueError):
+        VeloxEvidenceAdapter(version='test').adapt([dict(row, stored_event_id='different')], [1])

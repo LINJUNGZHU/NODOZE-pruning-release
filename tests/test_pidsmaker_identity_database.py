@@ -1,5 +1,7 @@
 import hashlib
 import os
+import json
+import multiprocessing
 import sqlite3
 
 import pytest
@@ -65,6 +67,13 @@ def test_hash_mismatch_and_legacy_target_are_rejected(tmp_path):
     assert identity.verify_source(source, hashlib.sha256(source.read_bytes()).hexdigest())
 
 
+def test_custom_source_requires_explicit_test_only_mode(tmp_path):
+    source = fixture_db(tmp_path / 'source.db')
+    sha = identity.file_sha256(source)
+    with pytest.raises(ValueError, match='frozen'):
+        identity.build_database(source, 'cadets_e3_identity_v1_' + sha[:12], tmp_path / 'm.json', sha)
+
+
 def test_incomplete_or_tampered_manifest_is_not_consumable():
     with pytest.raises(ValueError):
         identity.validate_manifest({'status': 'NOT_COMPLETED'})
@@ -82,18 +91,20 @@ def test_real_copy_resume_and_tamper_reconciliation(tmp_path):
     sha = identity.file_sha256(source)
     target = 'cadets_e3_identity_v1_' + sha[:12]
     manifest_path = tmp_path / 'manifest.json'
-    first = identity.build_database(source, target, manifest_path, sha, batch_size=2)
+    first = identity.build_database(source, target, manifest_path, sha, batch_size=2, test_only=True)
     assert first['inference_eligible_events'] == 2
     assert first['eligible_collision_events'] == 1
     assert first['progress']['identity_nodes']['rows'] == 3
     assert first['progress']['identity_events']['rows'] == 3
     assert first['reconciliation']['identity_events']['count'] == 3
     assert identity.validate_manifest(first)['status'] == 'COMPLETED'
-    resumed = identity.build_database(source, target, manifest_path, sha, batch_size=1)
+    resumed = identity.build_database(source, target, manifest_path, sha, batch_size=1, test_only=True)
     assert resumed['reconciliation'] == first['reconciliation']
     upgraded = identity.finalize_model_views(source, target, manifest_path)
     assert upgraded['raw_reconciliation_manifest_sha256'] == resumed['manifest_sha256']
     assert upgraded['identity_origin_counts'] == {'OTHER_STORED_ID': 3}
+    assert upgraded['conservation']['events'] == {'raw': 3, 'included': 1, 'remapped': 1, 'excluded': 1}
+    assert upgraded['conservation']['nodes'] == {'raw': 3, 'included': 0, 'remapped': 3, 'excluded': 0}
     with psycopg2.connect(dbname=target) as db:
         with db.cursor() as cur:
             cur.execute('SELECT node_uuid,hash_id,exec,path,cmd,index_id FROM subject_node_table ORDER BY index_id')
@@ -105,4 +116,47 @@ def test_real_copy_resume_and_tamper_reconciliation(tmp_path):
     with pytest.raises(ValueError, match='reconciliation'):
         identity.finalize_model_views(source, target, manifest_path)
     with pytest.raises(ValueError, match='reconciliation'):
-        identity.build_database(source, target, manifest_path, sha, batch_size=1)
+        identity.build_database(source, target, manifest_path, sha, batch_size=1, test_only=True)
+
+
+@pytest.mark.skipif(os.environ.get('IDENTITY_PG_TEST') != '1', reason='explicit PostgreSQL integration run')
+@pytest.mark.parametrize('phase', ['batch', 'tail', 'before_seal', 'after_seal'])
+def test_hard_crash_recovers_authoritative_database_checkpoint(tmp_path, phase):
+    import psycopg2
+    source = fixture_db(tmp_path / 'source.db')
+    with sqlite3.connect(source) as db:
+        db.execute('UPDATE nodes SET host=?', (str(tmp_path),))
+    sha = identity.file_sha256(source)
+    target = 'cadets_e3_identity_v1_' + sha[:12]
+    manifest_path = tmp_path / 'manifest.json'
+    def crashing_worker():
+        original = identity._write_manifest
+        def crash_at_checkpoint(path, value):
+            node_count = value.get('progress', {}).get('identity_nodes', {}).get('rows')
+            condition = ((phase == 'batch' and node_count == 2) or
+                (phase == 'tail' and node_count == 3) or
+                (phase == 'before_seal' and 'identity_events' in value.get('reconciliation', {})) or
+                (phase == 'after_seal' and value.get('status') == 'COMPLETED'))
+            if condition:
+                os._exit(71)
+            return original(path, value)
+        identity._write_manifest = crash_at_checkpoint
+        identity.build_database(source, target, manifest_path, sha, batch_size=2, test_only=True)
+    worker = multiprocessing.get_context('fork').Process(target=crashing_worker)
+    worker.start()
+    worker.join(30)
+    assert not worker.is_alive() and worker.exitcode == 71
+    with psycopg2.connect(dbname=target) as db:
+        with db.cursor() as cur:
+            cur.execute("SELECT value FROM identity_state WHERE key='manifest'")
+            checkpoint = cur.fetchone()[0]
+            cur.execute('SELECT count(*),max(index_id) FROM identity_nodes')
+            count, last = cur.fetchone()
+            assert checkpoint['progress']['identity_nodes'] == {'rows': count, 'last_id': last}
+    resumed = identity.build_database(source, target, manifest_path, sha, batch_size=2, test_only=True)
+    assert resumed['status'] == 'COMPLETED'
+    assert resumed['reconciliation']['identity_events']['count'] == 3
+    with psycopg2.connect(dbname=target) as db:
+        with db.cursor() as cur:
+            cur.execute("SELECT value FROM identity_state WHERE key='manifest'")
+            assert cur.fetchone()[0] == json.loads(manifest_path.read_text())

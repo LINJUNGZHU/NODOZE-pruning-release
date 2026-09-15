@@ -6,6 +6,8 @@ PIDSMaker views expose its model vocabulary with explicit audited aliases.
 import argparse
 import hashlib
 import io
+import os
+import importlib.util
 import json
 import re
 import sqlite3
@@ -150,8 +152,25 @@ CREATE OR REPLACE VIEW event_table AS SELECT e.src_uuid AS src_node,
 def _write_manifest(path, value):
     Path(path).parent.mkdir(parents=True, exist_ok=True)
     temp = Path(str(path) + '.tmp')
-    temp.write_text(json.dumps(value, indent=2, ensure_ascii=False) + '\n')
+    with temp.open('w') as stream:
+        stream.write(json.dumps(value, indent=2, ensure_ascii=False) + '\n')
+        stream.flush()
+        os.fsync(stream.fileno())
     temp.replace(path)
+    directory = os.open(str(Path(path).parent), os.O_RDONLY)
+    try:
+        os.fsync(directory)
+    finally:
+        os.close(directory)
+
+
+def _checkpoint(conn, manifest, path):
+    # DB is the authoritative transaction log. A crash between commit and file
+    # publication is repaired from this exact checkpoint on the next invocation.
+    with conn.cursor() as cur:
+        cur.execute("UPDATE identity_state SET value=%s WHERE key='manifest'", (json.dumps(manifest),))
+    conn.commit()
+    _write_manifest(path, manifest)
 
 
 def _copy_batch(cur, table, columns, rows):
@@ -183,18 +202,21 @@ def _digest(rows):
     return {'count': count, 'sha256': digest.hexdigest(), 'samples': samples}
 
 
-def build_database(source, target, manifest_path, expected_sha=FROZEN_SHA256, batch_size=50000):
+def build_database(source, target, manifest_path, expected_sha=FROZEN_SHA256, batch_size=50000, *, test_only=False):
     """Commit bounded COPY batches; resume only the same source and schema.
 
     PostgreSQL credentials use libpq's environment/password-file handling.
     The legacy database is never opened. SQL targets are fixed except for a
     tightly validated newly versioned database name.
     """
+    if expected_sha != FROZEN_SHA256 and not test_only:
+        raise ValueError('Production CADETS_E3 requires the frozen source hash')
     import psycopg2
     from psycopg2 import sql
     validate_target(target, expected_sha)
     verify_source(source, expected_sha)
     manifest = {'status': 'NOT_COMPLETED', 'schema_version': SCHEMA_VERSION,
+                'test_only': bool(test_only), 'production_admissible': False,
                 'source_path': str(Path(source).resolve()), 'source_sha256': expected_sha,
                 'target_database': target, 'node_type_mapping': NODE_TYPES,
                 'relation_mapping': RELATIONS,
@@ -202,7 +224,6 @@ def build_database(source, target, manifest_path, expected_sha=FROZEN_SHA256, ba
                 'model_views_sha256': hashlib.sha256(VIEWS.encode()).hexdigest(),
                 'code_commit': subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip(),
                 'progress': {}}
-    _write_manifest(manifest_path, manifest)
     admin = psycopg2.connect(dbname='postgres')
     admin.autocommit = True
     with admin.cursor() as cur:
@@ -219,13 +240,24 @@ def build_database(source, target, manifest_path, expected_sha=FROZEN_SHA256, ba
             binding = {'sha256': expected_sha, 'schema_version': SCHEMA_VERSION}
             if saved and saved[0] != binding:
                 raise ValueError('Incompatible database resume binding')
+            cur.execute("SELECT value FROM identity_state WHERE key='manifest'")
+            prior = cur.fetchone()
+            if prior:
+                previous = prior[0]
+                if previous.get('source_sha256') != expected_sha or previous.get('test_only', False) != bool(test_only):
+                    raise ValueError('Incompatible checkpoint binding')
+                manifest['progress'] = previous.get('progress', {})
             cur.execute("INSERT INTO identity_state VALUES('source',%s) ON CONFLICT DO NOTHING", (json.dumps(binding),))
             cur.execute("INSERT INTO identity_state VALUES('manifest',%s) ON CONFLICT(key) DO UPDATE SET value=excluded.value", (json.dumps(manifest),))
         conn.commit()
+        _write_manifest(manifest_path, manifest)
         for table, columns, iterator in (('identity_nodes', NODE_COLUMNS, iter_nodes), ('identity_events', EVENT_COLUMNS, iter_events)):
             with conn.cursor() as cur:
                 cur.execute('SELECT COALESCE(MAX(' + columns[0] + '),0),COUNT(*) FROM ' + table)
                 after, count = cur.fetchone()
+            checkpoint = manifest['progress'].get(table)
+            if checkpoint is not None and (checkpoint['rows'] != count or checkpoint['last_id'] != after):
+                raise ValueError('Committed rows differ from authoritative checkpoint')
             batch = []
             last_id = after
             for row in iterator(source, after):
@@ -234,19 +266,17 @@ def build_database(source, target, manifest_path, expected_sha=FROZEN_SHA256, ba
                 if len(batch) >= batch_size:
                     with conn.cursor() as cur:
                         _copy_batch(cur, table, columns, batch)
-                    conn.commit()
                     count += len(batch)
                     manifest['progress'][table] = {'rows': count, 'last_id': batch[-1][0]}
-                    _write_manifest(manifest_path, manifest)
+                    _checkpoint(conn, manifest, manifest_path)
                     print(json.dumps({'stage': table, 'rows': count}), flush=True)
                     batch.clear()
             if batch:
                 with conn.cursor() as cur:
                     _copy_batch(cur, table, columns, batch)
-                conn.commit()
                 count += len(batch)
             manifest['progress'][table] = {'rows': count, 'last_id': last_id}
-            _write_manifest(manifest_path, manifest)
+            _checkpoint(conn, manifest, manifest_path)
         with conn.cursor() as cur:
             cur.execute(VIEWS)
         conn.commit()
@@ -288,7 +318,7 @@ def build_database(source, target, manifest_path, expected_sha=FROZEN_SHA256, ba
         conn.rollback()
         manifest['status'] = 'NOT_COMPLETED'
         manifest['failure'] = type(exc).__name__ + ': ' + str(exc)
-        _write_manifest(manifest_path, manifest)
+        _checkpoint(conn, manifest, manifest_path)
         raise
     finally:
         conn.close()
@@ -305,6 +335,8 @@ def finalize_model_views(source, target, manifest_path):
     with open(manifest_path) as stream:
         previous = validate_manifest(json.load(stream))
     validate_target(target, previous['source_sha256'])
+    if previous['source_sha256'] != FROZEN_SHA256 and not previous.get('test_only'):
+        raise ValueError('Production CADETS_E3 requires the frozen source hash')
     if previous['target_database'] != target:
         raise ValueError('Manifest target mismatch')
     verify_source(source, previous['source_sha256'])
@@ -346,15 +378,47 @@ def finalize_model_views(source, target, manifest_path):
             nested_repo = Path(__file__).resolve().parents[2] / 'webapp/runtime/research/PIDSMaker'
             if nested_repo.is_dir():
                 manifest['pidsmaker_code_commit'] = subprocess.check_output(['git', '-C', str(nested_repo), 'rev-parse', 'HEAD'], text=True).strip()
+                spec = importlib.util.spec_from_file_location('identity_runtime_contract', nested_repo / 'pidsmaker/identity_contract.py')
+                contract = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(contract)
+                manifest['pidsmaker_runtime_seal'] = contract.runtime_seal()
             origin_sql = "CASE WHEN original_event_id LIKE 'LINEAGE:%' THEN 'DERIVED_NO_RAW_EVENT' WHEN original_event_id ~ '^[0-9A-Fa-f]{8}(-[0-9A-Fa-f]{4}){3}-[0-9A-Fa-f]{12}$' THEN 'RAW_TC_EVENT' ELSE 'OTHER_STORED_ID' END"
             cur.execute('SELECT ' + origin_sql + ',count(*) FROM identity_events GROUP BY 1')
             manifest['identity_origin_counts'] = dict(cur.fetchall())
             cur.execute('SELECT identity_origin,count(*) FROM event_table GROUP BY 1')
             manifest['model_eligible_identity_origin_counts'] = dict(cur.fetchall())
+            cur.execute("SELECT raw_type,model_type,CASE WHEN model_type IS NULL THEN 'excluded' WHEN raw_type=model_type THEN 'included' ELSE 'remapped' END,count(*) FROM identity_nodes GROUP BY 1,2,3 ORDER BY 1")
+            node_audit = cur.fetchall()
+            cur.execute("""SELECT e.raw_relation,e.model_operation,
+                CASE WHEN e.model_operation IS NULL THEN 'excluded_unsupported_relation'
+                     WHEN s.index_id IS NULL OR d.index_id IS NULL THEN 'rejected_missing_endpoint'
+                     WHEN s.model_type IS NULL OR d.model_type IS NULL THEN 'excluded_endpoint_type'
+                     WHEN e.raw_relation=e.model_operation THEN 'included' ELSE 'remapped' END,count(*)
+                FROM identity_events e LEFT JOIN identity_nodes s ON s.index_id=e.src_index_id
+                LEFT JOIN identity_nodes d ON d.index_id=e.dst_index_id
+                GROUP BY 1,2,3 ORDER BY 1,2,3""")
+            event_audit = cur.fetchall()
+            manifest['node_disposition_audit'] = node_audit
+            manifest['event_disposition_audit'] = event_audit
+            manifest['conservation'] = {}
+            for name, rows in (('nodes', node_audit), ('events', event_audit)):
+                counts = {'raw': previous['reconciliation']['identity_' + name]['count'], 'included': 0, 'remapped': 0, 'excluded': 0}
+                for raw, model, reason, count in rows:
+                    if reason.startswith('rejected'):
+                        raise ValueError('Unresolved identity category: ' + reason)
+                    category = 'excluded' if reason.startswith('excluded') else reason
+                    if category not in ('included', 'remapped', 'excluded'):
+                        raise ValueError('Unclassified identity disposition')
+                    counts[category] += count
+                if counts['raw'] != counts['included'] + counts['remapped'] + counts['excluded']:
+                    raise ValueError('Raw/model conservation failed')
+                manifest['conservation'][name] = counts
             manifest['identity_mapping_convention'] = {
                 'local_stored_identity_exact': 'all reconciled stored events',
                 'raw_TC_event_identity_exact': 'RAW_TC_EVENT only; LINEAGE rows are DERIVED_NO_RAW_EVENT',
                 'subject_lineage_provenance': 'src_uuid=parent subject; dst_uuid=child subject'}
+            manifest['test_only'] = previous.get('test_only', False)
+            manifest['production_admissible'] = not manifest['test_only'] and previous['source_sha256'] == FROZEN_SHA256
             manifest = seal_manifest(manifest)
             cur.execute("UPDATE identity_state SET value=%s WHERE key='manifest'", (json.dumps(manifest),))
     _write_manifest(manifest_path, manifest)
@@ -368,9 +432,10 @@ def main():
     parser.add_argument('--manifest', required=True)
     parser.add_argument('--source-sha256', default=FROZEN_SHA256)
     parser.add_argument('--finalize-model-views', action='store_true')
+    parser.add_argument('--test-only', action='store_true', help='Fixture sources; seals cannot be used for production')
     args = parser.parse_args()
     result = (finalize_model_views(args.source, args.target, args.manifest) if args.finalize_model_views
-              else build_database(args.source, args.target, args.manifest, args.source_sha256))
+              else build_database(args.source, args.target, args.manifest, args.source_sha256, test_only=args.test_only))
     print(json.dumps(result, indent=2))
 
 
