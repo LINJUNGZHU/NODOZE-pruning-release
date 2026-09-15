@@ -387,6 +387,15 @@ def finalize_model_views(source, target, manifest_path):
             manifest['identity_origin_counts'] = dict(cur.fetchall())
             cur.execute('SELECT identity_origin,count(*) FROM event_table GROUP BY 1')
             manifest['model_eligible_identity_origin_counts'] = dict(cur.fetchall())
+            cur.execute('''SELECT identity_origin,count(*),count(*) FILTER(WHERE n=1),
+                count(*) FILTER(WHERE n>1),coalesce(sum(n) FILTER(WHERE n=1),0),
+                coalesce(sum(n) FILTER(WHERE n>1),0),max(n)
+                FROM (SELECT identity_origin,original_event_id,count(*) n FROM event_table
+                      GROUP BY identity_origin,original_event_id) groups GROUP BY identity_origin''')
+            keys = ('original_id_values', 'unique_original_id_values', 'ambiguous_original_id_values',
+                    'rows_with_unique_original_id', 'rows_with_ambiguous_original_id', 'max_multiplicity')
+            manifest['model_eligible_original_id_resolution'] = {
+                row[0]: dict(zip(keys, (int(value) for value in row[1:]))) for row in cur.fetchall()}
             cur.execute("SELECT raw_type,model_type,CASE WHEN model_type IS NULL THEN 'excluded' WHEN raw_type=model_type THEN 'included' ELSE 'remapped' END,count(*) FROM identity_nodes GROUP BY 1,2,3 ORDER BY 1")
             node_audit = cur.fetchall()
             cur.execute("""SELECT e.raw_relation,e.model_operation,

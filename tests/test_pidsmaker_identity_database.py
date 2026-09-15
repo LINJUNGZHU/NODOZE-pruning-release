@@ -105,6 +105,9 @@ def test_real_copy_resume_and_tamper_reconciliation(tmp_path):
     assert upgraded['identity_origin_counts'] == {'OTHER_STORED_ID': 3}
     assert upgraded['conservation']['events'] == {'raw': 3, 'included': 1, 'remapped': 1, 'excluded': 1}
     assert upgraded['conservation']['nodes'] == {'raw': 3, 'included': 0, 'remapped': 3, 'excluded': 0}
+    assert upgraded['model_eligible_original_id_resolution']['OTHER_STORED_ID'] == {
+        'original_id_values': 1, 'unique_original_id_values': 0, 'ambiguous_original_id_values': 1,
+        'rows_with_unique_original_id': 0, 'rows_with_ambiguous_original_id': 2, 'max_multiplicity': 2}
     with psycopg2.connect(dbname=target) as db:
         with db.cursor() as cur:
             cur.execute('SELECT node_uuid,hash_id,exec,path,cmd,index_id FROM subject_node_table ORDER BY index_id')

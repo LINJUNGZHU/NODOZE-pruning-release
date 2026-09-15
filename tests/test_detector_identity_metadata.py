@@ -48,3 +48,25 @@ def test_partial_identity_never_claims_exact_mapping():
     assert evidence.mapping_quality.value != 'EXACT'
     with pytest.raises(ValueError):
         VeloxEvidenceAdapter(version='test').adapt([dict(row, stored_event_id='different')], [1])
+
+
+@pytest.mark.parametrize('streaming', [False, True])
+@pytest.mark.parametrize('change', [dict(stored_event_id='wrong'), dict(identity_collision=True),
+    dict(identity_origin='RAW_TC_EVENT'), dict(raw_relation='EVENT_READ'),
+    dict(supporting_event_ids=['other']), dict(original_event_id=None)])
+def test_all_velox_entrypoints_reject_malformed_exact_rows(streaming, change):
+    row = dict(event_uuid='e', stored_event_id='e', original_event_id='e', src_node_uuid='p',
+        dst_node_uuid='c', time=10, edge_type=9, raw_relation='EVENT_WRITE',
+        identity_collision=False, identity_origin='OTHER_STORED_ID', supporting_event_ids=['e'], loss=2)
+    row.update(change)
+    adapter = VeloxEvidenceAdapter(version='test')
+    with pytest.raises(ValueError):
+        list((adapter.iter_provide if streaming else adapter.adapt)([row], [1]))
+
+
+def test_velox_streaming_partial_downgrade_and_duplicate_rejection():
+    row = dict(event_uuid='e', src_node_uuid='p', dst_node_uuid='c', loss=2)
+    adapter = VeloxEvidenceAdapter(version='test')
+    assert list(adapter.iter_provide([row], [1]))[0].mapping_quality.value == 'NATIVE'
+    with pytest.raises(ValueError, match='Duplicate'):
+        list(adapter.iter_provide([row, row], [1]))

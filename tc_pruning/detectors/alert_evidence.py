@@ -447,27 +447,28 @@ class VeloxEvidenceAdapter(AlertEvidenceProvider):
     def __init__(self, *, version: str) -> None:
         self.version = version
 
+    def _convert_row(self, row: Mapping[str, Any], threshold: float, rank: float, local: float | None) -> AlertEvidence:
+        event, src, dst = (_identifier(row.get(key), key) for key in ("event_uuid", "src_node_uuid", "dst_node_uuid"))
+        value, edge_type = _loss(row.get("loss")), row.get("edge_type")
+        metadata = _native_identity_metadata(row)
+        quality = _native_mapping_quality(row, metadata)
+        timestamp = int(row["time"]) if row.get("time") not in (None, "") else None
+        return AlertEvidence(
+            _evidence_id("Velox", event), "Velox", self.version, EvidenceGranularity.EDGE, value, rank, value > threshold,
+            event_ids=(event,), node_ids=(src, dst), src_uuid=src, dst_uuid=dst,
+            relation=row.get("raw_relation") or row.get("relation") or _EDGE_RELATIONS.get(str(edge_type)),
+            role_hint=RoleHint.OBSERVATION, supporting_event_ids=_native_support(row), mapping_quality=quality,
+            detector_metadata={"native_threshold": threshold, "native_edge_type": edge_type, **metadata},
+            timestamp_start=timestamp, timestamp_end=timestamp, development_percentile=rank, query_local_percentile=local)
+
     def adapt(self, rows: str | Path | Iterable[Mapping[str, Any]], development_rows: str | Path | Iterable[Mapping[str, Any]]) -> tuple[AlertEvidence, ...]:
         native, calibration = _read_rows(rows), _development(development_rows)
         threshold = max(calibration.development_scores)
         local = _local_percentiles(native, lambda row: _loss(row["loss"]), lambda row: row.get("query_id") or row.get("day"))
         result = []
         for index, row in enumerate(native):
-            event, src, dst = (_identifier(row.get(key), key) for key in ("event_uuid", "src_node_uuid", "dst_node_uuid"))
             value = _loss(row.get("loss"))
-            edge_type = row.get("edge_type")
-            identity_metadata = _native_identity_metadata(row)
-            mapping_quality = _native_mapping_quality(row, identity_metadata)
-            result.append(AlertEvidence(
-                _evidence_id("Velox", event), "Velox", self.version, EvidenceGranularity.EDGE, value, calibration.percentile(value), value > threshold,
-                event_ids=(event,), node_ids=(src, dst), src_uuid=src, dst_uuid=dst,
-                relation=row.get("raw_relation") or row.get("relation") or _EDGE_RELATIONS.get(str(edge_type)), role_hint=RoleHint.OBSERVATION,
-                supporting_event_ids=_native_support(row),
-                mapping_quality=mapping_quality, detector_metadata={"native_threshold": threshold, "native_edge_type": edge_type, **identity_metadata},
-                timestamp_start=int(row["time"]) if row.get("time") not in (None, "") else None,
-                timestamp_end=int(row["time"]) if row.get("time") not in (None, "") else None,
-                development_percentile=calibration.percentile(value), query_local_percentile=local[index],
-            ))
+            result.append(self._convert_row(row, threshold, calibration.percentile(value), local[index]))
         return _ordered_unique(result)
 
     provide = adapt
@@ -479,6 +480,7 @@ class VeloxEvidenceAdapter(AlertEvidenceProvider):
         fd, name = tempfile.mkstemp(prefix="velox-development-", suffix=".sqlite"); os.close(fd); conn = sqlite3.connect(name)
         try:
             conn.execute("CREATE TABLE scores(value REAL NOT NULL)")
+            conn.execute("CREATE TABLE seen(event_id TEXT PRIMARY KEY,evidence_id TEXT UNIQUE NOT NULL)")
             def values() -> Iterable[Any]:
                 if isinstance(development_rows, (str, Path)):
                     path = Path(development_rows)
@@ -493,8 +495,14 @@ class VeloxEvidenceAdapter(AlertEvidenceProvider):
             conn.executemany("INSERT INTO scores VALUES (?)", ((_loss(row["loss"]) if isinstance(row, Mapping) else _loss(row),) for row in values())); conn.commit(); total, threshold = conn.execute("SELECT COUNT(*),MAX(value) FROM scores").fetchone()
             if not total: raise ValueError("development calibration needs at least one score")
             for row in rows:
-                event, src, dst = (_identifier(row.get(key), key) for key in ("event_uuid", "src_node_uuid", "dst_node_uuid")); value = _loss(row.get("loss")); rank = conn.execute("SELECT COUNT(*) FROM scores WHERE value<=?", (value,)).fetchone()[0] / total; edge_type = row.get("edge_type")
-                yield AlertEvidence(_evidence_id("Velox", event), "Velox", self.version, EvidenceGranularity.EDGE, value, rank, value > threshold, event_ids=(event,), node_ids=(src, dst), src_uuid=src, dst_uuid=dst, relation=row.get("raw_relation") or row.get("relation") or _EDGE_RELATIONS.get(str(edge_type)), role_hint=RoleHint.OBSERVATION, supporting_event_ids=_native_support(row), mapping_quality=MappingQuality.EXACT, detector_metadata={"native_threshold": threshold, "native_edge_type": edge_type, **_native_identity_metadata(row)}, timestamp_start=int(row["time"]) if row.get("time") not in (None, "") else None, timestamp_end=int(row["time"]) if row.get("time") not in (None, "") else None, development_percentile=rank, query_local_percentile=None)
+                value = _loss(row.get("loss"))
+                rank = conn.execute("SELECT COUNT(*) FROM scores WHERE value<=?", (value,)).fetchone()[0] / total
+                evidence = self._convert_row(row, threshold, rank, None)
+                try:
+                    conn.execute("INSERT INTO seen VALUES (?,?)", (evidence.event_ids[0], evidence.evidence_id))
+                except sqlite3.IntegrityError as exc:
+                    raise ValueError('Duplicate native event/evidence identity') from exc
+                yield evidence
         finally:
             conn.close()
             try: os.unlink(name)
