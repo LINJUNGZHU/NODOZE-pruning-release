@@ -1,0 +1,28 @@
+{
+  "schema_version": "detector-seed-benchmark-v1",
+  "dataset": "DARPA_TC_E3_CADETS",
+  "database": {
+    "path": "output/tc/cadets-e3-from-raw-2026-09-07_15-27-47.db",
+    "sha256": "719f97dafb642f49b0cffff6deaeb42138386521cfc2cf27539d6d5ae6a81abf"
+  },
+  "candidate_backend": "EvidenceDrivenCandidateBuilder",
+  "candidate": {
+    "candidate_cap": 10000,
+    "history_start_ns": 1522706861813350340,
+    "cutoff_ns": 1523655358953968696,
+    "max_strict_depth": 8,
+    "max_control_depth": 0,
+    "enable_common_cause": false,
+    "scan_multiplier": 20
+  },
+  "projection": {"mode": "DEPIMPACT_COMPATIBLE", "merge_window_ns": 900000000000},
+  "budget": {"raw_event_cap": 8000, "selection_fraction": 0.8},
+  "selectors": ["A_rasp", "C_branch_fair"],
+  "detectors": [
+    {"detector_id": "ORTHRUS"},
+    {"detector_id": "KAIROS"},
+    {"detector_id": "Velox", "profile": "VXL-0"},
+    {"detector_id": "R-CAID"},
+    {"detector_id": "NODLINK"}
+  ]
+}

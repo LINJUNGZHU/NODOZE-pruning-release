@@ -6,7 +6,7 @@ import heapq
 import json
 import resource
 import time
-from typing import Iterable
+from typing import Iterable, Mapping, Protocol
 
 from .detectors.alert_evidence import AlertEvidence, EvidenceGranularity, RoleHint
 from .models import StoredEdge
@@ -62,6 +62,28 @@ class CandidateResult:
     performance: CandidatePerformance
 
 
+class PriorityLookup(Protocol):
+    """Optional detector-neutral queue ordering lookup; never an admission rule."""
+
+    def score_for_event(self, event_id: str) -> float | None: ...
+
+
+@dataclass(frozen=True, slots=True)
+class EvidencePriority:
+    """Small mapping implementation; production callers may supply a SQLite lookup."""
+
+    scores: Mapping[str, float]
+
+    def __post_init__(self) -> None:
+        for value in self.scores.values():
+            if not isinstance(value, (int, float)) or not float("-inf") < float(value) < float("inf"):
+                raise ValueError("priority scores must be finite")
+
+    def score_for_event(self, event_id: str) -> float | None:
+        value = self.scores.get(event_id)
+        return None if value is None else float(value)
+
+
 @dataclass(frozen=True, slots=True)
 class _Frontier:
     node_id: str
@@ -76,8 +98,8 @@ class _Frontier:
 class EvidenceDrivenCandidateBuilder:
     """Search the full store without inspecting detector-specific identity fields."""
 
-    def __init__(self, store: ProvenanceStore, config: CandidateSearchConfig) -> None:
-        self.store, self.config = store, config
+    def __init__(self, store: ProvenanceStore, config: CandidateSearchConfig, *, priority: PriorityLookup | None = None) -> None:
+        self.store, self.config, self.priority = store, config, priority
 
     def build(self, evidence: Iterable[AlertEvidence]) -> CandidateResult:
         started = time.perf_counter()
@@ -255,7 +277,20 @@ class EvidenceDrivenCandidateBuilder:
                 continue
             if (frontier.direction == "backward" and target == frontier.node_id) or (frontier.direction == "forward" and source == frontier.node_id):
                 result.append(edge)
-        return tuple(sorted(result, key=lambda edge: (edge.timestamp_ns, edge.edge_id), reverse=frontier.direction == "backward")), 2
+        # Priority is consulted only after a full-graph edge has been enumerated.
+        # Missing scores remain eligible. Temporal distance and local fanout are
+        # stable tie-breakers, never filters or additions to the graph.
+        fanout: dict[str, int] = {}
+        for edge in result:
+            fanout[edge.src] = fanout.get(edge.src, 0) + 1
+            fanout[edge.dst] = fanout.get(edge.dst, 0) + 1
+
+        def order(edge: StoredEdge) -> tuple[float, int, int, int]:
+            score = 0.0 if self.priority is None else (self.priority.score_for_event(edge.event_id) or 0.0)
+            temporal = frontier.upper_time_ns - edge.timestamp_ns if frontier.direction == "backward" else edge.timestamp_ns - frontier.lower_time_ns
+            next_node = edge.src if frontier.direction == "backward" else edge.dst
+            return (-score, temporal, fanout.get(next_node, 0), edge.edge_id)
+        return tuple(sorted(result, key=order)), 2
 
     def _add_control_context(self, candidates: dict[int, StoredEdge], nodes: set[str], initial: list[tuple[str, int, int | None, int]], admit) -> tuple[int, int]:
         queue = [(node, lower, upper, depth, 0) for node, lower, upper, depth in initial if upper is not None]
@@ -337,4 +372,4 @@ class EvidenceDrivenCandidateBuilder:
         return queries, witnesses
 
 
-__all__ = ["CandidatePerformance", "CandidateResult", "CandidateSearchConfig", "EvidenceDrivenCandidateBuilder"]
+__all__ = ["CandidatePerformance", "CandidateResult", "CandidateSearchConfig", "EvidenceDrivenCandidateBuilder", "EvidencePriority", "PriorityLookup"]
