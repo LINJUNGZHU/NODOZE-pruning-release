@@ -82,8 +82,11 @@ def _reject_bad(value: Any, location: str = "input") -> None:
         tokens = re.findall(r"[a-z0-9]+", text.lower())
         joined = "_".join(tokens)
         singles = {"gt", "truth", "label", "malicious", "oracle", "funnel", "evaluator"}
-        compounds = {"ground_truth", "known_critical", "critical_event", "critical_edge", "positive_ids", "attack_time", "attack_times", "attack_window", "pdf_critical", "y_true", "is_malicious"}
-        return any(token in singles for token in tokens) or any(joined == term or joined.startswith(term + "_") or joined.endswith("_" + term) for term in compounds)
+        compounds = {"groundtruth", "ground_truth", "known_critical", "critical_event", "critical_edge", "positive_ids", "attack_time", "attack_times", "attack_window", "pdf_critical", "y_true", "is_malicious"}
+        # A compound authority may be embedded in a generated key/path (for
+        # example my_known_critical_event_ids_copy).  Do not apply this to
+        # ordinary words such as source/target: none is an authority token.
+        return any(token in singles for token in tokens) or any(term in joined for term in compounds)
     if isinstance(value, Mapping):
         for key, item in value.items():
             if forbidden(str(key)): raise ValueError(f"online {location} contains forbidden field")
@@ -119,6 +122,7 @@ class BenchmarkConfig:
         if not fixture and (path != FROZEN_DATABASE or db_hash != FROZEN_DATABASE_SHA256): raise ValueError("database path/hash is not frozen")
         search = CandidateSearchConfig(**dict(candidate))
         if not fixture and (search.candidate_cap != 10000 or search.history_start_ns != FROZEN_HISTORY_START_NS or search.cutoff_ns != FROZEN_CUTOFF_NS): raise ValueError("candidate cap/window is not frozen")
+        if not fixture and (search.max_control_depth != 2 or not search.enable_common_cause): raise ValueError("production control/common-cause lineage is frozen")
         projected = EdgeProjection(str(projection.get("mode")), int(projection.get("merge_window_ns")))
         if projected.mode is not ProjectionMode.DEPIMPACT_COMPATIBLE or projected.merge_window_ns != 900000000000: raise ValueError("projection is not frozen")
         raw_cap, proxy_cap = int(budget.get("raw_event_cap")), int(budget.get("proxy_event_cap", budget.get("raw_event_cap")))
@@ -143,6 +147,8 @@ class BenchmarkConfig:
                 raise ValueError("production benchmark requires exactly ORTHRUS, KAIROS, R-CAID, NODLINK and VXL-0..3")
             if any(item.profile != item.run_id for item in specs if item.detector_id.upper() == "VELOX"):
                 raise ValueError("Velox profile must exactly equal its VXL run id")
+            if any(item.run_id != item.detector_id.upper() for item in specs if item.detector_id.upper() != "VELOX"):
+                raise ValueError("non-Velox run id must equal detector id")
         unsigned = dict(record); expected = unsigned.pop("expected_config_sha256", None); digest = _sha_bytes(_canonical(unsigned))
         if not fixture and expected != digest: raise ValueError("expected canonical config digest mismatch")
         expected_commit = record.get("expected_code_commit")
@@ -163,9 +169,12 @@ def _native_manifest(source: str | Path) -> dict[str, Any]:
     return {"artifact_schema": "native-source-manifest-v2", "source": str(root), "files": rows, "aggregate_sha256": _sha_bytes(_canonical(rows))}
 
 def _verify_native(manifest: Mapping[str, Any]) -> None:
+    rows = []
     for row in manifest["files"]:
         path = Path(row["path"])
         if not path.is_file() or path.stat().st_size != row["size_bytes"] or _sha_file(path) != row["sha256"]: raise ValueError("native source changed")
+        rows.append({"path": row["path"], "relative_path": row["relative_path"], "size_bytes": row["size_bytes"], "sha256": row["sha256"]})
+    if manifest.get("files") and manifest.get("aggregate_sha256") != _sha_bytes(_canonical(rows)): raise ValueError("native aggregate hash mismatch")
 
 def _edge_record(store: ProvenanceStore, edge: StoredEdge) -> dict[str, Any]:
     return {"stored_event_id": edge.event_id, "original_event_id": store.original_event_id(edge.event_id), "edge_id": edge.edge_id, "src_uuid": edge.src, "dst_uuid": edge.dst, "relation": edge.relation, "timestamp_ns": edge.timestamp_ns, "host": edge.host, "src_type": edge.src_type, "dst_type": edge.dst_type}
@@ -199,6 +208,7 @@ def _stage_evidence(store: ProvenanceStore, source: Iterable[AlertEvidence], dir
     conn = sqlite3.connect(db)
     conn.execute("CREATE TABLE staged (ordinal INTEGER PRIMARY KEY, evidence_id TEXT NOT NULL, body TEXT NOT NULL, identity_status TEXT NOT NULL, native_id TEXT NOT NULL, native_decision INTEGER NOT NULL, calibrated_score REAL NOT NULL, raw_score REAL)")
     conn.execute("CREATE TABLE seen_identity (value TEXT PRIMARY KEY)")
+    conn.execute("CREATE TABLE stage_identity (stage TEXT NOT NULL, kind TEXT NOT NULL, identity TEXT NOT NULL, PRIMARY KEY(stage,kind,identity))")
     conn.execute("CREATE INDEX staged_anchor ON staged(identity_status,native_decision,calibrated_score DESC,evidence_id)")
     counts = {"exact": 0, "missing": 0, "duplicate": 0, "ambiguous": 0, "total_inference": 0, "scored": 0, "native_decisions": 0, "evidence": 0}
     evidence_path, audit_path = directory / "evidence.jsonl", directory / "identity_audit.jsonl"
@@ -224,6 +234,9 @@ def _stage_evidence(store: ProvenanceStore, source: Iterable[AlertEvidence], dir
                     edge = store.get_edge_by_event_id(events[0]["matches"][0]["stored_event_id"])
                     coherent = edge is not None and edge.src == item.src_uuid and edge.dst == item.dst_uuid and edge.relation == item.relation and (item.timestamp_start is None or edge.timestamp_ns == item.timestamp_start) and (item.timestamp_end is None or edge.timestamp_ns == item.timestamp_end)
                 state = "duplicate" if duplicate else "exact" if coherent and sizes and all(value == 1 for value in sizes) else "missing" if not sizes or any(value == 0 for value in sizes) or not coherent else "ambiguous"
+                if state == "exact":
+                    conn.executemany("INSERT OR IGNORE INTO stage_identity VALUES ('evidence',?,?)", (("event", event) for event in item.event_ids))
+                    conn.executemany("INSERT OR IGNORE INTO stage_identity VALUES ('evidence',?,?)", (("node", node) for node in item.node_ids))
                 counts[state] += 1; counts["total_inference"] += 1; counts["evidence"] += 1; counts["scored"] += item.raw_score is not None; counts["native_decisions"] += item.native_decision
                 audit = {"evidence_id": item.evidence_id, "identity_status": state, "event_identity": events, "node_identity": nodes}; encoded = _canonical(audit); audit_out.write(encoded); audit_digest.update(encoded)
                 conn.execute("INSERT INTO staged VALUES (?,?,?,?,?,?,?,?)", (ordinal, item.evidence_id, raw.decode().rstrip("\n"), state, native_object, int(item.native_decision), item.calibrated_score, item.raw_score)); ordinal += 1
@@ -241,6 +254,10 @@ def _stage_evidence(store: ProvenanceStore, source: Iterable[AlertEvidence], dir
     _write_json(evidence_path.with_suffix(".jsonl.manifest.json"), {"artifact_schema": "alert-evidence-jsonl-v2", "record_count": ordinal, "data_sha256": evidence_digest.hexdigest()})
     _write_json(audit_path.with_suffix(".jsonl.manifest.json"), {"artifact_schema": "per-evidence-identity-audit-v2", "record_count": ordinal, "data_sha256": audit_digest.hexdigest()})
     counts["mapping_rate"] = counts["exact"] / ordinal if ordinal else None
+    identity_conn = sqlite3.connect(db)
+    try: event_count = int(identity_conn.execute("SELECT COUNT(*) FROM stage_identity WHERE stage='evidence' AND kind='event'").fetchone()[0])
+    finally: identity_conn.close()
+    _write_json(directory / "stage_identity_manifest.json", {"artifact_schema": "stage-identity-sqlite-v1", "sqlite_path": "evidence_staging.sqlite", "evidence_event_count": event_count})
     return db, {"artifact_schema": "native-mapping-audit-v2", **counts}
 
 def _read_staged_anchors(db: Path, *, profile: str | None, threshold: float | None, cap: int, priority_path: Path | None) -> tuple[AlertEvidence, Any | None]:
@@ -258,9 +275,12 @@ def _read_staged_anchors(db: Path, *, profile: str | None, threshold: float | No
             priority.add_many(priority_rows())
         else: priority = None
         if profile in {"VXL-1", "VXL-3"}:
-            query, params = "SELECT body FROM staged WHERE identity_status='exact' AND calibrated_score>=? ORDER BY calibrated_score DESC,evidence_id LIMIT ?", (float(threshold), cap)
+            predicate, predicate_args = "identity_status='exact' AND calibrated_score>=?", (float(threshold),)
         else:
-            query, params = "SELECT body FROM staged WHERE identity_status='exact' AND native_decision=1 ORDER BY calibrated_score DESC,evidence_id LIMIT ?", (cap,)
+            predicate, predicate_args = "identity_status='exact' AND native_decision=1", ()
+        required = int(conn.execute("SELECT COUNT(*) FROM staged WHERE " + predicate, predicate_args).fetchone()[0])
+        if required > cap: raise ValueError(f"required native anchors ({required}) exceed frozen candidate_cap ({cap}); refusing to redefine detector seed set")
+        query, params = "SELECT body FROM staged WHERE " + predicate + " ORDER BY calibrated_score DESC,evidence_id", predicate_args
         anchors = tuple(AlertEvidence.from_record(json.loads(body)) for (body,) in conn.execute(query, params))
         return anchors, priority
     finally:
@@ -309,7 +329,7 @@ def _status(directory: Path, state: str, stage: str, reason: str | None = None) 
 
 def _link_shared(shared: Path, attempt: Path) -> None:
     """Reference immutable common evidence without copying multi-GB data."""
-    for name in ("evidence.jsonl", "evidence.jsonl.manifest.json", "identity_audit.jsonl", "identity_audit.jsonl.manifest.json", "evidence_staging.sqlite"):
+    for name in ("evidence.jsonl", "evidence.jsonl.manifest.json", "identity_audit.jsonl", "identity_audit.jsonl.manifest.json", "evidence_staging.sqlite", "stage_identity_manifest.json"):
         source, target = shared / name, attempt / name
         if not source.is_file(): raise ValueError("shared evidence staging is incomplete")
         os.link(source, target)
@@ -337,9 +357,13 @@ def run_online_benchmark(config_record: Mapping[str, Any], evidence_by_run: Mapp
         return {"schema_version": SCHEMA_VERSION, "status": "NOT_COMPLETED", "stage": "input", "reason": str(exc), "attempt_directory": str(outer)}
     result = {"schema_version": SCHEMA_VERSION, "status": "COMPLETED", "runs": {}}
     shared_velox: dict[str, tuple[Path, dict[str, Any]]] = {}
-    with ProvenanceStore(database) as store:
+    try: store_context = ProvenanceStore(database)
+    except Exception as exc:
+        _status(outer, "NOT_COMPLETED", "store", f"{type(exc).__name__}: {exc}")
+        return {"schema_version": SCHEMA_VERSION, "status": "NOT_COMPLETED", "stage": "store", "reason": str(exc), "attempt_directory": str(outer)}
+    with store_context as store:
         for spec in config.detectors:
-            attempt = root / ".attempts" / spec.run_id / f"attempt-{time.time_ns()}"; attempt.mkdir(parents=True, exist_ok=False); stage = "input_evidence"
+            attempt = root / ".attempts" / spec.run_id / f"attempt-{time.time_ns()}"; attempt.mkdir(parents=True, exist_ok=False); stage = "input_evidence"; priority = None
             try:
                 if spec.run_id.upper() not in supplied: raise ValueError("missing evidence input")
                 stage = "native_manifest"; source = sources.get(spec.run_id.upper()); native = _native_manifest(source) if source is not None else {"artifact_schema": "native-source-manifest-v2", "fixture_mode": True, "source": None, "files": [], "aggregate_sha256": None}; _write_json(attempt / "native_manifest.json", native)
@@ -379,8 +403,7 @@ def run_online_benchmark(config_record: Mapping[str, Any], evidence_by_run: Mapp
                 stage = "selector:C_branch_fair"; started = time.perf_counter(); b = _branch_fair(candidate.edges, proxy, config.raw_event_cap, proxy_audit, candidate.branch_provenance); b_seconds = time.perf_counter() - started; b["projected_edge_count"] = config.projection.count(tuple(edge for edge in candidate.edges if edge.event_id in b["selected_raw_event_ids"])); _write_json(attempt / "C_branch_fair_final.json", {"artifact_schema": "C-branch-fair-final-v2", **b})
                 inference = None if inference_seconds is None else inference_seconds.get(spec.run_id)
                 _write_json(attempt / "timing.json", {"artifact_schema": "online-timing-v2", **performance_fields(inference_seconds=inference, adapter_seconds=None, candidate_seconds=candidate_seconds, a_rasp_seconds=a_seconds, branch_fair_seconds=b_seconds, peak_rss_kb=max(before, resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)), "adapter_seconds_status": "NOT_AVAILABLE", "detector_inference_seconds_status": "MEASURED_EXTERNAL" if inference is not None else "NOT_AVAILABLE", "candidate_seconds_status": "MEASURED", "selector_seconds_status": "MEASURED"})
-                _write_json(attempt / "stage_identities.json", {"artifact_schema": "stage-identities-v2", "preprocessing": {"status": "NOT_AVAILABLE", "reason": "no graph/tensor manifest supplied"}, "inference": {"status": "NOT_AVAILABLE", "reason": "no inference identity artifact supplied"}, "scored": {"status": "NOT_AVAILABLE", "reason": "scored identity source was not supplied"}, "native_threshold": {"status": "AVAILABLE", "event_ids": sorted(event for item in candidates for event in item.event_ids), "node_ids": sorted(node for item in candidates for node in item.node_ids)}, "evidence": {"status": "AVAILABLE", "event_ids": sorted(event for item in candidates for event in item.event_ids), "node_ids": sorted(node for item in candidates for node in item.node_ids), "reason": "bounded exact-anchor view; complete evidence remains in evidence.jsonl"}})
-                if hasattr(priority, "close"): priority.close()
+                _write_json(attempt / "stage_identities.json", {"artifact_schema": "stage-identities-v2", "preprocessing": {"status": "NOT_AVAILABLE", "reason": "no graph/tensor manifest supplied"}, "inference": {"status": "NOT_AVAILABLE", "reason": "no inference identity artifact supplied"}, "scored": {"status": "NOT_AVAILABLE", "reason": "scored identity source was not supplied"}, "native_threshold": {"status": "AVAILABLE", "event_ids": sorted(event for item in candidates for event in item.event_ids), "node_ids": sorted(node for item in candidates for node in item.node_ids)}, "evidence": {"status": "AVAILABLE", "identity_index": "stage_identity_manifest.json", "stage": "evidence", "reason": "complete exact evidence identities are held in SQLite"}})
                 _verify_native(native)
                 if _sha_file(database) != config.database_sha256: raise ValueError("database hash changed during run")
                 _write_json(attempt / "resolved_config.json", {"artifact_schema": "resolved-online-config-v2", "config": config.resolved, "config_sha256": config.config_sha256, "expected_config_sha256": config.expected_config_sha256, "code_commit": _commit(), "expected_code_commit": config.expected_code_commit, "database_path": config.database_path, "database_sha256": config.database_sha256, "database_sha256_start": config.database_sha256, "database_sha256_end": _sha_file(database), "native_aggregate_sha256": native["aggregate_sha256"]}); _status(attempt, "COMPLETED", "complete"); _artifact_manifest(attempt)
@@ -392,6 +415,9 @@ def run_online_benchmark(config_record: Mapping[str, Any], evidence_by_run: Mapp
                 try: _status(attempt, "NOT_COMPLETED", stage, f"{type(exc).__name__}: {exc}"); _artifact_manifest(attempt)
                 except Exception: pass
                 result["status"] = "NOT_COMPLETED"; result["runs"][spec.run_id] = {"status": "NOT_COMPLETED", "stage": stage, "reason": str(exc), "attempt_directory": str(attempt)}
+            finally:
+                if hasattr(priority, "close"):
+                    priority.close()
     if result["status"] == "COMPLETED":
         pointers = sorted((root / "runs").glob("*.CURRENT"))
         root_rows = []
@@ -406,6 +432,7 @@ def run_online_benchmark(config_record: Mapping[str, Any], evidence_by_run: Mapp
         seal = _sha_file(root / "root_manifest.json")
         _write_json(root / "root_seal.json", {"artifact_schema": "benchmark-root-seal-v1", "root_manifest_sha256": seal})
         result["root_manifest_sha256"] = seal
+    _status(outer, "COMPLETED" if result["status"] == "COMPLETED" else "NOT_COMPLETED", "complete" if result["status"] == "COMPLETED" else "run", None if result["status"] == "COMPLETED" else "one or more runs failed")
     return result
 
 __all__ = ["BenchmarkConfig", "DetectorSpec", "run_online_benchmark"]

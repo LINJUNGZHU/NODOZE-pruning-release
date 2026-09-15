@@ -24,3 +24,10 @@ def test_authority_guard_rejects_known_critical_and_attack_times_but_not_safe_re
     for value in ("known_critical_event_ids.jsonl", "attack_times.json", {"positive_ids": ["x"]}, {"gt": True}):
         with pytest.raises(ValueError): _reject_bad(value)
     _reject_bad({"relation": "EVENT_WRITE", "source_semantic": "process:/usr/bin/bash"})
+
+
+@pytest.mark.parametrize("value", ["groundtruth.json", "my_known_critical_event_ids_copy.jsonl", "cadets_attack_times_backup", {"nested": {"critical_edge_cache": 1}}])
+def test_authority_guard_rejects_embedded_compound_authorities(value: object) -> None:
+    from tc_pruning.detector_seed_benchmark import _reject_bad
+    with pytest.raises(ValueError):
+        _reject_bad(value)

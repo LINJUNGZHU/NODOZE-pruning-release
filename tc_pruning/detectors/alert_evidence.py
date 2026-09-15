@@ -11,7 +11,10 @@ from enum import Enum
 import hashlib
 import json
 import math
+import os
 from pathlib import Path
+import sqlite3
+import tempfile
 from types import MappingProxyType
 from typing import Any, Iterable, Mapping, Sequence
 
@@ -403,6 +406,10 @@ class AlertEvidenceProvider(ABC):
     def provide(self, *args: Any, **kwargs: Any) -> tuple[AlertEvidence, ...]:
         """Translate native detector output without external labels."""
 
+    def iter_provide(self, *args: Any, **kwargs: Any) -> Iterable[AlertEvidence]:
+        """Streaming export hook. Legacy providers retain tuple compatibility."""
+        yield from self.provide(*args, **kwargs)
+
 
 class VeloxEvidenceAdapter(AlertEvidenceProvider):
     def __init__(self, *, version: str) -> None:
@@ -431,6 +438,34 @@ class VeloxEvidenceAdapter(AlertEvidenceProvider):
 
     provide = adapt
 
+    def iter_provide(self, rows: Iterable[Mapping[str, Any]], development_rows: str | Path | Iterable[Mapping[str, Any]]) -> Iterable[AlertEvidence]:
+        # Reuse the disk-backed streaming calibration implementation with an
+        # EDGE-specific projection; this deliberately omits query-local ranks
+        # rather than retaining an unbounded query grouping in RAM.
+        fd, name = tempfile.mkstemp(prefix="velox-development-", suffix=".sqlite"); os.close(fd); conn = sqlite3.connect(name)
+        try:
+            conn.execute("CREATE TABLE scores(value REAL NOT NULL)")
+            def values() -> Iterable[Any]:
+                if isinstance(development_rows, (str, Path)):
+                    path = Path(development_rows)
+                    if path.suffix.lower() == ".csv":
+                        with path.open(encoding="utf-8", newline="") as stream: yield from csv.DictReader(stream)
+                    elif path.suffix.lower() == ".jsonl":
+                        with path.open(encoding="utf-8") as stream:
+                            for line in stream:
+                                if line.strip(): yield json.loads(line)
+                    else: raise ValueError("production development input must be CSV or JSONL")
+                else: yield from development_rows
+            conn.executemany("INSERT INTO scores VALUES (?)", ((_loss(row["loss"]) if isinstance(row, Mapping) else _loss(row),) for row in values())); conn.commit(); total, threshold = conn.execute("SELECT COUNT(*),MAX(value) FROM scores").fetchone()
+            if not total: raise ValueError("development calibration needs at least one score")
+            for row in rows:
+                event, src, dst = (_identifier(row.get(key), key) for key in ("event_uuid", "src_node_uuid", "dst_node_uuid")); value = _loss(row.get("loss")); rank = conn.execute("SELECT COUNT(*) FROM scores WHERE value<=?", (value,)).fetchone()[0] / total; edge_type = row.get("edge_type")
+                yield AlertEvidence(_evidence_id("Velox", event), "Velox", self.version, EvidenceGranularity.EDGE, value, rank, value > threshold, event_ids=(event,), node_ids=(src, dst), src_uuid=src, dst_uuid=dst, relation=row.get("raw_relation") or row.get("relation") or _EDGE_RELATIONS.get(str(edge_type)), role_hint=RoleHint.OBSERVATION, supporting_event_ids=_native_support(row), mapping_quality=MappingQuality.EXACT, detector_metadata={"native_threshold": threshold, "native_edge_type": edge_type, **_native_identity_metadata(row)}, timestamp_start=int(row["time"]) if row.get("time") not in (None, "") else None, timestamp_end=int(row["time"]) if row.get("time") not in (None, "") else None, development_percentile=rank, query_local_percentile=None)
+        finally:
+            conn.close()
+            try: os.unlink(name)
+            except FileNotFoundError: pass
+
 
 class _PIDSMakerNodeAdapter(AlertEvidenceProvider):
     detector_id: str
@@ -458,6 +493,34 @@ class _PIDSMakerNodeAdapter(AlertEvidenceProvider):
         return _ordered_unique(result)
 
     provide = adapt
+
+    def iter_provide(self, rows: Iterable[Any], development_rows: str | Path | Iterable[Mapping[str, Any]]) -> Iterable[AlertEvidence]:
+        """Production streaming path: calibration ranks live in disk SQLite."""
+        fd, name = tempfile.mkstemp(prefix="pidsmaker-development-", suffix=".sqlite"); os.close(fd); conn = sqlite3.connect(name)
+        try:
+            conn.execute("CREATE TABLE scores(value REAL NOT NULL)")
+            def development_iter() -> Iterable[Any]:
+                if isinstance(development_rows, (str, Path)):
+                    path = Path(development_rows)
+                    if path.suffix.lower() == ".csv":
+                        with path.open(encoding="utf-8", newline="") as stream: yield from csv.DictReader(stream)
+                    elif path.suffix.lower() == ".jsonl":
+                        with path.open(encoding="utf-8") as stream:
+                            for line in stream:
+                                if line.strip(): yield json.loads(line)
+                    else: raise ValueError("production development input must be CSV or JSONL")
+                else: yield from development_rows
+            conn.executemany("INSERT INTO scores VALUES (?)", ((_loss(row["loss"]) if isinstance(row, Mapping) else _loss(row),) for row in development_iter())); conn.commit()
+            total, threshold = conn.execute("SELECT COUNT(*),MAX(value) FROM scores").fetchone()
+            if not total: raise ValueError("development calibration needs at least one score")
+            for row in rows:
+                node, value = _identifier(row.get("node_uuid"), "node_uuid"), _loss(row.get("loss")); rank = conn.execute("SELECT COUNT(*) FROM scores WHERE value<=?", (value,)).fetchone()[0] / total
+                start = int(row['timestamp_start']) if row.get('timestamp_start') not in (None, '') else None; end = int(row['timestamp_end']) if row.get('timestamp_end') not in (None, '') else None; context = () if start is None and end is None else (str(start), str(end))
+                yield AlertEvidence(_evidence_id(self.detector_id, node, *context), self.detector_id, self.version, EvidenceGranularity.NODE, value, rank, value > threshold, node_ids=(node,), role_hint=RoleHint.OBSERVATION, mapping_quality=MappingQuality.EXACT, timestamp_start=start, timestamp_end=end, supporting_event_ids=_native_support(row), detector_metadata={"native_threshold": threshold, "native_node_id": row.get("node")}, development_percentile=rank, query_local_percentile=None)
+        finally:
+            conn.close()
+            try: os.unlink(name)
+            except FileNotFoundError: pass
 
 
 class RCAIDEvidenceAdapter(_PIDSMakerNodeAdapter):

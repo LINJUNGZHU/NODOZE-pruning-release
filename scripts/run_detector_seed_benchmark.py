@@ -26,8 +26,9 @@ def main() -> int:
             if not separator or not key or not value or key in result: raise ValueError(f"{name} must be unique RUN_ID=VALUE")
             _reject_bad(value, name); result[key] = value
         return result
-    outer = Path(args.output) / ".attempts" / "cli" / f"attempt-{__import__('time').time_ns()}"; outer.mkdir(parents=True, exist_ok=False)
+    outer = Path(args.output) / ".attempts" / "cli" / f"attempt-{__import__('time').time_ns()}"
     try:
+        outer.mkdir(parents=True, exist_ok=False)
         _reject_bad(args.config, "config")
         evidence_paths = mapping(args.evidence, "evidence")
         for source in evidence_paths.values():
@@ -42,7 +43,9 @@ def main() -> int:
         evidence = {detector: iter_evidence_jsonl(source) for detector, source in evidence_paths.items()}
         result = run_online_benchmark(json.loads(Path(args.config).read_text(encoding="utf-8")), evidence, args.output, native_sources=native, inference_seconds=timings)
         if result["status"] == "COMPLETED" and args.write_pin:
-            _atomic(Path(args.write_pin), _canonical({"root_manifest_sha256": result["root_manifest_sha256"]}))
+            pin_path, output_path = Path(args.write_pin).resolve(), Path(args.output).resolve()
+            if pin_path == output_path or output_path in pin_path.parents: raise ValueError("--write-pin must be outside mutable online output")
+            _atomic(pin_path, _canonical({"root_manifest_sha256": result["root_manifest_sha256"]}))
         _status(outer, "COMPLETED" if result["status"] == "COMPLETED" else "NOT_COMPLETED", "complete" if result["status"] == "COMPLETED" else "run", None if result["status"] == "COMPLETED" else "one or more runs failed")
     except Exception as exc:
         _status(outer, "NOT_COMPLETED", "input", f"{type(exc).__name__}: {exc}")

@@ -115,6 +115,8 @@ class _Frontier:
     depth: int
     score: float
     identity: str
+    branch_id: str
+    mode: str
 
 
 class EvidenceDrivenCandidateBuilder:
@@ -136,13 +138,15 @@ class EvidenceDrivenCandidateBuilder:
         cap_reached = False
         seen: set[tuple[object, ...]] = set()
         control: list[tuple[str, int, int, int]] = []
+        provenance: dict[int, set[str]] = {}
 
-        def add(edge: StoredEdge) -> bool:
+        def add(edge: StoredEdge, branch_id: str = "unattributed", mode: str = "strict") -> bool:
             nonlocal cap_reached
             if edge.edge_id not in candidates and len(candidates) >= self.config.candidate_cap:
                 cap_reached = True
                 return False
             candidates[edge.edge_id] = edge
+            provenance.setdefault(edge.edge_id, set()).add(f"{branch_id}|{mode}")
             nodes.update((edge.src, edge.dst))
             if len(candidates) == self.config.candidate_cap:
                 cap_reached = True
@@ -159,7 +163,7 @@ class EvidenceDrivenCandidateBuilder:
             event_edges = [edge for event_id in item.event_ids if (edge := self.store.get_edge_by_event_id(event_id)) is not None]
             for edge in event_edges:
                 anchor_events.add(edge.event_id)
-                add(edge)
+                add(edge, f"anchor:{identity}:event:{edge.event_id}", "anchor")
                 for node in self._anchor_endpoints(edge):
                     anchor_nodes.add(node)
                     nodes.add(node)
@@ -167,7 +171,7 @@ class EvidenceDrivenCandidateBuilder:
                         soft_nodes.add(node)
                     for direction in directions:
                         lower, upper = self._bounds(direction, edge.timestamp_ns, edge.timestamp_ns)
-                        enqueue(_Frontier(node, direction, lower, upper, 0, item.calibrated_score, f"{identity}|event:{edge.event_id}"))
+                        enqueue(_Frontier(node, direction, lower, upper, 0, item.calibrated_score, f"{identity}|event:{edge.event_id}", f"anchor:{identity}:event:{edge.event_id}", "strict"))
             event_members = {node for edge in event_edges for node in self._anchor_endpoints(edge)}
             extra = {item.src_uuid, item.dst_uuid} if item.granularity is EvidenceGranularity.EDGE else set()
             for node in sorted(set(item.node_ids) | extra):
@@ -182,7 +186,7 @@ class EvidenceDrivenCandidateBuilder:
                     continue
                 for direction in directions:
                     lower, upper = self._bounds(direction, item.timestamp_start, item.timestamp_end)
-                    enqueue(_Frontier(node, direction, lower, upper, 0, item.calibrated_score, f"{identity}|node:{node}"))
+                    enqueue(_Frontier(node, direction, lower, upper, 0, item.calibrated_score, f"{identity}|node:{node}", f"anchor:{identity}:node:{node}", "strict"))
                 if self._node_is_process(node):
                     observed = item.timestamp_start if item.timestamp_start is not None else item.timestamp_end
                     control.append((node, self.config.history_start_ns if self.config.history_start_ns is not None else _MIN_TIME, observed if observed is not None else self.config.cutoff_ns, 0))
@@ -198,12 +202,12 @@ class EvidenceDrivenCandidateBuilder:
             found, used = self._strict_neighbors(frontier)
             queries += used
             for edge in found:
-                if not add(edge):
+                if not add(edge, frontier.branch_id, frontier.mode):
                     break
                 source, target = self._causal_endpoints(edge)
                 next_node = source if frontier.direction == "backward" else target
                 lower, upper = (frontier.lower_time_ns, edge.timestamp_ns) if frontier.direction == "backward" else (edge.timestamp_ns, frontier.upper_time_ns)
-                enqueue(_Frontier(next_node, frontier.direction, lower, upper, frontier.depth + 1, frontier.score, frontier.identity))
+                enqueue(_Frontier(next_node, frontier.direction, lower, upper, frontier.depth + 1, frontier.score, frontier.identity, frontier.branch_id, frontier.mode))
                 if self._node_is_process(next_node):
                     control.append((next_node, self._history_lower, edge.timestamp_ns, frontier.depth + 1))
             if frontier.direction == "backward" and self._node_is_process(frontier.node_id):
@@ -215,11 +219,11 @@ class EvidenceDrivenCandidateBuilder:
             queries += control_queries
             cap_reached = len(candidates) >= self.config.candidate_cap
         ordered = tuple(candidates[key] for key in sorted(candidates))
-        provenance = {edge.event_id: (("anchor:" + edge.event_id,) if edge.event_id in anchor_events else ("search:" + edge.src + "->" + edge.dst,)) for edge in ordered}
+        rendered_provenance = {edge.event_id: tuple(sorted(provenance.get(edge.edge_id, {"unattributed|strict"}))) for edge in ordered}
         return CandidateResult(
             ordered, frozenset(nodes), frozenset(edge.event_id for edge in ordered), frozenset(anchor_events), frozenset(anchor_nodes), frozenset(soft_nodes),
             "CAP_REACHED" if cap_reached else "FRONTIER_EXHAUSTED",
-            CandidatePerformance(time.perf_counter() - started, int(max(before_rss, resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)), len(seen), queries, unexpanded, "MISSING_TIME_CHECKPOINT" if unexpanded else None, control_witnesses), provenance,
+            CandidatePerformance(time.perf_counter() - started, int(max(before_rss, resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)), len(seen), queries, unexpanded, "MISSING_TIME_CHECKPOINT" if unexpanded else None, control_witnesses), rendered_provenance,
         )
 
     @property
@@ -337,7 +341,8 @@ class EvidenceDrivenCandidateBuilder:
                 if edge.relation.upper() not in _CONTROL or target != child:
                     continue
                 new = edge.edge_id not in candidates
-                if not admit(edge):
+                control_branch = f"control:{child}:{edge.event_id}"
+                if not admit(edge, control_branch, "control"):
                     break
                 if new:
                     witnesses += 1
@@ -345,7 +350,7 @@ class EvidenceDrivenCandidateBuilder:
                 branches.append((parent, edge, lower, upper))
                 # A validated control parent is a bounded context anchor. Continue
                 # strict reconstruction only through the depth that remains.
-                continued_queue = [_Frontier(parent, "forward", edge.timestamp_ns, upper, strict_depth, 0.0, f"control:{parent}:{edge.event_id}")]
+                continued_queue = [_Frontier(parent, "forward", edge.timestamp_ns, upper, strict_depth, 0.0, f"control:{parent}:{edge.event_id}", control_branch, "control-strict")]
                 while continued_queue:
                     continued_frontier = continued_queue.pop(0)
                     if continued_frontier.depth >= self.config.max_strict_depth:
@@ -358,12 +363,12 @@ class EvidenceDrivenCandidateBuilder:
                         if strict_edge.relation.upper() in _CONTROL:
                             continue
                         new = strict_edge.edge_id not in candidates
-                        if not admit(strict_edge):
+                        if not admit(strict_edge, continued_frontier.branch_id, continued_frontier.mode):
                             break
                         if new:
                             witnesses += 1
                         _, target = self._causal_endpoints(strict_edge)
-                        continued_queue.append(_Frontier(target, "forward", strict_edge.timestamp_ns, continued_frontier.upper_time_ns, continued_frontier.depth + 1, 0.0, continued_frontier.identity))
+                        continued_queue.append(_Frontier(target, "forward", strict_edge.timestamp_ns, continued_frontier.upper_time_ns, continued_frontier.depth + 1, 0.0, continued_frontier.identity, continued_frontier.branch_id, continued_frontier.mode))
                         if self._node_is_process(target):
                             # A process reached by control continuation has a new
                             # observation time and may itself have a bounded parent.
@@ -386,7 +391,7 @@ class EvidenceDrivenCandidateBuilder:
                         continue
                     if edge.relation.upper() in _CONTROL and source == parent:
                         new = edge.edge_id not in candidates
-                        if not admit(edge):
+                        if not admit(edge, f"common-cause:{parent}:{branch.event_id}", "common-cause"):
                             break
                         if new:
                             witnesses += 1

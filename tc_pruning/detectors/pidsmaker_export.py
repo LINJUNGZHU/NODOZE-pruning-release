@@ -18,16 +18,17 @@ def _native_rows(native: str | Path | Iterable[Mapping[str, object]]) -> Iterato
     if not isinstance(native, (str, Path)):
         yield from (dict(row) for row in native)
         return
-    source = Path(native); files = (source,) if source.is_file() else tuple(sorted(item for item in source.rglob("*") if item.suffix.lower() in {".csv", ".json"}))
+    source = Path(native); files = (source,) if source.is_file() else tuple(sorted(item for item in source.rglob("*") if item.suffix.lower() in {".csv", ".jsonl"}))
     for path in files:
         if path.suffix.lower() == ".csv":
             with path.open(encoding="utf-8", newline="") as stream:
                 yield from (dict(row) for row in csv.DictReader(stream))
-        else:
+        elif path.suffix.lower() == ".jsonl":
             with path.open(encoding="utf-8") as stream:
-                payload = json.load(stream)
-            if not isinstance(payload, list): raise ValueError("native JSON shard must be an array")
-            yield from (dict(row) for row in payload)
+                for line in stream:
+                    if line.strip(): yield dict(json.loads(line))
+        else:
+            raise ValueError("production native export accepts only CSV or JSONL shards; JSON arrays are not streaming-safe")
 
 def _stream_snapshot(rows: Iterable[Mapping[str, object]], snapshot: Path) -> tuple[int, str]:
     snapshot.parent.mkdir(parents=True, exist_ok=True); fd, temporary = tempfile.mkstemp(prefix=".native.", dir=snapshot.parent); digest, count = hashlib.sha256(), 0
@@ -44,7 +45,7 @@ def _stream_snapshot(rows: Iterable[Mapping[str, object]], snapshot: Path) -> tu
     return count, digest.hexdigest()
 
 
-def export_evidence(adapter: AlertEvidenceProvider, native: str | Path | Iterable[Mapping[str, object]], development: str | Path | Iterable[Mapping[str, object]], output: str | Path) -> tuple[AlertEvidence, ...]:
+def export_evidence(adapter: AlertEvidenceProvider, native: str | Path | Iterable[Mapping[str, object]], development: str | Path | Iterable[Mapping[str, object]], output: str | Path) -> None:
     """Require frozen-development calibration and atomically emit canonical JSONL."""
     snapshot = Path(output).with_suffix(".native.jsonl")
     count, digest = _stream_snapshot(_native_rows(native), snapshot)
@@ -54,10 +55,19 @@ def export_evidence(adapter: AlertEvidenceProvider, native: str | Path | Iterabl
         with snapshot.open(encoding="utf-8") as stream:
             for line in stream:
                 if line.strip(): yield dict(json.loads(line))
-    rows = adapter.provide(staged_rows(), development)
-    _atomic(Path(output), b"".join(_canonical(item.to_record()) for item in rows))
+    rows = adapter.iter_provide(staged_rows(), development) if hasattr(adapter, "iter_provide") else iter(adapter.provide(staged_rows(), development))
+    target = Path(output); target.parent.mkdir(parents=True, exist_ok=True); fd, temporary = tempfile.mkstemp(prefix=".evidence.", dir=target.parent)
+    try:
+        with os.fdopen(fd, "wb") as stream:
+            for item in rows: stream.write(_canonical(item.to_record()))
+            stream.flush(); os.fsync(stream.fileno())
+        os.replace(temporary, target)
+    except BaseException:
+        try: os.unlink(temporary)
+        except FileNotFoundError: pass
+        raise
     _atomic(snapshot.with_suffix(snapshot.suffix + ".manifest.json"), _canonical({"artifact_schema": "native-snapshot-v1", "data_sha256": digest, "record_count": count}))
-    return rows
+    return None
 
 
 __all__ = ["export_evidence"]

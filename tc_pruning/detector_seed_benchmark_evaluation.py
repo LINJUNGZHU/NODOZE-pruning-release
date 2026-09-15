@@ -1,11 +1,11 @@
 """Offline-only partial-positive accounting for immutable online attempts."""
 from __future__ import annotations
 import json
+import sqlite3
 from pathlib import Path
 from typing import Any, Iterable
 
 from .detector_seed_benchmark import _atomic, _canonical, _sha_bytes, _sha_file, _verify_native
-from .detectors.alert_evidence import load_evidence_jsonl
 from .seed_utility_evaluation import CandidateStageIds, evaluate_coverage_funnel, partial_positive_metrics
 from .store import ProvenanceStore
 
@@ -56,6 +56,27 @@ def _current_directories(root: Path) -> list[Path]:
         return result
     return sorted(path for path in root.iterdir() if path.is_dir() and path.name not in {".attempts", "runs", "offline"})
 
+def _pinned_directories(root: Path, expected_root_sha256: str) -> list[Path]:
+    manifest_path = root / "root_manifest.json"
+    if _sha_file(manifest_path) != expected_root_sha256: raise ValueError("offline root pin mismatch")
+    manifest = json.loads(manifest_path.read_text())
+    runs = manifest.get("runs")
+    if not isinstance(runs, list): raise ValueError("invalid pinned root manifest")
+    names = {str(row.get("run_id")) for row in runs}
+    expected = {"ORTHRUS", "KAIROS", "R-CAID", "NODLINK", "VXL-0", "VXL-1", "VXL-2", "VXL-3"}
+    if names != expected or len(runs) != 8: raise ValueError("pinned production root does not contain exact eight-run set")
+    directories = []
+    for row in runs:
+        current = root / row["current_path"]
+        if not current.is_file() or _sha_file(current) != row["current_sha256"]: raise ValueError("CURRENT bytes differ from pinned root")
+        target = Path(json.loads(current.read_text())["attempt"])
+        if not target.is_dir(): raise ValueError("pinned CURRENT target missing")
+        for file_row in row.get("files", ()):
+            file = root / file_row["path"]
+            if not file.is_file() or file.stat().st_size != file_row["size_bytes"] or _sha_file(file) != file_row["sha256"]: raise ValueError("pinned artifact bytes differ")
+        directories.append(target)
+    return directories
+
 def evaluate_offline_benchmark(run_root: str | Path, *, known_critical_event_ids: Iterable[str], known_attack_node_ids: Iterable[str], output_directory: str | Path | None = None, expected_root_sha256: str | None = None, pin_file: str | Path | None = None) -> dict[str, Any]:
     root, output = Path(run_root), Path(output_directory) if output_directory else Path(run_root).parent / "offline"
     if pin_file is not None:
@@ -73,15 +94,27 @@ def evaluate_offline_benchmark(run_root: str | Path, *, known_critical_event_ids
     elif _root_pin(root) != expected_root_sha256:
         raise ValueError("offline root pin mismatch")
     known_edges, known_nodes, result = frozenset(known_critical_event_ids), frozenset(known_attack_node_ids), {"status": "COMPLETED", "runs": {}}
-    for directory in _current_directories(root):
+    directories = _pinned_directories(root, expected_root_sha256) if expected_root_sha256 else _current_directories(root)
+    for directory in directories:
         try:
-            resolved = _verify_online(directory); evidence = load_evidence_jsonl(directory / "evidence.jsonl")
+            resolved = _verify_online(directory)
             candidate = _read_ids(directory / "candidate_raw_events.jsonl", "stored_event_id")
             a_final = frozenset(json.loads((directory / "A_rasp_final.json").read_text())["selected_raw_event_ids"])
             b_final = frozenset(json.loads((directory / "C_branch_fair_final.json").read_text())["selected_raw_event_ids"])
             stages = json.loads((directory / "stage_identities.json").read_text())
             with ProvenanceStore(resolved["database_path"]) as store: raw = frozenset(item for item in known_edges if store.get_edge_by_event_id(item))
-            available = lambda name: frozenset(stages[name].get("event_ids", ())) if stages[name].get("status") == "AVAILABLE" else frozenset()
+            def available(name: str) -> frozenset[str]:
+                row = stages[name]
+                if row.get("status") != "AVAILABLE": return frozenset()
+                if row.get("identity_index"):
+                    manifest = json.loads((directory / row["identity_index"]).read_text())
+                    conn = sqlite3.connect(directory / manifest["sqlite_path"])
+                    try:
+                        # Query only the offline supplied partial positives;
+                        # do not load the complete evidence identity population.
+                        return frozenset(identity for identity in known_edges if conn.execute("SELECT 1 FROM stage_identity WHERE stage=? AND kind='event' AND identity=?", (row.get("stage", name), identity)).fetchone())
+                    finally: conn.close()
+                return frozenset(row.get("event_ids", ()))
             stage_ids = CandidateStageIds(raw, available("preprocessing"), available("inference"), available("scored"), available("native_threshold"), available("evidence"), candidate, a_final)
             funnel = evaluate_coverage_funnel(known_critical_event_ids=known_edges, stages=stage_ids)
             unknown = [name for name in ("preprocessing", "inference", "scored") if stages[name].get("status") != "AVAILABLE"]
