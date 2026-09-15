@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import heapq
+import json
 import resource
 import time
 from typing import Iterable
@@ -69,7 +70,7 @@ class _Frontier:
     upper_time_ns: int
     depth: int
     score: float
-    identity: tuple[object, ...]
+    identity: str
 
 
 class EvidenceDrivenCandidateBuilder:
@@ -86,7 +87,7 @@ class EvidenceDrivenCandidateBuilder:
         anchor_events: set[str] = set()
         anchor_nodes: set[str] = set()
         soft_nodes: set[str] = set()
-        queue: list[tuple[float, tuple[object, ...], int, _Frontier]] = []
+        queue: list[tuple[float, str, int, _Frontier]] = []
         serial = queries = unexpanded = 0
         cap_reached = False
         seen: set[tuple[object, ...]] = set()
@@ -122,7 +123,7 @@ class EvidenceDrivenCandidateBuilder:
                         soft_nodes.add(node)
                     for direction in directions:
                         lower, upper = self._bounds(direction, edge.timestamp_ns, edge.timestamp_ns)
-                        enqueue(_Frontier(node, direction, lower, upper, 0, item.calibrated_score, identity + (edge.event_id,)))
+                        enqueue(_Frontier(node, direction, lower, upper, 0, item.calibrated_score, f"{identity}|event:{edge.event_id}"))
             event_members = {node for edge in event_edges for node in self._anchor_endpoints(edge)}
             extra = {item.src_uuid, item.dst_uuid} if item.granularity is EvidenceGranularity.EDGE else set()
             for node in sorted(set(item.node_ids) | extra):
@@ -137,7 +138,10 @@ class EvidenceDrivenCandidateBuilder:
                     continue
                 for direction in directions:
                     lower, upper = self._bounds(direction, item.timestamp_start, item.timestamp_end)
-                    enqueue(_Frontier(node, direction, lower, upper, 0, item.calibrated_score, identity + (node,)))
+                    enqueue(_Frontier(node, direction, lower, upper, 0, item.calibrated_score, f"{identity}|node:{node}"))
+                if self._node_is_process(node):
+                    observed = item.timestamp_start if item.timestamp_start is not None else item.timestamp_end
+                    control.append((node, self.config.history_start_ns if self.config.history_start_ns is not None else _MIN_TIME, observed if observed is not None else self.config.cutoff_ns, 0))
 
         while queue and not cap_reached:
             _, _, _, frontier = heapq.heappop(queue)
@@ -157,13 +161,13 @@ class EvidenceDrivenCandidateBuilder:
                 lower, upper = (frontier.lower_time_ns, edge.timestamp_ns) if frontier.direction == "backward" else (edge.timestamp_ns, frontier.upper_time_ns)
                 enqueue(_Frontier(next_node, frontier.direction, lower, upper, frontier.depth + 1, frontier.score, frontier.identity))
                 if self._node_is_process(next_node):
-                    control.append((next_node, lower, upper, frontier.depth + 1))
+                    control.append((next_node, frontier.lower_time_ns, edge.timestamp_ns, frontier.depth + 1))
             if frontier.direction == "backward" and self._node_is_process(frontier.node_id):
                 control.append((frontier.node_id, frontier.lower_time_ns, frontier.upper_time_ns, frontier.depth))
 
         control_queries = control_witnesses = 0
         if not cap_reached and self.config.max_control_depth:
-            control_queries, control_witnesses = self._add_control_context(candidates, nodes, control)
+            control_queries, control_witnesses = self._add_control_context(candidates, nodes, control, add)
             queries += control_queries
             cap_reached = len(candidates) >= self.config.candidate_cap
         ordered = tuple(candidates[key] for key in sorted(candidates))
@@ -183,8 +187,13 @@ class EvidenceDrivenCandidateBuilder:
         return self.build(events + nodes)
 
     @staticmethod
-    def _identity(item: AlertEvidence) -> tuple[object, ...]:
-        return (item.granularity.value, item.event_ids, item.node_ids, item.supporting_event_ids, item.timestamp_start, item.timestamp_end, item.src_uuid, item.dst_uuid, item.relation, item.role_hint.value)
+    def _identity(item: AlertEvidence) -> str:
+        return json.dumps(
+            [item.granularity.value, item.event_ids, item.node_ids, item.supporting_event_ids,
+             item.timestamp_start, item.timestamp_end, item.src_uuid, item.dst_uuid,
+             item.relation, item.role_hint.value],
+            separators=(",", ":"), ensure_ascii=True,
+        )
 
     @staticmethod
     def _directions(role: RoleHint) -> tuple[str, ...]:
@@ -244,8 +253,8 @@ class EvidenceDrivenCandidateBuilder:
                 result.append(edge)
         return tuple(sorted(result, key=lambda edge: (edge.timestamp_ns, edge.edge_id), reverse=frontier.direction == "backward")), 2
 
-    def _add_control_context(self, candidates: dict[int, StoredEdge], nodes: set[str], initial: list[tuple[str, int, int, int]]) -> tuple[int, int]:
-        queue = [(node, lower, upper, depth, 0) for node, lower, upper, depth in initial]
+    def _add_control_context(self, candidates: dict[int, StoredEdge], nodes: set[str], initial: list[tuple[str, int, int | None, int]], admit) -> tuple[int, int]:
+        queue = [(node, lower, upper, depth, 0) for node, lower, upper, depth in initial if upper is not None]
         seen: set[tuple[str, int, int, int]] = set()
         queries = witnesses = 0
         branches: list[tuple[str, StoredEdge, int, int]] = []
@@ -265,27 +274,36 @@ class EvidenceDrivenCandidateBuilder:
                     continue
                 if edge.relation.upper() not in _CONTROL or target != child:
                     continue
-                if edge.edge_id not in candidates:
-                    candidates[edge.edge_id] = edge
-                    nodes.update((edge.src, edge.dst))
+                new = edge.edge_id not in candidates
+                if not admit(edge):
+                    break
+                if new:
                     witnesses += 1
                 queue.append((parent, lower, edge.timestamp_ns, strict_depth, control_depth + 1))
                 branches.append((parent, edge, lower, upper))
                 # A validated control parent is a bounded context anchor. Continue
                 # strict reconstruction only through the depth that remains.
-                if strict_depth < self.config.max_strict_depth:
-                    continued, continued_queries = self._strict_neighbors(_Frontier(
-                        parent, "forward", edge.timestamp_ns, upper, strict_depth,
-                        0.0, ("control", parent, edge.event_id),
-                    ))
+                continued_queue = [_Frontier(parent, "forward", edge.timestamp_ns, upper, strict_depth, 0.0, f"control:{parent}:{edge.event_id}")]
+                while continued_queue:
+                    continued_frontier = continued_queue.pop(0)
+                    if continued_frontier.depth >= self.config.max_strict_depth:
+                        continue
+                    continued, continued_queries = self._strict_neighbors(continued_frontier)
                     queries += continued_queries
                     for strict_edge in continued:
-                        if strict_edge.edge_id not in candidates:
-                            candidates[strict_edge.edge_id] = strict_edge
-                            nodes.update((strict_edge.src, strict_edge.dst))
-                            witnesses += 1
-                        if len(candidates) >= self.config.candidate_cap:
+                        # Sibling creation is reserved for the common-cause branch;
+                        # continuation follows only ordinary strict causal edges.
+                        if strict_edge.relation.upper() in _CONTROL:
+                            continue
+                        new = strict_edge.edge_id not in candidates
+                        if not admit(strict_edge):
                             break
+                        if new:
+                            witnesses += 1
+                        _, target = self._causal_endpoints(strict_edge)
+                        continued_queue.append(_Frontier(target, "forward", strict_edge.timestamp_ns, continued_frontier.upper_time_ns, continued_frontier.depth + 1, 0.0, continued_frontier.identity))
+                    if len(candidates) >= self.config.candidate_cap:
+                        break
                 if len(candidates) >= self.config.candidate_cap:
                     break
         if self.config.enable_common_cause:
@@ -301,9 +319,10 @@ class EvidenceDrivenCandidateBuilder:
                     except ValueError:
                         continue
                     if edge.relation.upper() in _CONTROL and source == parent:
-                        if edge.edge_id not in candidates:
-                            candidates[edge.edge_id] = edge
-                            nodes.update((edge.src, edge.dst))
+                        new = edge.edge_id not in candidates
+                        if not admit(edge):
+                            break
+                        if new:
                             witnesses += 1
                     if len(candidates) >= self.config.candidate_cap:
                         break

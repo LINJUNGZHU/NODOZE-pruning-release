@@ -173,9 +173,7 @@ def test_control_lineage_and_common_cause_are_explicitly_configured(tmp_path: Pa
         enabled = _builder(store, max_control_depth=1, enable_common_cause=True).build([_evidence(node_ids=("child",), timestamp_start=10, timestamp_end=10)])
 
     assert "fork" in disabled.event_ids
-    # A validated parent now launches remaining strict forward reconstruction,
-    # so this sibling branch can be reached even without common-cause mode.
-    assert "sibling-fork" in disabled.event_ids
+    assert "sibling-fork" not in disabled.event_ids
     assert "sibling-fork" in enabled.event_ids
     assert "sibling" in enabled.node_ids
 
