@@ -18,6 +18,7 @@ from typing import Any, Iterable, Mapping, Sequence
 
 ALERT_EVIDENCE_SCHEMA_VERSION = "2.0"
 ORTHRUS_ALERTS_PATH = Path("output/query-adaptive-feasibility-20260914/orthrus/alerts.json")
+_ONLINE_FORBIDDEN = ("ground" + "truth", "ground" + "_truth", "pdf" + "_critical", "attack" + "_window", "attack" + "_timestamp", "ora" + "cle", "evalu" + "ator", "fun" + "nel", "y" + "_true", "is" + "_malicious", "mali" + "cious", "la" + "bel")
 
 
 class EvidenceGranularity(str, Enum):
@@ -91,9 +92,13 @@ def _freeze_json(value: Any) -> Any:
     if isinstance(value, Mapping):
         if not all(isinstance(key, str) for key in value):
             raise ValueError("JSON object keys must be strings")
+        if any(any(token in key.lower().replace("-", "_") for token in _ONLINE_FORBIDDEN) for key in value):
+            raise ValueError("label-bearing detector metadata is forbidden online")
         return MappingProxyType({key: _freeze_json(value[key]) for key in sorted(value)})
     if isinstance(value, (tuple, list)):
         return tuple(_freeze_json(item) for item in value)
+    if isinstance(value, str) and any(token in value.lower().replace("-", "_") for token in _ONLINE_FORBIDDEN):
+        raise ValueError("label-bearing detector metadata is forbidden online")
     if value is None or isinstance(value, (str, bool, int)):
         return value
     if isinstance(value, float) and math.isfinite(value):

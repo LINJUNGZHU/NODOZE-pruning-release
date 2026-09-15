@@ -17,9 +17,9 @@ def _fixture_store(path: Path) -> None:
         store.ingest((
             NodeRecord("p0", "process", "p0"), NodeRecord("p1", "process", "p1"),
             NodeRecord("f0", "file", "/tmp/f0"), NodeRecord("f1", "file", "/tmp/f1"),
-            EdgeRecord("e0", "p0", "f0", "EVENT_WRITE", 1, "host"),
-            EdgeRecord("e1", "f0", "p1", "EVENT_READ", 2, "host"),
-            EdgeRecord("e2", "p1", "f1", "EVENT_WRITE", 3, "host"),
+            EdgeRecord("e0", "p0", "f0", "EVENT_WRITE", 1522706861813350341, "host"),
+            EdgeRecord("e1", "f0", "p1", "EVENT_READ", 1522706861813350342, "host"),
+            EdgeRecord("e2", "p1", "f1", "EVENT_WRITE", 1522706861813350343, "host"),
         ))
 
 
@@ -27,20 +27,21 @@ def _edge_evidence() -> tuple[AlertEvidence, ...]:
     return (AlertEvidence(
         "fixture:e1", "Velox", "fixture", EvidenceGranularity.EDGE, 0.9, 0.9, True,
         event_ids=("e1",), node_ids=("f0", "p1"), src_uuid="f0", dst_uuid="p1",
-        relation="EVENT_READ", timestamp_start=2, timestamp_end=2,
+        relation="EVENT_READ", timestamp_start=1522706861813350342, timestamp_end=1522706861813350342,
         role_hint=RoleHint.OBSERVATION,
     ),)
 
 
 def _config(db: Path) -> dict[str, object]:
     return {
-        "schema_version": "detector-seed-benchmark-v1",
+        "schema_version": "detector-seed-benchmark-v2",
+        "fixture_mode": True,
         "dataset": "DARPA_TC_E3_CADETS",
         "database": {"path": str(db), "sha256": hashlib.sha256(db.read_bytes()).hexdigest()},
         "candidate_backend": "EvidenceDrivenCandidateBuilder",
-        "candidate": {"candidate_cap": 10, "max_strict_depth": 3, "max_control_depth": 0, "scan_multiplier": 2},
+        "candidate": {"candidate_cap": 10, "history_start_ns": 1522706861813350340, "cutoff_ns": 1523655358953968696, "max_strict_depth": 3, "max_control_depth": 0, "scan_multiplier": 2},
         "projection": {"mode": "DEPIMPACT_COMPATIBLE", "merge_window_ns": 900000000000},
-        "budget": {"raw_event_cap": 3, "selection_fraction": 1.0},
+        "budget": {"raw_event_cap": 3, "proxy_event_cap": 3},
         "selectors": ["A_rasp", "C_branch_fair"],
         "detectors": [{"detector_id": "Velox", "profile": "VXL-0"}],
     }
@@ -80,10 +81,10 @@ def test_online_runner_preserves_completed_artifacts_when_a_later_selector_fails
     result = runner.run_online_benchmark(config, {"Velox": _edge_evidence()}, tmp_path / "failed")
 
     assert result["status"] == "NOT_COMPLETED"
-    status = json.loads((tmp_path / "failed" / "Velox" / "status.json").read_text())
+    status = json.loads(Path(result["runs"]["Velox"]["attempt_directory"]).joinpath("status.json").read_text())
     assert status["stage"] == "selector:C_branch_fair"
-    assert (tmp_path / "failed" / "Velox" / "evidence.jsonl").is_file()
-    assert (tmp_path / "failed" / "Velox" / "candidate_raw_events.jsonl").is_file()
+    assert Path(result["runs"]["Velox"]["attempt_directory"]).joinpath("evidence.jsonl").is_file()
+    assert Path(result["runs"]["Velox"]["attempt_directory"]).joinpath("candidate_raw_events.jsonl").is_file()
 
 
 @pytest.mark.parametrize("bad", [
@@ -114,13 +115,13 @@ def test_offline_evaluation_is_the_only_known_positive_entrypoint(tmp_path: Path
     evaluation = evaluate_offline_benchmark(online, known_critical_event_ids={"e1"}, known_attack_node_ids={"p1"})
 
     assert evaluation["status"] == "COMPLETED"
-    assert json.loads((online / "Velox" / "evaluation.json").read_text())["candidate"]["known_TP"] == 1
+    assert json.loads(Path(evaluation["runs"]["Velox"]["evaluation"]).read_text())["candidate"]["known_TP"] == 1
 
 
 @pytest.mark.parametrize(("adapter_name", "native"), [
-    ("Velox", [{"event_uuid": "e1", "src_node_uuid": "f0", "dst_node_uuid": "p1", "loss": 2.0, "time": 2}]),
-    ("R-CAID", [{"node_uuid": "p1", "loss": 2.0}]),
-    ("NODLINK", [{"node_uuid": "p1", "loss": 2.0}]),
+    ("Velox", [{"event_uuid": "e1", "src_node_uuid": "f0", "dst_node_uuid": "p1", "loss": 4.0, "time": 1522706861813350342}]),
+    ("R-CAID", [{"node_uuid": "p1", "loss": 4.0}]),
+    ("NODLINK", [{"node_uuid": "p1", "loss": 4.0}]),
 ])
 def test_pidsmaker_adapter_schema_paths_feed_the_same_online_runner(tmp_path: Path, adapter_name: str, native: list[dict[str, object]]) -> None:
     from tc_pruning.detectors.alert_evidence import NODLINKEvidenceAdapter, RCAIDEvidenceAdapter, VeloxEvidenceAdapter
@@ -137,6 +138,32 @@ def test_pidsmaker_adapter_schema_paths_feed_the_same_online_runner(tmp_path: Pa
 
     assert result["status"] == "COMPLETED"
     assert (tmp_path / adapter_name / adapter_name / "evidence.jsonl").is_file()
+    assert json.loads((tmp_path / adapter_name / adapter_name / "A_rasp_final.json").read_text())["selected_raw_event_ids"]
+    assert json.loads((tmp_path / adapter_name / adapter_name / "C_branch_fair_final.json").read_text())["selected_raw_event_ids"]
+
+
+def test_missing_evidence_is_a_preserved_not_completed_attempt(tmp_path: Path) -> None:
+    from tc_pruning.detector_seed_benchmark import run_online_benchmark
+
+    db = tmp_path / "mini.db"
+    _fixture_store(db)
+    result = run_online_benchmark(_config(db), {}, tmp_path / "missing")
+    failed = result["runs"]["Velox"]
+    assert result["status"] == "NOT_COMPLETED" and failed["stage"] == "input_evidence"
+    assert json.loads((Path(failed["attempt_directory"]) / "status.json").read_text())["status"] == "NOT_COMPLETED"
+
+
+def test_mapping_audit_marks_collision_ambiguous_and_does_not_admit_it(tmp_path: Path) -> None:
+    from tc_pruning.detector_seed_benchmark import run_online_benchmark
+
+    db = tmp_path / "mini.db"
+    _fixture_store(db)
+    with ProvenanceStore(db) as store:
+        store.ingest((EdgeRecord("e1", "p0", "f1", "EVENT_WRITE", 1522706861813350344, "host"),))
+    result = run_online_benchmark(_config(db), {"Velox": _edge_evidence()}, tmp_path / "collision")
+    attempt = Path(result["runs"]["Velox"].get("attempt_directory", result["runs"]["Velox"].get("run_directory")))
+    audit = json.loads((attempt / "mapping_audit.json").read_text())
+    assert audit["ambiguous"] == 1
 
 
 def test_online_module_has_no_ground_truth_or_offline_evaluation_imports() -> None:
@@ -146,3 +173,13 @@ def test_online_module_has_no_ground_truth_or_offline_evaluation_imports() -> No
     forbidden = {"groundtruth", "ground_truth", "pdf_critical", "attack_window", "funnel", "oracle", "evaluator"}
     names = {node.name.lower() for node in ast.walk(tree) if isinstance(node, (ast.Import, ast.ImportFrom)) for node in node.names}
     assert not any(part in name for name in names for part in forbidden)
+
+
+def test_online_runner_ast_has_no_offline_module_or_label_argument_paths() -> None:
+    import tc_pruning.detector_seed_benchmark as module
+
+    tree = ast.parse(Path(module.__file__).read_text())
+    imports = [node.module for node in ast.walk(tree) if isinstance(node, ast.ImportFrom) and node.module]
+    arguments = [arg.arg.lower() for node in ast.walk(tree) if isinstance(node, ast.FunctionDef) for arg in (*node.args.args, *node.args.kwonlyargs)]
+    assert not any("evaluation" in name or "funnel" in name for name in imports)
+    assert not any("ground" in name or "attack" in name for name in arguments)

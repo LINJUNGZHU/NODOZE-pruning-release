@@ -315,6 +315,18 @@ class ProvenanceStore:
         ).fetchone()
         return self._row_to_edge(row) if row else None
 
+    def event_identity_matches(self, event_id: str) -> tuple[tuple[str, str], ...]:
+        """Return stored/original identities; collisions are intentionally visible."""
+        rows = self.conn.execute(
+            "SELECT event_id,original_event_id FROM edges WHERE event_id=? OR original_event_id=? ORDER BY id",
+            (event_id, event_id),
+        )
+        return tuple((str(row[0]), str(row[1])) for row in rows)
+
+    def original_event_id(self, stored_event_id: str) -> str | None:
+        row = self.conn.execute("SELECT original_event_id FROM edges WHERE event_id=?", (stored_event_id,)).fetchone()
+        return None if row is None else str(row[0])
+
     def get_directional_edges(
         self,
         node_uuid: str,

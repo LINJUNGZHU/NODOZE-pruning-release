@@ -5,6 +5,7 @@ from dataclasses import dataclass
 import heapq
 import json
 import resource
+import sqlite3
 import time
 from typing import Iterable, Mapping, Protocol
 
@@ -82,6 +83,24 @@ class EvidencePriority:
     def score_for_event(self, event_id: str) -> float | None:
         value = self.scores.get(event_id)
         return None if value is None else float(value)
+
+
+class SQLiteEvidencePriority:
+    """Disk-backed lookup for all-score profiles; absent scores stay eligible."""
+
+    def __init__(self, path: str) -> None:
+        self.conn = sqlite3.connect(path)
+        self.conn.execute("CREATE TABLE IF NOT EXISTS evidence_priority(event_id TEXT PRIMARY KEY, score REAL NOT NULL)")
+        self.conn.execute("CREATE INDEX IF NOT EXISTS idx_evidence_priority_event ON evidence_priority(event_id)")
+
+    def add_many(self, rows: Iterable[tuple[str, float]]) -> None:
+        self.conn.executemany("INSERT OR REPLACE INTO evidence_priority(event_id,score) VALUES (?,?)", ((key, float(value)) for key, value in rows)); self.conn.commit()
+
+    def score_for_event(self, event_id: str) -> float | None:
+        row = self.conn.execute("SELECT score FROM evidence_priority WHERE event_id=?", (event_id,)).fetchone()
+        return None if row is None else float(row[0])
+
+    def close(self) -> None: self.conn.close()
 
 
 @dataclass(frozen=True, slots=True)
@@ -372,4 +391,4 @@ class EvidenceDrivenCandidateBuilder:
         return queries, witnesses
 
 
-__all__ = ["CandidatePerformance", "CandidateResult", "CandidateSearchConfig", "EvidenceDrivenCandidateBuilder", "EvidencePriority", "PriorityLookup"]
+__all__ = ["CandidatePerformance", "CandidateResult", "CandidateSearchConfig", "EvidenceDrivenCandidateBuilder", "EvidencePriority", "SQLiteEvidencePriority", "PriorityLookup"]

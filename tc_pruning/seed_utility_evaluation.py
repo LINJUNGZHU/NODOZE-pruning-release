@@ -2,44 +2,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from enum import Enum
 from typing import Iterable, Mapping
 
+from .benchmark_contract import EdgeProjection, ProjectionMode, performance_fields as _online_performance_fields
 from .evidence_candidate_builder import CandidateSearchConfig
 from .models import StoredEdge
-
-
-class ProjectionMode(str, Enum):
-    RAW_EVENT = "RAW_EVENT"
-    DEPIMPACT_COMPATIBLE = "DEPIMPACT_COMPATIBLE"
-
-
-@dataclass(frozen=True, slots=True)
-class EdgeProjection:
-    """A small, reproducible raw-event projection used by every detector run."""
-
-    mode: ProjectionMode | str
-    merge_window_ns: int
-
-    def __post_init__(self) -> None:
-        object.__setattr__(self, "mode", ProjectionMode(self.mode))
-        if self.merge_window_ns <= 0:
-            raise ValueError("merge_window_ns must be positive")
-
-    def keys(self, edges: Iterable[StoredEdge]) -> frozenset[str]:
-        keys: set[str] = set()
-        for edge in edges:
-            if self.mode is ProjectionMode.RAW_EVENT:
-                keys.add(edge.event_id)
-            else:
-                keys.add("|".join((
-                    edge.src, edge.dst, edge.relation.upper(),
-                    str(edge.timestamp_ns // self.merge_window_ns),
-                )))
-        return frozenset(keys)
-
-    def count(self, edges: Iterable[StoredEdge]) -> int:
-        return len(self.keys(edges))
 
 
 @dataclass(frozen=True, slots=True)
@@ -185,27 +152,16 @@ def enforce_common_configuration(runs: Iterable[DetectorRunContract]) -> None:
             raise ValueError("detector comparison requires one common configuration, projection, budget, and selectors")
 
 
-def performance_fields(
-    *, inference_seconds: float | None, candidate_seconds: float, final_seconds: float | None,
-    adapter_seconds: float = 0.0,
-    peak_rss_kb: int | None, candidate_edges: int, final_edges: int | None,
-) -> Mapping[str, int | float | None]:
-    """Keep detector inference separate from post-alert reconstruction and selection."""
-    numbers = (inference_seconds, adapter_seconds, candidate_seconds, final_seconds, peak_rss_kb, candidate_edges, final_edges)
-    if any(value is not None and value < 0 for value in numbers):
-        raise ValueError("durations must be non-negative")
-    return {
-        "detector_inference_seconds": inference_seconds,
-        "candidate_reconstruction_seconds": candidate_seconds,
-        "final_selection_seconds": final_seconds,
-        "peak_rss_kb": peak_rss_kb,
-        "candidate_raw_event_count": candidate_edges,
-        "final_raw_event_count": final_edges,
-        "adapter_seconds": adapter_seconds,
-        "candidate_seconds": candidate_seconds,
-        "selector_seconds": final_seconds,
-        "total_post_alert_seconds": adapter_seconds + candidate_seconds + (final_seconds or 0.0),
-    }
+def performance_fields(*, inference_seconds: float | None, candidate_seconds: float, final_seconds: float | None, adapter_seconds: float = 0.0, peak_rss_kb: int | None, candidate_edges: int, final_edges: int | None) -> Mapping[str, int | float | None]:
+    """Compatibility shim; online code imports the label-free contract directly."""
+    if candidate_edges < 0 or final_edges is not None and final_edges < 0:
+        raise ValueError("counts must be non-negative")
+    result = dict(_online_performance_fields(inference_seconds=inference_seconds, adapter_seconds=adapter_seconds,
+        candidate_seconds=candidate_seconds, a_rasp_seconds=final_seconds, branch_fair_seconds=None, peak_rss_kb=peak_rss_kb))
+    result.update({"candidate_reconstruction_seconds": candidate_seconds, "final_selection_seconds": final_seconds,
+                   "candidate_raw_event_count": candidate_edges, "final_raw_event_count": final_edges,
+                   "selector_seconds": final_seconds})
+    return result
 
 
 __all__ = [

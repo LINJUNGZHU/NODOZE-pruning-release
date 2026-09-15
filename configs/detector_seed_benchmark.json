@@ -1,5 +1,5 @@
 {
-  "schema_version": "detector-seed-benchmark-v1",
+  "schema_version": "detector-seed-benchmark-v2",
   "dataset": "DARPA_TC_E3_CADETS",
   "database": {
     "path": "output/tc/cadets-e3-from-raw-2026-09-07_15-27-47.db",
@@ -16,13 +16,18 @@
     "scan_multiplier": 20
   },
   "projection": {"mode": "DEPIMPACT_COMPATIBLE", "merge_window_ns": 900000000000},
-  "budget": {"raw_event_cap": 8000, "selection_fraction": 0.8},
+  "budget": {"raw_event_cap": 8000, "proxy_event_cap": 8000},
   "selectors": ["A_rasp", "C_branch_fair"],
   "detectors": [
-    {"detector_id": "ORTHRUS"},
-    {"detector_id": "KAIROS"},
-    {"detector_id": "Velox", "profile": "VXL-0"},
-    {"detector_id": "R-CAID"},
-    {"detector_id": "NODLINK"}
-  ]
+    {"detector_id": "ORTHRUS", "run_id": "ORTHRUS"},
+    {"detector_id": "KAIROS", "run_id": "KAIROS"},
+    {"detector_id": "Velox", "run_id": "VXL-0", "profile": "VXL-0"},
+    {"detector_id": "Velox", "run_id": "VXL-1", "profile": "VXL-1", "calibration_artifact": "REQUIRED", "calibration_sha256": "REQUIRED"},
+    {"detector_id": "Velox", "run_id": "VXL-2", "profile": "VXL-2"},
+    {"detector_id": "Velox", "run_id": "VXL-3", "profile": "VXL-3", "calibration_artifact": "REQUIRED", "calibration_sha256": "REQUIRED"},
+    {"detector_id": "R-CAID", "run_id": "R-CAID"},
+    {"detector_id": "NODLINK", "run_id": "NODLINK"}
+  ],
+  "expected_code_commit": "0000000000000000000000000000000000000000",
+  "expected_config_sha256": "4986bcfcb739e35a1d7b4eb8609254c5076653c53ad7d8e4b32e9233ede77d17"
 }
