@@ -101,4 +101,6 @@ def test_real_copy_resume_and_tamper_reconciliation(tmp_path):
             assert cur.fetchall() == [('e1', 'e1', 'EVENT_FORK', 'EVENT_CLONE'), ('e1#2', 'e1', 'EVENT_WRITE', 'EVENT_WRITE')]
             cur.execute("UPDATE identity_events SET src_uuid='tampered' WHERE source_row_id=1")
     with pytest.raises(ValueError, match='reconciliation'):
+        identity.finalize_model_views(source, target, manifest_path)
+    with pytest.raises(ValueError, match='reconciliation'):
         identity.build_database(source, target, manifest_path, sha, batch_size=1)

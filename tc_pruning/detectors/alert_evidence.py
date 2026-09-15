@@ -374,6 +374,30 @@ def _ordered_unique(rows: Iterable[AlertEvidence]) -> tuple[AlertEvidence, ...]:
 _EDGE_RELATIONS = {"1": "EVENT_CONNECT", "2": "EVENT_EXECUTE", "3": "EVENT_OPEN", "4": "EVENT_READ", "5": "EVENT_RECVFROM", "6": "EVENT_RECVMSG", "7": "EVENT_SENDMSG", "8": "EVENT_SENDTO", "9": "EVENT_WRITE", "10": "EVENT_CLONE"}
 
 
+def _native_support(row: Mapping[str, Any]) -> tuple[str, ...]:
+    value = row.get('supporting_event_ids')
+    if value in (None, ''):
+        return ()
+    if isinstance(value, str):
+        value = json.loads(value)
+    return _identifiers(value, 'supporting_event_ids')
+
+
+def _native_identity_metadata(row: Mapping[str, Any]) -> dict[str, Any]:
+    result = {key: row[key] for key in ('stored_event_id', 'original_event_id', 'identity_origin')
+              if row.get(key) not in (None, '')}
+    collision = row.get('identity_collision')
+    if collision not in (None, ''):
+        if isinstance(collision, str) and collision.lower() in ('true', 'false'):
+            collision = collision.lower() == 'true'
+        if not isinstance(collision, bool):
+            raise ValueError('identity_collision must be a boolean')
+        result['identity_collision'] = collision
+    if 'supporting_event_ids' in row:
+        result['supporting_event_ids'] = _native_support(row)
+    return result
+
+
 class AlertEvidenceProvider(ABC):
     @abstractmethod
     def provide(self, *args: Any, **kwargs: Any) -> tuple[AlertEvidence, ...]:
@@ -396,8 +420,9 @@ class VeloxEvidenceAdapter(AlertEvidenceProvider):
             result.append(AlertEvidence(
                 _evidence_id("Velox", event), "Velox", self.version, EvidenceGranularity.EDGE, value, calibration.percentile(value), value > threshold,
                 event_ids=(event,), node_ids=(src, dst), src_uuid=src, dst_uuid=dst,
-                relation=row.get("relation") or _EDGE_RELATIONS.get(str(edge_type)), role_hint=RoleHint.OBSERVATION,
-                mapping_quality=MappingQuality.EXACT, detector_metadata={"native_threshold": threshold, "native_edge_type": edge_type},
+                relation=row.get("raw_relation") or row.get("relation") or _EDGE_RELATIONS.get(str(edge_type)), role_hint=RoleHint.OBSERVATION,
+                supporting_event_ids=_native_support(row),
+                mapping_quality=MappingQuality.EXACT, detector_metadata={"native_threshold": threshold, "native_edge_type": edge_type, **_native_identity_metadata(row)},
                 timestamp_start=int(row["time"]) if row.get("time") not in (None, "") else None,
                 timestamp_end=int(row["time"]) if row.get("time") not in (None, "") else None,
                 development_percentile=calibration.percentile(value), query_local_percentile=local[index],
@@ -420,9 +445,13 @@ class _PIDSMakerNodeAdapter(AlertEvidenceProvider):
         result = []
         for index, row in enumerate(native):
             node, value = _identifier(row.get("node_uuid"), "node_uuid"), _loss(row.get("loss"))
+            start = int(row['timestamp_start']) if row.get('timestamp_start') not in (None, '') else None
+            end = int(row['timestamp_end']) if row.get('timestamp_end') not in (None, '') else None
+            context = () if start is None and end is None else (str(start), str(end))
             result.append(AlertEvidence(
-                _evidence_id(self.detector_id, node), self.detector_id, self.version, EvidenceGranularity.NODE, value, calibration.percentile(value), value > threshold,
+                _evidence_id(self.detector_id, node, *context), self.detector_id, self.version, EvidenceGranularity.NODE, value, calibration.percentile(value), value > threshold,
                 node_ids=(node,), role_hint=RoleHint.OBSERVATION, mapping_quality=MappingQuality.EXACT,
+                timestamp_start=start, timestamp_end=end, supporting_event_ids=_native_support(row),
                 detector_metadata={"native_threshold": threshold, "native_node_id": row.get("node")},
                 development_percentile=calibration.percentile(value), query_local_percentile=local[index],
             ))

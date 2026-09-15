@@ -312,12 +312,19 @@ def finalize_model_views(source, target, manifest_path):
             saved = cur.fetchone()
             if saved is None or saved[0] != previous:
                 raise ValueError('Database and file manifests disagree')
-            # Bind the existing tables and views before this scoped migration.
-            for name, expected in (('identity_nodes', previous['reconciliation']['identity_nodes']['count']),
-                                   ('identity_events', previous['reconciliation']['identity_events']['count'])):
-                cur.execute('SELECT count(*) FROM ' + name)
-                if cur.fetchone()[0] != expected:
-                    raise ValueError('Raw table changed since reconciliation')
+            # Exclude concurrent raw-table writes while rechecking every record.
+            cur.execute('LOCK TABLE identity_nodes,identity_events IN SHARE MODE')
+            for name, columns in (('identity_nodes', NODE_COLUMNS), ('identity_events', EVENT_COLUMNS)):
+                with conn.cursor(name='finalize_' + name) as scan:
+                    scan.itersize = 50000
+                    scan.execute('SELECT ' + ','.join(columns) + ' FROM ' + name + ' ORDER BY ' + columns[0])
+                    actual_digest = _digest(scan)
+                if actual_digest != previous['reconciliation'][name]:
+                    invalid = dict(previous, status='NOT_COMPLETED', failure='Finalization reconciliation mismatch')
+                    cur.execute("UPDATE identity_state SET value=%s WHERE key='manifest'", (json.dumps(invalid),))
+                    conn.commit()
+                    _write_manifest(manifest_path, invalid)
+                    raise ValueError('Finalization reconciliation mismatch: ' + name)
             for name in ('subject_node_table', 'netflow_node_table'):
                 cur.execute('SELECT definition FROM pg_views WHERE schemaname=%s AND viewname=%s', ('public', name))
                 row = cur.fetchone()
