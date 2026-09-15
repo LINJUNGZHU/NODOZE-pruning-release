@@ -54,3 +54,11 @@ def test_resource_cap_bounds_hub_expansion():
     )
     assert len(sphere.raw_event_ids) == 7
     assert sphere.stop_reason == "RESOURCE_CAP"
+
+
+def test_detector_anchor_is_a_terminal_not_a_bridge_to_future_noise():
+    graph = _graphs((_edge(1, "root", "poi", 10), _edge(2, "poi", "noise", 11)))
+    sphere = ForwardCausalSphereBuilder(ForwardSphereConfig(max_rounds=4)).build(
+        "root", graph, OnlineForwardSignals(anchor_ids=frozenset({"poi"})), backward_support=1.0
+    )
+    assert sphere.raw_event_ids == ("e1",)

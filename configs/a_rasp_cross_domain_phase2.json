@@ -1,0 +1,70 @@
+{
+  "algorithm": {
+    "mode": "full_experimental"
+  },
+  "budget_ratios": [0.05, 0.10, 0.20, 0.30],
+  "candidate": {
+    "phase1_factor": 2.0,
+    "strict_depth": 2,
+    "control_depth": 2,
+    "history_horizon_seconds": 3600
+  },
+  "propagation": {
+    "clean_view": {
+      "enabled": true,
+      "alpha": 0.5,
+      "gamma": 0.5,
+      "relation_weights": {
+        "CONTROL": 1.0,
+        "FILE_READ": 1.0,
+        "FILE_WRITE": 1.0,
+        "EXECUTION": 1.0,
+        "NETWORK_IN": 1.0,
+        "NETWORK_OUT": 1.0,
+        "OTHER": 0.25
+      },
+      "tau_ns": {
+        "CONTROL": 3600000000000,
+        "FILE_READ": 3600000000000,
+        "FILE_WRITE": 3600000000000,
+        "EXECUTION": 3600000000000,
+        "NETWORK_IN": 1800000000000,
+        "NETWORK_OUT": 1800000000000,
+        "OTHER": 900000000000
+      },
+      "progressive_clean": false,
+      "progressive_rounds": 0
+    }
+  },
+  "reverse_reachability": {
+    "enabled": true,
+    "samples": 128,
+    "seed": 20260915,
+    "max_hops": 12,
+    "max_sketch_size": 64,
+    "top_roots": 20
+  },
+  "forward_sphere": {
+    "enabled": true,
+    "max_rounds": 12,
+    "max_events_per_root": 200,
+    "min_marginal_gain": 0.01,
+    "low_gain_patience": 2
+  },
+  "motif": {
+    "enabled": true,
+    "max_bridge_hops": 8
+  },
+  "preserver": {
+    "enabled": true
+  },
+  "selector": {
+    "mode": "branch_fair",
+    "lambda_relevance": 1.0,
+    "lambda_branch": 1.5,
+    "lambda_anchor": 1.0,
+    "lambda_motif": 0.5,
+    "lambda_verification": 1.0,
+    "lambda_redundancy": 0.25
+  }
+}

@@ -100,21 +100,38 @@ class TemporalCausalMotifBuilder:
         receives = by_relation["EVENT_RECVFROM"] + by_relation["EVENT_RECVMSG"] + by_relation["EVENT_ACCEPT"]
         network_out = by_relation["EVENT_CONNECT"] + by_relation["EVENT_SENDTO"] + by_relation["EVENT_SENDMSG"]
         found: list[tuple[MotifType, tuple[StoredEdge, ...], float]] = []
+        executes_by_process: dict[str, list[StoredEdge]] = defaultdict(list)
+        reads_by_file: dict[str, list[StoredEdge]] = defaultdict(list)
+        executes_by_file: dict[str, list[StoredEdge]] = defaultdict(list)
+        consequences_by_process: dict[str, list[StoredEdge]] = defaultdict(list)
+        for execute in executes:
+            executes_by_process[execute.src].append(execute)
+            executes_by_file[execute.dst].append(execute)
+        for read in reads:
+            reads_by_file[read.src].append(read)
+        for consequence in (*forks, *executes):
+            consequences_by_process[consequence.src].append(consequence)
         for fork in forks:
-            for execute in executes:
-                if execute.src == fork.dst and fork.timestamp_ns < execute.timestamp_ns:
+            for execute in executes_by_process.get(fork.dst, ()):
+                if fork.timestamp_ns < execute.timestamp_ns:
                     found.append((MotifType.CONTROL_SPAWN, (fork, execute), 0.0))
         for write in writes:
-            for read in reads:
-                if write.dst == read.src and write.timestamp_ns < read.timestamp_ns:
+            for read in reads_by_file.get(write.dst, ()):
+                if write.timestamp_ns < read.timestamp_ns:
                     found.append((MotifType.FILE_TRANSFER, (write, read), 0.0))
-            for execute in executes:
-                if write.dst == execute.dst and write.timestamp_ns < execute.timestamp_ns:
+            for execute in executes_by_file.get(write.dst, ()):
+                if write.timestamp_ns < execute.timestamp_ns:
                     found.append((MotifType.DROP_EXECUTE, (write, execute), 0.0))
-        found.extend((MotifType.NETWORK_CONSEQUENCE, (edge,), 0.0) for edge in network_out)
+        found.extend(
+            (MotifType.NETWORK_CONSEQUENCE, (edge,), 0.0)
+            for edge in network_out
+            if float(relevance.get(edge.event_id, 0.0)) > 0.0
+            or float(verification_map.get(edge.event_id, 0.0)) > 0.0
+            or edge.src in anchors or edge.dst in anchors or edge.dst in terminals
+        )
         for receive in receives:
-            for consequence in (*forks, *executes):
-                if consequence.src == receive.dst and receive.timestamp_ns < consequence.timestamp_ns:
+            for consequence in consequences_by_process.get(receive.dst, ()):
+                if receive.timestamp_ns < consequence.timestamp_ns:
                     found.append((MotifType.RECEIVE_TO_EXECUTION, (receive, consequence), 0.0))
         children: dict[str, list[StoredEdge]] = defaultdict(list)
         outgoing: dict[str, list[StoredEdge]] = defaultdict(list)

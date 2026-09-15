@@ -41,15 +41,20 @@ class CandidateMissAnalyzer:
         registry: InvestigationSemanticsRegistry,
         *,
         max_hops: int = 12,
-        scan_limit_per_endpoint: int = 2_000,
+        scan_limit_per_endpoint: int | None = None,
+        minimum_time_ns: int | None = None,
     ) -> None:
-        if max_hops < 1 or scan_limit_per_endpoint < 1:
+        if max_hops < 1 or (
+            scan_limit_per_endpoint is not None and scan_limit_per_endpoint < 1
+        ):
             raise ValueError("search bounds must be positive")
         self.store = store
         self.registry = registry
         self.max_hops = max_hops
         self.scan_limit = scan_limit_per_endpoint
+        self.minimum_time_ns = minimum_time_ns
         self._outgoing_cache: dict[tuple[str, int], tuple[StoredEdge, ...]] = {}
+        self._incoming_cache: dict[tuple[str, int], tuple[StoredEdge, ...]] = {}
 
     def _raw_incident(
         self, node: str, *, cutoff_ns: int
@@ -60,7 +65,7 @@ class CandidateMissAnalyzer:
             for edge in self.store.get_directional_edges(
                 node,
                 direction=direction,
-                minimum_time_ns=None,
+                minimum_time_ns=self.minimum_time_ns,
                 maximum_time_ns=cutoff_ns,
                 scan_limit=self.scan_limit,
             )
@@ -81,11 +86,28 @@ class CandidateMissAnalyzer:
             self._outgoing_cache[key] = tuple(valid)
         return self._outgoing_cache[key]
 
+    def _incoming(self, node: str, *, cutoff_ns: int) -> tuple[StoredEdge, ...]:
+        key = (node, cutoff_ns)
+        if key not in self._incoming_cache:
+            valid = []
+            for edge in self._raw_incident(node, cutoff_ns=cutoff_ns):
+                try:
+                    _, target = self.registry.causal_endpoints(edge)
+                except ValueError:
+                    continue
+                if target == node:
+                    valid.append(edge)
+            self._incoming_cache[key] = tuple(valid)
+        return self._incoming_cache[key]
+
     def _shortest(
-        self, source: str, targets: set[str], *, cutoff_ns: int
+        self, source: str, targets: set[str], *, cutoff_ns: int, reverse: bool = False
     ) -> _Path | None:
         queue = deque([_Path((source,), ())])
-        best_time: dict[tuple[str, int], int] = {(source, 0): -1}
+        # Temporal dominance: an earlier forward arrival (or later reverse
+        # arrival) at the same entity admits every continuation available to
+        # a dominated state, so depth-specific copies only waste memory.
+        best_time: dict[str, int] = {}
         while queue:
             path = queue.popleft()
             node = path.nodes[-1]
@@ -93,17 +115,29 @@ class CandidateMissAnalyzer:
                 return path
             if len(path.edges) >= self.max_hops:
                 continue
-            last_time = path.edges[-1].timestamp_ns if path.edges else -1
-            for edge in self._outgoing(node, cutoff_ns=cutoff_ns):
-                if edge.timestamp_ns <= last_time:
+            last_time = path.edges[-1].timestamp_ns if path.edges else (
+                cutoff_ns + 1 if reverse else -1
+            )
+            adjacent = (
+                self._incoming(node, cutoff_ns=cutoff_ns)
+                if reverse else self._outgoing(node, cutoff_ns=cutoff_ns)
+            )
+            for edge in adjacent:
+                if (reverse and edge.timestamp_ns >= last_time) or (
+                    not reverse and edge.timestamp_ns <= last_time
+                ):
                     continue
-                _, target = self.registry.causal_endpoints(edge)
+                causal_source, causal_target = self.registry.causal_endpoints(edge)
+                target = causal_source if reverse else causal_target
                 if target in path.nodes:
                     continue
-                state = (target, len(path.edges) + 1)
-                if best_time.get(state, cutoff_ns + 1) <= edge.timestamp_ns:
-                    continue
-                best_time[state] = edge.timestamp_ns
+                previous = best_time.get(target)
+                if previous is not None:
+                    if reverse and previous >= edge.timestamp_ns:
+                        continue
+                    if not reverse and previous <= edge.timestamp_ns:
+                        continue
+                best_time[target] = edge.timestamp_ns
                 queue.append(_Path(path.nodes + (target,), path.edges + (edge,)))
         return None
 
@@ -127,12 +161,15 @@ class CandidateMissAnalyzer:
         self, node_id: str, anchors: Iterable[str], *, cutoff_ns: int
     ) -> CandidateMissRecord:
         anchor_set = {str(anchor) for anchor in anchors if str(anchor) != node_id}
-        from_anchors = [
-            path
-            for anchor in sorted(anchor_set)
-            if (path := self._shortest(anchor, {node_id}, cutoff_ns=cutoff_ns))
-            is not None
-        ]
+        reverse_path = self._shortest(
+            node_id, anchor_set, cutoff_ns=cutoff_ns, reverse=True
+        )
+        from_anchors = []
+        if reverse_path is not None:
+            from_anchors.append(_Path(
+                tuple(reversed(reverse_path.nodes)),
+                tuple(reversed(reverse_path.edges)),
+            ))
         to_anchor = self._shortest(node_id, anchor_set, cutoff_ns=cutoff_ns)
         paths = [*from_anchors, *([to_anchor] if to_anchor else [])]
         chosen = min(

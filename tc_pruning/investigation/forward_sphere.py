@@ -138,7 +138,8 @@ class ForwardCausalSphereBuilder:
                 selected.append(edge.raw_event_id)
                 nodes.add(edge.causal_target)
                 new_nodes.add(edge.causal_target)
-                new_frontier.append((edge.causal_target, edge.timestamp_ns))
+                if edge.causal_target not in signals.anchor_ids:
+                    new_frontier.append((edge.causal_target, edge.timestamp_ns))
                 gain_sum += gain
             marginal = gain_sum / max(1, len(chosen))
             total_signal += gain_sum
