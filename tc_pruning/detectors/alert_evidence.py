@@ -494,13 +494,27 @@ def fuse_same_object_noisy_or(evidence: Sequence[AlertEvidence]) -> AlertEvidenc
         contributions[detector] = {"calibrated_score": ranked[0].calibrated_score, "source_evidence_ids": tuple(item.evidence_id for item in rows)}
     score = 1.0 - math.prod(1.0 - item.calibrated_score for item in selected)
     first = selected[0]
+    granularities = {item.granularity for item in selected}
+    edge_representable = all(
+        item.granularity is EvidenceGranularity.EDGE and item.src_uuid is not None and item.dst_uuid is not None
+        for item in selected
+    ) and len({(item.src_uuid, item.dst_uuid) for item in selected}) == 1
+    if edge_representable:
+        granularity = EvidenceGranularity.EDGE
+    elif granularities <= {EvidenceGranularity.EVENT, EvidenceGranularity.EDGE}:
+        granularity = EvidenceGranularity.EVENT
+    elif len(granularities) == 1:
+        granularity = first.granularity
+    else:
+        raise ValueError("Noisy-OR fusion has incompatible granularities")
+    common_node_ids = tuple(sorted(set.intersection(*(set(item.node_ids) for item in selected))))
     fields = ("src_uuid", "dst_uuid", "relation", "timestamp_start", "timestamp_end")
     conflicts = {name: tuple(sorted({getattr(item, name) for item in selected}, key=lambda value: "" if value is None else str(value))) for name in fields if len({getattr(item, name) for item in selected}) > 1}
     same_role = len({item.role_hint for item in selected}) == 1
     return AlertEvidence(
         "fusion:" + hashlib.sha256("\x1f".join(item.evidence_id for item in ordered).encode()).hexdigest()[:20],
-        "Noisy-OR[" + ",".join(sorted(by_detector)) + "]", ALERT_EVIDENCE_SCHEMA_VERSION, first.granularity, None, score,
-        any(item.native_decision for item in selected), event_ids=first.event_ids, node_ids=first.node_ids,
+        "Noisy-OR[" + ",".join(sorted(by_detector)) + "]", ALERT_EVIDENCE_SCHEMA_VERSION, granularity, None, score,
+        any(item.native_decision for item in selected), event_ids=first.event_ids, node_ids=common_node_ids,
         supporting_event_ids=tuple(event for item in selected for event in item.supporting_event_ids), structural_context=first.structural_context,
         src_uuid=None if "src_uuid" in conflicts else first.src_uuid, dst_uuid=None if "dst_uuid" in conflicts else first.dst_uuid,
         relation=None if "relation" in conflicts else first.relation, timestamp_start=None if "timestamp_start" in conflicts else first.timestamp_start,

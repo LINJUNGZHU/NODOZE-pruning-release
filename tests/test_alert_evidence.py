@@ -170,6 +170,35 @@ def test_fusion_makes_endpoint_conflicts_explicit_without_creating_a_fact() -> N
     assert fused.detector_metadata["identity_conflicts"]["src_uuid"] == ("a", "different")
 
 
+def test_mixed_kairos_edge_and_orthrus_event_fusion_downshifts_to_event_regardless_of_order(tmp_path: Path) -> None:
+    kairos_native = KairosEvidence(
+        "shared-event", "src", "dst", "EVENT_READ", 10, 3.0, 0.8, True,
+        ("queue",), 0.7, False, None, "native", "window", "IDENTITY",
+    )
+    kairos = KairosEvidenceProvider().provide([kairos_native], [1.0, 3.0])[0]
+    source = tmp_path / "alerts.json"
+    source.write_text(json.dumps([{
+        "alert_id": "alert", "detector_version": "4", "alert_score": 2.0, "threshold": 1.0,
+        "seed_event_ids": ["shared-event"], "event_time_end": 1_523_027_699_836_180_163,
+    }]))
+    orthrus = OrthrusEvidenceProvider().provide(source, [{"loss": 1.0}, {"loss": 3.0}])[0]
+    fused_forward = fuse_same_object_noisy_or([kairos, orthrus])
+    fused_reverse = fuse_same_object_noisy_or([orthrus, kairos])
+    for fused in (fused_forward, fused_reverse):
+        assert fused.granularity is EvidenceGranularity.EVENT
+        assert fused.src_uuid is None
+        assert fused.dst_uuid is None
+        assert fused.detector_metadata["identity_conflicts"]["src_uuid"] == (None, "src")
+
+
+def test_same_object_node_fusion_keeps_node_granularity() -> None:
+    left = _event(evidence_id="left", detector_id="A", granularity="NODE", event_ids=(), node_ids=("node",), src_uuid=None, dst_uuid=None)
+    right = _event(evidence_id="right", detector_id="B", granularity="NODE", event_ids=(), node_ids=("node",), src_uuid=None, dst_uuid=None)
+    fused = fuse_same_object_noisy_or([left, right])
+    assert fused.granularity is EvidenceGranularity.NODE
+    assert fused.node_ids == ("node",)
+
+
 def test_structural_object_key_includes_event_and_node_members() -> None:
     first = _event(granularity="STRUCTURAL_GRAPH", structural_context={"native_members": ["x"]}, event_ids=("e",), node_ids=("n1",))
     second = _event(evidence_id="other", granularity="STRUCTURAL_GRAPH", structural_context={"native_members": ["x"]}, event_ids=("e",), node_ids=("n2",))
@@ -186,9 +215,35 @@ def test_agreement_is_immutable_reliability_only_and_cannot_create_provenance_fa
     assert not hasattr(agreement, "edges")
 
 
-def test_online_module_has_no_ground_truth_or_evaluator_import_or_forbidden_input() -> None:
+def _forbidden_ast_occurrences(tree: ast.AST) -> set[str]:
+    forbidden = ("groundtruth", "ground_truth", "pdf_critical", "attack_window", "oracle", "evaluator", "evaluation")
+    values: set[str] = set()
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.Import, ast.ImportFrom)):
+            values.update(alias.name.lower() for alias in node.names)
+        elif isinstance(node, ast.Constant) and isinstance(node.value, str):
+            values.add(node.value.lower())
+        elif isinstance(node, ast.Name):
+            values.add(node.id.lower())
+        elif isinstance(node, ast.Attribute):
+            values.add(node.attr.lower())
+        elif isinstance(node, ast.keyword) and node.arg is not None:
+            values.add(node.arg.lower())
+        elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda)):
+            arguments = node.args
+            values.update(argument.arg.lower() for argument in (*arguments.posonlyargs, *arguments.args, *arguments.kwonlyargs))
+            if arguments.vararg is not None:
+                values.add(arguments.vararg.arg.lower())
+            if arguments.kwarg is not None:
+                values.add(arguments.kwarg.arg.lower())
+    return {value for value in values if any(token in value for token in forbidden)}
+
+
+def test_isolation_ast_scan_detects_synthetic_forbidden_parameters_attributes_keywords_and_calls() -> None:
+    synthetic = ast.parse("def run(ground_truth, *, attack_window=None): return oracle.evaluator(pdf_critical=ground_truth)")
+    assert {"ground_truth", "attack_window", "oracle", "evaluator", "pdf_critical"} <= _forbidden_ast_occurrences(synthetic)
+
+
+def test_online_module_has_no_ground_truth_or_evaluator_dependency_or_input() -> None:
     tree = ast.parse(Path("tc_pruning/detectors/alert_evidence.py").read_text())
-    imports = [alias.name.lower() for node in ast.walk(tree) if isinstance(node, (ast.Import, ast.ImportFrom)) for alias in node.names]
-    constants = [node.value.lower() for node in ast.walk(tree) if isinstance(node, ast.Constant) and isinstance(node.value, str)]
-    forbidden = ("groundtruth", "ground_truth", "pdf_critical", "attack_window", "evaluator", "evaluation")
-    assert not any(token in value for value in imports + constants for token in forbidden)
+    assert _forbidden_ast_occurrences(tree) == set()
