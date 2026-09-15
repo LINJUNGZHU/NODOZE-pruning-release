@@ -70,6 +70,7 @@ class PriorityLookup(Protocol):
     """Optional detector-neutral queue ordering lookup; never an admission rule."""
 
     def score_for_event(self, event_id: str) -> float | None: ...
+    def score_for_node(self, node_id: str) -> float | None: ...
 
 
 @dataclass(frozen=True, slots=True)
@@ -86,6 +87,7 @@ class EvidencePriority:
     def score_for_event(self, event_id: str) -> float | None:
         value = self.scores.get(event_id)
         return None if value is None else float(value)
+    def score_for_node(self, node_id: str) -> float | None: return None
 
 
 class SQLiteEvidencePriority:
@@ -94,6 +96,7 @@ class SQLiteEvidencePriority:
     def __init__(self, path: str) -> None:
         self.conn = sqlite3.connect(path)
         self.conn.execute("CREATE TABLE IF NOT EXISTS evidence_priority(event_id TEXT PRIMARY KEY, score REAL NOT NULL)")
+        self.conn.execute("CREATE TABLE IF NOT EXISTS node_priority(node_id TEXT PRIMARY KEY, score REAL NOT NULL)")
         self.conn.execute("CREATE INDEX IF NOT EXISTS idx_evidence_priority_event ON evidence_priority(event_id)")
 
     def add_many(self, rows: Iterable[tuple[str, float]]) -> None:
@@ -101,6 +104,13 @@ class SQLiteEvidencePriority:
 
     def score_for_event(self, event_id: str) -> float | None:
         row = self.conn.execute("SELECT score FROM evidence_priority WHERE event_id=?", (event_id,)).fetchone()
+        return None if row is None else float(row[0])
+
+    def add_nodes(self, rows: Iterable[tuple[str, float]]) -> None:
+        self.conn.executemany("INSERT INTO node_priority(node_id,score) VALUES (?,?) ON CONFLICT(node_id) DO UPDATE SET score=MAX(score,excluded.score)", ((key, float(value)) for key, value in rows)); self.conn.commit()
+
+    def score_for_node(self, node_id: str) -> float | None:
+        row = self.conn.execute("SELECT score FROM node_priority WHERE node_id=?", (node_id,)).fetchone()
         return None if row is None else float(row[0])
 
     def close(self) -> None: self.conn.close()
@@ -137,7 +147,7 @@ class EvidenceDrivenCandidateBuilder:
         serial = queries = unexpanded = 0
         cap_reached = False
         seen: set[tuple[object, ...]] = set()
-        control: list[tuple[str, int, int, int]] = []
+        control: list[tuple[str, int, int, int, str]] = []
         provenance: dict[int, set[str]] = {}
 
         def add(edge: StoredEdge, branch_id: str = "unattributed", mode: str = "strict") -> bool:
@@ -189,11 +199,11 @@ class EvidenceDrivenCandidateBuilder:
                     enqueue(_Frontier(node, direction, lower, upper, 0, item.calibrated_score, f"{identity}|node:{node}", f"anchor:{identity}:node:{node}", "strict"))
                 if self._node_is_process(node):
                     observed = item.timestamp_start if item.timestamp_start is not None else item.timestamp_end
-                    control.append((node, self.config.history_start_ns if self.config.history_start_ns is not None else _MIN_TIME, observed if observed is not None else self.config.cutoff_ns, 0))
+                    control.append((node, self.config.history_start_ns if self.config.history_start_ns is not None else _MIN_TIME, observed if observed is not None else self.config.cutoff_ns, 0, f"anchor:{identity}:node:{node}"))
 
         while queue and not cap_reached:
             _, _, _, frontier = heapq.heappop(queue)
-            key = (frontier.node_id, frontier.direction, frontier.lower_time_ns, frontier.upper_time_ns, frontier.depth)
+            key = (frontier.node_id, frontier.direction, frontier.lower_time_ns, frontier.upper_time_ns, frontier.depth, frontier.branch_id, frontier.mode)
             if key in seen:
                 continue
             seen.add(key)
@@ -209,9 +219,9 @@ class EvidenceDrivenCandidateBuilder:
                 lower, upper = (frontier.lower_time_ns, edge.timestamp_ns) if frontier.direction == "backward" else (edge.timestamp_ns, frontier.upper_time_ns)
                 enqueue(_Frontier(next_node, frontier.direction, lower, upper, frontier.depth + 1, frontier.score, frontier.identity, frontier.branch_id, frontier.mode))
                 if self._node_is_process(next_node):
-                    control.append((next_node, self._history_lower, edge.timestamp_ns, frontier.depth + 1))
+                    control.append((next_node, self._history_lower, edge.timestamp_ns, frontier.depth + 1, frontier.branch_id))
             if frontier.direction == "backward" and self._node_is_process(frontier.node_id):
-                control.append((frontier.node_id, frontier.lower_time_ns, frontier.upper_time_ns, frontier.depth))
+                control.append((frontier.node_id, frontier.lower_time_ns, frontier.upper_time_ns, frontier.depth, frontier.branch_id))
 
         control_queries = control_witnesses = 0
         if not cap_reached and self.config.max_control_depth:
@@ -319,14 +329,14 @@ class EvidenceDrivenCandidateBuilder:
             return (-score, temporal, fanout.get(next_node, 0), edge.edge_id)
         return tuple(sorted(result, key=order)), 2
 
-    def _add_control_context(self, candidates: dict[int, StoredEdge], nodes: set[str], initial: list[tuple[str, int, int | None, int]], admit) -> tuple[int, int]:
-        queue = [(node, lower, upper, depth, 0) for node, lower, upper, depth in initial if upper is not None]
+    def _add_control_context(self, candidates: dict[int, StoredEdge], nodes: set[str], initial: list[tuple[str, int, int | None, int, str]], admit) -> tuple[int, int]:
+        queue = [(node, lower, upper, depth, 0, branch) for node, lower, upper, depth, branch in initial if upper is not None]
         seen: set[tuple[str, int, int, int]] = set()
         queries = witnesses = 0
         branches: list[tuple[str, StoredEdge, int, int]] = []
         while queue and len(candidates) < self.config.candidate_cap:
-            child, lower, upper, strict_depth, control_depth = queue.pop(0)
-            state = (child, lower, upper, control_depth)
+            child, lower, upper, strict_depth, control_depth, origin_branch = queue.pop(0)
+            state = (child, lower, upper, control_depth, origin_branch)
             if state in seen or control_depth >= self.config.max_control_depth:
                 continue
             seen.add(state)
@@ -341,12 +351,12 @@ class EvidenceDrivenCandidateBuilder:
                 if edge.relation.upper() not in _CONTROL or target != child:
                     continue
                 new = edge.edge_id not in candidates
-                control_branch = f"control:{child}:{edge.event_id}"
+                control_branch = f"{origin_branch}|control:{child}:{edge.event_id}"
                 if not admit(edge, control_branch, "control"):
                     break
                 if new:
                     witnesses += 1
-                queue.append((parent, lower, edge.timestamp_ns, strict_depth, control_depth + 1))
+                queue.append((parent, lower, edge.timestamp_ns, strict_depth, control_depth + 1, control_branch))
                 branches.append((parent, edge, lower, upper))
                 # A validated control parent is a bounded context anchor. Continue
                 # strict reconstruction only through the depth that remains.
@@ -372,7 +382,7 @@ class EvidenceDrivenCandidateBuilder:
                         if self._node_is_process(target):
                             # A process reached by control continuation has a new
                             # observation time and may itself have a bounded parent.
-                            queue.append((target, self._history_lower, strict_edge.timestamp_ns, continued_frontier.depth + 1, control_depth + 1))
+                            queue.append((target, self._history_lower, strict_edge.timestamp_ns, continued_frontier.depth + 1, control_depth + 1, continued_frontier.branch_id))
                     if len(candidates) >= self.config.candidate_cap:
                         break
                 if len(candidates) >= self.config.candidate_cap:

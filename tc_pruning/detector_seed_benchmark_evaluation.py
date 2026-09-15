@@ -80,7 +80,9 @@ def _pinned_directories(root: Path, expected_root_sha256: str) -> list[Path]:
 def evaluate_offline_benchmark(run_root: str | Path, *, known_critical_event_ids: Iterable[str], known_attack_node_ids: Iterable[str], output_directory: str | Path | None = None, expected_root_sha256: str | None = None, pin_file: str | Path | None = None) -> dict[str, Any]:
     root, output = Path(run_root), Path(output_directory) if output_directory else Path(run_root).parent / "offline"
     if pin_file is not None:
-        pin = json.loads(Path(pin_file).read_text())
+        pin_path = Path(pin_file).resolve()
+        if root.resolve() == pin_path or root.resolve() in pin_path.parents: raise ValueError("offline pin must be outside mutable online root")
+        pin = json.loads(pin_path.read_text())
         expected_root_sha256 = str(pin.get("root_manifest_sha256", ""))
     if not expected_root_sha256:
         # Fixture-only backwards compatibility: production paths are always

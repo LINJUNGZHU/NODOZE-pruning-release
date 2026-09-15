@@ -1,7 +1,7 @@
 """Online-only CADETS E3 detector-seed artifact runner."""
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 import hashlib
 import json
 import os
@@ -79,9 +79,10 @@ def _reject_bad(value: Any, location: str = "input") -> None:
     # CDM text such as ``source`` because it happens to contain ``our``/``or``.
     # Compound authorities are matched only as whole underscore-delimited terms.
     def forbidden(text: str) -> bool:
+        text = re.sub(r"(?<=[a-z0-9])(?=[A-Z])", "_", text)
         tokens = re.findall(r"[a-z0-9]+", text.lower())
         joined = "_".join(tokens)
-        singles = {"gt", "truth", "label", "malicious", "oracle", "funnel", "evaluator"}
+        singles = {"gt", "truth", "label", "malicious", "oracle", "funnel", "evaluator", "positive"}
         compounds = {"groundtruth", "ground_truth", "known_critical", "critical_event", "critical_edge", "positive_ids", "attack_time", "attack_times", "attack_window", "pdf_critical", "y_true", "is_malicious"}
         # A compound authority may be embedded in a generated key/path (for
         # example my_known_critical_event_ids_copy).  Do not apply this to
@@ -209,6 +210,7 @@ def _stage_evidence(store: ProvenanceStore, source: Iterable[AlertEvidence], dir
     conn.execute("CREATE TABLE staged (ordinal INTEGER PRIMARY KEY, evidence_id TEXT NOT NULL, body TEXT NOT NULL, identity_status TEXT NOT NULL, native_id TEXT NOT NULL, native_decision INTEGER NOT NULL, calibrated_score REAL NOT NULL, raw_score REAL)")
     conn.execute("CREATE TABLE seen_identity (value TEXT PRIMARY KEY)")
     conn.execute("CREATE TABLE stage_identity (stage TEXT NOT NULL, kind TEXT NOT NULL, identity TEXT NOT NULL, PRIMARY KEY(stage,kind,identity))")
+    conn.execute("CREATE TABLE evidence_identity (evidence_id TEXT NOT NULL, kind TEXT NOT NULL, identity TEXT NOT NULL, PRIMARY KEY(evidence_id,kind,identity))")
     conn.execute("CREATE INDEX staged_anchor ON staged(identity_status,native_decision,calibrated_score DESC,evidence_id)")
     counts = {"exact": 0, "missing": 0, "duplicate": 0, "ambiguous": 0, "total_inference": 0, "scored": 0, "native_decisions": 0, "evidence": 0}
     evidence_path, audit_path = directory / "evidence.jsonl", directory / "identity_audit.jsonl"
@@ -220,7 +222,7 @@ def _stage_evidence(store: ProvenanceStore, source: Iterable[AlertEvidence], dir
                 if not isinstance(item, AlertEvidence): raise ValueError("evidence source yielded a non-AlertEvidence value")
                 if item.detector_id.upper() != detector_id.upper(): raise ValueError("evidence detector identity mismatch")
                 _reject_bad({"metadata": item.detector_metadata, "context": item.structural_context}, "evidence")
-                body = item.to_record(); raw = _canonical(body); evidence_out.write(raw); evidence_digest.update(raw)
+                body = item.to_record(); raw = _canonical(body)
                 events = [{"native_event_id": event, "matches": [{"stored_event_id": stored, "original_event_id": original} for stored, original in store.event_identity_matches(event)]} for event in item.event_ids]
                 nodes = [{"native_node_id": node, "matches": 1 if store.get_node(node) else 0} for node in item.node_ids]
                 sizes = [len(entry["matches"]) for entry in events] + [entry["matches"] for entry in nodes]
@@ -235,9 +237,17 @@ def _stage_evidence(store: ProvenanceStore, source: Iterable[AlertEvidence], dir
                     coherent = edge is not None and edge.src == item.src_uuid and edge.dst == item.dst_uuid and edge.relation == item.relation and (item.timestamp_start is None or edge.timestamp_ns == item.timestamp_start) and (item.timestamp_end is None or edge.timestamp_ns == item.timestamp_end)
                 state = "duplicate" if duplicate else "exact" if coherent and sizes and all(value == 1 for value in sizes) else "missing" if not sizes or any(value == 0 for value in sizes) or not coherent else "ambiguous"
                 if state == "exact":
-                    conn.executemany("INSERT OR IGNORE INTO stage_identity VALUES ('evidence',?,?)", (("event", event) for event in item.event_ids))
+                    mapped_events = tuple(entry["matches"][0]["stored_event_id"] for entry in events)
+                    # Canonical online transport is always stored-event IDs;
+                    # audit retains native/original identities above.
+                    item = replace(item, event_ids=mapped_events)
+                    body = item.to_record(); raw = _canonical(body)
+                    conn.executemany("INSERT OR IGNORE INTO stage_identity VALUES ('evidence',?,?)", (("event", event) for event in mapped_events))
                     conn.executemany("INSERT OR IGNORE INTO stage_identity VALUES ('evidence',?,?)", (("node", node) for node in item.node_ids))
+                    conn.executemany("INSERT OR IGNORE INTO evidence_identity VALUES (?,?,?)", ((item.evidence_id, "event", event) for event in mapped_events))
+                    conn.executemany("INSERT OR IGNORE INTO evidence_identity VALUES (?,?,?)", ((item.evidence_id, "node", node) for node in item.node_ids))
                 counts[state] += 1; counts["total_inference"] += 1; counts["evidence"] += 1; counts["scored"] += item.raw_score is not None; counts["native_decisions"] += item.native_decision
+                evidence_out.write(raw); evidence_digest.update(raw)
                 audit = {"evidence_id": item.evidence_id, "identity_status": state, "event_identity": events, "node_identity": nodes}; encoded = _canonical(audit); audit_out.write(encoded); audit_digest.update(encoded)
                 conn.execute("INSERT INTO staged VALUES (?,?,?,?,?,?,?,?)", (ordinal, item.evidence_id, raw.decode().rstrip("\n"), state, native_object, int(item.native_decision), item.calibrated_score, item.raw_score)); ordinal += 1
             evidence_out.flush(); os.fsync(evidence_out.fileno()); audit_out.flush(); os.fsync(audit_out.fileno())
@@ -263,8 +273,9 @@ def _stage_evidence(store: ProvenanceStore, source: Iterable[AlertEvidence], dir
 def _read_staged_anchors(db: Path, *, profile: str | None, threshold: float | None, cap: int, priority_path: Path | None) -> tuple[AlertEvidence, Any | None]:
     """SQL-filter anchors and build disk priority without materializing all scores."""
     conn = sqlite3.connect(db)
+    priority = None
     try:
-        if profile in {"VXL-2", "VXL-3"}:
+        if priority_path is not None:
             from .evidence_candidate_builder import SQLiteEvidencePriority
             priority = SQLiteEvidencePriority(str(priority_path))
             def priority_rows():
@@ -273,16 +284,25 @@ def _read_staged_anchors(db: Path, *, profile: str | None, threshold: float | No
                     if score is not None:
                         for event in item.event_ids: yield event, float(score)
             priority.add_many(priority_rows())
+            def node_rows():
+                for (body,) in conn.execute("SELECT body FROM staged WHERE identity_status='exact' ORDER BY ordinal"):
+                    item = AlertEvidence.from_record(json.loads(body)); score = item.raw_score if profile == "VXL-2" else item.calibrated_score
+                    if score is not None:
+                        for node in item.node_ids: yield node, float(score)
+            priority.add_nodes(node_rows())
         else: priority = None
         if profile in {"VXL-1", "VXL-3"}:
             predicate, predicate_args = "identity_status='exact' AND calibrated_score>=?", (float(threshold),)
         else:
             predicate, predicate_args = "identity_status='exact' AND native_decision=1", ()
-        required = int(conn.execute("SELECT COUNT(*) FROM staged WHERE " + predicate, predicate_args).fetchone()[0])
+        required = int(conn.execute("SELECT COUNT(DISTINCT kind || ':' || identity) FROM evidence_identity WHERE evidence_id IN (SELECT evidence_id FROM staged WHERE " + predicate + ")", predicate_args).fetchone()[0])
         if required > cap: raise ValueError(f"required native anchors ({required}) exceed frozen candidate_cap ({cap}); refusing to redefine detector seed set")
         query, params = "SELECT body FROM staged WHERE " + predicate + " ORDER BY calibrated_score DESC,evidence_id", predicate_args
         anchors = tuple(AlertEvidence.from_record(json.loads(body)) for (body,) in conn.execute(query, params))
         return anchors, priority
+    except BaseException:
+        if hasattr(priority, "close"): priority.close()
+        raise
     finally:
         conn.close()
 
@@ -298,10 +318,14 @@ def _proxies(edges: tuple[StoredEdge, ...], anchor_events: frozenset[str], ancho
     if len(anchor_events) > cap: raise ValueError("selector cap cannot retain event anchors")
     # event anchors are mandatory once; node observations only nominate bounded
     # incident observation edges, ranked by detector-neutral search priority.
-    incident = sorted((edge for edge in edges if edge.event_id not in anchor_events and (edge.src in anchor_nodes or edge.dst in anchor_nodes)), key=lambda edge: (-(priority.score_for_event(edge.event_id) if priority and priority.score_for_event(edge.event_id) is not None else float("-inf")), edge.timestamp_ns, edge.event_id))
+    def proxy_score(edge: StoredEdge) -> float:
+        event = priority.score_for_event(edge.event_id) if priority else None
+        nodes = [priority.score_for_node(node) for node in (edge.src, edge.dst)] if priority and hasattr(priority, "score_for_node") else []
+        return max([value for value in [event, *nodes] if value is not None], default=float("-inf"))
+    incident = sorted((edge for edge in edges if edge.event_id not in anchor_events and (edge.src in anchor_nodes or edge.dst in anchor_nodes)), key=lambda edge: (-proxy_score(edge), edge.timestamp_ns, edge.event_id))
     node_proxy = tuple(edge.event_id for edge in incident[:max(0, cap - len(anchor_events))])
     proxy = frozenset(set(anchor_events) | set(node_proxy))
-    return proxy, {"anchor_event_ids": sorted(anchor_events), "anchor_node_ids": sorted(anchor_nodes), "node_incident_proxy_event_ids": list(node_proxy), "mandatory_proxy_event_ids": sorted(proxy), "proxy_cap": cap, "selection": "dedup-anchor,priority,time,event-id"}
+    return proxy, {"anchor_event_ids": sorted(anchor_events), "anchor_node_ids": sorted(anchor_nodes), "node_incident_proxy_event_ids": list(node_proxy), "mandatory_proxy_event_ids": sorted(proxy), "proxy_cap": cap, "selection": "dedup-anchor,event-or-endpoint-node-priority,time,event-id"}
 
 def _a_rasp(store: ProvenanceStore, edges: tuple[StoredEdge, ...], poi_ids: frozenset[str], cap: int, proxy_audit: Mapping[str, Any]) -> dict[str, Any]:
     if not edges or not poi_ids or len(poi_ids) > cap: raise ValueError("selector requires nonempty candidate and bounded POI proxies")
@@ -371,7 +395,11 @@ def run_online_benchmark(config_record: Mapping[str, Any], evidence_by_run: Mapp
                 # VXL-0..3 are four policies over one Velox output.  The
                 # content-addressed native aggregate selects a single shared,
                 # immutable SQLite/JSONL intake; attempts merely hard-link it.
-                shared_key = native["aggregate_sha256"] if spec.detector_id.upper() == "VELOX" else None
+                # Reuse is intentionally disabled until a complete evidence +
+                # native + development + adapter-version content key has been
+                # sealed.  Correct independent staging is safer than silently
+                # substituting one VXL profile's stream for another.
+                shared_key = None
                 if shared_key is not None and shared_key in shared_velox:
                     staging, audit = shared_velox[shared_key]; _link_shared(staging.parent, attempt)
                 elif shared_key is not None:
@@ -393,7 +421,7 @@ def run_online_benchmark(config_record: Mapping[str, Any], evidence_by_run: Mapp
                         threshold = float(calibration["development_percentile_threshold"])
                     profile = spec.profile
                 else: profile = None
-                candidates, priority = _read_staged_anchors(staging, profile=profile, threshold=threshold, cap=config.candidate.candidate_cap, priority_path=(attempt / "priority.sqlite") if profile in {"VXL-2", "VXL-3"} else None)
+                candidates, priority = _read_staged_anchors(staging, profile=profile, threshold=threshold, cap=config.candidate.candidate_cap, priority_path=(attempt / "priority.sqlite"))
                 if not candidates: raise ValueError("no uniquely mapped native-decision evidence")
                 stage = "candidate"; before, started = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss, time.perf_counter(); candidate = EvidenceDrivenCandidateBuilder(store, config.candidate, priority=priority).build(candidates); candidate_seconds = time.perf_counter() - started
                 if not candidate.edges: raise ValueError("candidate reconstruction produced no raw events")

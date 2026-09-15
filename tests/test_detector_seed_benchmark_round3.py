@@ -31,3 +31,15 @@ def test_authority_guard_rejects_embedded_compound_authorities(value: object) ->
     from tc_pruning.detector_seed_benchmark import _reject_bad
     with pytest.raises(ValueError):
         _reject_bad(value)
+
+
+@pytest.mark.parametrize("value", ["knownCriticalEventIds.jsonl", "attackTimesBackup", "pdfCriticalEdges", "yTrue", "positive"])
+def test_authority_guard_rejects_camelcase_and_bare_positive(value: str) -> None:
+    from tc_pruning.detector_seed_benchmark import _reject_bad
+    with pytest.raises(ValueError): _reject_bad(value)
+
+
+def test_streaming_export_rejects_json_array_shards(tmp_path: Path) -> None:
+    from tc_pruning.detectors.pidsmaker_export import _native_rows
+    shard = tmp_path / "bad.json"; shard.write_text("[]")
+    with pytest.raises(ValueError): list(_native_rows(tmp_path))

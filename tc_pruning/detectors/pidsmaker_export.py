@@ -18,7 +18,11 @@ def _native_rows(native: str | Path | Iterable[Mapping[str, object]]) -> Iterato
     if not isinstance(native, (str, Path)):
         yield from (dict(row) for row in native)
         return
-    source = Path(native); files = (source,) if source.is_file() else tuple(sorted(item for item in source.rglob("*") if item.suffix.lower() in {".csv", ".jsonl"}))
+    source = Path(native)
+    if source.is_dir() and any(item.suffix.lower() == ".json" for item in source.rglob("*")):
+        raise ValueError("production native export rejects JSON array shards")
+    files = (source,) if source.is_file() else tuple(sorted(item for item in source.rglob("*") if item.suffix.lower() in {".csv", ".jsonl"}))
+    if not files: raise ValueError("native export has no CSV/JSONL shards")
     for path in files:
         if path.suffix.lower() == ".csv":
             with path.open(encoding="utf-8", newline="") as stream:
@@ -49,6 +53,7 @@ def export_evidence(adapter: AlertEvidenceProvider, native: str | Path | Iterabl
     """Require frozen-development calibration and atomically emit canonical JSONL."""
     snapshot = Path(output).with_suffix(".native.jsonl")
     count, digest = _stream_snapshot(_native_rows(native), snapshot)
+    if not count: raise ValueError("native export is empty")
     # Disk staging gives adapters a replayable stream without retaining all
     # input rows or CSV shard contents in process memory.
     def staged_rows() -> Iterator[dict[str, object]]:

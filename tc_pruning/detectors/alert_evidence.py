@@ -11,6 +11,7 @@ from enum import Enum
 import hashlib
 import json
 import math
+import re
 import os
 from pathlib import Path
 import sqlite3
@@ -401,6 +402,37 @@ def _native_identity_metadata(row: Mapping[str, Any]) -> dict[str, Any]:
     return result
 
 
+def _native_mapping_quality(row: Mapping[str, Any], metadata: Mapping[str, Any]) -> MappingQuality:
+    markers = ('stored_event_id', 'original_event_id', 'identity_origin', 'identity_collision', 'raw_relation')
+    if not any(key in row for key in markers):
+        return MappingQuality.NATIVE
+    for key in markers + ('event_uuid', 'src_node_uuid', 'dst_node_uuid', 'time', 'supporting_event_ids'):
+        if row.get(key) in (None, ''):
+            raise ValueError('Incomplete exact native identity: ' + key)
+    if row['stored_event_id'] != row['event_uuid']:
+        raise ValueError('Stored and exported event identities disagree')
+    event, original = row['event_uuid'], row['original_event_id']
+    if metadata['identity_collision'] != (event != original):
+        raise ValueError('Inconsistent native identity collision')
+    origin = ('DERIVED_NO_RAW_EVENT' if original.startswith('LINEAGE:') else
+              'RAW_TC_EVENT' if re.fullmatch(r'[0-9A-Fa-f]{8}(-[0-9A-Fa-f]{4}){3}-[0-9A-Fa-f]{12}', original)
+              else 'OTHER_STORED_ID')
+    if row['identity_origin'] != origin:
+        raise ValueError('Inconsistent native identity origin')
+    support = row['supporting_event_ids']
+    if isinstance(support, str):
+        support = json.loads(support)
+    if not isinstance(support, (tuple, list)) or not support or support[0] != event or len(set(support)) != len(support):
+        raise ValueError('Invalid representative/supporting identities')
+    expected_operation = 'EVENT_CLONE' if row['raw_relation'] == 'EVENT_FORK' else row['raw_relation']
+    if (row.get('model_operation') or _EDGE_RELATIONS.get(str(row.get('edge_type')))) != expected_operation:
+        raise ValueError('Native model operation disagrees with raw relation')
+    if isinstance(row['time'], bool) or not isinstance(row['time'], (int, str)):
+        raise ValueError('Native timestamp must be an exact integer')
+    int(row['time'])
+    return MappingQuality.EXACT
+
+
 class AlertEvidenceProvider(ABC):
     @abstractmethod
     def provide(self, *args: Any, **kwargs: Any) -> tuple[AlertEvidence, ...]:
@@ -424,12 +456,14 @@ class VeloxEvidenceAdapter(AlertEvidenceProvider):
             event, src, dst = (_identifier(row.get(key), key) for key in ("event_uuid", "src_node_uuid", "dst_node_uuid"))
             value = _loss(row.get("loss"))
             edge_type = row.get("edge_type")
+            identity_metadata = _native_identity_metadata(row)
+            mapping_quality = _native_mapping_quality(row, identity_metadata)
             result.append(AlertEvidence(
                 _evidence_id("Velox", event), "Velox", self.version, EvidenceGranularity.EDGE, value, calibration.percentile(value), value > threshold,
                 event_ids=(event,), node_ids=(src, dst), src_uuid=src, dst_uuid=dst,
                 relation=row.get("raw_relation") or row.get("relation") or _EDGE_RELATIONS.get(str(edge_type)), role_hint=RoleHint.OBSERVATION,
                 supporting_event_ids=_native_support(row),
-                mapping_quality=MappingQuality.EXACT, detector_metadata={"native_threshold": threshold, "native_edge_type": edge_type, **_native_identity_metadata(row)},
+                mapping_quality=mapping_quality, detector_metadata={"native_threshold": threshold, "native_edge_type": edge_type, **identity_metadata},
                 timestamp_start=int(row["time"]) if row.get("time") not in (None, "") else None,
                 timestamp_end=int(row["time"]) if row.get("time") not in (None, "") else None,
                 development_percentile=calibration.percentile(value), query_local_percentile=local[index],

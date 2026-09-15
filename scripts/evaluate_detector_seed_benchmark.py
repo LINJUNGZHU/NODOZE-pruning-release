@@ -18,8 +18,10 @@ def main() -> int:
     parser.add_argument("--run-root", required=True)
     parser.add_argument("--known-critical-event-ids", required=True)
     parser.add_argument("--known-attack-node-ids", required=True)
+    parser.add_argument("--pin-file")
+    parser.add_argument("--expected-root-sha256")
     args = parser.parse_args()
-    result = evaluate_offline_benchmark(args.run_root, known_critical_event_ids=_ids(args.known_critical_event_ids), known_attack_node_ids=_ids(args.known_attack_node_ids))
+    result = evaluate_offline_benchmark(args.run_root, known_critical_event_ids=_ids(args.known_critical_event_ids), known_attack_node_ids=_ids(args.known_attack_node_ids), pin_file=args.pin_file, expected_root_sha256=args.expected_root_sha256)
     print(json.dumps(result, sort_keys=True, allow_nan=False))
     return 0
 
