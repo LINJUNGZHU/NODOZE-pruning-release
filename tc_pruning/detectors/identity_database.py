@@ -126,19 +126,23 @@ CREATE OR REPLACE VIEW file_node_table AS SELECT node_uuid,node_uuid AS hash_id,
  COALESCE(NULLIF(properties_json::jsonb->>'path',''),label) AS path,index_id
  FROM identity_nodes WHERE model_type='file';
 CREATE OR REPLACE VIEW subject_node_table AS SELECT node_uuid,node_uuid AS hash_id,
+ COALESCE(NULLIF(properties_json::jsonb->>'exec',''),label) AS exec,
  COALESCE(NULLIF(properties_json::jsonb->>'exec',''),label) AS path,
- COALESCE(properties_json::jsonb->>'cmdLine','') AS cmd_line,index_id
+ COALESCE(properties_json::jsonb->>'cmdLine','') AS cmd,index_id
  FROM identity_nodes WHERE model_type='subject';
 CREATE OR REPLACE VIEW netflow_node_table AS SELECT node_uuid,node_uuid AS hash_id,
- COALESCE(properties_json::jsonb->>'localAddress','') AS local_ip,
- COALESCE(properties_json::jsonb->>'localPort','') AS local_port,
- COALESCE(properties_json::jsonb->>'remoteAddress',label) AS remote_ip,
- COALESCE(properties_json::jsonb->>'remotePort','') AS remote_port,index_id
+ COALESCE(properties_json::jsonb->>'localAddress','') AS src_addr,
+ COALESCE(properties_json::jsonb->>'localPort','') AS src_port,
+ COALESCE(properties_json::jsonb->>'remoteAddress',label) AS dst_addr,
+ COALESCE(properties_json::jsonb->>'remotePort','') AS dst_port,index_id
  FROM identity_nodes WHERE model_type='netflow';
 CREATE OR REPLACE VIEW event_table AS SELECT e.src_uuid AS src_node,
  e.src_index_id::text AS src_index_id,e.model_operation AS operation,e.dst_uuid AS dst_node,
  e.dst_index_id::text AS dst_index_id,e.event_uuid,e.timestamp_rec,e.source_row_id AS _id,
- e.original_event_id,e.src_uuid,e.dst_uuid,e.raw_relation,e.identity_collision
+ e.original_event_id,e.src_uuid,e.dst_uuid,e.raw_relation,e.identity_collision,
+ CASE WHEN e.original_event_id LIKE 'LINEAGE:%' THEN 'DERIVED_NO_RAW_EVENT'
+ WHEN e.original_event_id ~ '^[0-9A-Fa-f]{8}(-[0-9A-Fa-f]{4}){3}-[0-9A-Fa-f]{12}$'
+ THEN 'RAW_TC_EVENT' ELSE 'OTHER_STORED_ID' END AS identity_origin
  FROM identity_events e JOIN identity_nodes s ON s.index_id=e.src_index_id
  JOIN identity_nodes d ON d.index_id=e.dst_index_id
  WHERE e.model_operation IS NOT NULL AND s.model_type IS NOT NULL AND d.model_type IS NOT NULL;
@@ -197,6 +201,8 @@ def build_database(source, target, manifest_path, expected_sha=FROZEN_SHA256, ba
                 'source_path': str(Path(source).resolve()), 'source_sha256': expected_sha,
                 'target_database': target, 'node_type_mapping': NODE_TYPES,
                 'relation_mapping': RELATIONS,
+                'loader_sha256': file_sha256(__file__),
+                'model_views_sha256': hashlib.sha256(VIEWS.encode()).hexdigest(),
                 'code_commit': subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip(),
                 'progress': {}}
     _write_manifest(manifest_path, manifest)
@@ -286,14 +292,70 @@ def build_database(source, target, manifest_path, expected_sha=FROZEN_SHA256, ba
         conn.close()
 
 
+def finalize_model_views(source, target, manifest_path):
+    """Upgrade only derived model views after a successful raw reconciliation.
+
+    This supports a long-running v1 COPY begun before the compatibility-view
+    correction. It does not insert, update, or delete any raw node/event row.
+    The predecessor reconciliation digest remains explicit in the new manifest.
+    """
+    import psycopg2
+    with open(manifest_path) as stream:
+        previous = validate_manifest(json.load(stream))
+    validate_target(target, previous['source_sha256'])
+    if previous['target_database'] != target:
+        raise ValueError('Manifest target mismatch')
+    verify_source(source, previous['source_sha256'])
+    with psycopg2.connect(dbname=target) as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT value FROM identity_state WHERE key='manifest'")
+            saved = cur.fetchone()
+            if saved is None or saved[0] != previous:
+                raise ValueError('Database and file manifests disagree')
+            # Bind the existing tables and views before this scoped migration.
+            for name, expected in (('identity_nodes', previous['reconciliation']['identity_nodes']['count']),
+                                   ('identity_events', previous['reconciliation']['identity_events']['count'])):
+                cur.execute('SELECT count(*) FROM ' + name)
+                if cur.fetchone()[0] != expected:
+                    raise ValueError('Raw table changed since reconciliation')
+            for name in ('subject_node_table', 'netflow_node_table'):
+                cur.execute('SELECT definition FROM pg_views WHERE schemaname=%s AND viewname=%s', ('public', name))
+                row = cur.fetchone()
+                if row is None or 'identity_nodes' not in row[0]:
+                    raise ValueError('Refusing to replace an unowned model view')
+            cur.execute('DROP VIEW subject_node_table; DROP VIEW netflow_node_table;')
+            cur.execute(VIEWS)
+            manifest = dict(previous)
+            manifest['raw_reconciliation_manifest_sha256'] = previous['manifest_sha256']
+            manifest['loader_sha256'] = file_sha256(__file__)
+            manifest['model_views_sha256'] = hashlib.sha256(VIEWS.encode()).hexdigest()
+            manifest['view_code_commit'] = subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()
+            origin_sql = "CASE WHEN original_event_id LIKE 'LINEAGE:%' THEN 'DERIVED_NO_RAW_EVENT' WHEN original_event_id ~ '^[0-9A-Fa-f]{8}(-[0-9A-Fa-f]{4}){3}-[0-9A-Fa-f]{12}$' THEN 'RAW_TC_EVENT' ELSE 'OTHER_STORED_ID' END"
+            cur.execute('SELECT ' + origin_sql + ',count(*) FROM identity_events GROUP BY 1')
+            manifest['identity_origin_counts'] = dict(cur.fetchall())
+            cur.execute('SELECT identity_origin,count(*) FROM event_table GROUP BY 1')
+            manifest['model_eligible_identity_origin_counts'] = dict(cur.fetchall())
+            manifest['identity_mapping_convention'] = {
+                'local_stored_identity_exact': 'all reconciled stored events',
+                'raw_TC_event_identity_exact': 'RAW_TC_EVENT only; LINEAGE rows are DERIVED_NO_RAW_EVENT',
+                'subject_lineage_provenance': 'src_uuid=parent subject; dst_uuid=child subject'}
+            manifest = seal_manifest(manifest)
+            cur.execute("UPDATE identity_state SET value=%s WHERE key='manifest'", (json.dumps(manifest),))
+    _write_manifest(manifest_path, manifest)
+    return manifest
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--source', required=True)
     parser.add_argument('--target', required=True)
     parser.add_argument('--manifest', required=True)
     parser.add_argument('--source-sha256', default=FROZEN_SHA256)
+    parser.add_argument('--finalize-model-views', action='store_true')
     args = parser.parse_args()
-    print(json.dumps(build_database(args.source, args.target, args.manifest, args.source_sha256), indent=2))
+    result = (finalize_model_views(args.source, args.target, args.manifest) if args.finalize_model_views
+              else build_database(args.source, args.target, args.manifest, args.source_sha256))
+    print(json.dumps(result, indent=2))
 
 
 if __name__ == '__main__':

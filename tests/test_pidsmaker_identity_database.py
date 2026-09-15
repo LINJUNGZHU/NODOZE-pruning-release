@@ -89,8 +89,14 @@ def test_real_copy_resume_and_tamper_reconciliation(tmp_path):
     assert identity.validate_manifest(first)['status'] == 'COMPLETED'
     resumed = identity.build_database(source, target, manifest_path, sha, batch_size=1)
     assert resumed['reconciliation'] == first['reconciliation']
+    upgraded = identity.finalize_model_views(source, target, manifest_path)
+    assert upgraded['raw_reconciliation_manifest_sha256'] == resumed['manifest_sha256']
+    assert upgraded['identity_origin_counts'] == {'OTHER_STORED_ID': 3}
     with psycopg2.connect(dbname=target) as db:
         with db.cursor() as cur:
+            cur.execute('SELECT node_uuid,hash_id,exec,path,cmd,index_id FROM subject_node_table ORDER BY index_id')
+            assert [row[0] for row in cur.fetchall()] == ['p1', 'p2']
+            cur.execute('SELECT src_addr,src_port,dst_addr,dst_port FROM netflow_node_table')
             cur.execute('SELECT event_uuid,original_event_id,raw_relation,operation FROM event_table ORDER BY _id')
             assert cur.fetchall() == [('e1', 'e1', 'EVENT_FORK', 'EVENT_CLONE'), ('e1#2', 'e1', 'EVENT_WRITE', 'EVENT_WRITE')]
             cur.execute("UPDATE identity_events SET src_uuid='tampered' WHERE source_row_id=1")
