@@ -219,7 +219,11 @@ def _forbidden_ast_occurrences(tree: ast.AST) -> set[str]:
     forbidden = ("groundtruth", "ground_truth", "pdf_critical", "attack_window", "oracle", "evaluator", "evaluation")
     values: set[str] = set()
     for node in ast.walk(tree):
-        if isinstance(node, (ast.Import, ast.ImportFrom)):
+        if isinstance(node, ast.Import):
+            values.update(alias.name.lower() for alias in node.names)
+        elif isinstance(node, ast.ImportFrom):
+            if node.module is not None:
+                values.add(node.module.lower())
             values.update(alias.name.lower() for alias in node.names)
         elif isinstance(node, ast.Constant) and isinstance(node.value, str):
             values.add(node.value.lower())
@@ -242,6 +246,14 @@ def _forbidden_ast_occurrences(tree: ast.AST) -> set[str]:
 def test_isolation_ast_scan_detects_synthetic_forbidden_parameters_attributes_keywords_and_calls() -> None:
     synthetic = ast.parse("def run(ground_truth, *, attack_window=None): return oracle.evaluator(pdf_critical=ground_truth)")
     assert {"ground_truth", "attack_window", "oracle", "evaluator", "pdf_critical"} <= _forbidden_ast_occurrences(synthetic)
+
+
+def test_isolation_ast_scan_detects_import_and_importfrom_module_leaks() -> None:
+    synthetic = ast.parse(
+        "import tc_pruning.groundtruth_labels as labels\n"
+        "from tc_pruning.evaluation import load_labels"
+    )
+    assert {"tc_pruning.groundtruth_labels", "tc_pruning.evaluation"} <= _forbidden_ast_occurrences(synthetic)
 
 
 def test_online_module_has_no_ground_truth_or_evaluator_dependency_or_input() -> None:
