@@ -187,10 +187,18 @@ def main() -> int:
         Path(args.incident_dir) if args.incident_dir else None, args.scenario
     )
     started = time.perf_counter()
-    with ProvenanceStore(args.db) as store:
-        edges, layers, retrieval_audit = _retrieve_layers(
-            store, evidence, config, incident_ids
-        )
+    if evidence:
+        with ProvenanceStore(args.db) as store:
+            edges, layers, retrieval_audit = _retrieve_layers(
+                store, evidence, config, incident_ids
+            )
+    else:
+        edges = {}
+        layers = {name: set() for name in ("inverse", "target", "long_history", "corridor")}
+        retrieval_audit = {
+            "seed_nodes": 0, "purification_stop_reason": "NO_NATIVE_ALERT",
+            "purification_rounds": [], "anchor_components": 0, "causal_corridors": 0,
+        }
     retrieval_seconds = time.perf_counter() - started
     samples = []
     result = None

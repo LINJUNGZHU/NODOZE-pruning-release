@@ -102,15 +102,49 @@ class RobustMultiobjectiveSelector:
         remaining = list(active)
         checkpoints = []
         satisfying = None
+        covered_kairos = set()
+        covered_anchors = set()
+        branch_coverage = Counter()
+        demand_prizes = {}
+        relevance = 0.0
+        selected_events = set()
+        target_values = (
+            targets.kairos, targets.branch, targets.anchor,
+            targets.path_prize, targets.relevance,
+        )
+
+        def state_objective():
+            values = (
+                float(len(covered_kairos)),
+                sum(math.log1p(count) / math.log(2) for count in branch_coverage.values()),
+                float(len(covered_anchors)), sum(demand_prizes.values()), relevance,
+            )
+            ratios = [value / target if target > 0 else 1.0 for value, target in zip(values, target_values)]
+            return ObjectiveVector(*values, min(ratios))
+
         while remaining:
             candidates = []
-            before = self.objective(tuple(selected), targets)
+            before = state_objective()
+            before_values = (
+                before.kairos, before.branch, before.anchor,
+                before.path_prize, before.relevance,
+            )
             for unit in remaining:
-                after = self.objective(tuple((*selected, unit)), targets)
-                cost = len(set(unit.raw_event_ids) - {event for row in selected for event in row.raw_event_ids}) or 1
-                target_values = (targets.kairos, targets.branch, targets.anchor, targets.path_prize, targets.relevance)
-                before_values = (before.kairos, before.branch, before.anchor, before.path_prize, before.relevance)
-                after_values = (after.kairos, after.branch, after.anchor, after.path_prize, after.relevance)
+                gains = (
+                    float(len(unit.kairos_ids - covered_kairos)),
+                    self.branch_gain(unit.branch_ids, branch_coverage),
+                    float(len(unit.anchor_ids - covered_anchors)),
+                    sum(max(0.0, float(prize) - demand_prizes.get(demand, 0.0))
+                        for demand, prize in unit.demand_prizes.items()),
+                    max(0.0, unit.relevance),
+                )
+                after_values = tuple(value + gain for value, gain in zip(before_values, gains))
+                ratios_after = [
+                    value / target if target > 0 else 1.0
+                    for value, target in zip(after_values, target_values)
+                ]
+                after_minimum = min(ratios_after)
+                cost = len(set(unit.raw_event_ids) - selected_events) or 1
                 newly_advanced = sum(
                     target > 0 and previous < target and current > previous
                     for target, previous, current in zip(target_values, before_values, after_values)
@@ -121,7 +155,7 @@ class RobustMultiobjectiveSelector:
                     if target > 0
                 )
                 ratios = (
-                    after.minimum_ratio,
+                    after_minimum,
                     newly_advanced,
                     normalized_gain / cost,
                 )
@@ -129,8 +163,15 @@ class RobustMultiobjectiveSelector:
             _, _, chosen = max(candidates, key=lambda item: (item[0], tuple(-ord(c) for c in item[1])))
             selected.append(chosen)
             remaining.remove(chosen)
-            objective = self.objective(tuple(selected), targets)
-            events = tuple(sorted({event for unit in selected for event in unit.raw_event_ids}))
+            covered_kairos.update(chosen.kairos_ids)
+            covered_anchors.update(chosen.anchor_ids)
+            branch_coverage.update(chosen.branch_ids)
+            for demand, prize in chosen.demand_prizes.items():
+                demand_prizes[demand] = max(demand_prizes.get(demand, 0.0), float(prize))
+            relevance += max(0.0, chosen.relevance)
+            selected_events.update(chosen.raw_event_ids)
+            objective = state_objective()
+            events = tuple(sorted(selected_events))
             checkpoint = SelectionCheckpoint(tuple(unit.unit_id for unit in selected), events, len(events), objective)
             checkpoints.append(checkpoint)
             if objective.minimum_ratio >= 1.0:

@@ -44,5 +44,17 @@ class EvaluationEdgeProjection:
             result.append(ProjectedEdge(identity, src, dst, relation, temporal, raw_ids))
         return tuple(result)
 
+    def count(self, edges: Iterable[StoredEdge]) -> int:
+        """Count projection groups without materializing replay witnesses."""
+        if self.mode is ProjectionMode.RAW_EVENT:
+            return len({edge.event_id for edge in edges})
+        return len({
+            (
+                edge.src, edge.dst, edge.relation.upper(),
+                edge.timestamp_ns // self.merge_window_ns,
+            )
+            for edge in edges
+        })
+
 
 __all__ = ["EvaluationEdgeProjection", "ProjectedEdge", "ProjectionMode"]

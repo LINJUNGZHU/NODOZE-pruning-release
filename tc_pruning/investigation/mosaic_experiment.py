@@ -32,11 +32,10 @@ def _layer(
     projector: EvaluationEdgeProjection,
 ) -> dict:
     ids = tuple(sorted(set(event_ids) & edge_by_id.keys()))
-    projected = projector.project(edge_by_id[event] for event in ids)
     return {
         "event_ids": list(ids),
         "raw_event_count": len(ids),
-        "projected_edge_count": len(projected),
+        "projected_edge_count": projector.count(edge_by_id[event] for event in ids),
     }
 
 
@@ -118,7 +117,6 @@ def _selection(
     checkpoints = tuple({
         "raw_event_count": row.raw_event_count,
         "minimum_ratio": row.objective.minimum_ratio,
-        "event_ids": list(row.selected_event_ids),
     } for row in frontier.checkpoints)
     return output, selected_units, targets, checkpoints
 
@@ -186,18 +184,14 @@ def run_online_experiment(
     s1["selector"] = "branch_round_robin"
 
     corridor_ids = additions.get("corridor", set())
-    plain_units = _units(
-        r_sets["R4"], rows, edge_by_id, unit_size=unit_size,
-        corridor_ids=corridor_ids, include_branch=False, include_path=False,
-    )
-    branch_units = tuple(replace(unit, demand_prizes={}) for unit in _units(
-        r_sets["R4"], rows, edge_by_id, unit_size=unit_size,
-        corridor_ids=corridor_ids, include_branch=True, include_path=False,
-    ))
     full_units = _units(
         r_sets["R4"], rows, edge_by_id, unit_size=unit_size,
         corridor_ids=corridor_ids, include_branch=True, include_path=True,
     )
+    plain_units = tuple(replace(
+        unit, branch_ids=frozenset(), demand_prizes={}
+    ) for unit in full_units)
+    branch_units = tuple(replace(unit, demand_prizes={}) for unit in full_units)
     s2, _, _, _ = _selection(plain_units, fraction, top_k=top_k)
     s2["selector"] = "multiobjective_no_branch"
     s3, _, _, _ = _selection(branch_units, fraction, top_k=top_k)

@@ -47,3 +47,8 @@ def test_online_cli_has_no_truth_or_attack_imports():
         for token in ("groundtruth", "ground_truth", "pdf_critical", "evaluation", "attack")
     )
 
+
+def test_online_experiment_records_detector_silence_without_fabricating_candidates():
+    result = run_online_experiment((), (), scenario="13", config={})
+    assert result["retrieval_ablations"]["R4"]["raw_event_count"] == 0
+    assert result["selection_ablations"]["S5"]["event_ids"] == []
