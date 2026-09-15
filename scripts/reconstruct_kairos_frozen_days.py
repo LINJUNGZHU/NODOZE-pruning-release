@@ -36,6 +36,12 @@ def main() -> int:
     from kairos_utils import gen_nodeid2msg, init_database_connection
     from test import test as reconstruct
 
+    torch.manual_seed(0)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(0)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+
     cursor, connection = init_database_connection()
     try:
         nodeid2msg = gen_nodeid2msg(cursor)
@@ -47,22 +53,37 @@ def main() -> int:
     runs = []
     for day in args.days:
         output = artifact / f"graph_4_{day}"
-        if output.exists() and any(output.glob("*.txt")) and not args.force:
-            runs.append({"day": day, "status": "EXISTING", "window_count": len(list(output.glob("*.txt")))})
+        completion = output / ".kairos-frozen-complete.json"
+        if completion.exists() and not args.force:
+            completed = json.loads(completion.read_text(encoding="utf-8"))
+            observed = sorted(path.name for path in output.glob("*.txt"))
+            if observed != completed.get("window_names"):
+                raise RuntimeError(f"incomplete or changed reconstruction directory: day {day}")
+            runs.append({"day": day, "status": "EXISTING", "window_count": len(observed)})
             continue
         output.mkdir(parents=True, exist_ok=True)
+        if args.force:
+            for stale in output.glob("*.txt"):
+                stale.unlink()
         graph_path = artifact / "graphs" / f"graph_4_{day}.TemporalData.simple"
         started = time.perf_counter()
         graph = torch.load(graph_path, map_location="cuda")
         reconstruct(graph, memory, gnn, link_pred, neighbor_loader, nodeid2msg, str(output))
+        window_names = sorted(path.name for path in output.glob("*.txt"))
+        completion.write_text(json.dumps({
+            "day": day, "model_sha256": _hash(model_path),
+            "window_names": window_names,
+        }, indent=2, sort_keys=True) + "\n", encoding="utf-8")
         runs.append({
             "day": day, "status": "RECONSTRUCTED", "seconds": time.perf_counter() - started,
-            "window_count": len(list(output.glob("*.txt"))), "graph_sha256": _hash(graph_path),
+            "window_count": len(window_names), "graph_sha256": _hash(graph_path),
         })
     manifest = {
         "schema_version": "kairos-frozen-reconstruction-v1",
         "model_sha256": _hash(model_path), "torch_version": torch.__version__,
-        "cuda_available": torch.cuda.is_available(), "random_seed": "frozen_model_inference",
+        "cuda_available": torch.cuda.is_available(), "random_seed": 0,
+        "cudnn_deterministic": torch.backends.cudnn.deterministic,
+        "deterministic_algorithms_enforced": torch.are_deterministic_algorithms_enabled(),
         "runs": runs,
     }
     target = Path(args.manifest)

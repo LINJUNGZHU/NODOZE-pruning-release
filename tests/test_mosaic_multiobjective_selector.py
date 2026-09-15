@@ -25,3 +25,13 @@ def test_branch_concavity_has_diminishing_returns():
     first = selector.branch_gain(frozenset({"a"}), {})
     later = selector.branch_gain(frozenset({"a"}), {"a": 100})
     assert later < first
+
+
+def test_representative_prefilter_keeps_branch_and_anchor_lanes():
+    units = (
+        _unit("a-low", branches=("shared",), anchors=("a",), relevance=0.1),
+        _unit("a-high", branches=("shared",), anchors=("a",), relevance=1.0),
+        _unit("b", branches=("shared",), anchors=("b",), relevance=0.2),
+    )
+    kept = RobustMultiobjectiveSelector.representative_prefilter(units, top_k=1)
+    assert {unit.unit_id for unit in kept} == {"a-high", "b"}

@@ -18,5 +18,5 @@ def test_recent_and_long_history_are_reported_separately():
     memory.observe(key, 0, "old")
     memory.observe(key, 95 * second, "new")
     score = memory.score(key, 100 * second)
-    assert (score.short_count, score.long_count) == (1, 2)
+    assert (score.short_count, score.long_count) == (1, 1)
     assert score.gap_bucket == "1-10s"

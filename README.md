@@ -775,3 +775,7 @@ POI 数；这些路径是 POI 锚定的参考路径，不等于独立攻击数�
 ## RASP-D 实验更新
 
 新增保持评分不变的多样性/边际收益递减选边分支，提供四案例、四预算和权重消融，以及逐事件决策账本。20% 预算有提升，低预算存在明显退步，网页默认仍保留 RASP。论文依据、完整结果和后台复现命令见 [RASP-D 实验说明](docs/rasp-diverse.md)。
+
+## KAIROS-MOSAIC 架构实验
+
+CADETS E3 的 detector-native KAIROS 输入、source/target/long-history 候选和多目标压缩实验见 [KAIROS-MOSAIC 结果](docs/kairos-mosaic-results.md)。去除 Track A 的旧 V4 candidate 回注后，新增检索模块没有提高已知攻击覆盖，完整栈也未通过质量 gate；默认算法保持 A_rasp，仅把 relation round-robin 的投影冗余下降作为待验证的工程现象。

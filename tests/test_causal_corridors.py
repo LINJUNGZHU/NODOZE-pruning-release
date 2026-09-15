@@ -18,6 +18,7 @@ def test_corridor_contains_strict_raw_replay_witness():
     )
     assert paths[0].raw_event_ids == ("e1", "e2")
     assert paths[0].temporal_witness == (1, 2)
+    assert paths[0].path_bundle.projected_edges != paths[0].raw_event_ids
 
 
 def test_equal_time_edges_do_not_form_a_corridor():

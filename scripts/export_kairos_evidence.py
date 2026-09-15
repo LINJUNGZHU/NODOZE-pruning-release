@@ -45,16 +45,18 @@ def manifest_windows(path: Path) -> dict[str, tuple[tuple[str, float], ...]]:
     return {window: tuple(sorted(values)) for window, values in result.items()}
 
 
-def native_records(artifact: Path, queue_manifest: Path | None = None):
+def native_records(artifact: Path, queue_manifest: Path | None = None, *, day: int):
     membership = (
         manifest_windows(queue_manifest) if queue_manifest is not None
         else queue_windows(artifact / "evaluation.log")
     )
-    for window, queues in sorted(membership.items()):
+    paths = sorted((artifact / f"graph_4_{day}").glob("*.txt"))
+    pending = []
+    for path in paths:
+        window = path.name
+        queues = membership.get(window, ())
         queue_ids = tuple(queue_id for queue_id, _ in queues)
-        strength = max(value for _, value in queues)
-        day = int(window[8:10])
-        path = artifact / f"graph_4_{day}" / window
+        strength = max((value for _, value in queues), default=0.0)
         values = [
             ast.literal_eval(line) for line in path.read_text(
                 encoding="utf-8", errors="replace"
@@ -64,12 +66,29 @@ def native_records(artifact: Path, queue_manifest: Path | None = None):
         threshold = statistics.fmean(losses) + 1.5 * statistics.pstdev(losses)
         for line_number, value in enumerate(values, 1):
             anomalous = float(value["loss"]) > threshold
-            yield NativeKairosEvent(
-                f"{window}:{line_number}", window, int(value["time"]), str(value["edge_type"]),
-                str(value["srcmsg"]), str(value["dstmsg"]), float(value["loss"]),
-                anomalous_native=anomalous, queue_ids=queue_ids, queue_strength=strength,
-                summary_component="+".join(queue_ids) if anomalous else None,
-            )
+            if anomalous or queue_ids:
+                pending.append((
+                    f"{window}:{line_number}", window, value, anomalous,
+                    queue_ids, strength,
+                ))
+    summary_winners = {}
+    for native_id, _, value, anomalous, queue_ids, _ in pending:
+        if not anomalous or not queue_ids:
+            continue
+        key = (queue_ids, str(value["srcmsg"]), str(value["dstmsg"]), str(value["edge_type"]))
+        rank = (float(value["loss"]), native_id)
+        if key not in summary_winners or rank > summary_winners[key][0]:
+            summary_winners[key] = (rank, native_id)
+    winner_ids = {native_id for _, native_id in summary_winners.values()}
+    for native_id, window, value, anomalous, queue_ids, strength in pending:
+        yield NativeKairosEvent(
+            native_id, window, int(value["time"]), str(value["edge_type"]),
+            str(value["srcmsg"]), str(value["dstmsg"]), float(value["loss"]),
+            anomalous_native=anomalous, queue_ids=queue_ids, queue_strength=strength,
+            summary_component=(
+                f"summary:{'+'.join(queue_ids)}" if native_id in winner_ids else None
+            ),
+        )
 
 
 def main() -> int:
@@ -77,6 +96,7 @@ def main() -> int:
     parser.add_argument("--db", required=True)
     parser.add_argument("--artifact", required=True)
     parser.add_argument("--queue-manifest")
+    parser.add_argument("--day", type=int, choices=(6, 12, 13), required=True)
     parser.add_argument("--tolerance-ns", type=int, default=0)
     parser.add_argument("--output", required=True)
     args = parser.parse_args()
@@ -84,7 +104,8 @@ def main() -> int:
     with ProvenanceStore(args.db) as store:
         field = NativeKairosAdapter(store, tolerance_ns=args.tolerance_ns).map_records(
             native_records(
-                artifact, Path(args.queue_manifest) if args.queue_manifest else None
+                artifact, Path(args.queue_manifest) if args.queue_manifest else None,
+                day=args.day,
             )
         )
     output = {

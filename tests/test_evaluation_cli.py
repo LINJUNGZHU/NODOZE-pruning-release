@@ -4,6 +4,7 @@ from pathlib import Path
 import pytest
 
 import tc_pruning.evaluation as evaluation_module
+from scripts.evaluate_kairos_mosaic import _projected_known_tp
 from tc_pruning.cli import main
 from tc_pruning.causal import CausalSearchConfig
 from tc_pruning.config import load_experiment_config
@@ -19,6 +20,15 @@ from tc_pruning.score_ledger import verify_score_ledger
 
 
 FIXTURES = Path(__file__).parent / "fixtures"
+
+
+def test_projected_tp_matches_equivalent_nonreference_raw_event():
+    cache = {
+        "gt": ("a", "b", "EVENT_WRITE", 101),
+        "equivalent": ("a", "b", "EVENT_WRITE", 109),
+    }
+    reference = {("a", "b", "EVENT_WRITE", 10)}
+    assert _projected_known_tp({"equivalent"}, cache, reference, 10) == 1
 
 
 def test_paper_main_result_has_only_compact_publication_columns():
@@ -531,6 +541,41 @@ def test_cli_runs_from_detector_independent_poi_events_without_kairos(tmp_path):
         }
     ]
     assert "e-fork" in report["results"][0]["kept_event_ids"]
+
+
+def test_cli_attaches_orthrus_as_final_attack_node_prediction(tmp_path):
+    database = tmp_path / "tc.db"
+    output = tmp_path / "poi-report.json"
+    poi_events = tmp_path / "poi-events.json"
+    predictions = tmp_path / "orthrus-predictions.json"
+    poi_events.write_text(json.dumps(["e-fork"]), encoding="utf-8")
+    predictions.write_text(json.dumps({
+        "schema_version": "1.0",
+        "detector": "PIDSMaker/ORTHRUS",
+        "run_hash": "run-1",
+        "truth_used": False,
+        "nodes": [{
+            "node_id": "p-attack", "node_type": "process",
+            "predicted_attack": True, "max_alert_score": 9.0,
+            "threshold": 5.0, "alert_ids": ["alert-1"],
+        }],
+    }), encoding="utf-8")
+    profile = _write_profile(tmp_path, keep_ratios=(0.5,))
+    assert main(["ingest", "--input", str(FIXTURES / "tc-mini.jsonl"), "--db", str(database)]) == 0
+    assert main(["build-frequency-cache", "--db", str(database)]) == 0
+    assert main(["compile-frequency-snapshot", "--db", str(database), "--before-timestamp-ns", "3"]) == 0
+
+    assert main([
+        "experiment", "--db", str(database), "--poi-events", str(poi_events),
+        "--attack-node-predictions", str(predictions),
+        "--config", str(profile), "--output", str(output),
+    ]) == 0
+
+    report = json.loads(output.read_text(encoding="utf-8"))
+    attack = report["attack_node_predictions"]
+    assert attack["decision_source"] == "PIDSMaker/ORTHRUS"
+    assert attack["predicted_attack_node_ids"] == ["p-attack"]
+    assert attack["contract"]["truth_used"] is False
 
 
 def test_cli_evaluates_each_detector_alert_against_independent_groundtruth(tmp_path):

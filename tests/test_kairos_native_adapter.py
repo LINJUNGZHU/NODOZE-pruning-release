@@ -72,7 +72,7 @@ def test_export_marks_only_native_threshold_exceedances_anomalous(tmp_path):
         for index, loss in enumerate((1.0, 1.0, 1.0, 10.0))
     ]
     (graph / window).write_text("".join(f"{row!r}\n" for row in rows), encoding="utf-8")
-    result = tuple(native_records(artifact))
+    result = tuple(native_records(artifact, day=6))
     assert [row.anomalous_native for row in result] == [False, False, False, True]
 
 
@@ -91,7 +91,36 @@ def test_export_reads_selected_queues_from_label_free_manifest(tmp_path):
     manifest.write_text(__import__("json").dumps({"queues": [{
         "queue_id": "q12", "windows": [window], "score": 123.0, "selected": True,
     }]}), encoding="utf-8")
-    result = tuple(native_records(artifact, manifest))
+    result = tuple(native_records(artifact, manifest, day=12))
     assert len(result) == 10
     assert result[-1].queue_ids == ("q12",)
     assert result[-1].queue_strength == 123.0
+
+
+def test_export_keeps_loss_events_outside_queues_and_summary_is_a_scaffold(tmp_path):
+    artifact = tmp_path / "artifact"
+    graph = artifact / "graph_4_12"
+    graph.mkdir(parents=True)
+    selected = "2018-04-12 selected.txt"
+    outside = "2018-04-12 outside.txt"
+    base = lambda loss: {
+        "time": int(loss * 10), "edge_type": "EVENT_WRITE",
+        "srcmsg": "{'subject': 'p'}", "dstmsg": "{'file': 'f'}", "loss": loss,
+    }
+    (graph / selected).write_text(
+        "".join(f"{base(loss)!r}\n" for loss in (*([1.0] * 20), 10.0, 11.0)),
+        encoding="utf-8",
+    )
+    (graph / outside).write_text(
+        "".join(f"{base(loss)!r}\n" for loss in (*([1.0] * 9), 20.0)),
+        encoding="utf-8",
+    )
+    manifest = tmp_path / "queues.json"
+    manifest.write_text(__import__("json").dumps({"queues": [{
+        "queue_id": "q12", "windows": [selected], "score": 123.0, "selected": True,
+    }]}), encoding="utf-8")
+    result = tuple(native_records(artifact, manifest, day=12))
+    assert any(row.window == outside and row.anomalous_native and not row.queue_ids for row in result)
+    selected_anomalies = [row for row in result if row.window == selected and row.anomalous_native]
+    assert len(selected_anomalies) == 2
+    assert sum(row.summary_component is not None for row in selected_anomalies) == 1

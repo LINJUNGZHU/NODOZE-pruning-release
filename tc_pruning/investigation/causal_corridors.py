@@ -14,6 +14,7 @@ class CorridorConfig:
     k_paths: int = 3
     max_states: int = 20_000
     max_events: int = 24
+    minimum_target_match: float = 0.0
 
 
 @dataclass(frozen=True, slots=True)
@@ -51,12 +52,20 @@ class CausalCorridorBuilder:
 
     def between(self, graphs: InvestigationGraphs, source: KairosAnchorComponent,
                 target: KairosAnchorComponent, *, edge_costs: Mapping[str, float] | None = None,
-                target_match: float = 0.0, long_gap_support: float = 0.0) -> tuple[CausalCorridor, ...]:
-        if source.end_time_ns >= target.start_time_ns:
+                target_match: float = 0.0, long_gap_support: float = 0.0,
+                pair_compatible: bool = True) -> tuple[CausalCorridor, ...]:
+        if (
+            source.end_time_ns >= target.start_time_ns
+            or not pair_compatible
+            or target_match < self.config.minimum_target_match
+            or (source.hosts and target.hosts and not set(source.hosts) & set(target.hosts))
+        ):
             return ()
         outgoing = defaultdict(list)
+        by_event = {}
         for edge in graphs.propagation_edges:
             outgoing[edge.causal_source].append(edge)
+            by_event[edge.raw_event_id] = edge
         for rows in outgoing.values():
             rows.sort(key=lambda edge: (edge.timestamp_ns, edge.raw_event_id))
         costs = edge_costs or {}
@@ -76,7 +85,12 @@ class CausalCorridorBuilder:
                 if "EVENT_WRITE" in relations and "EVENT_READ" in relations: proof.append("FILE_TRANSFER")
                 if "EVENT_WRITE" in relations and "EVENT_EXECUTE" in relations: proof.append("DROP_EXEC")
                 demand_id = f"{source.component_id}->{target.component_id}"
-                bundle = PathBundle(demand_id, events, events, visited[0], node, times, relations,
+                projected = tuple(
+                    f"{by_event[event].causal_source}|{by_event[event].causal_target}|"
+                    f"{by_event[event].relation}|{by_event[event].timestamp_ns}"
+                    for event in events
+                )
+                bundle = PathBundle(demand_id, events, projected, visited[0], node, times, relations,
                                     cost, source.loss_mass + target.loss_mass,
                                     (source.component_id, target.component_id), tuple(proof))
                 found.append(CausalCorridor(source.component_id, target.component_id, events, times,

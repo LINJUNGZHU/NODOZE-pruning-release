@@ -87,7 +87,11 @@ class RobustMultiobjectiveSelector:
             raise ValueError("top_k must be positive")
         lanes = {}
         for unit in units:
-            labels = unit.branch_ids or unit.anchor_ids or frozenset({"unassigned"})
+            labels = (
+                {f"branch:{label}" for label in unit.branch_ids}
+                | {f"anchor:{label}" for label in unit.anchor_ids}
+                | {f"demand:{label}" for label in unit.demand_prizes}
+            ) or {"unassigned"}
             for label in labels:
                 lanes.setdefault(label, []).append(unit)
         keep = {unit.unit_id for unit in units if unit.mandatory_bridge}

@@ -37,7 +37,7 @@ class LongShortTemporalMemory:
         self._history[key].sort()
 
     @staticmethod
-    def _bucket(delta_ns: int) -> str:
+    def gap_bucket(delta_ns: int) -> str:
         second = 1_000_000_000
         if delta_ns < second: return "<1s"
         if delta_ns < 10 * second: return "1-10s"
@@ -51,12 +51,25 @@ class LongShortTemporalMemory:
         if not history:
             return TemporalMemoryScore(0, 0, 0.0, 0.0, 0.0, ">1h")
         delta = timestamp_ns - history[-1][0]
-        short = sum(timestamp_ns - time <= self.short_window for time, _ in history)
+        short_history = [
+            (time, event) for time, event in history
+            if timestamp_ns - time <= self.short_window
+        ]
+        long_history = [
+            (time, event) for time, event in history
+            if timestamp_ns - time > self.short_window
+        ]
+        short = len(short_history)
+        long = len(long_history)
         exponential = math.exp(-delta / self.base)
-        log_time = 1.0 / (1.0 + math.log1p(delta / self.base))
+        long_delta = timestamp_ns - long_history[-1][0] if long_history else None
+        log_time = (
+            1.0 / (1.0 + math.log1p(long_delta / self.base))
+            if long_delta is not None else 0.0
+        )
         short_signal = min(1.0, short / 3.0)
         fused = self.short_weight * short_signal + (1 - self.short_weight) * log_time
-        return TemporalMemoryScore(short, len(history), exponential, log_time, fused, self._bucket(delta))
+        return TemporalMemoryScore(short, long, exponential, log_time, fused, self.gap_bucket(delta))
 
 
 __all__ = ["LongShortTemporalMemory", "RarePairHistoryKey", "TemporalMemoryScore"]
