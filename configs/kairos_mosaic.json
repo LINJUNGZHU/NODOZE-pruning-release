@@ -1,0 +1,19 @@
+{
+  "dataset": "DARPA_TC_E3_CADETS",
+  "frozen_parameters": true,
+  "selection_fraction": 0.8,
+  "projection_window_ns": 900000000000,
+  "unit_size": 64,
+  "representative_top_k": 16,
+  "seed_node_limit": 512,
+  "per_node_scan_limit": 64,
+  "inverse_lookback_ns": 21600000000000,
+  "long_history_lookback_ns": 604800000000000,
+  "target_forward_ns": 3600000000000,
+  "target_match_threshold": 0.15,
+  "long_history_threshold": 0.08,
+  "corridor_k_paths": 3,
+  "corridor_max_states": 20000,
+  "corridor_max_events": 24,
+  "timing_repetitions": 5
+}

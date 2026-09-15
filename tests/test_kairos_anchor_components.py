@@ -13,3 +13,10 @@ def test_queue_members_merge_but_time_alone_does_not():
         _e("c", 3, (), src="z", dst="y"),
     ))
     assert [component.event_ids for component in result] == [("a", "b"), ("c",)]
+
+
+def test_large_single_queue_avoids_quadratic_pair_scan():
+    rows = tuple(_e(f"e{index}", index, ("large",)) for index in range(20_000))
+    components = KairosAnchorComponentBuilder().build(rows)
+    assert len(components) == 1
+    assert len(components[0].event_ids) == 20_000

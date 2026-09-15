@@ -1,6 +1,7 @@
 from tc_pruning.detectors.kairos_adapter import NativeKairosAdapter, NativeKairosEvent
 from tc_pruning.models import EdgeRecord, NodeRecord
 from tc_pruning.store import ProvenanceStore
+from scripts.export_kairos_evidence import native_records
 
 
 def _native(time=100, loss=5.0, event_id=None):
@@ -55,3 +56,42 @@ def test_ambiguous_mapping_is_rejected_instead_of_taking_first(tmp_path):
     assert field.evidence == ()
     assert field.audit.ambiguous == 1
     assert field.audit.mapping_rate == 0.0
+
+
+def test_export_marks_only_native_threshold_exceedances_anomalous(tmp_path):
+    artifact = tmp_path / "artifact"
+    graph = artifact / "graph_4_6"
+    graph.mkdir(parents=True)
+    window = "2018-04-06 sample.txt"
+    (artifact / "evaluation.log").write_text(
+        f"Anomalous queue: ['{window}']\nAnomaly score: 10\n", encoding="utf-8"
+    )
+    rows = [
+        {"time": index, "edge_type": "EVENT_WRITE", "srcmsg": "{'subject': 'p'}",
+         "dstmsg": "{'file': 'f'}", "loss": loss}
+        for index, loss in enumerate((1.0, 1.0, 1.0, 10.0))
+    ]
+    (graph / window).write_text("".join(f"{row!r}\n" for row in rows), encoding="utf-8")
+    result = tuple(native_records(artifact))
+    assert [row.anomalous_native for row in result] == [False, False, False, True]
+
+
+def test_export_reads_selected_queues_from_label_free_manifest(tmp_path):
+    artifact = tmp_path / "artifact"
+    graph = artifact / "graph_4_12"
+    graph.mkdir(parents=True)
+    window = "2018-04-12 sample.txt"
+    rows = [
+        {"time": index, "edge_type": "EVENT_WRITE", "srcmsg": "{'subject': 'p'}",
+         "dstmsg": "{'file': 'f'}", "loss": loss}
+        for index, loss in enumerate((*([1.0] * 9), 10.0))
+    ]
+    (graph / window).write_text("".join(f"{row!r}\n" for row in rows), encoding="utf-8")
+    manifest = tmp_path / "queues.json"
+    manifest.write_text(__import__("json").dumps({"queues": [{
+        "queue_id": "q12", "windows": [window], "score": 123.0, "selected": True,
+    }]}), encoding="utf-8")
+    result = tuple(native_records(artifact, manifest))
+    assert len(result) == 10
+    assert result[-1].queue_ids == ("q12",)
+    assert result[-1].queue_strength == 123.0

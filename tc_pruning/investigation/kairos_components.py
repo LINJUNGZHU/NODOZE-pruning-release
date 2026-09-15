@@ -38,14 +38,39 @@ class KairosAnchorComponentBuilder:
             if left != right:
                 parent[max(left, right)] = min(left, right)
 
-        for left, first in enumerate(rows):
-            for right in range(left + 1, len(rows)):
-                second = rows[right]
-                same_queue = bool(set(first.queue_ids) & set(second.queue_ids))
-                same_summary = first.summary_component is not None and first.summary_component == second.summary_component
-                shared = bool({first.src, first.dst} & {second.src, second.dst}) and first.timestamp_ns != second.timestamp_ns
-                if same_queue or same_summary or shared:
-                    union(left, right)
+        queue_representative = {}
+        summary_representative = {}
+        node_state = {}
+        for index, row in enumerate(rows):
+            for queue in row.queue_ids:
+                if queue in queue_representative:
+                    union(index, queue_representative[queue])
+                else:
+                    queue_representative[queue] = index
+            if row.summary_component is not None:
+                if row.summary_component in summary_representative:
+                    union(index, summary_representative[row.summary_component])
+                else:
+                    summary_representative[row.summary_component] = index
+            for node in {row.src, row.dst}:
+                state = node_state.get(node)
+                if state is None:
+                    node_state[node] = {
+                        "first_time": row.timestamp_ns,
+                        "pending": [index],
+                        "connected_representative": None,
+                    }
+                elif state["connected_representative"] is not None:
+                    union(index, state["connected_representative"])
+                elif row.timestamp_ns == state["first_time"]:
+                    state["pending"].append(index)
+                else:
+                    representative = state["pending"][0]
+                    union(index, representative)
+                    for pending in state["pending"][1:]:
+                        union(pending, index)
+                    state["pending"] = []
+                    state["connected_representative"] = representative
         groups = {}
         for index, row in enumerate(rows):
             groups.setdefault(find(index), []).append(row)
