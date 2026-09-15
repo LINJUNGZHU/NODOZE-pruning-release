@@ -161,7 +161,7 @@ class EvidenceDrivenCandidateBuilder:
                 lower, upper = (frontier.lower_time_ns, edge.timestamp_ns) if frontier.direction == "backward" else (edge.timestamp_ns, frontier.upper_time_ns)
                 enqueue(_Frontier(next_node, frontier.direction, lower, upper, frontier.depth + 1, frontier.score, frontier.identity))
                 if self._node_is_process(next_node):
-                    control.append((next_node, frontier.lower_time_ns, edge.timestamp_ns, frontier.depth + 1))
+                    control.append((next_node, self._history_lower, edge.timestamp_ns, frontier.depth + 1))
             if frontier.direction == "backward" and self._node_is_process(frontier.node_id):
                 control.append((frontier.node_id, frontier.lower_time_ns, frontier.upper_time_ns, frontier.depth))
 
@@ -180,6 +180,10 @@ class EvidenceDrivenCandidateBuilder:
     @property
     def _has_common_window(self) -> bool:
         return self.config.history_start_ns is not None and self.config.cutoff_ns is not None
+
+    @property
+    def _history_lower(self) -> int:
+        return self.config.history_start_ns if self.config.history_start_ns is not None else _MIN_TIME
 
     def build_legacy(self, *, event_ids: Iterable[str] = (), node_ids: Iterable[str] = ()) -> CandidateResult:
         events = [AlertEvidence(f"legacy-event-{n}", "legacy", "1", EvidenceGranularity.EVENT, None, 0.0, True, event_ids=(event_id,), role_hint=RoleHint.UNKNOWN) for n, event_id in enumerate(sorted(set(event_ids)))]
@@ -302,6 +306,10 @@ class EvidenceDrivenCandidateBuilder:
                             witnesses += 1
                         _, target = self._causal_endpoints(strict_edge)
                         continued_queue.append(_Frontier(target, "forward", strict_edge.timestamp_ns, continued_frontier.upper_time_ns, continued_frontier.depth + 1, 0.0, continued_frontier.identity))
+                        if self._node_is_process(target):
+                            # A process reached by control continuation has a new
+                            # observation time and may itself have a bounded parent.
+                            queue.append((target, self._history_lower, strict_edge.timestamp_ns, continued_frontier.depth + 1, control_depth + 1))
                     if len(candidates) >= self.config.candidate_cap:
                         break
                 if len(candidates) >= self.config.candidate_cap:

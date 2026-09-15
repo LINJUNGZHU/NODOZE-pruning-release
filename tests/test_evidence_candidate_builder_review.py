@@ -137,7 +137,16 @@ def test_online_isolation_scan_checks_argument_names() -> None:
     tree = ast.parse(Path("tc_pruning/evidence_candidate_builder.py").read_text())
     forbidden = ("groundtruth", "ground_truth", "pdf_critical", "attack_window", "oracle", "evaluator", "evaluation")
     args = {node.arg.lower() for node in ast.walk(tree) if isinstance(node, ast.arg)}
+    imports = {
+        value.lower()
+        for node in ast.walk(tree)
+        for value in (
+            ([node.module] if isinstance(node, ast.ImportFrom) and node.module else [])
+            + ([alias.name for alias in node.names] if isinstance(node, ast.Import) else [])
+        )
+    }
     assert not {value for value in args if any(token in value for token in forbidden)}
+    assert not {value for value in imports if any(token in value for token in forbidden)}
 
 
 def test_build_legacy_equals_equivalent_canonical_event_evidence(tmp_path: Path) -> None:
