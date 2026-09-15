@@ -82,9 +82,11 @@ def test_real_copy_resume_and_tamper_reconciliation(tmp_path):
     sha = identity.file_sha256(source)
     target = 'cadets_e3_identity_v1_' + sha[:12]
     manifest_path = tmp_path / 'manifest.json'
-    first = identity.build_database(source, target, manifest_path, sha, batch_size=1)
+    first = identity.build_database(source, target, manifest_path, sha, batch_size=2)
     assert first['inference_eligible_events'] == 2
     assert first['eligible_collision_events'] == 1
+    assert first['progress']['identity_nodes']['rows'] == 3
+    assert first['progress']['identity_events']['rows'] == 3
     assert first['reconciliation']['identity_events']['count'] == 3
     assert identity.validate_manifest(first)['status'] == 'COMPLETED'
     resumed = identity.build_database(source, target, manifest_path, sha, batch_size=1)

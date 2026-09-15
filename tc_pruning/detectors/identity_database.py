@@ -4,14 +4,12 @@ No labels or investigation annotations are inputs. All raw records are retained;
 PIDSMaker views expose its model vocabulary with explicit audited aliases.
 """
 import argparse
-import csv
 import hashlib
 import io
 import json
 import re
 import sqlite3
 import subprocess
-from collections import Counter
 from pathlib import Path
 
 SCHEMA_VERSION = 1
@@ -158,7 +156,6 @@ def _write_manifest(path, value):
 
 def _copy_batch(cur, table, columns, rows):
     stream = io.StringIO()
-    writer = csv.writer(stream)
     # Force quote all strings so SQL NULL is distinguishable from empty text.
     for row in rows:
         pieces = []
@@ -230,7 +227,9 @@ def build_database(source, target, manifest_path, expected_sha=FROZEN_SHA256, ba
                 cur.execute('SELECT COALESCE(MAX(' + columns[0] + '),0),COUNT(*) FROM ' + table)
                 after, count = cur.fetchone()
             batch = []
+            last_id = after
             for row in iterator(source, after):
+                last_id = row[0]
                 batch.append(row)
                 if len(batch) >= batch_size:
                     with conn.cursor() as cur:
@@ -245,6 +244,9 @@ def build_database(source, target, manifest_path, expected_sha=FROZEN_SHA256, ba
                 with conn.cursor() as cur:
                     _copy_batch(cur, table, columns, batch)
                 conn.commit()
+                count += len(batch)
+            manifest['progress'][table] = {'rows': count, 'last_id': last_id}
+            _write_manifest(manifest_path, manifest)
         with conn.cursor() as cur:
             cur.execute(VIEWS)
         conn.commit()
@@ -333,10 +335,17 @@ def finalize_model_views(source, target, manifest_path):
             cur.execute('DROP VIEW subject_node_table; DROP VIEW netflow_node_table;')
             cur.execute(VIEWS)
             manifest = dict(previous)
+            manifest['progress'] = {}
+            for name, columns in (('identity_nodes', NODE_COLUMNS), ('identity_events', EVENT_COLUMNS)):
+                cur.execute('SELECT max(' + columns[0] + ') FROM ' + name)
+                manifest['progress'][name] = {'rows': previous['reconciliation'][name]['count'], 'last_id': cur.fetchone()[0]}
             manifest['raw_reconciliation_manifest_sha256'] = previous['manifest_sha256']
             manifest['loader_sha256'] = file_sha256(__file__)
             manifest['model_views_sha256'] = hashlib.sha256(VIEWS.encode()).hexdigest()
             manifest['view_code_commit'] = subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()
+            nested_repo = Path(__file__).resolve().parents[2] / 'webapp/runtime/research/PIDSMaker'
+            if nested_repo.is_dir():
+                manifest['pidsmaker_code_commit'] = subprocess.check_output(['git', '-C', str(nested_repo), 'rev-parse', 'HEAD'], text=True).strip()
             origin_sql = "CASE WHEN original_event_id LIKE 'LINEAGE:%' THEN 'DERIVED_NO_RAW_EVENT' WHEN original_event_id ~ '^[0-9A-Fa-f]{8}(-[0-9A-Fa-f]{4}){3}-[0-9A-Fa-f]{12}$' THEN 'RAW_TC_EVENT' ELSE 'OTHER_STORED_ID' END"
             cur.execute('SELECT ' + origin_sql + ',count(*) FROM identity_events GROUP BY 1')
             manifest['identity_origin_counts'] = dict(cur.fetchall())
