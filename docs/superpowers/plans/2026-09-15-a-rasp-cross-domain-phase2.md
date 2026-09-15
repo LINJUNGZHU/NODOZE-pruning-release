@@ -23,7 +23,7 @@
 
 ### Task 1: Offline miss taxonomy
 
-**Files:** Create `tc_pruning/evaluation/candidate_miss.py`, `scripts/analyze_candidate_misses.py`, and `tests/test_candidate_miss_analyzer.py`.
+**Files:** Create `tc_pruning/offline_analysis/candidate_miss.py`, `scripts/analyze_candidate_misses.py`, and `tests/test_candidate_miss_analyzer.py` (the repository already has `tc_pruning/evaluation.py`, so a same-name package is invalid).
 
 **Interfaces:** `CandidateMissAnalyzer(store, registry).analyze(node_id, anchors, cutoff_ns) -> CandidateMissRecord`; JSON/Markdown serializers consume frozen V4 output plus evaluator-only GT.
 
