@@ -57,15 +57,16 @@ def test_online_runner_writes_complete_hashed_artifacts_and_is_deterministic(tmp
     second = run_online_benchmark(config, {"Velox": _edge_evidence()}, tmp_path / "two")
 
     assert first["status"] == "COMPLETED"
+    first_dir, second_dir = Path(first["runs"]["Velox"]["run_directory"]), Path(second["runs"]["Velox"]["run_directory"])
     for name in ("native_manifest.json", "evidence.jsonl", "mapping_audit.json", "candidate_raw_events.jsonl", "A_rasp_final.json", "C_branch_fair_final.json", "timing.json", "resolved_config.json", "artifacts.json"):
-        assert (tmp_path / "one" / "Velox" / name).is_file()
-    manifest = json.loads((tmp_path / "one" / "Velox" / "artifacts.json").read_text())
+        assert (first_dir / name).is_file()
+    manifest = json.loads((first_dir / "artifacts.json").read_text())
     assert all("sha256" in row for row in manifest["artifacts"])
-    assert json.loads((tmp_path / "one" / "Velox" / "resolved_config.json").read_text())["config_sha256"]
-    assert json.loads((tmp_path / "one" / "Velox" / "A_rasp_final.json").read_text())["selected_raw_event_ids"]
-    assert json.loads((tmp_path / "one" / "Velox" / "C_branch_fair_final.json").read_text())["selected_raw_event_ids"]
+    assert json.loads((first_dir / "resolved_config.json").read_text())["config_sha256"]
+    assert json.loads((first_dir / "A_rasp_final.json").read_text())["selected_raw_event_ids"]
+    assert json.loads((first_dir / "C_branch_fair_final.json").read_text())["selected_raw_event_ids"]
     for name in ("evidence.jsonl", "mapping_audit.json", "candidate_raw_events.jsonl", "A_rasp_final.json", "C_branch_fair_final.json", "resolved_config.json"):
-        assert (tmp_path / "one" / "Velox" / name).read_bytes() == (tmp_path / "two" / "Velox" / name).read_bytes()
+        assert (first_dir / name).read_bytes() == (second_dir / name).read_bytes()
 
 
 def test_online_runner_preserves_completed_artifacts_when_a_later_selector_fails(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -112,14 +113,15 @@ def test_offline_evaluation_is_the_only_known_positive_entrypoint(tmp_path: Path
     _fixture_store(db)
     online = tmp_path / "online"
     run_online_benchmark(_config(db), {"Velox": _edge_evidence()}, online)
-    evaluation = evaluate_offline_benchmark(online, known_critical_event_ids={"e1"}, known_attack_node_ids={"p1"})
+    evaluation = evaluate_offline_benchmark(online / "runs" / "Velox", known_critical_event_ids={"e1"}, known_attack_node_ids={"p1"})
 
     assert evaluation["status"] == "COMPLETED"
-    assert json.loads(Path(evaluation["runs"]["Velox"]["evaluation"]).read_text())["candidate"]["known_TP"] == 1
+    only = next(iter(evaluation["runs"].values()))
+    assert json.loads(Path(only["evaluation"]).read_text())["candidate"]["known_TP"] == 1
 
 
 @pytest.mark.parametrize(("adapter_name", "native"), [
-    ("Velox", [{"event_uuid": "e1", "src_node_uuid": "f0", "dst_node_uuid": "p1", "loss": 4.0, "time": 1522706861813350342}]),
+    ("Velox", [{"event_uuid": "e1", "src_node_uuid": "f0", "dst_node_uuid": "p1", "relation": "EVENT_READ", "loss": 4.0, "time": 1522706861813350342}]),
     ("R-CAID", [{"node_uuid": "p1", "loss": 4.0}]),
     ("NODLINK", [{"node_uuid": "p1", "loss": 4.0}]),
 ])
@@ -137,9 +139,10 @@ def test_pidsmaker_adapter_schema_paths_feed_the_same_online_runner(tmp_path: Pa
     result = run_online_benchmark(config, {adapter_name: evidence}, tmp_path / adapter_name)
 
     assert result["status"] == "COMPLETED"
-    assert (tmp_path / adapter_name / adapter_name / "evidence.jsonl").is_file()
-    assert json.loads((tmp_path / adapter_name / adapter_name / "A_rasp_final.json").read_text())["selected_raw_event_ids"]
-    assert json.loads((tmp_path / adapter_name / adapter_name / "C_branch_fair_final.json").read_text())["selected_raw_event_ids"]
+    run_dir = Path(result["runs"][adapter_name]["run_directory"])
+    assert (run_dir / "evidence.jsonl").is_file()
+    assert json.loads((run_dir / "A_rasp_final.json").read_text())["selected_raw_event_ids"]
+    assert json.loads((run_dir / "C_branch_fair_final.json").read_text())["selected_raw_event_ids"]
 
 
 def test_missing_evidence_is_a_preserved_not_completed_attempt(tmp_path: Path) -> None:

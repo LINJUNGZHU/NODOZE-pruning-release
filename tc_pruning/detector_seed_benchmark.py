@@ -7,7 +7,7 @@ import json
 import os
 from pathlib import Path
 import resource
-import shutil
+import re
 import subprocess
 import tempfile
 import time
@@ -99,7 +99,9 @@ class BenchmarkConfig:
     def from_record(cls, record: Mapping[str, Any]) -> "BenchmarkConfig":
         _reject_bad(record)
         if record.get("schema_version") != SCHEMA_VERSION or record.get("dataset") != FROZEN_DATASET: raise ValueError("invalid CADETS_E3 benchmark schema")
-        fixture = bool(record.get("fixture_mode", False))
+        fixture_value = record.get("fixture_mode", False)
+        if not isinstance(fixture_value, bool): raise ValueError("fixture_mode must be a JSON boolean")
+        fixture = fixture_value
         if record.get("candidate_backend") != "EvidenceDrivenCandidateBuilder": raise ValueError("one detector-neutral candidate backend is required")
         database, candidate, projection, budget = (record.get(name) for name in ("database", "candidate", "projection", "budget"))
         if not all(isinstance(item, Mapping) for item in (database, candidate, projection, budget)): raise ValueError("missing benchmark sections")
@@ -118,8 +120,9 @@ class BenchmarkConfig:
             if not isinstance(row, Mapping): raise ValueError("invalid detector")
             if set(row) - {"detector_id", "run_id", "profile", "calibration_artifact", "calibration_sha256"}: raise ValueError("detector-specific downstream configuration is forbidden")
             identifier, run_id, profile = str(row.get("detector_id", "")), str(row.get("run_id", row.get("detector_id", ""))), row.get("profile")
-            if identifier.upper() not in _DETECTORS or not run_id: raise ValueError("unsupported detector/run id")
+            if identifier.upper() not in _DETECTORS or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]{0,79}", run_id): raise ValueError("unsupported detector/run id")
             if identifier.upper() == "VELOX" and profile not in {"VXL-0", "VXL-1", "VXL-2", "VXL-3", None}: raise ValueError("invalid Velox profile")
+            if identifier.upper() != "VELOX" and profile is not None: raise ValueError("only Velox accepts profiles")
             calibration, calibration_hash = row.get("calibration_artifact"), row.get("calibration_sha256")
             if profile in {"VXL-1", "VXL-3"} and (not isinstance(calibration, str) or not isinstance(calibration_hash, str)): raise ValueError("frozen calibration artifact/hash required")
             specs.append(DetectorSpec(identifier, run_id, None if profile is None else str(profile), calibration, calibration_hash))
@@ -152,12 +155,19 @@ def _edge_record(store: ProvenanceStore, edge: StoredEdge) -> dict[str, Any]:
     return {"stored_event_id": edge.event_id, "original_event_id": store.original_event_id(edge.event_id), "edge_id": edge.edge_id, "src_uuid": edge.src, "dst_uuid": edge.dst, "relation": edge.relation, "timestamp_ns": edge.timestamp_ns, "host": edge.host, "src_type": edge.src_type, "dst_type": edge.dst_type}
 
 def _identity_audit(store: ProvenanceStore, rows: tuple[AlertEvidence, ...]) -> tuple[tuple[AlertEvidence, ...], tuple[dict[str, Any], ...], dict[str, Any]]:
-    usable, audits, counts = [], [], {"exact": 0, "missing": 0, "duplicate": 0, "ambiguous": 0}
+    usable, audits, counts, seen = [], [], {"exact": 0, "missing": 0, "duplicate": 0, "ambiguous": 0}, set()
     for item in rows:
         events = [{"native_event_id": event, "matches": [{"stored_event_id": stored, "original_event_id": original} for stored, original in store.event_identity_matches(event)]} for event in item.event_ids]
         nodes = [{"native_node_id": node, "matches": 1 if store.get_node(node) else 0} for node in item.node_ids]
         sizes = [len(entry["matches"]) for entry in events] + [entry["matches"] for entry in nodes]
-        state = "exact" if sizes and all(value == 1 for value in sizes) else "missing" if not sizes or any(value == 0 for value in sizes) else "ambiguous"
+        native_object = str(item.detector_metadata.get("native_id", item.evidence_id))
+        duplicate = item.evidence_id in seen or native_object in seen
+        seen.update((item.evidence_id, native_object))
+        coherent = True
+        if item.granularity.value == "EDGE" and len(events) == 1 and len(events[0]["matches"]) == 1:
+            stored = events[0]["matches"][0]["stored_event_id"]; edge = store.get_edge_by_event_id(stored)
+            coherent = edge is not None and edge.src == item.src_uuid and edge.dst == item.dst_uuid and edge.relation == item.relation and (item.timestamp_start is None or edge.timestamp_ns == item.timestamp_start) and (item.timestamp_end is None or edge.timestamp_ns == item.timestamp_end)
+        state = "duplicate" if duplicate else "exact" if coherent and sizes and all(value == 1 for value in sizes) else "missing" if not sizes or any(value == 0 for value in sizes) or not coherent else "ambiguous"
         counts[state] += 1; audits.append({"evidence_id": item.evidence_id, "identity_status": state, "event_identity": events, "node_identity": nodes})
         if state == "exact": usable.append(item)
     return tuple(usable), tuple(audits), {"artifact_schema": "native-mapping-audit-v2", "total_inference": len(rows), "scored": sum(item.raw_score is not None for item in rows), "native_decisions": sum(item.native_decision for item in rows), "evidence": len(rows), **counts, "mapping_rate": counts["exact"] / len(rows) if rows else None}
@@ -171,9 +181,11 @@ def _causal(edge: StoredEdge) -> tuple[str, str]:
     raise ValueError("candidate contains non-causal CDM edge")
 
 def _proxies(edges: tuple[StoredEdge, ...], anchor_events: frozenset[str], anchor_nodes: frozenset[str], cap: int) -> tuple[frozenset[str], dict[str, Any]]:
-    node_proxy = {edge.event_id for edge in edges if edge.src in anchor_nodes or edge.dst in anchor_nodes}; proxy = frozenset(set(anchor_events) | node_proxy)
-    if len(proxy) > cap: raise ValueError("selector proxy cap exceeded")
-    return proxy, {"anchor_event_ids": sorted(anchor_events), "anchor_node_ids": sorted(anchor_nodes), "node_incident_proxy_event_ids": sorted(node_proxy), "mandatory_proxy_event_ids": sorted(proxy), "proxy_cap": cap}
+    if len(anchor_events) > cap: raise ValueError("selector cap cannot retain event anchors")
+    incident = sorted((edge for edge in edges if edge.src in anchor_nodes or edge.dst in anchor_nodes), key=lambda edge: (0 if edge.event_id in anchor_events else 1, edge.timestamp_ns, edge.event_id))
+    node_proxy = tuple(edge.event_id for edge in incident[:max(0, cap - len(anchor_events))])
+    proxy = frozenset(set(anchor_events) | set(node_proxy))
+    return proxy, {"anchor_event_ids": sorted(anchor_events), "anchor_node_ids": sorted(anchor_nodes), "node_incident_proxy_event_ids": list(node_proxy), "mandatory_proxy_event_ids": sorted(proxy), "proxy_cap": cap, "selection": "anchor-first,time,event-id"}
 
 def _a_rasp(store: ProvenanceStore, edges: tuple[StoredEdge, ...], poi_ids: frozenset[str], cap: int, proxy_audit: Mapping[str, Any]) -> dict[str, Any]:
     if not edges or not poi_ids or len(poi_ids) > cap: raise ValueError("selector requires nonempty candidate and bounded POI proxies")
@@ -243,9 +255,10 @@ def run_online_benchmark(config_record: Mapping[str, Any], evidence_by_run: Mapp
                 _write_json(attempt / "timing.json", {"artifact_schema": "online-timing-v2", **performance_fields(inference_seconds=inference, adapter_seconds=None, candidate_seconds=candidate_seconds, a_rasp_seconds=a_seconds, branch_fair_seconds=b_seconds, peak_rss_kb=max(before, resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)), "adapter_seconds_status": "NOT_AVAILABLE", "detector_inference_seconds_status": "MEASURED_EXTERNAL" if inference is not None else "NOT_AVAILABLE", "candidate_seconds_status": "MEASURED", "selector_seconds_status": "MEASURED"})
                 _write_json(attempt / "stage_identities.json", {"artifact_schema": "stage-identities-v2", "preprocessing": {"status": "NOT_AVAILABLE", "reason": "no graph/tensor manifest supplied"}, "inference": {"status": "NOT_AVAILABLE", "reason": "no inference identity artifact supplied"}, "scored": {"status": "NOT_AVAILABLE", "reason": "no scored identity artifact supplied"}, "native_threshold": {"status": "AVAILABLE", "event_ids": sorted(event for item in candidates for event in item.event_ids), "node_ids": sorted(node for item in candidates for node in item.node_ids)}, "evidence": {"status": "AVAILABLE", "event_ids": sorted(event for item in usable for event in item.event_ids), "node_ids": sorted(node for item in usable for node in item.node_ids)}})
                 _verify_native(native); _write_json(attempt / "resolved_config.json", {"artifact_schema": "resolved-online-config-v2", "config": config.resolved, "config_sha256": config.config_sha256, "expected_config_sha256": config.expected_config_sha256, "code_commit": _commit(), "expected_code_commit": config.expected_code_commit, "database_path": config.database_path, "database_sha256": config.database_sha256, "native_aggregate_sha256": native["aggregate_sha256"]}); _status(attempt, "COMPLETED", "complete"); _artifact_manifest(attempt)
-                final = root / spec.run_id
-                if final.exists(): shutil.rmtree(final)
-                os.replace(attempt, final); result["runs"][spec.run_id] = {"status": "COMPLETED", "run_directory": str(final)}
+                published = root / "runs" / spec.run_id / attempt.name
+                published.parent.mkdir(parents=True, exist_ok=True); os.replace(attempt, published)
+                _atomic(root / "runs" / f"{spec.run_id}.CURRENT", _canonical({"run_id": spec.run_id, "attempt": str(published.resolve())}))
+                result["runs"][spec.run_id] = {"status": "COMPLETED", "run_directory": str(published)}
             except Exception as exc:
                 try: _status(attempt, "NOT_COMPLETED", stage, f"{type(exc).__name__}: {exc}"); _artifact_manifest(attempt)
                 except Exception: pass

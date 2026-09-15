@@ -11,8 +11,8 @@
     "history_start_ns": 1522706861813350340,
     "cutoff_ns": 1523655358953968696,
     "max_strict_depth": 8,
-    "max_control_depth": 0,
-    "enable_common_cause": false,
+    "max_control_depth": 2,
+    "enable_common_cause": true,
     "scan_multiplier": 20
   },
   "projection": {"mode": "DEPIMPACT_COMPATIBLE", "merge_window_ns": 900000000000},
@@ -29,5 +29,5 @@
     {"detector_id": "NODLINK", "run_id": "NODLINK"}
   ],
   "expected_code_commit": "0000000000000000000000000000000000000000",
-  "expected_config_sha256": "4986bcfcb739e35a1d7b4eb8609254c5076653c53ad7d8e4b32e9233ede77d17"
+  "expected_config_sha256": "cadbd89187525721a27de7ddea01821a5d026b2f7b89b243b2f5c20ab1efb0c0"
 }

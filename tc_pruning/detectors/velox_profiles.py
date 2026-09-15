@@ -4,14 +4,14 @@ from __future__ import annotations
 from dataclasses import replace
 from typing import Iterable
 
-from ..evidence_candidate_builder import EvidencePriority
+from ..evidence_candidate_builder import EvidencePriority, SQLiteEvidencePriority
 from .alert_evidence import AlertEvidence
 
 
 _PROFILES = frozenset({"VXL-0", "VXL-1", "VXL-2", "VXL-3"})
 
 
-def apply_velox_profile(evidence: Iterable[AlertEvidence], profile: str, *, frozen_development_percentile_threshold: float | None = None) -> tuple[tuple[AlertEvidence, ...], EvidencePriority]:
+def apply_velox_profile(evidence: Iterable[AlertEvidence], profile: str, *, frozen_development_percentile_threshold: float | None = None, priority_path: str | None = None) -> tuple[tuple[AlertEvidence, ...], EvidencePriority | SQLiteEvidencePriority]:
     """Return continuous evidence plus optional search-only priority.
 
     Profile decisions modify only native anchor eligibility.  Every input row is
@@ -28,7 +28,10 @@ def apply_velox_profile(evidence: Iterable[AlertEvidence], profile: str, *, froz
         anchored = tuple(replace(item, native_decision=item.calibrated_score >= float(frozen_development_percentile_threshold)) for item in rows)
     else:
         anchored = rows
-    if profile == "VXL-2":
+    if profile in {"VXL-2", "VXL-3"} and priority_path is not None:
+        priority = SQLiteEvidencePriority(priority_path)
+        priority.add_many((event, float(item.raw_score) if profile == "VXL-2" else item.calibrated_score) for item in rows if item.raw_score is not None or profile == "VXL-3" for event in item.event_ids)
+    elif profile == "VXL-2":
         priority = EvidencePriority({event: float(item.raw_score) for item in rows if item.raw_score is not None for event in item.event_ids})
     elif profile == "VXL-3":
         priority = EvidencePriority({event: item.calibrated_score for item in rows for event in item.event_ids})
