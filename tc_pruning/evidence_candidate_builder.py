@@ -1,7 +1,7 @@
 """Detector-neutral, label-free reconstruction from immutable alert evidence."""
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import heapq
 import json
 import resource
@@ -61,6 +61,9 @@ class CandidateResult:
     soft_seed_node_ids: frozenset[str]
     stop_reason: str
     performance: CandidatePerformance
+    # Auditable, detector-blind search lineage.  It is intentionally based on
+    # builder traversal facts, never selector-invented source/relation labels.
+    branch_provenance: Mapping[str, tuple[str, ...]] = field(default_factory=dict)
 
 
 class PriorityLookup(Protocol):
@@ -212,10 +215,11 @@ class EvidenceDrivenCandidateBuilder:
             queries += control_queries
             cap_reached = len(candidates) >= self.config.candidate_cap
         ordered = tuple(candidates[key] for key in sorted(candidates))
+        provenance = {edge.event_id: (("anchor:" + edge.event_id,) if edge.event_id in anchor_events else ("search:" + edge.src + "->" + edge.dst,)) for edge in ordered}
         return CandidateResult(
             ordered, frozenset(nodes), frozenset(edge.event_id for edge in ordered), frozenset(anchor_events), frozenset(anchor_nodes), frozenset(soft_nodes),
             "CAP_REACHED" if cap_reached else "FRONTIER_EXHAUSTED",
-            CandidatePerformance(time.perf_counter() - started, int(max(before_rss, resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)), len(seen), queries, unexpanded, "MISSING_TIME_CHECKPOINT" if unexpanded else None, control_witnesses),
+            CandidatePerformance(time.perf_counter() - started, int(max(before_rss, resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)), len(seen), queries, unexpanded, "MISSING_TIME_CHECKPOINT" if unexpanded else None, control_witnesses), provenance,
         )
 
     @property

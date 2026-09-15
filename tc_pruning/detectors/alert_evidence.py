@@ -288,6 +288,16 @@ def load_evidence_jsonl(path: str | Path) -> tuple[AlertEvidence, ...]:
     return tuple(sorted(rows, key=lambda item: item.evidence_id))
 
 
+def iter_evidence_jsonl(path: str | Path) -> Iterable[AlertEvidence]:
+    """Single-pass JSONL reader preserving source order for SQLite staging."""
+    def reject_constant(_: str) -> None: raise ValueError("non-finite JSON number")
+    with Path(path).open(encoding="utf-8") as handle:
+        for number, line in enumerate(handle, 1):
+            if not line.strip(): continue
+            try: yield AlertEvidence.from_record(json.loads(line, parse_constant=reject_constant))
+            except (TypeError, ValueError, json.JSONDecodeError) as exc: raise ValueError(f"invalid AlertEvidence JSONL line {number}") from exc
+
+
 @dataclass(frozen=True, slots=True)
 class DevelopmentCalibrator:
     development_scores: tuple[float, ...]
@@ -556,5 +566,5 @@ __all__ = [
     "ALERT_EVIDENCE_SCHEMA_VERSION", "ORTHRUS_ALERTS_PATH", "AlertEvidence", "AlertEvidenceProvider", "CausalAgreement",
     "DevelopmentCalibrator", "EvidenceGranularity", "KairosEvidenceProvider", "MappingQuality", "NODLINKEvidenceAdapter",
     "OrthrusEvidenceProvider", "RCAIDEvidenceAdapter", "RoleHint", "VeloxEvidenceAdapter", "dump_evidence_jsonl",
-    "fuse_same_object_noisy_or", "load_evidence_jsonl",
+    "fuse_same_object_noisy_or", "load_evidence_jsonl", "iter_evidence_jsonl",
 ]

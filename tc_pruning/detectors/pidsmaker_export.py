@@ -4,33 +4,59 @@ from __future__ import annotations
 import csv
 import hashlib
 import json
+import os
 from pathlib import Path
-from typing import Iterable, Mapping
+import tempfile
+from typing import Iterable, Iterator, Mapping
 
 from ..detector_seed_benchmark import _atomic, _canonical
 from .alert_evidence import AlertEvidence, AlertEvidenceProvider
 
 
-def _native_rows(native: str | Path | Iterable[Mapping[str, object]]) -> list[dict[str, object]]:
-    if not isinstance(native, (str, Path)): return [dict(row) for row in native]
+def _native_rows(native: str | Path | Iterable[Mapping[str, object]]) -> Iterator[dict[str, object]]:
+    """Deterministic shard iterator; never reads a detector output wholesale."""
+    if not isinstance(native, (str, Path)):
+        yield from (dict(row) for row in native)
+        return
     source = Path(native); files = (source,) if source.is_file() else tuple(sorted(item for item in source.rglob("*") if item.suffix.lower() in {".csv", ".json"}))
-    rows: list[dict[str, object]] = []
     for path in files:
         if path.suffix.lower() == ".csv":
-            with path.open(encoding="utf-8", newline="") as stream: rows.extend(dict(row) for row in csv.DictReader(stream))
+            with path.open(encoding="utf-8", newline="") as stream:
+                yield from (dict(row) for row in csv.DictReader(stream))
         else:
-            payload = json.loads(path.read_text(encoding="utf-8")); rows.extend(dict(row) for row in payload)
-    return rows
+            with path.open(encoding="utf-8") as stream:
+                payload = json.load(stream)
+            if not isinstance(payload, list): raise ValueError("native JSON shard must be an array")
+            yield from (dict(row) for row in payload)
+
+def _stream_snapshot(rows: Iterable[Mapping[str, object]], snapshot: Path) -> tuple[int, str]:
+    snapshot.parent.mkdir(parents=True, exist_ok=True); fd, temporary = tempfile.mkstemp(prefix=".native.", dir=snapshot.parent); digest, count = hashlib.sha256(), 0
+    try:
+        with os.fdopen(fd, "wb") as stream:
+            for row in rows:
+                line = _canonical(dict(row)); stream.write(line); digest.update(line); count += 1
+            stream.flush(); os.fsync(stream.fileno())
+        os.replace(temporary, snapshot)
+    except BaseException:
+        try: os.unlink(temporary)
+        except FileNotFoundError: pass
+        raise
+    return count, digest.hexdigest()
 
 
 def export_evidence(adapter: AlertEvidenceProvider, native: str | Path | Iterable[Mapping[str, object]], development: str | Path | Iterable[Mapping[str, object]], output: str | Path) -> tuple[AlertEvidence, ...]:
     """Require frozen-development calibration and atomically emit canonical JSONL."""
-    native_rows = _native_rows(native)
-    rows = adapter.provide(native_rows, development)
-    _atomic(Path(output), b"".join(_canonical(item.to_record()) for item in rows))
     snapshot = Path(output).with_suffix(".native.jsonl")
-    _atomic(snapshot, b"".join(_canonical(row) for row in native_rows))
-    _atomic(snapshot.with_suffix(snapshot.suffix + ".manifest.json"), _canonical({"artifact_schema": "native-snapshot-v1", "data_sha256": hashlib.sha256(snapshot.read_bytes()).hexdigest(), "record_count": len(native_rows)}))
+    count, digest = _stream_snapshot(_native_rows(native), snapshot)
+    # Disk staging gives adapters a replayable stream without retaining all
+    # input rows or CSV shard contents in process memory.
+    def staged_rows() -> Iterator[dict[str, object]]:
+        with snapshot.open(encoding="utf-8") as stream:
+            for line in stream:
+                if line.strip(): yield dict(json.loads(line))
+    rows = adapter.provide(staged_rows(), development)
+    _atomic(Path(output), b"".join(_canonical(item.to_record()) for item in rows))
+    _atomic(snapshot.with_suffix(snapshot.suffix + ".manifest.json"), _canonical({"artifact_schema": "native-snapshot-v1", "data_sha256": digest, "record_count": count}))
     return rows
 
 
