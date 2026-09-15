@@ -81,7 +81,11 @@ def test_every_evidence_granularity_reconstructs_from_real_members(
         )])
 
     assert "p" in result.node_ids
-    assert {"past", "future"} <= result.event_ids
+    if granularity is EvidenceGranularity.NODE:
+        assert result.event_ids == set()
+        assert result.performance.unexpanded_anchor_reason == "MISSING_TIME_CHECKPOINT"
+    else:
+        assert {"past", "future"} <= result.event_ids
     if event_ids:
         assert "anchor" in result.event_ids
 
@@ -169,7 +173,9 @@ def test_control_lineage_and_common_cause_are_explicitly_configured(tmp_path: Pa
         enabled = _builder(store, max_control_depth=1, enable_common_cause=True).build([_evidence(node_ids=("child",), timestamp_start=10, timestamp_end=10)])
 
     assert "fork" in disabled.event_ids
-    assert "sibling-fork" not in disabled.event_ids
+    # A validated parent now launches remaining strict forward reconstruction,
+    # so this sibling branch can be reached even without common-cause mode.
+    assert "sibling-fork" in disabled.event_ids
     assert "sibling-fork" in enabled.event_ids
     assert "sibling" in enabled.node_ids
 
@@ -193,7 +199,7 @@ def test_online_builder_has_no_label_or_evaluator_import_or_input() -> None:
 
 def test_offline_funnel_decomposes_candidate_ceiling_and_pairwise_delta() -> None:
     from tc_pruning.seed_utility_evaluation import (
-        CandidateStageIds, EdgeProjection, ProjectionMode, evaluate_coverage_funnel, pairwise_candidate_delta,
+        CandidateSnapshot, CandidateStageIds, EdgeProjection, ProjectionMode, evaluate_coverage_funnel, pairwise_candidate_delta,
     )
 
     funnel = evaluate_coverage_funnel(
@@ -205,7 +211,7 @@ def test_offline_funnel_decomposes_candidate_ceiling_and_pairwise_delta() -> Non
     )
     assert funnel["candidate"]["known_recall"] == pytest.approx(0.25)
     assert funnel["candidate_ceiling_decomposition"] == {
-        "unmapped": ["d"], "preprocess": ["c"], "inference": [], "score": ["b"],
+        "unmapped": ["d"], "preprocess": ["c"], "inference": [], "unscored": ["b"], "below_native_threshold": [],
         "evidence": [], "search": [],
     }
     assert funnel["per_known_critical_edge"]["b"] == {
@@ -215,7 +221,7 @@ def test_offline_funnel_decomposes_candidate_ceiling_and_pairwise_delta() -> Non
     projection = EdgeProjection(ProjectionMode.RAW_EVENT, merge_window_ns=10)
     left = [type("E", (), {"event_id": "a", "src": "p", "dst": "x", "relation": "EVENT_WRITE", "timestamp_ns": 1})()]
     right = left + [type("E", (), {"event_id": "b", "src": "p", "dst": "attack", "relation": "EVENT_WRITE", "timestamp_ns": 2})()]
-    delta = pairwise_candidate_delta(left, right, known_critical_event_ids={"a", "b"}, known_attack_node_ids={"attack"}, projection=projection)
+    delta = pairwise_candidate_delta(CandidateSnapshot(tuple(left), frozenset({"p", "x"})), CandidateSnapshot(tuple(right), frozenset({"p", "attack"})), known_critical_event_ids={"a", "b"}, known_attack_node_ids={"attack"}, projection=projection)
     assert delta["new_critical_edges"] == ["b"]
     assert delta["new_attack_nodes"] == ["attack"]
     assert delta["projected_edge_delta"] == 1

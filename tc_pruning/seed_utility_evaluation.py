@@ -81,6 +81,18 @@ class DetectorRunContract:
             raise ValueError("at least one selector is required")
 
 
+@dataclass(frozen=True, slots=True)
+class CandidateSnapshot:
+    """An independently produced candidate set, including seed-only nodes."""
+
+    edges: tuple[StoredEdge, ...]
+    node_ids: frozenset[str]
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "edges", tuple(self.edges))
+        object.__setattr__(self, "node_ids", frozenset(self.node_ids))
+
+
 def partial_positive_metrics(
     output_event_ids: Iterable[str], known_critical_event_ids: Iterable[str],
 ) -> dict[str, int | float]:
@@ -114,15 +126,23 @@ def evaluate_coverage_funnel(
     result: dict[str, object] = {
         name: partial_positive_metrics(event_ids, known) for name, event_ids in ordered
     }
-    # Attribute a known miss to the first boundary at which it disappears.
+    # Stage sets are auditable snapshots, not assumed to be monotone.
     result["candidate_ceiling_decomposition"] = {
         "unmapped": sorted(known - stages.raw_database),
         "preprocess": sorted((known & stages.raw_database) - stages.preprocessing),
         "inference": sorted((known & stages.preprocessing) - stages.inference),
-        "score": sorted((known & stages.inference) - stages.native_threshold),
+        "unscored": sorted((known & stages.inference) - stages.scored),
+        "below_native_threshold": sorted((known & stages.scored) - stages.native_threshold),
         "evidence": sorted((known & stages.native_threshold) - stages.evidence),
         "search": sorted((known & stages.evidence) - stages.candidate),
     }
+    direct = known & stages.evidence
+    candidate = known & stages.candidate
+    direct_miss = known - stages.evidence
+    result["direct_evidence_hits"] = sorted(direct)
+    result["direct_evidence_misses"] = sorted(direct_miss)
+    result["direct_miss_recovered_by_reconstruction"] = sorted((candidate - direct))
+    result["reconstruction_miss"] = sorted(known - stages.candidate)
     result["per_known_critical_edge"] = {
         event_id: {name: event_id in event_ids for name, event_ids in ordered}
         for event_id in sorted(known)
@@ -131,21 +151,22 @@ def evaluate_coverage_funnel(
 
 
 def pairwise_candidate_delta(
-    left_edges: Iterable[StoredEdge], right_edges: Iterable[StoredEdge], *,
+    left: CandidateSnapshot, right: CandidateSnapshot, *,
     known_critical_event_ids: Iterable[str], known_attack_node_ids: Iterable[str], projection: EdgeProjection,
 ) -> dict[str, object]:
     """Candidate-level complementarity, with raw and projected deltas separated."""
-    left = {edge.event_id: edge for edge in left_edges}
-    right = {edge.event_id: edge for edge in right_edges}
-    added = set(right) - set(left)
+    left_edges = {edge.event_id: edge for edge in left.edges}
+    right_edges = {edge.event_id: edge for edge in right.edges}
+    union_edges = {**left_edges, **right_edges}
+    added = set(union_edges) - set(left_edges)
     critical = set(known_critical_event_ids)
     attack_nodes = set(known_attack_node_ids)
-    left_nodes = {node for edge in left.values() for node in (edge.src, edge.dst)}
-    right_nodes = {node for edge in right.values() for node in (edge.src, edge.dst)}
+    left_nodes = set(left.node_ids) | {node for edge in left_edges.values() for node in (edge.src, edge.dst)}
+    union_nodes = set(left.node_ids) | set(right.node_ids) | {node for edge in union_edges.values() for node in (edge.src, edge.dst)}
     return {
         "new_critical_edges": sorted(added & critical),
-        "new_attack_nodes": sorted((right_nodes - left_nodes) & attack_nodes),
-        "projected_edge_delta": projection.count(right.values()) - projection.count(left.values()),
+        "new_attack_nodes": sorted((union_nodes - left_nodes) & attack_nodes),
+        "projected_edge_delta": projection.count(union_edges.values()) - projection.count(left_edges.values()),
         "raw_event_delta": len(added),
     }
 
@@ -166,10 +187,12 @@ def enforce_common_configuration(runs: Iterable[DetectorRunContract]) -> None:
 
 def performance_fields(
     *, inference_seconds: float | None, candidate_seconds: float, final_seconds: float | None,
+    adapter_seconds: float = 0.0,
     peak_rss_kb: int | None, candidate_edges: int, final_edges: int | None,
 ) -> Mapping[str, int | float | None]:
     """Keep detector inference separate from post-alert reconstruction and selection."""
-    if candidate_seconds < 0 or (inference_seconds is not None and inference_seconds < 0):
+    numbers = (inference_seconds, adapter_seconds, candidate_seconds, final_seconds, peak_rss_kb, candidate_edges, final_edges)
+    if any(value is not None and value < 0 for value in numbers):
         raise ValueError("durations must be non-negative")
     return {
         "detector_inference_seconds": inference_seconds,
@@ -178,11 +201,15 @@ def performance_fields(
         "peak_rss_kb": peak_rss_kb,
         "candidate_raw_event_count": candidate_edges,
         "final_raw_event_count": final_edges,
+        "adapter_seconds": adapter_seconds,
+        "candidate_seconds": candidate_seconds,
+        "selector_seconds": final_seconds,
+        "total_post_alert_seconds": adapter_seconds + candidate_seconds + (final_seconds or 0.0),
     }
 
 
 __all__ = [
-    "CandidateStageIds", "DetectorRunContract", "EdgeProjection", "ProjectionMode",
+    "CandidateSnapshot", "CandidateStageIds", "DetectorRunContract", "EdgeProjection", "ProjectionMode",
     "enforce_common_configuration", "evaluate_coverage_funnel", "pairwise_candidate_delta",
     "partial_positive_metrics", "performance_fields",
 ]
