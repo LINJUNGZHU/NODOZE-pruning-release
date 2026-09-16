@@ -95,12 +95,16 @@ class SQLiteEvidencePriority:
 
     def __init__(self, path: str) -> None:
         self.conn = sqlite3.connect(path)
-        self.conn.execute("CREATE TABLE IF NOT EXISTS evidence_priority(event_id TEXT PRIMARY KEY, score REAL NOT NULL)")
-        self.conn.execute("CREATE TABLE IF NOT EXISTS node_priority(node_id TEXT PRIMARY KEY, score REAL NOT NULL)")
-        self.conn.execute("CREATE INDEX IF NOT EXISTS idx_evidence_priority_event ON evidence_priority(event_id)")
+        try:
+            self.conn.execute("CREATE TABLE IF NOT EXISTS evidence_priority(event_id TEXT PRIMARY KEY, score REAL NOT NULL)")
+            self.conn.execute("CREATE TABLE IF NOT EXISTS node_priority(node_id TEXT PRIMARY KEY, score REAL NOT NULL)")
+            self.conn.execute("CREATE INDEX IF NOT EXISTS idx_evidence_priority_event ON evidence_priority(event_id)")
+        except BaseException:
+            self.conn.close()
+            raise
 
     def add_many(self, rows: Iterable[tuple[str, float]]) -> None:
-        self.conn.executemany("INSERT OR REPLACE INTO evidence_priority(event_id,score) VALUES (?,?)", ((key, float(value)) for key, value in rows)); self.conn.commit()
+        self.conn.executemany("INSERT INTO evidence_priority(event_id,score) VALUES (?,?) ON CONFLICT(event_id) DO UPDATE SET score=MAX(score,excluded.score)", ((key, float(value)) for key, value in rows)); self.conn.commit()
 
     def score_for_event(self, event_id: str) -> float | None:
         row = self.conn.execute("SELECT score FROM evidence_priority WHERE event_id=?", (event_id,)).fetchone()
@@ -181,7 +185,7 @@ class EvidenceDrivenCandidateBuilder:
                         soft_nodes.add(node)
                     for direction in directions:
                         lower, upper = self._bounds(direction, edge.timestamp_ns, edge.timestamp_ns)
-                        enqueue(_Frontier(node, direction, lower, upper, 0, item.calibrated_score, f"{identity}|event:{edge.event_id}", f"anchor:{identity}:event:{edge.event_id}", "strict"))
+                        enqueue(_Frontier(node, direction, lower, upper, 0, item.calibrated_score, f"{identity}|event:{edge.event_id}", f"anchor:{identity}:event:{edge.event_id}:node:{node}:direction:{direction}", "strict"))
             event_members = {node for edge in event_edges for node in self._anchor_endpoints(edge)}
             extra = {item.src_uuid, item.dst_uuid} if item.granularity is EvidenceGranularity.EDGE else set()
             for node in sorted(set(item.node_ids) | extra):
@@ -196,10 +200,10 @@ class EvidenceDrivenCandidateBuilder:
                     continue
                 for direction in directions:
                     lower, upper = self._bounds(direction, item.timestamp_start, item.timestamp_end)
-                    enqueue(_Frontier(node, direction, lower, upper, 0, item.calibrated_score, f"{identity}|node:{node}", f"anchor:{identity}:node:{node}", "strict"))
+                    enqueue(_Frontier(node, direction, lower, upper, 0, item.calibrated_score, f"{identity}|node:{node}", f"anchor:{identity}:node:{node}:direction:{direction}", "strict"))
                 if self._node_is_process(node):
                     observed = item.timestamp_start if item.timestamp_start is not None else item.timestamp_end
-                    control.append((node, self.config.history_start_ns if self.config.history_start_ns is not None else _MIN_TIME, observed if observed is not None else self.config.cutoff_ns, 0, f"anchor:{identity}:node:{node}"))
+                    control.append((node, self.config.history_start_ns if self.config.history_start_ns is not None else _MIN_TIME, observed if observed is not None else self.config.cutoff_ns, 0, f"anchor:{identity}:node:{node}:direction:backward"))
 
         while queue and not cap_reached:
             _, _, _, frontier = heapq.heappop(queue)
@@ -333,7 +337,7 @@ class EvidenceDrivenCandidateBuilder:
         queue = [(node, lower, upper, depth, 0, branch) for node, lower, upper, depth, branch in initial if upper is not None]
         seen: set[tuple[str, int, int, int]] = set()
         queries = witnesses = 0
-        branches: list[tuple[str, StoredEdge, int, int]] = []
+        branches: list[tuple[str, StoredEdge, int, int, str]] = []
         while queue and len(candidates) < self.config.candidate_cap:
             child, lower, upper, strict_depth, control_depth, origin_branch = queue.pop(0)
             state = (child, lower, upper, control_depth, origin_branch)
@@ -357,7 +361,7 @@ class EvidenceDrivenCandidateBuilder:
                 if new:
                     witnesses += 1
                 queue.append((parent, lower, edge.timestamp_ns, strict_depth, control_depth + 1, control_branch))
-                branches.append((parent, edge, lower, upper))
+                branches.append((parent, edge, lower, upper, control_branch))
                 # A validated control parent is a bounded context anchor. Continue
                 # strict reconstruction only through the depth that remains.
                 continued_queue = [_Frontier(parent, "forward", edge.timestamp_ns, upper, strict_depth, 0.0, f"control:{parent}:{edge.event_id}", control_branch, "control-strict")]
@@ -388,7 +392,7 @@ class EvidenceDrivenCandidateBuilder:
                 if len(candidates) >= self.config.candidate_cap:
                     break
         if self.config.enable_common_cause:
-            for parent, branch, lower, upper in branches:
+            for parent, branch, lower, upper, origin_branch in branches:
                 if len(candidates) >= self.config.candidate_cap:
                     break
                 queries += 1
@@ -401,7 +405,7 @@ class EvidenceDrivenCandidateBuilder:
                         continue
                     if edge.relation.upper() in _CONTROL and source == parent:
                         new = edge.edge_id not in candidates
-                        if not admit(edge, f"common-cause:{parent}:{branch.event_id}", "common-cause"):
+                        if not admit(edge, f"{origin_branch}|common-cause:{parent}:{branch.event_id}", "common-cause"):
                             break
                         if new:
                             witnesses += 1
