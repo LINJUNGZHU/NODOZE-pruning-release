@@ -44,7 +44,7 @@ def _epoch_directories(root: Path, split: str) -> dict[int, Path]:
     return result
 
 
-def select_velox_epoch(artifact_root: str | Path) -> dict:
+def select_velox_epoch(artifact_root: str | Path, *, runtime_audit: str | Path | None = None) -> dict:
     """Choose solely by mean development loss and attach measured test runtime."""
     root = Path(artifact_root).resolve()
     val, test = _epoch_directories(root, "val"), _epoch_directories(root, "test")
@@ -64,7 +64,7 @@ def select_velox_epoch(artifact_root: str | Path) -> dict:
         raise ValueError("selected Velox epoch has no test CSV shards")
     test_count, _, _ = _losses(native_files)
 
-    audit_path = root / "velox-inference-runtime.jsonl"
+    audit_path = Path(runtime_audit).resolve() if runtime_audit is not None else root / "velox-inference-runtime.jsonl"
     if not audit_path.is_file():
         raise ValueError("Velox runtime audit is missing")
     runtime = None
@@ -112,7 +112,13 @@ def render_velox_config(*, artifact_root: str | Path, training_status: str | Pat
         raise ValueError("Velox training is not completed")
     if status.get("identity_manifest_sha256") != identity.get("manifest_sha256"):
         raise ValueError("Velox training/identity manifest mismatch")
-    selected = select_velox_epoch(artifact_root)
+    training_task = status.get("stages", {}).get("training", {}).get("task_path")
+    if not training_task:
+        raise ValueError("Velox training status lacks its sealed training task path")
+    selected = select_velox_epoch(
+        training_task,
+        runtime_audit=Path(artifact_root).resolve() / "velox-inference-runtime.jsonl",
+    )
     runtime_root = Path(runtime_root).resolve()
     commit = subprocess.check_output(["git", "-C", runtime_root, "rev-parse", "HEAD"], text=True).strip()
     population = {

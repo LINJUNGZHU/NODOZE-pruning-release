@@ -52,3 +52,21 @@ def test_rejects_missing_matching_test_epoch_or_runtime_audit(tmp_path):
         assert "test" in str(exc) or "runtime" in str(exc)
     else:
         raise AssertionError("incomplete detector artifacts were accepted")
+
+
+def test_accepts_runtime_audit_outside_hashed_training_task(tmp_path):
+    training = tmp_path / "training-task"
+    _csv(training / "edge_losses/val/model_epoch_0/val.csv", [1, 2])
+    _csv(training / "edge_losses/test/model_epoch_0/test.csv", [3])
+    audit = tmp_path / "artifact-root/velox-inference-runtime.jsonl"
+    audit.parent.mkdir(parents=True)
+    audit.write_text(json.dumps({
+        "epoch": 0, "requested_split": "all",
+        "splits": {"test": {"seconds": 1, "scored_edges": 1, "edges_per_second": 1}},
+        "peak_inference_cpu_gb": 1, "peak_inference_gpu_gb": 0.5,
+    }) + "\n")
+
+    result = select_velox_epoch(training, runtime_audit=audit)
+
+    assert result["epoch"] == 0
+    assert Path(result["runtime_audit"]["path"]) == audit.resolve()
