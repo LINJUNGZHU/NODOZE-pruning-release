@@ -61,6 +61,16 @@ def graph(path):
                       EdgeRecord("e3", "p", "f", "EVENT_WRITE", 18, "h")])
 
 
+def test_streaming_csv_accepts_large_bounded_pidsmaker_field(tmp_path):
+    source = tmp_path / "velox.csv"
+    oversized = "e" * 800_000
+    source.write_text("loss,event_uuid\n1," + oversized + "\n")
+
+    rows = list(production().iter_shards([pin(source)]))
+
+    assert rows == [{"loss": "1", "event_uuid": oversized}]
+
+
 def test_fused_velox_support_is_visible_in_direct_coverage_stages(tmp_path):
     p = production()
     cfg = config(tmp_path)

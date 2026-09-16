@@ -149,14 +149,28 @@ def _array(value):
     return list(result)
 
 
+def _bounded_csv_rows(stream):
+    reader = csv.DictReader(stream)
+    while True:
+        previous_limit = csv.field_size_limit()
+        csv.field_size_limit(4 * 1024 * 1024)
+        try:
+            row = next(reader)
+        except StopIteration:
+            return
+        finally:
+            csv.field_size_limit(previous_limit)
+        yield row
+
+
 def iter_shards(files):
-    """CSV/JSONL only; bound each record and never hold a shard in memory."""
+    """CSV/JSONL only; bound parser fields and never hold a shard in memory."""
     for item in files:
         reject_authorities(item)
         path = verify_file(item)
         with path.open(encoding="utf-8", newline="") as stream:
             if path.suffix.lower() == ".csv":
-                reader = csv.DictReader(stream)
+                reader = _bounded_csv_rows(stream)
             elif path.suffix.lower() == ".jsonl":
                 def lines():
                     while True:
