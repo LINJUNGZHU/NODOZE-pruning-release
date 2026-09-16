@@ -300,6 +300,24 @@ def test_four_profile_atomic_publication_and_offline_attribution(tmp_path):
     assert before == pin(tmp_path / "result/manifest.json")
 
 
+def test_zero_alert_profile_is_a_completed_empty_result_not_outer_failure(tmp_path):
+    p = production()
+    cfg = config(tmp_path)
+    source = cfg["populations"]["VELOX"]
+    source["native"] = [shard(tmp_path / "quiet.jsonl", [edge(score=2, native_decision=False)])]
+    derivation_path = Path(source["derivation"]["path"])
+    derivation = json.loads(derivation_path.read_text())
+    derivation["native"] = source["native"]
+    source["derivation"] = write_json(derivation_path, derivation)
+    result = p.run_production(cfg, tmp_path / "result", tmp_path / "pin.json", allow_test=True)
+    assert result["status"] == "COMPLETED", result
+    for run_id in p.RUN_IDS:
+        candidate = json.loads((tmp_path / "result/runs" / run_id / "candidate.json").read_text())
+        final = json.loads((tmp_path / "result/runs" / run_id / "A_rasp.json").read_text())
+        assert candidate["raw_events"] == 0
+        assert final["selected_raw_event_ids"] == []
+
+
 @pytest.mark.parametrize("stage", ["attempt_mkdir", "store_open", "store_close", "priority_close", "seal", "publish", "freeze"])
 def test_outer_attempt_seals_every_injected_failure(tmp_path, monkeypatch, stage):
     p = production()

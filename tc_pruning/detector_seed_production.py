@@ -471,8 +471,6 @@ def population_inputs(directory, run_id, cap, percentile):
         distinct = conn.execute("SELECT COUNT(DISTINCT anchor_key) FROM staged WHERE " + predicate, params).fetchone()[0]
         if distinct > cap:
             raise ValueError("required anchor identities exceed fixed cap")
-        if distinct == 0:
-            raise ValueError("no eligible native anchors")
         # Dedup equivalent causal anchors only. Retain different node time/role
         # branches; never load a population-sized evidence collection.
         anchors = []
@@ -683,27 +681,45 @@ def run_production(config, output, external_pin, *, allow_test=False):
             directory.mkdir()
             stage = "candidate:" + run_id
             with population_inputs(attempt / "populations" / detector, run_id, search.candidate_cap, config["percentile_threshold"]) as (anchors, priority, evidence_sha):
-                started = time.perf_counter()
-                candidate = EvidenceDrivenCandidateBuilder(store, search, priority=priority).build(anchors)
-                candidate_seconds = time.perf_counter() - started
-                if not candidate.edges:
-                    raise ValueError("empty candidate")
-                write_json(directory / "candidate.json", {"event_ids": sorted(candidate.event_ids), "node_ids": sorted(candidate.node_ids),
-                           "edges": [asdict(edge) for edge in candidate.edges], "branch_provenance": candidate.branch_provenance,
-                           "raw_events": len(candidate.edges), "projected_edges": projection.count(candidate.edges), "stop_reason": candidate.stop_reason})
-                mandatory, proxy_audit = _proxies(candidate.edges, candidate.anchor_event_ids, candidate.anchor_node_ids, min(config["raw_event_cap"], config["proxy_event_cap"]), priority)
-                stage = "A_rasp:" + run_id
-                started = time.perf_counter()
-                a = _a_rasp(store, candidate.edges, mandatory, config["raw_event_cap"], proxy_audit)
-                a_seconds = time.perf_counter() - started
-                stage = "C_branch_fair:" + run_id
-                started = time.perf_counter()
-                b = _branch(candidate.edges, mandatory, config["raw_event_cap"], proxy_audit, candidate.branch_provenance)
-                b_seconds = time.perf_counter() - started
+                if not anchors:
+                    candidate_seconds = a_seconds = b_seconds = 0.0
+                    candidate_edges = ()
+                    write_json(directory / "candidate.json", {"event_ids": [], "node_ids": [], "edges": [],
+                               "branch_provenance": {}, "raw_events": 0, "projected_edges": 0,
+                               "stop_reason": "NO_ELIGIBLE_VELOX_ANCHORS"})
+                    proxy_audit = {"anchor_event_ids": [], "anchor_node_ids": [],
+                                   "node_incident_proxy_event_ids": [], "mandatory_proxy_event_ids": [],
+                                   "proxy_cap": min(config["raw_event_cap"], config["proxy_event_cap"]),
+                                   "selection": "not-run:no-eligible-velox-anchors"}
+                    a = {"selected_raw_event_ids": [], "selected_anchor_event_ids": [],
+                         "proxy_audit": proxy_audit,
+                         "selector_input": {"status": "NOT_RUN", "reason": "NO_ELIGIBLE_VELOX_ANCHORS"}}
+                    b = {"selected_raw_event_ids": [], "selected_unit_ids": [],
+                         "proxy_audit": proxy_audit, "stable_contrast": "NOT_AVAILABLE", "ledger": [],
+                         "selector_status": "NOT_RUN", "selector_reason": "NO_ELIGIBLE_VELOX_ANCHORS"}
+                else:
+                    started = time.perf_counter()
+                    candidate = EvidenceDrivenCandidateBuilder(store, search, priority=priority).build(anchors)
+                    candidate_seconds = time.perf_counter() - started
+                    if not candidate.edges:
+                        raise ValueError("nonempty Velox anchors produced an empty candidate")
+                    candidate_edges = candidate.edges
+                    write_json(directory / "candidate.json", {"event_ids": sorted(candidate.event_ids), "node_ids": sorted(candidate.node_ids),
+                               "edges": [asdict(edge) for edge in candidate.edges], "branch_provenance": candidate.branch_provenance,
+                               "raw_events": len(candidate.edges), "projected_edges": projection.count(candidate.edges), "stop_reason": candidate.stop_reason})
+                    mandatory, proxy_audit = _proxies(candidate.edges, candidate.anchor_event_ids, candidate.anchor_node_ids, min(config["raw_event_cap"], config["proxy_event_cap"]), priority)
+                    stage = "A_rasp:" + run_id
+                    started = time.perf_counter()
+                    a = _a_rasp(store, candidate.edges, mandatory, config["raw_event_cap"], proxy_audit)
+                    a_seconds = time.perf_counter() - started
+                    stage = "C_branch_fair:" + run_id
+                    started = time.perf_counter()
+                    b = _branch(candidate.edges, mandatory, config["raw_event_cap"], proxy_audit, candidate.branch_provenance)
+                    b_seconds = time.perf_counter() - started
                 for name, result in (("A_rasp", a), ("C_branch_fair", b)):
                     selected = set(result["selected_raw_event_ids"])
                     result.update(run_id=run_id, detector_id=detector, raw_events=len(selected),
-                                  projected_edges=projection.count(edge for edge in candidate.edges if edge.event_id in selected))
+                                  projected_edges=projection.count(edge for edge in candidate_edges if edge.event_id in selected))
                     write_json(directory / (name + ".json"), result)
                 timing = performance_fields(inference_seconds=config["populations"][detector].get("inference_seconds"),
                     adapter_seconds=populations[detector]["adapter_seconds"], candidate_seconds=candidate_seconds,
