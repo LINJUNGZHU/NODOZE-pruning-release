@@ -69,6 +69,33 @@ def test_online_runner_writes_complete_hashed_artifacts_and_is_deterministic(tmp
         assert (first_dir / name).read_bytes() == (second_dir / name).read_bytes()
 
 
+def test_a_rasp_preserves_noncausal_alert_observation_without_claiming_causality(tmp_path: Path) -> None:
+    from tc_pruning.detector_seed_benchmark import run_online_benchmark
+
+    db = tmp_path / "mini.db"
+    _fixture_store(db)
+    with ProvenanceStore(db) as store:
+        store.ingest((EdgeRecord(
+            "open", "p0", "f0", "EVENT_OPEN", 1522706861813350342, "host",
+        ),))
+    evidence = (AlertEvidence(
+        "fixture:open", "Velox", "fixture", EvidenceGranularity.EDGE,
+        0.9, 0.9, True, event_ids=("open",), node_ids=("p0", "f0"),
+        src_uuid="p0", dst_uuid="f0", relation="EVENT_OPEN",
+        timestamp_start=1522706861813350342,
+        timestamp_end=1522706861813350342,
+        role_hint=RoleHint.OBSERVATION,
+    ),)
+
+    result = run_online_benchmark(_config(db), {"Velox": evidence}, tmp_path / "result")
+
+    assert result["status"] == "COMPLETED", result
+    run_dir = Path(result["runs"]["Velox"]["run_directory"])
+    selected = json.loads((run_dir / "A_rasp_final.json").read_text())
+    assert "open" in selected["selected_raw_event_ids"]
+    assert selected["selector_input"]["noncausal_observation_event_ids"] == ["open"]
+
+
 def test_online_runner_preserves_completed_artifacts_when_a_later_selector_fails(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     import tc_pruning.detector_seed_benchmark as runner
 
