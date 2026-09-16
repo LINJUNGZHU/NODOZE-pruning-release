@@ -16,8 +16,10 @@ def _bound(root, relative):
     return result
 
 
-def evaluate_production(pin_path, known_event_ids, known_node_ids, output):
+def evaluate_production(pin_path, known_event_ids, known_node_ids, output, *, positives_pin=None):
     result = {"status": "NOT_COMPLETED", "runs": {}}
+    if positives_pin is not None:
+        result["positive_authority"] = positives_pin
     may_write = False
     try:
         pin_path, output = Path(pin_path).resolve(), Path(output).resolve()
@@ -82,6 +84,14 @@ def evaluate_production(pin_path, known_event_ids, known_node_ids, output):
                 direct_nodes = {node for node in nodes if conn.execute("SELECT 1 FROM stage_identity WHERE stage='native_threshold' AND kind='node' AND identity=?", (node,)).fetchone()}
             finally:
                 conn.close()
+            edge_nodes = {str(edge["event_id"]): {str(edge["src"]), str(edge["dst"])} for edge in candidate["edges"]}
+            def final_metrics(selected, payload):
+                metrics = partial_positive_metrics(selected, events)
+                final_nodes = set().union(*(edge_nodes.get(event, set()) for event in selected)) if selected else set()
+                metrics.update(node_recall=len(final_nodes & nodes) / len(nodes) if nodes else None,
+                               known_attack_nodes=len(final_nodes & nodes),
+                               raw_events=payload["raw_events"], projected_edges=payload["projected_edges"])
+                return metrics
             funnel = {"raw_database": partial_positive_metrics(raw, events),
                       "preprocessing": partial_positive_metrics(stage_hits["preprocessing"], events),
                       "inference": {"status": "SCORED_OUTPUT_LOWER_BOUND", "known_ids": sorted(stage_hits["inference"])},
@@ -94,8 +104,8 @@ def evaluate_production(pin_path, known_event_ids, known_node_ids, output):
                 "candidate": partial_positive_metrics(candidate_ids, events),
                 "candidate_node_recall": len(candidate_nodes & nodes) / len(nodes) if nodes else None,
                 "candidate_raw_events": candidate["raw_events"], "candidate_projected_edges": candidate["projected_edges"],
-                "A_rasp": partial_positive_metrics(a_ids, events), "C_branch_fair": partial_positive_metrics(b_ids, events),
-                "native_direct_nodes": sorted(direct_nodes), "mapping": summary["counts"], "funnel": funnel}
+                "A_rasp": final_metrics(a_ids, a), "C_branch_fair": final_metrics(b_ids, b),
+                "direct_attack_node_hits": sorted(direct_nodes), "mapping": summary["counts"], "funnel": funnel}
         result["status"] = "COMPLETED"
     except Exception as exc:
         result["status"] = "NOT_COMPLETED"

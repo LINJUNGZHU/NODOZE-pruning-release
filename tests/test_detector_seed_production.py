@@ -293,6 +293,10 @@ def test_four_profile_atomic_publication_and_offline_attribution(tmp_path):
     for run, value in evaluation["runs"].items():
         assert value["run_id"] == run and value["candidate"]["known_TP"] == 1
         assert value["A_rasp"]["known_TP"] == 1
+        assert value["A_rasp"]["node_recall"] == 1
+        assert value["A_rasp"]["raw_events"] >= 1
+        assert value["C_branch_fair"]["node_recall"] == 1
+        assert value["direct_attack_node_hits"] == ["p"]
     assert before == pin(tmp_path / "result/manifest.json")
 
 

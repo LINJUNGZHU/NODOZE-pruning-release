@@ -297,7 +297,7 @@ def _native_records(detector, row, spec, store, ordinal):
             quality = "EXACT" if tier in ("EXACT", "IDENTITY") else "TOLERANT" if tier == "TOLERANT" else "PARTIAL"
             metadata.update(mapping_tier=tier, frozen_legacy=True)
         item = AlertEvidence(f"{detector}:{ordinal}:{index}", detector, spec["version"], "EDGE", score, 0, decision,
-                             event_ids=(stored,), src_uuid=src, dst_uuid=dst, relation=relation,
+                             event_ids=(stored,), node_ids=(src, dst), src_uuid=src, dst_uuid=dst, relation=relation,
                              timestamp_start=timestamp, timestamp_end=timestamp, mapping_quality=quality,
                              supporting_event_ids=tuple(support) if strict else (), detector_metadata=metadata)
         yield item, dict(audit, mapping_quality=quality), scope
@@ -387,6 +387,9 @@ def stage_population(detector, spec, store, directory):
                     for member in support:
                         for stage in stages:
                             conn.execute("INSERT OR IGNORE INTO stage_identity VALUES (?,?,?)", (stage, "event", member))
+                    for node in item.node_ids:
+                        for stage in stages:
+                            conn.execute("INSERT OR IGNORE INTO stage_identity VALUES (?,?,?)", (stage, "node", node))
                     if number % 10000 == 0:
                         conn.commit()
             audit_stream.flush()
