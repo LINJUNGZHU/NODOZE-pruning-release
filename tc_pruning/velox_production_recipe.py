@@ -7,6 +7,7 @@ import math
 from pathlib import Path
 import re
 import subprocess
+import sys
 
 from .detector_seed_production import (
     RUN_IDS,
@@ -20,15 +21,20 @@ def _losses(files):
     count = 0
     total = 0.0
     maximum = float("-inf")
-    for path in files:
-        with path.open(encoding="utf-8", newline="") as stream:
-            for row in csv.DictReader(stream):
-                value = float(row["loss"])
-                if not math.isfinite(value):
-                    raise ValueError("nonfinite Velox loss")
-                count += 1
-                total += value
-                maximum = max(maximum, value)
+    previous_limit = csv.field_size_limit()
+    csv.field_size_limit(sys.maxsize)
+    try:
+        for path in files:
+            with path.open(encoding="utf-8", newline="") as stream:
+                for row in csv.DictReader(stream):
+                    value = float(row["loss"])
+                    if not math.isfinite(value):
+                        raise ValueError("nonfinite Velox loss")
+                    count += 1
+                    total += value
+                    maximum = max(maximum, value)
+    finally:
+        csv.field_size_limit(previous_limit)
     if not count:
         raise ValueError("empty Velox loss population")
     return count, total / count, maximum

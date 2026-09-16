@@ -70,3 +70,21 @@ def test_accepts_runtime_audit_outside_hashed_training_task(tmp_path):
 
     assert result["epoch"] == 0
     assert Path(result["runtime_audit"]["path"]) == audit.resolve()
+
+
+def test_accepts_pidsmaker_csv_fields_larger_than_python_default(tmp_path):
+    root = tmp_path / "artifacts"
+    oversized_uuid = "e" * 150_000
+    _csv(root / "edge_losses/val/model_epoch_0/val.csv", [1])
+    _csv(root / "edge_losses/test/model_epoch_0/test.csv", [2])
+    test_csv = root / "edge_losses/test/model_epoch_0/test.csv"
+    test_csv.write_text("loss,event_uuid\n2," + oversized_uuid + "\n")
+    (root / "velox-inference-runtime.jsonl").write_text(json.dumps({
+        "epoch": 0, "requested_split": "all",
+        "splits": {"test": {"seconds": 1, "scored_edges": 1, "edges_per_second": 1}},
+        "peak_inference_cpu_gb": 1, "peak_inference_gpu_gb": 0.5,
+    }) + "\n")
+
+    result = select_velox_epoch(root)
+
+    assert result["epoch"] == 0
