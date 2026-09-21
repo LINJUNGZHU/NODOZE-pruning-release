@@ -153,6 +153,8 @@ class EvidenceDrivenCandidateBuilder:
         seen: set[tuple[object, ...]] = set()
         control: list[tuple[str, int, int, int, str]] = []
         provenance: dict[int, set[str]] = {}
+        initial_frontiers: dict[str, list[_Frontier]] = {}
+        neighbor_cache: dict[tuple[object, ...], tuple[StoredEdge, ...]] = {}
 
         def add(edge: StoredEdge, branch_id: str = "unattributed", mode: str = "strict") -> bool:
             nonlocal cap_reached
@@ -200,10 +202,34 @@ class EvidenceDrivenCandidateBuilder:
                     continue
                 for direction in directions:
                     lower, upper = self._bounds(direction, item.timestamp_start, item.timestamp_end)
-                    enqueue(_Frontier(node, direction, lower, upper, 0, item.calibrated_score, f"{identity}|node:{node}", f"anchor:{identity}:node:{node}:direction:{direction}", "strict"))
+                    frontier = _Frontier(node, direction, lower, upper, 0, item.calibrated_score, f"{identity}|node:{node}", f"anchor:{identity}:node:{node}:direction:{direction}", "strict")
+                    enqueue(frontier)
+                    initial_frontiers.setdefault(node, []).append(frontier)
                 if self._node_is_process(node):
                     observed = item.timestamp_start if item.timestamp_start is not None else item.timestamp_end
                     control.append((node, self.config.history_start_ns if self.config.history_start_ns is not None else _MIN_TIME, observed if observed is not None else self.config.cutoff_ns, 0, f"anchor:{identity}:node:{node}:direction:backward"))
+
+        # Admit one incident causal witness per node-valued detector anchor
+        # before a high-fanout branch can consume the shared candidate cap.
+        # Exact event anchors were already admitted above and keep priority.
+        for node in sorted(initial_frontiers):
+            if cap_reached:
+                break
+            choices: list[tuple[int, int, str, str, StoredEdge, _Frontier]] = []
+            for frontier in initial_frontiers[node]:
+                key = (frontier.node_id, frontier.direction, frontier.lower_time_ns,
+                       frontier.upper_time_ns, frontier.depth, frontier.branch_id,
+                       frontier.mode)
+                found, used = self._strict_neighbors(frontier)
+                queries += used
+                neighbor_cache[key] = found
+                for rank, edge in enumerate(found):
+                    if edge.edge_id not in candidates:
+                        choices.append((rank, edge.timestamp_ns, edge.event_id,
+                                        frontier.direction, edge, frontier))
+            if choices:
+                *_, edge, frontier = min(choices, key=lambda row: row[:4])
+                add(edge, frontier.branch_id, "anchor-proxy")
 
         while queue and not cap_reached:
             _, _, _, frontier = heapq.heappop(queue)
@@ -213,8 +239,11 @@ class EvidenceDrivenCandidateBuilder:
             seen.add(key)
             if frontier.depth >= self.config.max_strict_depth:
                 continue
-            found, used = self._strict_neighbors(frontier)
-            queries += used
+            if key in neighbor_cache:
+                found = neighbor_cache.pop(key)
+            else:
+                found, used = self._strict_neighbors(frontier)
+                queries += used
             for edge in found:
                 if not add(edge, frontier.branch_id, frontier.mode):
                     break

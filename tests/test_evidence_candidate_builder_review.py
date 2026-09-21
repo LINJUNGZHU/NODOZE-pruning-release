@@ -121,6 +121,29 @@ def test_detector_and_evidence_identity_cannot_change_cap_sensitive_result(tmp_p
     assert first.event_ids == second.event_ids == {"p-edge"}
 
 
+def test_candidate_cap_gives_each_node_anchor_one_incident_edge_before_deep_expansion(tmp_path: Path) -> None:
+    """A high-fanout first POI must not starve a later POI at the shared cap."""
+    with ProvenanceStore(tmp_path / "fair-anchor-admission.db") as store:
+        store.ingest([
+            NodeRecord("p", "process", "p", "h"),
+            NodeRecord("q", "process", "q", "h"),
+            NodeRecord("p-one", "file", "p-one", "h"),
+            NodeRecord("p-two", "file", "p-two", "h"),
+            NodeRecord("q-one", "file", "q-one", "h"),
+            EdgeRecord("p-edge-one", "p", "p-one", "EVENT_WRITE", 11, "h"),
+            EdgeRecord("p-edge-two", "p", "p-two", "EVENT_WRITE", 12, "h"),
+            EdgeRecord("q-edge-one", "q", "q-one", "EVENT_WRITE", 11, "h"),
+        ])
+        result = _builder(store, candidate_cap=2).build([
+            _node("p"),
+            _node("q"),
+        ])
+
+    assert len(result.edges) == 2
+    assert len({edge.event_id for edge in result.edges if edge.src == "p"}) == 1
+    assert "q-edge-one" in result.event_ids
+
+
 def test_cap_holds_for_multi_anchor_control_and_common_cause_paths(tmp_path: Path) -> None:
     with ProvenanceStore(tmp_path / "cap.db") as store:
         store.ingest([

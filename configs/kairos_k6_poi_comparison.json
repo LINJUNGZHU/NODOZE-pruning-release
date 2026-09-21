@@ -1,0 +1,45 @@
+{
+  "schema_version": "kairos-k6-poi-context-comparison-v1",
+  "dataset": "DARPA_TC_E3_CADETS",
+  "database": {
+    "path": "output/tc/cadets-e3-from-raw-2026-09-07_15-27-47.db",
+    "sha256": "719f97dafb642f49b0cffff6deaeb42138386521cfc2cf27539d6d5ae6a81abf"
+  },
+  "projection": {
+    "mode": "DEPIMPACT_COMPATIBLE",
+    "merge_window_ns": 900000000000
+  },
+  "candidate": {
+    "candidate_cap": 10000,
+    "history_start_ns": 1522706861813350340,
+    "cutoff_ns": 1523655358953968696,
+    "max_strict_depth": 8,
+    "max_control_depth": 2,
+    "enable_common_cause": true,
+    "scan_multiplier": 20
+  },
+  "raw_event_cap": 8000,
+  "scenarios": [
+    {
+      "scenario": "06",
+      "kairos_online": "output/kairos-k6-alerts/track-b-day6.json",
+      "kairos_sha256": "5cda8ae94a11c9a7eea2379957a3a956c93fbdc7836ad5aec8872f4ca8deffa1",
+      "orthrus_csv": "/root/PIDSMaker-main/Ground_Truth/orthrus/E3-CADETS/node_Nginx_Backdoor_06.csv",
+      "orthrus_sha256": "8905ffa57f99e4cbbf4b78179850073020a70089ff3ce05716f15eb3e2357c69"
+    },
+    {
+      "scenario": "12",
+      "kairos_online": "output/kairos-k6-alerts/track-b-day12.json",
+      "kairos_sha256": "9ac5207cb3b1426e42f775358e0c40074a4796e03f07128b27e2caeda0c8c141",
+      "orthrus_csv": "/root/PIDSMaker-main/Ground_Truth/orthrus/E3-CADETS/node_Nginx_Backdoor_12.csv",
+      "orthrus_sha256": "41b60345dcb551b5899b11fb116dc240493931a97ea3acd92c19d9a8a7730e88"
+    },
+    {
+      "scenario": "13",
+      "kairos_online": "output/kairos-k6-alerts/track-b-day13.json",
+      "kairos_sha256": "468007753166ec434e93e96533d034ee7fa2b95208f63525fb472e5f47740835",
+      "orthrus_csv": "/root/PIDSMaker-main/Ground_Truth/orthrus/E3-CADETS/node_Nginx_Backdoor_13.csv",
+      "orthrus_sha256": "1234a11304ba52cc7a9f0e6a4d006f1c14dc044a5a9201eec1e7ba7e42fa2bff"
+    }
+  ]
+}

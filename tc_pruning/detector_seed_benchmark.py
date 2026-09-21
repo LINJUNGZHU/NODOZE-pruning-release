@@ -312,6 +312,7 @@ def _causal(edge: StoredEdge) -> tuple[str, str]:
     if relation in {"EVENT_WRITE", "EVENT_SENDTO", "EVENT_SENDMSG", "EVENT_CONNECT", "EVENT_CREATE_OBJECT", "EVENT_TRUNCATE", "EVENT_MODIFY_FILE_ATTRIBUTES", "EVENT_RENAME", "EVENT_LINK", "EVENT_UNLINK"} and src in {"process", "subject"}: return edge.src, edge.dst
     if relation == "EVENT_EXECUTE" and src in {"process", "subject"}: return edge.dst, edge.src
     if relation in {"EVENT_FORK", "EVENT_CLONE", "PROCESS_CREATE"} and src in {"process", "subject"} and dst in {"process", "subject"}: return edge.src, edge.dst
+    if relation == "EVENT_DERIVE" and src in {"file", "memory", "unknown"} and dst in {"file", "memory", "unknown"}: return edge.src, edge.dst
     raise ValueError("candidate contains non-causal CDM edge")
 
 def _proxies(edges: tuple[StoredEdge, ...], anchor_events: frozenset[str], anchor_nodes: frozenset[str], cap: int, priority: Any | None = None) -> tuple[frozenset[str], dict[str, Any]]:
@@ -327,7 +328,7 @@ def _proxies(edges: tuple[StoredEdge, ...], anchor_events: frozenset[str], ancho
     proxy = frozenset(set(anchor_events) | set(node_proxy))
     return proxy, {"anchor_event_ids": sorted(anchor_events), "anchor_node_ids": sorted(anchor_nodes), "node_incident_proxy_event_ids": list(node_proxy), "mandatory_proxy_event_ids": sorted(proxy), "proxy_cap": cap, "selection": "dedup-anchor,event-or-endpoint-node-priority,time,event-id"}
 
-def _a_rasp(store: ProvenanceStore, edges: tuple[StoredEdge, ...], poi_ids: frozenset[str], cap: int, proxy_audit: Mapping[str, Any]) -> dict[str, Any]:
+def _a_rasp(store: ProvenanceStore, edges: tuple[StoredEdge, ...], poi_ids: frozenset[str], cap: int, proxy_audit: Mapping[str, Any], *, frequency_model: FrequencyModel | None = None) -> dict[str, Any]:
     if not edges or not poi_ids or len(poi_ids) > cap: raise ValueError("selector requires nonempty candidate and bounded POI proxies")
     causal_edges, causal, noncausal = [], [], []
     for edge in edges:
@@ -345,7 +346,7 @@ def _a_rasp(store: ProvenanceStore, edges: tuple[StoredEdge, ...], poi_ids: froz
         return {"selected_raw_event_ids": [edge.event_id for edge in edges if edge.event_id in observation_ids], "selected_anchor_event_ids": [edge.event_id for edge in edges if edge.event_id in observation_ids], "proxy_audit": dict(proxy_audit), "selector_input": selector_input}
     nodes = sorted({node for pair in causal for node in pair}); index = {node: n for n, node in enumerate(nodes)}
     src, dst = np.asarray([index[pair[0]] for pair in causal]), np.asarray([index[pair[1]] for pair in causal]); relation_ids = {name: number for number, name in enumerate(sorted({edge.relation.upper() for edge in causal_edges}))}; relation = np.asarray([relation_ids[edge.relation.upper()] for edge in causal_edges]); times = np.asarray([edge.timestamp_ns for edge in causal_edges], dtype=np.int64); poi = np.asarray([edge.event_id in causal_poi_ids for edge in causal_edges], dtype=bool)
-    frequency = FrequencyModel.from_store(store); process = np.asarray([bool(store.get_node(node) and store.get_node(node).node_type.lower() in {"process", "subject"}) for node in nodes], dtype=float)
+    frequency = frequency_model or FrequencyModel.from_store(store); process = np.asarray([bool(store.get_node(node) and store.get_node(node).node_type.lower() in {"process", "subject"}) for node in nodes], dtype=float)
     rarity = np.asarray([frequency.edge_rarity(edge) for edge in causal_edges])
     score, _ = propagate(src, dst, relation, rarity, poi, process, {"restart": .15, "iterations": 100, "tolerance": 1e-10, "rarity_floor": .2}); links, direction, reachable, _ = temporal_routes(src, dst, times, poi); selected, anchors = select_bundles(score, poi, links, direction, reachable, min(causal_budget, len(causal_edges)))
     selected_ids = observation_ids | frozenset(edge.event_id for edge, keep in zip(causal_edges, selected) if keep)

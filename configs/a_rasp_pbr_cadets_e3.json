@@ -1,0 +1,57 @@
+{
+  "schema_version": "a-rasp-pbr-experiment-v1",
+  "dataset": "DARPA_TC_E3_CADETS",
+  "baseline": {
+    "evaluation_path": "/root/NODOZE-pruning-release/output/kairos-k6-poi-comparison/evaluation.json",
+    "evaluation_sha256": "2659c07dbc4df064c846803043244ccb542b1da627690ea938dad2f692f8fd77",
+    "legacy_config_path": "/root/NODOZE-pruning-release/.worktrees/query-adaptive-cadets-e3/configs/kairos_k6_poi_comparison.json",
+    "legacy_config_sha256": "a9b2e642c2b9c2df25c75227841b522c9e13aee5a5373ce49c4ae61f06088dd2",
+    "legacy_selector_source_path": "/root/NODOZE-pruning-release/.worktrees/query-adaptive-cadets-e3/tc_pruning/detector_seed_benchmark.py",
+    "legacy_selector_source_sha256": "3ce99e3c619ae058092333ee268649c63cf25abe5058f50a58f25da94ae213b5"
+  },
+  "database": {
+    "path": "/root/NODOZE-pruning-release/output/tc/cadets-e3-from-raw-2026-09-07_15-27-47.db",
+    "sha256": "719f97dafb642f49b0cffff6deaeb42138386521cfc2cf27539d6d5ae6a81abf"
+  },
+  "projection": {"mode": "DEPIMPACT_COMPATIBLE", "merge_window_ns": 900000000000},
+  "candidate": {
+    "candidate_cap": 10000,
+    "history_start_ns": 1522706861813350340,
+    "cutoff_ns": 1523655358953968696,
+    "max_strict_depth": 8,
+    "max_control_depth": 2,
+    "enable_common_cause": true,
+    "scan_multiplier": 20
+  },
+  "maximum_raw_budget": 8000,
+  "fixed_extra_raw": 8000,
+  "k_paths": 3,
+  "pbr_allowance_ratios": [0, 0.05, 0.10, 0.25, 0.50, 1.0],
+  "c_projected_targets": [100, 250, 500, 1000, 2000, 4000, 8000],
+  "scenarios": [
+    {
+      "scenario": "06",
+      "kairos_online": "/root/NODOZE-pruning-release/output/kairos-k6-alerts/track-b-day6.json",
+      "kairos_sha256": "5cda8ae94a11c9a7eea2379957a3a956c93fbdc7836ad5aec8872f4ca8deffa1",
+      "orthrus_csv": "/root/PIDSMaker-main/Ground_Truth/orthrus/E3-CADETS/node_Nginx_Backdoor_06.csv",
+      "orthrus_sha256": "8905ffa57f99e4cbbf4b78179850073020a70089ff3ce05716f15eb3e2357c69",
+      "poi_node_ids": ["674D8313-390A-11E8-BF66-D9AA8AFF4A69", "D3822AFC-39AF-11E8-BF66-D9AA8AFF4A69", "F77E454D-CA07-6B5D-87CA-9EFDCD6BA3ED"]
+    },
+    {
+      "scenario": "12",
+      "kairos_online": "/root/NODOZE-pruning-release/output/kairos-k6-alerts/track-b-day12.json",
+      "kairos_sha256": "9ac5207cb3b1426e42f775358e0c40074a4796e03f07128b27e2caeda0c8c141",
+      "orthrus_csv": "/root/PIDSMaker-main/Ground_Truth/orthrus/E3-CADETS/node_Nginx_Backdoor_12.csv",
+      "orthrus_sha256": "41b60345dcb551b5899b11fb116dc240493931a97ea3acd92c19d9a8a7730e88",
+      "poi_node_ids": ["0001A528-3E80-11E8-A5CB-3FA3753A265A", "1131CD42-3DC3-11E8-A5CA-3FA3753A265A", "11C64B2C-3DC3-11E8-A5CA-3FA3753A265A", "15267234-3E7F-11E8-A5CB-3FA3753A265A", "1633500B-D34B-8058-8BD3-ABB7D880915E", "17C4C0C3-3E7D-11E8-A5CB-3FA3753A265A", "1902FFA3-6F80-2052-806F-3D6A2220819E", "1D3ACF79-3E7F-11E8-A5CB-3FA3753A265A", "219DE547-3E7E-11E8-A5CB-3FA3753A265A", "327621AE-3E80-11E8-A5CB-3FA3753A265A", "34612C08-3E7B-11E8-A5CB-3FA3753A265A", "416AB837-8E42-6D58-828E-6976586D8E68", "42E4A848-3E7C-11E8-A5CB-3FA3753A265A", "47E61FFC-3E80-11E8-A5CB-3FA3753A265A", "48289024-3E7E-11E8-A5CB-3FA3753A265A", "4DA445A7-56DB-D353-9B56-AD9CD3D373D6", "5026C48F-56BA-3E5B-BA56-DD382B3EC82B", "51110606-D232-9652-B2D2-3A7242968F8A", "5453C813-1A0E-4359-8E1A-41B40943CDC5", "5CD609A7-3E7F-11E8-A5CB-3FA3753A265A", "60EBF436-633F-B75F-BF63-A8040FB73989", "74D78344-4A18-265B-984A-8D22BB26DDCF", "7B30E76D-3E7D-11E8-A5CB-3FA3753A265A", "7CED5514-3E7B-11E8-A5CB-3FA3753A265A", "7CF2DDA4-3E7B-11E8-A5CB-3FA3753A265A", "7D2E10B3-3E7B-11E8-A5CB-3FA3753A265A", "81E2003D-3E7B-11E8-A5CB-3FA3753A265A", "84D440C2-4E50-4A5C-904E-C4772C4ACD5A", "AE11D308-3E7F-11E8-A5CB-3FA3753A265A", "B2C5B97D-3E7F-11E8-A5CB-3FA3753A265A", "C4F4FF22-3E7B-11E8-A5CB-3FA3753A265A", "CBBF8038-5237-8651-B752-A1C99186128A", "DCBB8D5C-3E7F-11E8-A5CB-3FA3753A265A", "E5F1BC5B-052D-3F5F-AD05-928A8F3FF746", "F993C224-C6AD-AB5C-ADC6-09316CABFFD8"]
+    },
+    {
+      "scenario": "13",
+      "kairos_online": "/root/NODOZE-pruning-release/output/kairos-k6-alerts/track-b-day13.json",
+      "kairos_sha256": "468007753166ec434e93e96533d034ee7fa2b95208f63525fb472e5f47740835",
+      "orthrus_csv": "/root/PIDSMaker-main/Ground_Truth/orthrus/E3-CADETS/node_Nginx_Backdoor_13.csv",
+      "orthrus_sha256": "1234a11304ba52cc7a9f0e6a4d006f1c14dc044a5a9201eec1e7ba7e42fa2bff",
+      "poi_node_ids": ["04A9D03C-3F1C-11E8-A5CB-3FA3753A265A", "11C65665-3DC3-11E8-A5CA-3FA3753A265A", "2CA83801-3E80-11E8-A5CB-3FA3753A265A", "4FB0BFEA-3F1C-11E8-A5CB-3FA3753A265A", "51110606-D232-9652-B2D2-3A7242968F8A", "E5A15412-68E0-FD54-A068-DD6114FD9040"]
+    }
+  ]
+}

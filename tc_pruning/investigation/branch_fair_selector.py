@@ -146,6 +146,7 @@ class LazyGreedySelector:
         heap: list[tuple[float, str, int]] = []
         versions = {unit.unit_id: 0 for unit in unit_list}
         unit_by_id = {unit.unit_id: unit for unit in unit_list}
+        precovered_units: set[str] = set()
         pushes = pops = recomputes = 0
 
         def push(unit: EvidenceUnit, version: int) -> None:
@@ -160,6 +161,13 @@ class LazyGreedySelector:
             pushes += 1
 
         for unit in unit_list:
+            if set(unit.raw_event_ids) <= covered:
+                precovered_units.add(unit.unit_id)
+                branches.update(unit.branch_ids)
+                anchors.update(unit.anchor_ids)
+                if unit.motif_type is not None:
+                    motifs.update((unit.motif_type,))
+                continue
             push(unit, 0)
         round_index = 0
         while heap:
@@ -215,7 +223,11 @@ class LazyGreedySelector:
                 values["total"] / max(1, new_cost),
                 unit.unit_id in selected_round,
                 selected_round.get(unit.unit_id),
-                "branch_fair_lazy_greedy" if unit.unit_id in selected_round else "not_selected",
+                (
+                    "branch_fair_lazy_greedy" if unit.unit_id in selected_round
+                    else "mandatory_precovered" if unit.unit_id in precovered_units
+                    else "not_selected"
+                ),
             ))
         event_order = tuple(sorted(covered))
         return BranchFairSelectionResult(

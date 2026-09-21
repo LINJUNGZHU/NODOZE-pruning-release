@@ -2,8 +2,8 @@ from tc_pruning.investigation.branch_fair_selector import BranchFairConfig, Lazy
 from tc_pruning.investigation.evidence_units import EvidenceUnit, ecdf_relevance
 
 
-def _unit(name, score, branch, events=None, verification=1.0):
-    return EvidenceUnit(name, "edge", tuple(events or (name,)), (name,), frozenset({branch}), frozenset(), None, frozenset(), score, score, verification)
+def _unit(name, score, branch, events=None, verification=1.0, anchors=None):
+    return EvidenceUnit(name, "edge", tuple(events or (name,)), (name,), frozenset({branch}), frozenset(anchors or ()), None, frozenset(), score, score, verification)
 
 
 def test_ecdf_is_stable_when_disconnected_zero_scores_are_added():
@@ -29,3 +29,17 @@ def test_diminishing_return_for_repeated_branch_evidence():
     selector = LazyGreedySelector(BranchFairConfig(lambda_branch=1.0))
     unit = _unit("u", .0, "A")
     assert selector.marginal(unit, {}, set(), set())["branch"] > selector.marginal(unit, {"A": 100}, set(), set())["branch"]
+
+
+def test_mandatory_units_initialize_coverage_without_being_selected_again():
+    mandatory = _unit("mandatory", .9, "branch-m", anchors=("anchor-m",))
+    optional = _unit("optional", .8, "branch-o", anchors=("anchor-o",))
+
+    result = LazyGreedySelector(BranchFairConfig()).select(
+        (mandatory, optional), mandatory_event_ids={"mandatory"}, budget=1,
+    )
+
+    assert result.selected_unit_ids == ()
+    assert result.raw_event_cost == 1
+    assert result.branch_coverage == {"branch-m": 1}
+    assert result.anchor_coverage == {"anchor-m": 1}
