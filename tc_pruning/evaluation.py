@@ -57,6 +57,14 @@ from .window_search import (
 )
 
 
+def _previous_kept_edge_ids(graph: Neighborhood, previous_kept_event_ids: Iterable[str] | None) -> set[int] | None:
+    """Map prior-prefix event IDs once, before scanning the candidate edges."""
+    if previous_kept_event_ids is None:
+        return None
+    prior_event_ids = set(previous_kept_event_ids)
+    return {edge.edge_id for edge in graph.edges if edge.event_id in prior_event_ids}
+
+
 def _score_distribution(values: Iterable[float]) -> dict[str, float | int]:
     ordered = sorted(float(value) for value in values)
     if not ordered:
@@ -387,6 +395,7 @@ def _run_experiment_core(
     use_frequency_snapshot: bool = False,
     progress_callback: Callable[[dict], None] | None = None,
     include_method_comparison: bool = True,
+    include_auxiliary_depimpact_baselines: bool = True,
     poi_aggregation: str = "joint",
     previous_kept_event_ids: set[str] | None = None,
     churn_slack_ratio: float = 0.0,
@@ -820,6 +829,7 @@ def _run_experiment_core(
                 "behavior_fallback_gap_seconds": behavior_fallback_gap_seconds,
                 "embedding_dimensions": embedding_dimensions,
                 "minimum_token_frequency": minimum_token_frequency,
+                "include_auxiliary_depimpact_baselines": include_auxiliary_depimpact_baselines,
             },
         }
         prefix_context_digest = hashlib.sha256(
@@ -880,25 +890,26 @@ def _run_experiment_core(
                 poi_edge.event_id, "depimpact", local_impact.node_impacts,
                 local_impact.phase_seconds,
             )
-            for method, feature_mask, projection_override in (
-                ("temporal_only", (False, True, False), None),
-                ("temporal_data", (True, True, False), None),
-                ("fixed_projection", (True, True, True), (0.334, 0.333, 0.333)),
-            ):
-                baseline = compute_depimpact_relevance(
-                    graph,
-                    poi_edge_ids={poi_edge.edge_id},
-                    merge_threshold_seconds=merge_threshold_seconds,
-                    alpha=data_flow_alpha,
-                    kmeans_restarts=kmeans_restarts,
-                    random_seed=depimpact_random_seed,
-                    feature_mask=feature_mask,
-                    projection_override=projection_override,
-                )
-                active_prefix_accumulator.add_auxiliary_node_scores(
-                    poi_edge.event_id, method, baseline.node_impacts,
-                    baseline.phase_seconds,
-                )
+            if include_auxiliary_depimpact_baselines:
+                for method, feature_mask, projection_override in (
+                    ("temporal_only", (False, True, False), None),
+                    ("temporal_data", (True, True, False), None),
+                    ("fixed_projection", (True, True, True), (0.334, 0.333, 0.333)),
+                ):
+                    baseline = compute_depimpact_relevance(
+                        graph,
+                        poi_edge_ids={poi_edge.edge_id},
+                        merge_threshold_seconds=merge_threshold_seconds,
+                        alpha=data_flow_alpha,
+                        kmeans_restarts=kmeans_restarts,
+                        random_seed=depimpact_random_seed,
+                        feature_mask=feature_mask,
+                        projection_override=projection_override,
+                    )
+                    active_prefix_accumulator.add_auxiliary_node_scores(
+                        poi_edge.event_id, method, baseline.node_impacts,
+                        baseline.phase_seconds,
+                    )
             local_started = time.perf_counter()
             local_behavior = analyze_behaviors(
                 graph,
@@ -1007,23 +1018,24 @@ def _run_experiment_core(
         progress("depimpact_scored", seconds=phase_seconds["edge_merge_weight_and_backward_impact"])
         table8_method_node_scores["depimpact"] = impact_analysis.node_impacts
         table7_depimpact_timings["depimpact"] = impact_analysis.phase_seconds
-        for method, feature_mask, projection_override in (
-            ("temporal_only", (False, True, False), None),
-            ("temporal_data", (True, True, False), None),
-            ("fixed_projection", (True, True, True), (0.334, 0.333, 0.333)),
-        ):
-            baseline = compute_depimpact_relevance(
-                graph,
-                poi_edge_ids=poi_edge_ids,
-                merge_threshold_seconds=merge_threshold_seconds,
-                alpha=data_flow_alpha,
-                kmeans_restarts=kmeans_restarts,
-                random_seed=depimpact_random_seed,
-                feature_mask=feature_mask,
-                projection_override=projection_override,
-            )
-            table8_method_node_scores[method] = baseline.node_impacts
-            table7_depimpact_timings[method] = baseline.phase_seconds
+        if include_auxiliary_depimpact_baselines:
+            for method, feature_mask, projection_override in (
+                ("temporal_only", (False, True, False), None),
+                ("temporal_data", (True, True, False), None),
+                ("fixed_projection", (True, True, True), (0.334, 0.333, 0.333)),
+            ):
+                baseline = compute_depimpact_relevance(
+                    graph,
+                    poi_edge_ids=poi_edge_ids,
+                    merge_threshold_seconds=merge_threshold_seconds,
+                    alpha=data_flow_alpha,
+                    kmeans_restarts=kmeans_restarts,
+                    random_seed=depimpact_random_seed,
+                    feature_mask=feature_mask,
+                    projection_override=projection_override,
+                )
+                table8_method_node_scores[method] = baseline.node_impacts
+                table7_depimpact_timings[method] = baseline.phase_seconds
         behavior_started = time.perf_counter()
         behavior_analysis = analyze_behaviors(
             graph,
@@ -1145,11 +1157,7 @@ def _run_experiment_core(
     ledger_components: dict[int, dict[str, float]] | None = None
     ledger_decisions: dict[str, dict[int, tuple[str, ...]]] = {}
     progressive_evidence: dict[str, dict] = {}
-    previous_kept_edge_ids = {
-        edge.edge_id
-        for edge in graph.edges
-        if edge.event_id in set(previous_kept_event_ids or set())
-    } if previous_kept_event_ids is not None else None
+    previous_kept_edge_ids = _previous_kept_edge_ids(graph, previous_kept_event_ids)
     pruning_started = time.perf_counter()
     for keep_ratio in keep_ratios:
         progress("pruning_started", keep_ratio=keep_ratio)

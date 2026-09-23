@@ -1,0 +1,25 @@
+{
+  "event_ids": [
+    "1DBC1412-7102-4706-9A96-60216801F06B"
+  ],
+  "seed_event_groups": [
+    {
+      "group_id": "fivedirections-20180412-browser-extension",
+      "seed_event_ids": ["1DBC1412-7102-4706-9A96-60216801F06B"],
+      "window_start_ns": 1523545800000000000,
+      "window_end_ns": 1523546400000000000
+    }
+  ],
+  "metadata": {
+    "source_kind": "official_report_oracle_derived",
+    "source_document": "/root/PIDSMaker-main/Ground_Truth/TC_Ground_Truth_Report_E3_Update.pdf",
+    "source_section": "3.10, FiveDirections browser extension with Drakon dropper, 2018-04-12",
+    "selection_rule": "The report names hJauWl01 as the downloaded executable. Select the last EVENT_WRITE to that file at 2018-04-12 15:15:15 UTC: its two recorded writes total 121856 bytes, matching DEPIMPACT's Case3 POI size of about 121.85 KB. Do not use detector alerts or held-out event labels.",
+    "matched_file_uuid": "7D9805CE-27EC-48E3-94F5-536CB3C0BDB3",
+    "matched_executable_uuid": "E53DEFE5-D4E9-4BBC-8CA3-7CFFA6701C1E",
+    "first_write_event_id": "9A733BFF-FDCC-4A18-8B94-865C3A9A46EC",
+    "related_execute_event_id": "D6041E19-B4E1-4926-A4D9-6781DFBB7158",
+    "database": "/root/NODOZE-pruning-release/output/tc/sparse-five/fivedirections/case3-shards.db",
+    "limitations": "This is a report-informed investigation anchor, not an independently discovered alert. The selected time shard is incomplete until neighboring shards are imported."
+  }
+}

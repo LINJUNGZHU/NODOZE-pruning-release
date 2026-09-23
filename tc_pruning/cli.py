@@ -166,6 +166,15 @@ def build_parser() -> argparse.ArgumentParser:
     poi_prefix.add_argument("--output-dir", required=True)
     experiment.add_argument("--output", required=True)
     experiment.add_argument(
+        "--frequency-source", choices=("snapshot", "cache", "store"),
+        default="snapshot",
+        help="frequency profile source; store uses the experiment database",
+    )
+    experiment.add_argument(
+        "--no-method-comparison", action="store_true",
+        help="skip auxiliary comparison methods in this run",
+    )
+    experiment.add_argument(
         "--config",
         default=str(Path(__file__).resolve().parent.parent / "configs" / "tc_pruning.json"),
         help=(
@@ -532,8 +541,10 @@ def main(argv: Sequence[str] | None = None) -> int:
             embedding_dimensions=experiment_config.embedding_dimensions,
             minimum_token_frequency=experiment_config.minimum_token_frequency,
             connectivity_protection=True,
-            use_frequency_cache=True,
-            use_frequency_snapshot=True,
+            use_frequency_cache=args.frequency_source in {"snapshot", "cache"},
+            use_frequency_snapshot=args.frequency_source == "snapshot",
+            include_method_comparison=not args.no_method_comparison,
+            include_auxiliary_depimpact_baselines=not args.no_method_comparison,
             progress_callback=save_progress,
             poi_aggregation=experiment_config.poi_aggregation,
             churn_slack_ratio=experiment_config.churn_slack_ratio,

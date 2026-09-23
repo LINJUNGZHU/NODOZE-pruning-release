@@ -3,6 +3,8 @@ from __future__ import annotations
 import gzip
 import glob
 import json
+import sys
+from contextlib import nullcontext
 from dataclasses import dataclass
 from pathlib import Path
 from typing import BinaryIO, Iterable, Iterator, Mapping, TextIO
@@ -319,7 +321,9 @@ class CDMStreamReader:
         self.paths = []
         for raw_path in paths:
             path = Path(raw_path)
-            if path.is_file():
+            if str(path) == '-':
+                matches = [path]
+            elif path.is_file():
                 matches = [path]
             elif path.is_dir():
                 matches = sorted(item for item in path.rglob("*") if item.is_file())
@@ -353,6 +357,8 @@ class CDMStreamReader:
 
     @staticmethod
     def _is_json(path: Path) -> bool:
+        if str(path) == '-':
+            return True
         suffixes = [suffix.lower() for suffix in path.suffixes]
         if suffixes and suffixes[-1] == ".gz":
             suffixes = suffixes[:-1]
@@ -360,7 +366,8 @@ class CDMStreamReader:
 
     def _iter_json(self, path: Path) -> Iterator[Mapping]:
         opener = gzip.open if path.suffix.lower() == ".gz" else open
-        with opener(path, "rt", encoding="utf-8") as stream:
+        context = nullcontext(sys.stdin) if str(path) == '-' else opener(path, "rt", encoding="utf-8")
+        with context as stream:
             for line_number, line in enumerate(stream, start=1):
                 try:
                     yield json.loads(line)

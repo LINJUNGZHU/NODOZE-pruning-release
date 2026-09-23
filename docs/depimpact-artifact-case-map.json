@@ -1,0 +1,102 @@
+{
+  "source": "DEPIMPACT USENIX 2022 artifact, Zenodo DOI 10.5281/zenodo.5559214",
+  "artifact_zip_md5": "9429bdb2614e24754f6efc1ff1f08a7a",
+  "source_allcases_zip": "/root/NODOZE-pruning-release/output/tc/sparse-five/depimpact-artifact/allcases.zip",
+  "source_allcases_sha256": "6c6c4ef829e07dd6fe8e47d0832f871db8ad0488df6701ee09beb3bcbe54b9c3",
+  "label_scope": "critical entity pairs in DEPIMPACT preprocessed DOT graphs; not CDM event IDs and not SPARSE event-wise ground truth",
+  "cases": [
+    {
+      "case": "Five Dir Case 1",
+      "official_report_section": "4.4",
+      "nested_zip": "fivedirectionscase1.zip",
+      "nested_zip_sha256": "999bdd2780a8dd6f080e547833745966a4040c7075eb3dea73f0cb1c8e100407",
+      "property_file": "fivedirections-backward.property_case1",
+      "property_sha256": "0905a1c96d64dcf562e401a067397aa736d1c11dbd10709636ee93fc86285842",
+      "dot_file": "fivedirections-case1.dot",
+      "dot_sha256": "49e0b61836c78b0fc7300336620c11e602183f186f527bc23c4f93c83d268d96",
+      "poi_entity": "\\\\Device\\\\HarddiskVolume2\\\\ProgramData\\\\update.ps1",
+      "critical_entity_pairs": [
+        "7784powershell.exe, \\\\Device\\\\HarddiskVolume2\\\\ProgramData\\\\update.ps1",
+        "128.55.12.67/32:57619->208.75.117.5/32:80, 7784powershell.exe"
+      ],
+      "nodoze_time_ms": 1523295672000
+    },
+    {
+      "case": "Five Dir Case 3",
+      "official_report_section": "3.10",
+      "nested_zip": "fivedirections-case3.zip",
+      "nested_zip_sha256": "f63e180744d53016cf94e8695b36193b1de7a2eb6f768a2b50e9a8f8b58c4ba1",
+      "property_file": "fivedirections-backward.property_case3",
+      "property_sha256": "7a39f98cab1977fa6a36e7713299d68fff300b1e710b3c2cbc7b203dd2cc6288",
+      "dot_file": "fivedirections-case3.dot",
+      "dot_sha256": "8bf40110a1e3d3c20dbf0fac02dd3a698245006a9c3f26f3ea20458f36bd7c3e",
+      "poi_entity": "\\\\Device\\\\HarddiskVolume2\\\\Program Files\\\\Mozilla Firefox\\\\add-on\\\\hJauWl01",
+      "critical_entity_pairs": [
+        "7620C:\\\\Program, \\\\Device\\\\HarddiskVolume2\\\\Program Files\\\\Mozilla Firefox\\\\add-on\\\\hJauWl01",
+        "\\\\Device\\\\HarddiskVolume2\\\\Program Files\\\\Mozilla Firefox\\\\add-on\\\\passwordfile.dat, 7620C:\\\\Program",
+        "6916C:\\\\Program, \\\\Device\\\\HarddiskVolume2\\\\Program Files\\\\Mozilla Firefox\\\\add-on\\\\passwordfile.dat",
+        "128.55.12.67/32:61082->135.84.161.202/32:80, 6916C:\\\\Program"
+      ],
+      "nodoze_time_ms": 1522875235000
+    },
+    {
+      "case": "Theia Case 1",
+      "official_report_section": "3.3",
+      "nested_zip": "theia-case1.zip",
+      "nested_zip_sha256": "0dd36058a3774f9498fcdb51afaabf62a436f1cfc8822c7a0222af786de11fa5",
+      "property_file": "theia1-backward.property_case1",
+      "property_sha256": "54000616f7cbbddba256455afe392e2949e6db3a0b6c6622d2fa890d1dd6703c",
+      "dot_file": "theia-case1.dot",
+      "dot_sha256": "5f980c4112b497f5f5b0a394f8799f2074ac6567a993cc8800e73be4650a3c72",
+      "poi_entity": "/home/admin/clean",
+      "critical_entity_pairs": [
+        "128.55.12.110/32:44354->146.153.68.151/32:80, 6222/usr/bin/firefox",
+        "6222/usr/bin/firefox, 128.55.12.110/32:44354->146.153.68.151/32:80",
+        "6222/usr/bin/firefox, 6244/usr/bin/firefox",
+        "6244/usr/bin/firefox, /home/admin/clean",
+        "128.55.12.110/32:33100->141.43.176.203/32:80, 6150/usr/bin/fluxbox",
+        "128.55.12.110/32:42087->61.130.69.232/32:80, 5771/usr/bin/fluxbox",
+        "5771/usr/bin/fluxbox, /dev/glx_alsa_675",
+        "/dev/glx_alsa_675, 6150/usr/bin/fluxbox"
+      ],
+      "nodoze_time_ms": 1522764134000
+    },
+    {
+      "case": "Theia Case 3",
+      "official_report_section": "3.11",
+      "nested_zip": "theia-case3.zip",
+      "nested_zip_sha256": "a8a2720c1f2b60234e44543eadfa604cc673dd2b1db8a97d444ccf0b3b31c61c",
+      "property_file": "theia-backward.property_case3",
+      "property_sha256": "a3a62db656d163150f6fc4d63d49e9cb1ebe8aa4c9a470f117397a2a79e1ae14",
+      "dot_file": "theia_3_test.dot",
+      "dot_sha256": "c6deb5c1a278bf2cbd52abd31b60a940e08a387162c845504c4b3ba083d52ca4",
+      "poi_entity": "/tmp/memtrace.so",
+      "critical_entity_pairs": [
+        "128.55.12.110/32:49721->146.153.68.151/32:80, 13749/bin/sh",
+        "13749/bin/sh, 13907./gtcache",
+        "13907./gtcache, /tmp/memtrace.so",
+        "13748/etc/firefox/native-messaging-hosts/pass_mgr, 13749/bin/sh",
+        "13747/usr/bin/firefox, 13748/etc/firefox/native-messaging-hosts/pass_mgr",
+        "128.55.12.110/32:38467->141.43.176.203/32:80, 13747/usr/bin/firefox"
+      ],
+      "nodoze_time_ms": 1522764134000
+    },
+    {
+      "case": "TRACE Case 5 (paper fifth row)",
+      "official_report_section": "4.9",
+      "nested_zip": "trace-case5.zip",
+      "nested_zip_sha256": "800eb9793101ad58a090329c34a04eeace254e3e1114177c96c9ef7f5597efee",
+      "property_file": "trace-backward.property_case5",
+      "property_sha256": "b082cada4316f51a8821e37aa6eca095fba63b15602622f603372b4431467255",
+      "dot_file": "trace-case5.dot",
+      "dot_sha256": "a768bc30166af54849fca4a7232e67871e9107610f9e1c116d87dbddfd832380",
+      "poi_entity": "/tmp/tcexec",
+      "critical_entity_pairs": [
+        "27183./pine, /tmp/tcexec",
+        "128.55.12.118/32:54159->128.55.12.73/32:143, 27183./pine",
+        "27183bash, 27183./pine"
+      ],
+      "nodoze_time_ms": 1523643379000
+    }
+  ]
+}

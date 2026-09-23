@@ -1,0 +1,45 @@
+{
+  "protocol": "sparse-five-optimized-variants-v2",
+  "variants": [
+    {
+      "name": "Five Dir Case 1 | one report POI | file IO origin | 23 edges",
+      "ledger": "/root/NODOZE-pruning-release/output/tc/sparse-five/fivedirections/case1-phishing-results-ledger/edge-scores.jsonl.gz",
+      "reference": "../poi/fivedirections-e3-case1-phishing-depimpact-pair-events.json",
+      "budget_key": "0.2",
+      "decision_path": "/root/NODOZE-pruning-release/output/tc/sparse-five/fivedirections/case1-phishing-rasp-origin-23/decisions.jsonl.gz",
+      "decision_key": "rasp_semantic@5e-05"
+    },
+    {
+      "name": "Five Dir Case 3 | two report POIs | bridge | 39 edges",
+      "ledger": "/root/NODOZE-pruning-release/output/tc/sparse-five/fivedirections/case3-two-poi-results-ledger/edge-scores.jsonl.gz",
+      "reference": "../poi/fivedirections-e3-case3-depimpact-pair-events.json",
+      "budget_key": "0.2",
+      "decision_path": "/root/NODOZE-pruning-release/output/tc/sparse-five/fivedirections/case3-two-poi-rasp-bridge-fork-40/decisions.jsonl.gz",
+      "decision_key": "rasp_semantic@9.5e-05"
+    },
+    {
+      "name": "Theia Case 1 | three report POIs | RASP-D | 179650 edges",
+      "ledger": "/root/NODOZE-pruning-release/output/tc/sparse-five/theia-case1-direct-3poi-fast-results-ledger/edge-scores.jsonl.gz",
+      "reference": "../poi/theia-e3-case1-derived-positive-events.json",
+      "budget_key": "0.2",
+      "decision_path": "/root/NODOZE-pruning-release/output/tc/sparse-five/theia-case1-rasp-semantic-20pct/decisions.jsonl.gz",
+      "decision_key": "rasp_semantic@0.2"
+    },
+    {
+      "name": "Theia Case 3 | three report POIs | RASP-D | 226443 edges",
+      "ledger": "/root/NODOZE-pruning-release/output/tc/theia-case3-poi-prefix-fixed-2026-09-09_23-36-33/scenario-theia-case3/poi-prefix-3-ledger/edge-scores.jsonl.gz",
+      "reference": "../poi/theia-e3-case3-derived-positive-events.json",
+      "budget_key": "0.2",
+      "decision_path": "/root/NODOZE-pruning-release/output/tc/selected-rasp-THEIA-2026-09-10_18-49-06/diverse-decisions.jsonl.gz",
+      "decision_key": "rasp_d0@0.2"
+    },
+    {
+      "name": "Theia Case 5 / TRACE artifact | one report POI | file IO origin | 135 edges",
+      "ledger": "/root/NODOZE-pruning-release/output/tc/sparse-five/trace-case5-paper-results-ledger/edge-scores.jsonl.gz",
+      "reference": "../poi/trace-e3-case5-depimpact-pair-events.json",
+      "budget_key": "0.2",
+      "decision_path": "/root/NODOZE-pruning-release/output/tc/sparse-five/trace-case5-paper-rasp-origin-137/decisions.jsonl.gz",
+      "decision_key": "rasp_semantic@0.001"
+    }
+  ]
+}

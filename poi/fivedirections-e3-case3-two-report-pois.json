@@ -1,0 +1,26 @@
+{
+  "event_ids": [
+    "0A84AEEB-C668-4527-B564-69F1C69ED4B6",
+    "1DBC1412-7102-4706-9A96-60216801F06B"
+  ],
+  "seed_event_groups": [
+    {
+      "group_id": "fivedirections-20180412-browser-extension-two-report-anchors",
+      "seed_event_ids": [
+        "0A84AEEB-C668-4527-B564-69F1C69ED4B6",
+        "1DBC1412-7102-4706-9A96-60216801F06B"
+      ],
+      "window_start_ns": 1523545800000000000,
+      "window_end_ns": 1523546400000000000
+    }
+  ],
+  "metadata": {
+    "source_kind": "official_report_and_orthrus_node_oracle_derived",
+    "source_document": "/root/PIDSMaker-main/Ground_Truth/TC_Ground_Truth_Report_E3_Update.pdf",
+    "source_section": "3.10, FiveDirections browser-extension attack, 2018-04-12",
+    "selection_rule": "Use the report-named shellcode server 135.84.161.202:80 CONNECT and last WRITE to report-named hJauWl01 as two investigation anchors. The socket UUID also appears in the ORTHRUS node list. No external alert is used.",
+    "socket_uuid": "E20F7C55-319D-4AF5-BC62-11317B9DEC3C",
+    "file_uuid": "7D9805CE-27EC-48E3-94F5-536CB3C0BDB3",
+    "comparison_warning": "Two oracle-informed POIs provide more attack information than the single-write-POI run. Report separately and exclude both seeds from non-POI recovery."
+  }
+}

@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 
 import tc_pruning.evaluation as evaluation_module
-from tc_pruning.cli import main
+from tc_pruning.cli import build_parser, main
 from tc_pruning.causal import CausalSearchConfig
 from tc_pruning.config import load_experiment_config
 from tc_pruning.evaluation import (
@@ -19,6 +19,16 @@ from tc_pruning.score_ledger import verify_score_ledger
 
 
 FIXTURES = Path(__file__).parent / "fixtures"
+
+
+def test_experiment_can_use_same_day_store_profile_and_skip_extra_baselines():
+    args = build_parser().parse_args([
+        'experiment', '--db', 'events.db', '--poi-events', 'poi.json',
+        '--output', 'results.json', '--frequency-source', 'store',
+        '--no-method-comparison',
+    ])
+    assert args.frequency_source == 'store'
+    assert args.no_method_comparison is True
 
 
 def test_paper_main_result_has_only_compact_publication_columns():

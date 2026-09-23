@@ -1,0 +1,26 @@
+{
+  "event_ids": [
+    "764AB6F2-DF26-2415-B8F5-3B0000000010",
+    "AB9231DC-0828-2415-DEA1-400000000010",
+    "5338C80F-2428-2415-3146-410000000010"
+  ],
+  "seed_event_groups": [
+    {
+      "group_id": "theia-20180410-firefox-three-report-stages",
+      "seed_event_ids": [
+        "764AB6F2-DF26-2415-B8F5-3B0000000010",
+        "AB9231DC-0828-2415-DEA1-400000000010",
+        "5338C80F-2428-2415-3146-410000000010"
+      ],
+      "window_start_ns": 1523385000000000000,
+      "window_end_ns": 1523386800000000000
+    }
+  ],
+  "metadata": {
+    "source_kind": "official_report_oracle_derived",
+    "source_document": "/root/PIDSMaker-main/Ground_Truth/TC_Ground_Truth_Report_E3_Update.pdf",
+    "source_section": "3.3, 2018-04-10 THEIA Firefox backdoor",
+    "selection_rule": "The existing verified case-1 report POIs are the Firefox writes to /home/admin/clean and /home/admin/profile and the profile write to /var/log/xdev. Use a fixed 18:30-19:00 UTC report-stage window and all three POIs from the outset.",
+    "comparison_warning": "The 30-minute stage window omits some of the report's wider attack interval; evaluate only with explicit candidate coverage."
+  }
+}

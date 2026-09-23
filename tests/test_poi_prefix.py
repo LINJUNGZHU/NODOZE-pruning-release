@@ -444,9 +444,20 @@ def test_minimum_sufficient_accepts_valid_causal_path_cover_forest():
     assert chosen["fully_restored"] is True
 
 
-def test_run_experiment_can_skip_redundant_method_comparisons(tmp_path):
+@pytest.mark.parametrize("poi_aggregation", ["joint", "noisy_or"])
+def test_run_experiment_can_skip_redundant_method_comparisons(
+    tmp_path, monkeypatch, poi_aggregation
+):
     database = tmp_path / "tc.db"
     progress = []
+    impact_calls = []
+    original_impact = evaluation_module.compute_depimpact_relevance
+
+    def counted_impact(*args, **kwargs):
+        impact_calls.append(kwargs)
+        return original_impact(*args, **kwargs)
+
+    monkeypatch.setattr(evaluation_module, "compute_depimpact_relevance", counted_impact)
     with ProvenanceStore(database) as store:
         store.ingest(
             [NodeRecord(name, "process", name, "h") for name in ("a", "b")]
@@ -469,12 +480,16 @@ def test_run_experiment_can_skip_redundant_method_comparisons(tmp_path):
             ),
             progress_callback=progress.append,
             include_method_comparison=False,
+            include_auxiliary_depimpact_baselines=False,
+            poi_aggregation=poi_aggregation,
+            fusion_mode="rdp_guard",
         )
 
     assert len(report["results"]) == 1
     assert report["method_comparison"]["methods"] == []
     assert report["method_comparison"]["curve"] == []
     assert not any(item["stage"].startswith("ablation_") for item in progress)
+    assert len(impact_calls) == 1
 
 
 def test_sweep_cli_runs_real_prefix_and_writes_auditable_summaries(

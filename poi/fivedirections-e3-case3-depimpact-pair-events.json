@@ -1,0 +1,77 @@
+{
+  "name": "FiveDirections Case 3 DEPIMPACT four critical entity pairs expanded to CDM events",
+  "attack_event_ids": [
+    "9A733BFF-FDCC-4A18-8B94-865C3A9A46EC",
+    "1DBC1412-7102-4706-9A96-60216801F06B",
+    "A6A826E0-80E1-4E47-A6F5-F9B42C75770A",
+    "F70AD789-3B31-4324-BA28-3B47F2804AA7",
+    "656D2D5A-AC50-4D7C-84BF-CD3C674523B1",
+    "6E7B7DF6-2C4C-4275-B3F0-C42645EBA929",
+    "9CB97B8C-104A-4A6E-B2FA-D73DF3CB49E6",
+    "B729DEA0-F099-48FF-B7D8-A9F674D20588",
+    "74678BCA-A21B-458D-9111-DE690FC1D965",
+    "F6310CF5-9880-47B3-95DB-3AE3BE9994B4",
+    "B9034461-ED40-4263-8E9E-A1F7671D109C",
+    "C45EE14F-9FDF-4CFA-AC51-C547616F0FD5",
+    "39BC1613-17EB-4151-96B5-35FB6FD2B411"
+  ],
+  "poi_event_ids": [
+    "1DBC1412-7102-4706-9A96-60216801F06B"
+  ],
+  "metadata": {
+    "exhaustive_event_labels": false,
+    "label_scope": "artifact_entity_pair_expansion_positive_subset",
+    "source_nested_zip": "fivedirections-case3.zip",
+    "source_property_sha256": "7a39f98cab1977fa6a36e7713299d68fff300b1e710b3c2cbc7b203dd2cc6288",
+    "source_dot_sha256": "8bf40110a1e3d3c20dbf0fac02dd3a698245006a9c3f26f3ea20458f36bd7c3e",
+    "matching_rule": "same host, process/file/socket identity, relation, DOT second, and matching aggregate byte count; one DOT edge may fold multiple CDM events",
+    "critical_pair_groups": [
+      {
+        "critical_entity_pair": "7620C:\\Program -> hJauWl01",
+        "dot_event_id": "56242325",
+        "dot_event_type": "write",
+        "dot_aggregate_bytes": 121856,
+        "cdm_event_ids": [
+          "9A733BFF-FDCC-4A18-8B94-865C3A9A46EC",
+          "1DBC1412-7102-4706-9A96-60216801F06B"
+        ]
+      },
+      {
+        "critical_entity_pair": "passwordfile.dat -> 7620C:\\Program",
+        "dot_event_id": "56242307",
+        "dot_event_type": "read",
+        "dot_aggregate_bytes": 8192,
+        "cdm_event_ids": [
+          "A6A826E0-80E1-4E47-A6F5-F9B42C75770A",
+          "F70AD789-3B31-4324-BA28-3B47F2804AA7"
+        ]
+      },
+      {
+        "critical_entity_pair": "6916C:\\Program -> passwordfile.dat",
+        "dot_event_id": "56222497",
+        "dot_event_type": "open",
+        "dot_aggregate_bytes": 0,
+        "cdm_event_ids": [
+          "656D2D5A-AC50-4D7C-84BF-CD3C674523B1"
+        ]
+      },
+      {
+        "critical_entity_pair": "C2 socket -> 6916C:\\Program",
+        "dot_event_id": "56221438",
+        "dot_event_type": "recvfrom",
+        "dot_aggregate_bytes": 65120,
+        "cdm_event_ids": [
+          "6E7B7DF6-2C4C-4275-B3F0-C42645EBA929",
+          "9CB97B8C-104A-4A6E-B2FA-D73DF3CB49E6",
+          "B729DEA0-F099-48FF-B7D8-A9F674D20588",
+          "74678BCA-A21B-458D-9111-DE690FC1D965",
+          "F6310CF5-9880-47B3-95DB-3AE3BE9994B4",
+          "B9034461-ED40-4263-8E9E-A1F7671D109C",
+          "C45EE14F-9FDF-4CFA-AC51-C547616F0FD5",
+          "39BC1613-17EB-4151-96B5-35FB6FD2B411"
+        ]
+      }
+    ],
+    "warning": "DEPIMPACT entity-pair labels are not SPARSE event-wise labels and do not certify candidate negatives."
+  }
+}

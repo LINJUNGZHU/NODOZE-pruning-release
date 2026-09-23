@@ -1,0 +1,74 @@
+{
+  "name": "FiveDirections Case 1 DEPIMPACT critical entity pairs expanded to CDM events",
+  "attack_event_ids": [
+    "6E430903-B404-4AA5-B1CA-9509EDDF0887",
+    "0A3DB443-FA6C-42A7-A25C-1D670169A44A",
+    "EADE278C-55E0-4EE6-A36F-B2A64F0635F2",
+    "F2F5ED00-F1EA-4EB1-93D3-F584A09F2DA1",
+    "F5C69907-9045-470D-BA14-7A38424628EB",
+    "F64E61A8-0E76-4F62-BC7E-D5097B10EC18",
+    "531B25EB-CDAC-4D6B-9227-9ADCB32AE832",
+    "83CEC876-AF3C-4F49-883E-1A8174410803",
+    "3E939EC2-1959-4F81-A8AB-C09F2F117567",
+    "6F60563A-DF92-43A8-971C-0AB6C4B41D66",
+    "7F4E08E7-DDA3-490A-A539-5EC8040D7A4B",
+    "C35922E9-5032-41E6-B9A4-2C90DAC4FC7E",
+    "F2189D4E-7C23-48E3-A03B-10F6462B18AF",
+    "FAEC8D78-1D10-43AF-B352-8334FAED6A78",
+    "1BDF907B-7A5D-47AB-94A3-389500ACF2FD",
+    "1CA39594-96CC-4A2A-BCD2-5F720049BB58",
+    "300040D1-F913-4E4D-A87E-E63E04CCFD68",
+    "DFA966AB-6235-46FC-81AC-505AED9BBD6B",
+    "DFF308C0-2807-4E7C-9549-F6E619CCAA2B",
+    "855CFE4D-79AC-4699-8BB0-4F747DBC7B8F"
+  ],
+  "poi_event_ids": [
+    "531B25EB-CDAC-4D6B-9227-9ADCB32AE832"
+  ],
+  "metadata": {
+    "exhaustive_event_labels": false,
+    "label_scope": "artifact_entity_pair_expansion_positive_subset",
+    "source_property_sha256": "0905a1c96d64dcf562e401a067397aa736d1c11dbd10709636ee93fc86285842",
+    "source_dot_sha256": "49e0b61836c78b0fc7300336620c11e602183f186f527bc23c4f93c83d268d96",
+    "matching_rule": "same report case, host, process/file/socket identity, relation, DOT second and aggregate byte count",
+    "critical_pair_groups": [
+      {
+        "entity_pair": "powershell.exe -> update.ps1",
+        "dot_event_id": "43137993",
+        "relation": "EVENT_WRITE",
+        "aggregate_bytes": 50781,
+        "cdm_event_ids": [
+          "6E430903-B404-4AA5-B1CA-9509EDDF0887",
+          "0A3DB443-FA6C-42A7-A25C-1D670169A44A",
+          "EADE278C-55E0-4EE6-A36F-B2A64F0635F2",
+          "F2F5ED00-F1EA-4EB1-93D3-F584A09F2DA1",
+          "F5C69907-9045-470D-BA14-7A38424628EB",
+          "F64E61A8-0E76-4F62-BC7E-D5097B10EC18",
+          "531B25EB-CDAC-4D6B-9227-9ADCB32AE832"
+        ]
+      },
+      {
+        "entity_pair": "C2 download socket -> powershell.exe",
+        "dot_event_id": "43138646",
+        "relation": "EVENT_RECVFROM",
+        "aggregate_bytes": 37843,
+        "cdm_event_ids": [
+          "83CEC876-AF3C-4F49-883E-1A8174410803",
+          "3E939EC2-1959-4F81-A8AB-C09F2F117567",
+          "6F60563A-DF92-43A8-971C-0AB6C4B41D66",
+          "7F4E08E7-DDA3-490A-A539-5EC8040D7A4B",
+          "C35922E9-5032-41E6-B9A4-2C90DAC4FC7E",
+          "F2189D4E-7C23-48E3-A03B-10F6462B18AF",
+          "FAEC8D78-1D10-43AF-B352-8334FAED6A78",
+          "1BDF907B-7A5D-47AB-94A3-389500ACF2FD",
+          "1CA39594-96CC-4A2A-BCD2-5F720049BB58",
+          "300040D1-F913-4E4D-A87E-E63E04CCFD68",
+          "DFA966AB-6235-46FC-81AC-505AED9BBD6B",
+          "DFF308C0-2807-4E7C-9549-F6E619CCAA2B",
+          "855CFE4D-79AC-4699-8BB0-4F747DBC7B8F"
+        ]
+      }
+    ],
+    "warning": "DEPIMPACT entity-pair labels are not SPARSE event-wise labels; unreviewed candidate events are unknown."
+  }
+}

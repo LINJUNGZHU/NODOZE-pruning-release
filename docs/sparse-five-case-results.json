@@ -1,0 +1,450 @@
+{
+  "inventory_sha256": "05f4da59f2ab30f13b2861f97165da5b2c665c5d916e927ee5a47606d409bd7a",
+  "cases": [
+    {
+      "name": "Five Dir Case 1",
+      "status": "measured",
+      "reason": null,
+      "poi_source_kind": "official_report_oracle_derived",
+      "paper_case_identity": "mapped_inference",
+      "label_scope": "artifact_entity_pair_expansion_positive_subset",
+      "sources": {
+        "official_report": [
+          {
+            "path": "/root/PIDSMaker-main/Ground_Truth/TC_Ground_Truth_Report_E3_Update.pdf",
+            "exists": true,
+            "bytes": 1244912
+          }
+        ],
+        "poi_manifest": [
+          {
+            "path": "configs/../poi/fivedirections-e3-case1-phishing-report-poi.json",
+            "exists": true,
+            "bytes": 827
+          }
+        ],
+        "node_groundtruth": [
+          {
+            "path": "/root/PIDSMaker-main/Ground_Truth/orthrus/E3-FIVEDIRECTIONS/node_fivedirections_e3_excel_0409.csv",
+            "exists": true,
+            "bytes": 9187
+          }
+        ],
+        "ledger": [
+          {
+            "path": "/root/NODOZE-pruning-release/output/tc/sparse-five/fivedirections/case1-phishing-results-ledger/edge-scores.jsonl.gz",
+            "exists": true,
+            "bytes": 33429831
+          }
+        ],
+        "reference": [
+          {
+            "path": "configs/../poi/fivedirections-e3-case1-phishing-depimpact-pair-events.json",
+            "exists": true,
+            "bytes": 3107
+          }
+        ],
+        "ingested_database": [
+          {
+            "path": "/root/NODOZE-pruning-release/output/tc/sparse-five/fivedirections/case1-phishing.db",
+            "exists": true,
+            "bytes": 2693484544
+          }
+        ],
+        "raw_logs": [
+          {
+            "path": "/root/TAPAS-artifact/data/fivedirections/logs/ta1-fivedirections-e3-official-2-2.rar",
+            "exists": true,
+            "bytes": 1751546368
+          }
+        ]
+      },
+      "metrics": {
+        "ledger_sha256": "27ac808c4875ff7bc212cd44d0b82e081fc4f0279cf13a9508eab91fadcb7eb2",
+        "reference_sha256": "dc27bcdf85503f7d13586f5a6d95e409ba95f9d02676af2d70c29cca11f62210",
+        "decision_sha256": "27ac808c4875ff7bc212cd44d0b82e081fc4f0279cf13a9508eab91fadcb7eb2",
+        "decision_key": "0.2",
+        "budget_key": "0.2",
+        "reference_complete": false,
+        "candidate_edges": 466257,
+        "output_edges": 93251,
+        "known_positive_edges": 20,
+        "known_positive_outside_candidate": 0,
+        "candidate_positive_coverage": 1.0,
+        "known_positive_hits": 7,
+        "known_positive_misses": 13,
+        "observed_positive_recall": 0.35,
+        "poi_positive_edges": 1,
+        "non_poi_positive_edges": 19,
+        "non_poi_positive_hits": 6,
+        "non_poi_observed_recall": 0.3157894736842105,
+        "unreviewed_selected_edges": 93244,
+        "tp": null,
+        "fp": null,
+        "fn": null,
+        "tn": null,
+        "precision": null,
+        "recall": null,
+        "f1": null,
+        "paper_fpr": null,
+        "standard_fpr": null
+      }
+    },
+    {
+      "name": "Five Dir Case 3",
+      "status": "measured",
+      "reason": null,
+      "poi_source_kind": "official_report_oracle_derived",
+      "paper_case_identity": "mapped_inference",
+      "label_scope": "artifact_entity_pair_expansion_positive_subset",
+      "sources": {
+        "official_report": [
+          {
+            "path": "/root/PIDSMaker-main/Ground_Truth/TC_Ground_Truth_Report_E3_Update.pdf",
+            "exists": true,
+            "bytes": 1244912
+          }
+        ],
+        "poi_manifest": [
+          {
+            "path": "configs/../poi/fivedirections-e3-case3-report-poi.json",
+            "exists": true,
+            "bytes": 1460
+          }
+        ],
+        "node_groundtruth": [
+          {
+            "path": "/root/PIDSMaker-main/Ground_Truth/orthrus/E3-FIVEDIRECTIONS/node_fivedirections_e3_browser_0412.csv",
+            "exists": true,
+            "bytes": 96
+          }
+        ],
+        "ledger": [
+          {
+            "path": "/root/NODOZE-pruning-release/output/tc/sparse-five/fivedirections/case3-report-poi-results-ledger/edge-scores.jsonl.gz",
+            "exists": true,
+            "bytes": 29223630
+          }
+        ],
+        "reference": [
+          {
+            "path": "configs/../poi/fivedirections-e3-case3-depimpact-pair-events.json",
+            "exists": true,
+            "bytes": 3022
+          }
+        ],
+        "ingested_database": [
+          {
+            "path": "/root/NODOZE-pruning-release/output/tc/sparse-five/fivedirections/case3-shards.db",
+            "exists": true,
+            "bytes": 2823426048
+          }
+        ],
+        "raw_logs": [
+          {
+            "path": "/root/TAPAS-artifact/data/fivedirections/logs/ta1-fivedirections-e3-official-2-4.rar",
+            "exists": true,
+            "bytes": 1784342685
+          }
+        ]
+      },
+      "metrics": {
+        "ledger_sha256": "606f47326b4fd183490b0a6b886d239aa784b0880daeba3156f98958cc336ce5",
+        "reference_sha256": "0998652962b4c49dcb31b98eea7d96256526ff57329268e7a1fa2f3f938ca56d",
+        "decision_sha256": "606f47326b4fd183490b0a6b886d239aa784b0880daeba3156f98958cc336ce5",
+        "decision_key": "0.2",
+        "budget_key": "0.2",
+        "reference_complete": false,
+        "candidate_edges": 424245,
+        "output_edges": 84849,
+        "known_positive_edges": 13,
+        "known_positive_outside_candidate": 0,
+        "candidate_positive_coverage": 1.0,
+        "known_positive_hits": 5,
+        "known_positive_misses": 8,
+        "observed_positive_recall": 0.38461538461538464,
+        "poi_positive_edges": 1,
+        "non_poi_positive_edges": 12,
+        "non_poi_positive_hits": 4,
+        "non_poi_observed_recall": 0.3333333333333333,
+        "unreviewed_selected_edges": 84844,
+        "tp": null,
+        "fp": null,
+        "fn": null,
+        "tn": null,
+        "precision": null,
+        "recall": null,
+        "f1": null,
+        "paper_fpr": null,
+        "standard_fpr": null
+      }
+    },
+    {
+      "name": "Theia Case 1",
+      "status": "measured",
+      "reason": null,
+      "poi_source_kind": "official_report_oracle_derived",
+      "paper_case_identity": "mapped_inference",
+      "label_scope": "derived_positive_events_only",
+      "sources": {
+        "official_report": [
+          {
+            "path": "/root/PIDSMaker-main/Ground_Truth/TC_Ground_Truth_Report_E3_Update.pdf",
+            "exists": true,
+            "bytes": 1244912
+          }
+        ],
+        "poi_manifest": [
+          {
+            "path": "configs/../poi/theia-e3-case1-three-report-pois-focused.json",
+            "exists": true,
+            "bytes": 1175
+          }
+        ],
+        "node_groundtruth": [
+          {
+            "path": "/root/PIDSMaker-main/Ground_Truth/orthrus/E3-THEIA/node_Firefox_Backdoor_Drakon_In_Memory.csv",
+            "exists": true,
+            "bytes": 6003
+          }
+        ],
+        "ledger": [
+          {
+            "path": "/root/NODOZE-pruning-release/output/tc/sparse-five/theia-case1-direct-3poi-fast-results-ledger/edge-scores.jsonl.gz",
+            "exists": true,
+            "bytes": 42113416
+          }
+        ],
+        "reference": [
+          {
+            "path": "configs/../poi/theia-e3-case1-derived-positive-events.json",
+            "exists": true,
+            "bytes": 1110395
+          }
+        ],
+        "ingested_database": [
+          {
+            "path": "/root/NODOZE-pruning-release/output/tc/theia-depimpact-case1-2026-09-09_15-35-45.db",
+            "exists": true,
+            "bytes": 5091393536
+          }
+        ],
+        "raw_logs": [
+          {
+            "path": "/root/TAPAS-artifact/data/theia/logs/ta1-theia-e3-official-6r-00.json",
+            "exists": true,
+            "bytes": 3804030069
+          }
+        ]
+      },
+      "metrics": {
+        "ledger_sha256": "b7924926bc633ef94104179e087bc0dbe0268f610020c194fda664d37927b827",
+        "reference_sha256": "c8bb226f0686286726d9dd532f414db41a29dc36758fe3817db3b4fe4271270c",
+        "decision_sha256": "b7924926bc633ef94104179e087bc0dbe0268f610020c194fda664d37927b827",
+        "decision_key": "0.2",
+        "budget_key": "0.2",
+        "reference_complete": false,
+        "candidate_edges": 898253,
+        "output_edges": 179650,
+        "known_positive_edges": 25217,
+        "known_positive_outside_candidate": 2,
+        "candidate_positive_coverage": 0.9999206884244756,
+        "known_positive_hits": 405,
+        "known_positive_misses": 24812,
+        "observed_positive_recall": 0.01606059404370068,
+        "poi_positive_edges": 3,
+        "non_poi_positive_edges": 25214,
+        "non_poi_positive_hits": 402,
+        "non_poi_observed_recall": 0.015943523439359085,
+        "unreviewed_selected_edges": 179245,
+        "tp": null,
+        "fp": null,
+        "fn": null,
+        "tn": null,
+        "precision": null,
+        "recall": null,
+        "f1": null,
+        "paper_fpr": null,
+        "standard_fpr": null
+      }
+    },
+    {
+      "name": "Theia Case 3",
+      "status": "measured",
+      "reason": null,
+      "poi_source_kind": "official_report_oracle_derived",
+      "paper_case_identity": "mapped_inference",
+      "label_scope": "derived_positive_events_only",
+      "sources": {
+        "official_report": [
+          {
+            "path": "/root/PIDSMaker-main/Ground_Truth/TC_Ground_Truth_Report_E3_Update.pdf",
+            "exists": true,
+            "bytes": 1244912
+          }
+        ],
+        "poi_manifest": [
+          {
+            "path": "/root/NODOZE-pruning-release/poi/theia-e3-case3-report-pois.json",
+            "exists": true,
+            "bytes": 1113
+          }
+        ],
+        "node_groundtruth": [
+          {
+            "path": "/root/PIDSMaker-main/Ground_Truth/orthrus/E3-THEIA/node_Browser_Extension_Drakon_Dropper.csv",
+            "exists": true,
+            "bytes": 6607
+          }
+        ],
+        "ledger": [
+          {
+            "path": "/root/NODOZE-pruning-release/output/tc/theia-case3-poi-prefix-fixed-2026-09-09_23-36-33/scenario-theia-case3/poi-prefix-3-ledger/edge-scores.jsonl.gz",
+            "exists": true,
+            "bytes": 51621440
+          }
+        ],
+        "reference": [
+          {
+            "path": "configs/../poi/theia-e3-case3-derived-positive-events.json",
+            "exists": true,
+            "bytes": 39266
+          }
+        ],
+        "ingested_database": [
+          {
+            "path": "/root/NODOZE-pruning-release/output/tc/theia-depimpact-case3-2026-09-09_15-32-25.db",
+            "exists": true,
+            "bytes": 5025497088
+          }
+        ],
+        "raw_logs": [
+          {
+            "path": "/root/TAPAS-artifact/data/theia/logs/ta1-theia-e3-official-6r-08.json",
+            "exists": true,
+            "bytes": 3769407323
+          }
+        ]
+      },
+      "metrics": {
+        "ledger_sha256": "95884055355027cbd379470467f28b1d36f851af1a9ce8da8adf7f94dd70ec5b",
+        "reference_sha256": "837bc1833eeb7791d6fbe507a933a69c8b6106628b1223d489322db03f0580f9",
+        "decision_sha256": "95884055355027cbd379470467f28b1d36f851af1a9ce8da8adf7f94dd70ec5b",
+        "decision_key": "0.2",
+        "budget_key": "0.2",
+        "reference_complete": false,
+        "candidate_edges": 1132218,
+        "output_edges": 226443,
+        "known_positive_edges": 870,
+        "known_positive_outside_candidate": 0,
+        "candidate_positive_coverage": 1.0,
+        "known_positive_hits": 664,
+        "known_positive_misses": 206,
+        "observed_positive_recall": 0.7632183908045977,
+        "poi_positive_edges": 3,
+        "non_poi_positive_edges": 867,
+        "non_poi_positive_hits": 661,
+        "non_poi_observed_recall": 0.76239907727797,
+        "unreviewed_selected_edges": 225779,
+        "tp": null,
+        "fp": null,
+        "fn": null,
+        "tn": null,
+        "precision": null,
+        "recall": null,
+        "f1": null,
+        "paper_fpr": null,
+        "standard_fpr": null
+      }
+    },
+    {
+      "name": "Theia Case 5",
+      "status": "measured",
+      "reason": null,
+      "poi_source_kind": "official_report_oracle_derived",
+      "paper_case_identity": "inferred_trace_case5",
+      "label_scope": "artifact_entity_pair_expansion_positive_subset",
+      "sources": {
+        "official_report": [
+          {
+            "path": "/root/PIDSMaker-main/Ground_Truth/TC_Ground_Truth_Report_E3_Update.pdf",
+            "exists": true,
+            "bytes": 1244912
+          }
+        ],
+        "poi_manifest": [
+          {
+            "path": "configs/../poi/trace-e3-case5-phishing-report-poi.json",
+            "exists": true,
+            "bytes": 914
+          }
+        ],
+        "node_groundtruth": [
+          {
+            "path": "/root/PIDSMaker-main/Ground_Truth/orthrus/E3-TRACE/node_trace_e3_phishing_executable_0413.csv",
+            "exists": true,
+            "bytes": 1061
+          }
+        ],
+        "ledger": [
+          {
+            "path": "/root/NODOZE-pruning-release/output/tc/sparse-five/trace-case5-paper-results-ledger/edge-scores.jsonl.gz",
+            "exists": true,
+            "bytes": 10488380
+          }
+        ],
+        "reference": [
+          {
+            "path": "configs/../poi/trace-e3-case5-depimpact-pair-events.json",
+            "exists": true,
+            "bytes": 11247
+          }
+        ],
+        "ingested_database": [
+          {
+            "path": "/root/NODOZE-pruning-release/output/tc/sparse-five/trace-case5-paper.db",
+            "exists": true,
+            "bytes": 2909782016
+          }
+        ],
+        "raw_logs": [
+          {
+            "path": "/root/TAPAS-artifact/data/trace/logs/ta1-trace-e3-official-1-4.json",
+            "exists": true,
+            "bytes": 3183387111
+          }
+        ]
+      },
+      "metrics": {
+        "ledger_sha256": "cb16eaf3d9c098f5528b334a7d7dc94cfe60faf8cc5a8d59d13b1cb1eeef48a8",
+        "reference_sha256": "b6ff8574ecfa18e38101edfac22d2322822693f0ba1f91e002b23c512040c043",
+        "decision_sha256": "cb16eaf3d9c098f5528b334a7d7dc94cfe60faf8cc5a8d59d13b1cb1eeef48a8",
+        "decision_key": "0.2",
+        "budget_key": "0.2",
+        "reference_complete": false,
+        "candidate_edges": 137762,
+        "output_edges": 27552,
+        "known_positive_edges": 104,
+        "known_positive_outside_candidate": 0,
+        "candidate_positive_coverage": 1.0,
+        "known_positive_hits": 104,
+        "known_positive_misses": 0,
+        "observed_positive_recall": 1.0,
+        "poi_positive_edges": 1,
+        "non_poi_positive_edges": 103,
+        "non_poi_positive_hits": 103,
+        "non_poi_observed_recall": 1.0,
+        "unreviewed_selected_edges": 27448,
+        "tp": null,
+        "fp": null,
+        "fn": null,
+        "tn": null,
+        "precision": null,
+        "recall": null,
+        "f1": null,
+        "paper_fpr": null,
+        "standard_fpr": null
+      }
+    }
+  ]
+}

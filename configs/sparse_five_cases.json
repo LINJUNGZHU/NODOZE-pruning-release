@@ -1,0 +1,102 @@
+{
+  "protocol": "sparse-five-case-audit-v1",
+  "cases": [
+    {
+      "name": "Five Dir Case 1",
+      "official_report": "/root/PIDSMaker-main/Ground_Truth/TC_Ground_Truth_Report_E3_Update.pdf",
+      "official_report_section": "4.4, 2018-04-09 phishing Excel macro and PowerShell",
+      "raw_logs": [
+        "/root/TAPAS-artifact/data/fivedirections/logs/ta1-fivedirections-e3-official-2-2.rar"
+      ],
+      "raw_members": [
+        "ta1-fivedirections-e3-official-2-25.json"
+      ],
+      "ingested_database": "/root/NODOZE-pruning-release/output/tc/sparse-five/fivedirections/case1-phishing.db",
+      "neighboring_members_available": [
+        "ta1-fivedirections-e3-official-2-24.json"
+      ],
+      "node_groundtruth": "/root/PIDSMaker-main/Ground_Truth/orthrus/E3-FIVEDIRECTIONS/node_fivedirections_e3_excel_0409.csv",
+      "poi_manifest": "../poi/fivedirections-e3-case1-phishing-report-poi.json",
+      "reference": "../poi/fivedirections-e3-case1-phishing-depimpact-pair-events.json",
+      "ledger": "/root/NODOZE-pruning-release/output/tc/sparse-five/fivedirections/case1-phishing-results-ledger/edge-scores.jsonl.gz",
+      "budget_key": "0.2",
+      "poi_source_kind": "official_report_oracle_derived",
+      "label_scope": "artifact_entity_pair_expansion_positive_subset",
+      "reason": "DEPIMPACT entity-pair labels expanded by CDM relation, time and byte count; SPARSE event IDs unavailable"
+    },
+    {
+      "name": "Five Dir Case 3",
+      "official_report": "/root/PIDSMaker-main/Ground_Truth/TC_Ground_Truth_Report_E3_Update.pdf",
+      "official_report_section": "3.10, 2018-04-12 browser extension with failed implant execution",
+      "raw_logs": [
+        "/root/TAPAS-artifact/data/fivedirections/logs/ta1-fivedirections-e3-official-2-4.rar"
+      ],
+      "raw_members": [
+        "ta1-fivedirections-e3-official-2-42.json"
+      ],
+      "ingested_database": "/root/NODOZE-pruning-release/output/tc/sparse-five/fivedirections/case3-shards.db",
+      "neighboring_members_available": [
+        "ta1-fivedirections-e3-official-2-41.json"
+      ],
+      "node_groundtruth": "/root/PIDSMaker-main/Ground_Truth/orthrus/E3-FIVEDIRECTIONS/node_fivedirections_e3_browser_0412.csv",
+      "poi_manifest": "../poi/fivedirections-e3-case3-report-poi.json",
+      "reference": "../poi/fivedirections-e3-case3-depimpact-pair-events.json",
+      "ledger": "/root/NODOZE-pruning-release/output/tc/sparse-five/fivedirections/case3-report-poi-results-ledger/edge-scores.jsonl.gz",
+      "budget_key": "0.2",
+      "poi_source_kind": "official_report_oracle_derived",
+      "label_scope": "artifact_entity_pair_expansion_positive_subset",
+      "reason": "DEPIMPACT four critical entity pairs map to 13 CDM events; SPARSE event IDs unavailable"
+    },
+    {
+      "name": "Theia Case 1",
+      "official_report": "/root/PIDSMaker-main/Ground_Truth/TC_Ground_Truth_Report_E3_Update.pdf",
+      "official_report_section": "3.3, 2018-04-10 Firefox backdoor",
+      "raw_logs": [
+        "/root/TAPAS-artifact/data/theia/logs/ta1-theia-e3-official-6r-00.json"
+      ],
+      "ingested_database": "/root/NODOZE-pruning-release/output/tc/theia-depimpact-case1-2026-09-09_15-35-45.db",
+      "node_groundtruth": "/root/PIDSMaker-main/Ground_Truth/orthrus/E3-THEIA/node_Firefox_Backdoor_Drakon_In_Memory.csv",
+      "poi_manifest": "../poi/theia-e3-case1-three-report-pois-focused.json",
+      "poi_source_kind": "official_report_oracle_derived",
+      "label_scope": "derived_positive_events_only",
+      "ledger": "/root/NODOZE-pruning-release/output/tc/sparse-five/theia-case1-direct-3poi-fast-results-ledger/edge-scores.jsonl.gz",
+      "reference": "../poi/theia-e3-case1-derived-positive-events.json",
+      "budget_key": "0.2",
+      "reason": "30-minute report-stage window and node-rule-derived positive reference, not SPARSE event labels"
+    },
+    {
+      "name": "Theia Case 3",
+      "official_report": "/root/PIDSMaker-main/Ground_Truth/TC_Ground_Truth_Report_E3_Update.pdf",
+      "official_report_section": "3.11, 2018-04-12 browser extension dropper",
+      "raw_logs": [
+        "/root/TAPAS-artifact/data/theia/logs/ta1-theia-e3-official-6r-08.json"
+      ],
+      "ingested_database": "/root/NODOZE-pruning-release/output/tc/theia-depimpact-case3-2026-09-09_15-32-25.db",
+      "node_groundtruth": "/root/PIDSMaker-main/Ground_Truth/orthrus/E3-THEIA/node_Browser_Extension_Drakon_Dropper.csv",
+      "poi_manifest": "/root/NODOZE-pruning-release/poi/theia-e3-case3-report-pois.json",
+      "poi_source_kind": "official_report_oracle_derived",
+      "label_scope": "derived_positive_events_only",
+      "ledger": "/root/NODOZE-pruning-release/output/tc/theia-case3-poi-prefix-fixed-2026-09-09_23-36-33/scenario-theia-case3/poi-prefix-3-ledger/edge-scores.jsonl.gz",
+      "reference": "../poi/theia-e3-case3-derived-positive-events.json",
+      "budget_key": "0.2"
+    },
+    {
+      "name": "Theia Case 5",
+      "paper_case_identity": "inferred_trace_case5",
+      "official_report": "/root/PIDSMaker-main/Ground_Truth/TC_Ground_Truth_Report_E3_Update.pdf",
+      "official_report_section": "4.9, 2018-04-13 TRACE Pine phishing attachment",
+      "raw_logs": [
+        "/root/TAPAS-artifact/data/trace/logs/ta1-trace-e3-official-1-4.json"
+      ],
+      "ingested_database": "/root/NODOZE-pruning-release/output/tc/sparse-five/trace-case5-paper.db",
+      "node_groundtruth": "/root/PIDSMaker-main/Ground_Truth/orthrus/E3-TRACE/node_trace_e3_phishing_executable_0413.csv",
+      "poi_manifest": "../poi/trace-e3-case5-phishing-report-poi.json",
+      "reference": "../poi/trace-e3-case5-depimpact-pair-events.json",
+      "ledger": "/root/NODOZE-pruning-release/output/tc/sparse-five/trace-case5-paper-results-ledger/edge-scores.jsonl.gz",
+      "budget_key": "0.2",
+      "poi_source_kind": "official_report_oracle_derived",
+      "label_scope": "artifact_entity_pair_expansion_positive_subset",
+      "reason": "SPARSE labels this row THEIA Case 5; matching DEPIMPACT artifact property and case ordering identify TRACE Case 5. Entity-pair expansion is a partial positive subset, not SPARSE event-level truth."
+    }
+  ]
+}

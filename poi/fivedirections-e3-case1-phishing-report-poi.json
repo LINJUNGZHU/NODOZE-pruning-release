@@ -1,0 +1,22 @@
+{
+  "event_ids": [
+    "531B25EB-CDAC-4D6B-9227-9ADCB32AE832"
+  ],
+  "seed_event_groups": [
+    {
+      "group_id": "fivedirections-20180409-excel-powershell",
+      "seed_event_ids": [
+        "531B25EB-CDAC-4D6B-9227-9ADCB32AE832"
+      ],
+      "window_start_ns": 1523300280000000000,
+      "window_end_ns": 1523301120000000000
+    }
+  ],
+  "metadata": {
+    "source_kind": "official_report_and_depimpact_artifact_oracle_derived",
+    "official_report_section": "4.4, 2018-04-09 FiveDirections phishing Excel macro",
+    "artifact_property_sha256": "0905a1c96d64dcf562e401a067397aa736d1c11dbd10709636ee93fc86285842",
+    "selection_rule": "final CDM WRITE to official /ProgramData/update.ps1 file at 19:06:38.594 UTC; seven adjacent writes sum to artifact detectionSize 50,781 bytes",
+    "uses_external_alert": false
+  }
+}

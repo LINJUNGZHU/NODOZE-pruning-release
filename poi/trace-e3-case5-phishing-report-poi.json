@@ -1,0 +1,23 @@
+{
+  "event_ids": [
+    "C2D1D51A-9857-998A-3271-F5A2B00930D8"
+  ],
+  "seed_event_groups": [
+    {
+      "group_id": "trace-20180413-pine-phishing-attachment",
+      "seed_event_ids": [
+        "C2D1D51A-9857-998A-3271-F5A2B00930D8"
+      ],
+      "window_start_ns": 1523643540000000000,
+      "window_end_ns": 1523643960000000000
+    }
+  ],
+  "metadata": {
+    "source_kind": "official_report_and_depimpact_artifact_oracle_derived",
+    "official_report_section": "4.9, 2018-04-13 TRACE phishing executable attachment",
+    "artifact_property_sha256": "b082cada4316f51a8821e37aa6eca095fba63b15602622f603372b4431467255",
+    "selection_rule": "final CDM WRITE to /tmp/tcexec at 18:20:18.976 UTC; 24 adjacent writes sum to artifact detectionSize 95,015 bytes",
+    "paper_identity_warning": "SPARSE labels the fifth row THEIA Case 5; DEPIMPACT artifact names trace-case5.zip",
+    "uses_external_alert": false
+  }
+}

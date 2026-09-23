@@ -1,4 +1,5 @@
 import gzip
+import io
 import json
 
 import pytest
@@ -6,6 +7,19 @@ from fastavro import writer
 
 from tc_pruning.cdm import CDMStreamReader, normalize_cdm_record
 from tc_pruning.models import EdgeRecord, NodeRecord
+
+
+def test_json_stream_can_be_ingested_from_standard_input(monkeypatch):
+    raw = {'datum': {'com.bbn.tc.schema.avro.cdm18.Subject': {
+        'uuid': 'streamed-process', 'type': 'SUBJECT_PROCESS',
+        'cmdLine': {'string': 'powershell.exe'}, 'hostId': 'windows-host',
+    }}}
+    monkeypatch.setattr('sys.stdin', io.StringIO(json.dumps(raw) + '\n'))
+    reader = CDMStreamReader(['-'], strict=True)
+    observations = list(reader)
+    assert len(observations) == 1
+    assert observations[0].uuid == 'streamed-process'
+    assert reader.stats.records_read == 1
 
 
 def _uuid(value: str) -> dict:
