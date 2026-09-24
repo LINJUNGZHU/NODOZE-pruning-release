@@ -1,0 +1,58 @@
+{
+  "protocol": "witness-portfolio-development-v4",
+  "restart": 0.15,
+  "iterations": 200,
+  "tolerance": 1e-10,
+  "rarity_floor": 0.2,
+  "escape_floor": 1e-06,
+  "episode_window_ns": 10000000000,
+  "raw_budgets": [
+    64,
+    256,
+    1024,
+    4096
+  ],
+  "primary_budget": 1024,
+  "primary_method": "witness_rerank",
+  "random_seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "timing_repeats": 3,
+  "pcst_multipliers": [
+    1e-06,
+    3e-06,
+    1e-05,
+    3e-05,
+    0.0001,
+    0.0003,
+    0.001,
+    0.003,
+    0.01,
+    0.03,
+    0.1,
+    0.3,
+    1.0,
+    3.0
+  ],
+  "sensitivity_methods": [
+    "diffusion_top",
+    "episode",
+    "coverage_semantic",
+    "coverage_no_frequency"
+  ],
+  "temporal_scale_ns": 300000000000,
+  "temporal_sensitivity_ns": [
+    30000000000,
+    3000000000000
+  ],
+  "heat_time": 3.0,
+  "portfolio_fraction": 0.5,
+  "portfolio_sensitivity": [
+    0.25,
+    0.75
+  ]
+}
