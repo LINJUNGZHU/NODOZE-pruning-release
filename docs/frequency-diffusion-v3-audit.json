@@ -1,0 +1,62 @@
+[
+  {
+    "case": "Five Dir Case 1",
+    "candidate_events": 466257,
+    "hosts": 1,
+    "poi_count": 1,
+    "evaluated_decisions": 56,
+    "mandatory_continuations": 38,
+    "source_hashes_match": true,
+    "ledger_hash_matches": true,
+    "all_selected_ids_valid": true,
+    "all_caps_and_pois_valid": true
+  },
+  {
+    "case": "Five Dir Case 3",
+    "candidate_events": 424245,
+    "hosts": 1,
+    "poi_count": 2,
+    "evaluated_decisions": 56,
+    "mandatory_continuations": 36,
+    "source_hashes_match": true,
+    "ledger_hash_matches": true,
+    "all_selected_ids_valid": true,
+    "all_caps_and_pois_valid": true
+  },
+  {
+    "case": "Theia Case 1",
+    "candidate_events": 898253,
+    "hosts": 1,
+    "poi_count": 3,
+    "evaluated_decisions": 52,
+    "mandatory_continuations": 162,
+    "source_hashes_match": true,
+    "ledger_hash_matches": true,
+    "all_selected_ids_valid": true,
+    "all_caps_and_pois_valid": true
+  },
+  {
+    "case": "Theia Case 3",
+    "candidate_events": 1132218,
+    "hosts": 1,
+    "poi_count": 3,
+    "evaluated_decisions": 52,
+    "mandatory_continuations": 84,
+    "source_hashes_match": true,
+    "ledger_hash_matches": true,
+    "all_selected_ids_valid": true,
+    "all_caps_and_pois_valid": true
+  },
+  {
+    "case": "Theia Case 5",
+    "candidate_events": 137762,
+    "hosts": 1,
+    "poi_count": 1,
+    "evaluated_decisions": 52,
+    "mandatory_continuations": 113,
+    "source_hashes_match": true,
+    "ledger_hash_matches": true,
+    "all_selected_ids_valid": true,
+    "all_caps_and_pois_valid": true
+  }
+]
