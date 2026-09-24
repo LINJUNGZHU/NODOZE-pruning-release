@@ -1,5 +1,5 @@
 """Independently evaluate frozen v7 selections against local partial positives."""
-import argparse,csv,gzip,json
+import argparse,csv,gzip,hashlib,json
 from pathlib import Path
 import numpy as np
 from tc_pruning.frequency_diffusion import load_ledger
@@ -86,13 +86,17 @@ def evaluate(input_dir,output):
                     if not x['matched_frozen_ids']:raise ValueError('unverified E0 reuse')
                     prior=next(r for r in old['results'] if r['scenario']=='all' and r['track']=='poi_only' and r['method']==x['method'] and r['raw_cap']==x['budget'])
                     if set(prior['selected_ids'])!=set(selected):raise ValueError('E0 source ID mismatch')
-                    valid=prior.get('temporal_fork_fraction')
+                    # The frozen portfolio has no saved per-anchor certificate.
+                    # Its structural reachability fraction is not a validation pass rate.
+                    valid=None
                 met=evaluate_selection(selected,x['mandatory_ids'],ref,len(universe))
             pooldiag=x.get('candidate_diagnostics') or {}
             row=dict(run_id=x['run_id'],dataset='DARPA TC E3',campaign_id=ref['name'],case_id=i,split='development',method=x['method'],
                 baseline_status='native_reproduced' if x['run_id'].startswith('e0') else 'native_new',track=x['track'],budget=x['budget'],seed=None,
                 scoring_id='v4_original' if x['method']=='witness_rerank' else 'v6_history_channel',candidate_policy=pooldiag.get('representation'),
-                pool_hash=x['pool_sha256'],path_contract_hash=manifest['source_sha256']['tc_pruning/rasp.py'],objective=x['objective'],
+                pool_hash=x['pool_sha256'],path_contract_hash=hashlib.sha256(json.dumps({
+                    key:manifest['source_sha256'][key] for key in ('tc_pruning/rasp.py','tc_pruning/alternative_witnesses.py')
+                },sort_keys=True).encode()).hexdigest(),objective=x['objective'],
                 n_group_refs=pooldiag.get('n_group_refs'),n_potential_members=pooldiag.get('n_potential_members'),
                 n_materialized_events=pooldiag.get('n_materialized_events',pooldiag.get('materialized_events')),
                 n_executable_anchors=pooldiag.get('n_executable_anchors',pooldiag.get('anchors')),n_witnesses=pooldiag.get('n_witnesses',pooldiag.get('witnesses')),

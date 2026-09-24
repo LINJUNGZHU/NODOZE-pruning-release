@@ -1,0 +1,6 @@
+case_index,case_name,process_repetitions,scope,cold_seconds,warm_seconds,peak_rss_mib,candidate_build_seconds,alternative_build_seconds,historical_build_seconds,status,reason
+0,Five Dir Case 1,1,cold_case_process_24_reused_decisions,71.70178797096014,,451.18359375,24.092409569770098,9.71900662779808,,descriptive_only_not_E7,one process per case; history cache reused; no five-repeat median/IQR
+1,Five Dir Case 3,1,cold_case_process_24_reused_decisions,60.5970871001482,,427.95703125,18.81069701164961,7.474199626594782,,descriptive_only_not_E7,one process per case; history cache reused; no five-repeat median/IQR
+2,Theia Case 1,1,cold_case_process_24_reused_decisions,112.86238143965602,,712.5625,21.73162030428648,21.715370126068592,,descriptive_only_not_E7,one process per case; history cache reused; no five-repeat median/IQR
+3,Theia Case 3,1,cold_case_process_24_reused_decisions,123.60869733989239,,860.05078125,21.14873468130827,25.781591974198818,,descriptive_only_not_E7,one process per case; history cache reused; no five-repeat median/IQR
+4,Theia Case 5,1,cold_case_process_24_reused_decisions,32.92155869305134,,280.1328125,8.697539918124676,3.217019960284233,,descriptive_only_not_E7,one process per case; history cache reused; no five-repeat median/IQR

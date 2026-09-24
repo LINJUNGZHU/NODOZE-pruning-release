@@ -1,0 +1,2 @@
+experiment,status,case_index,seed,perturbation,strength,recall_original,recall_observable,reason
+E6,not_run,,,,,,,first-stage stop rule; no fixed method promoted

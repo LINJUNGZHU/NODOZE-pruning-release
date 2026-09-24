@@ -1,0 +1,84 @@
+{
+  "protocol": "budget-evidence-v7",
+  "execution_commit": "44323282e36926248d488221bdb25f3b17b097f9",
+  "execution_commit_role": "HEAD observed by runner when decisions were generated; per-file hashes are authoritative",
+  "source_sha256": {
+    "tc_pruning/candidate_views.py": "eb7ff1e9168dde8d0a4d258d045644fe99ca5e8b296766218262f6ce26305183",
+    "tc_pruning/deferred_event_groups.py": "50ebd6ec6595109eda6553dc2e7ebf3da09cc535b405e123215c0733cf3fe781",
+    "tc_pruning/canonical_event_order_v7.py": "356830e141651fe8e44330f181f1d86a62e60c64670c183517e2105121890602",
+    "tc_pruning/alternative_witnesses.py": "c819d00dce1ca214746c98b8aeecc6e7affce6b632b4d1929136f6b4fa4138e2",
+    "tc_pruning/evidence_objective.py": "0a055c4c546c02a458919d4944dcd550b3c16a92e444fc5887d9ce09dc1620f2",
+    "tc_pruning/budget_evidence_v7.py": "d5351c75f6e944d3560b268bf61f02268e81888e2ad344cb3a351a089fafacd6",
+    "scripts/run_budget_evidence_v7.py": "55e927d21458711f13ab548263f2cb3f892d07ad2ec397def2e7327f06a2279d",
+    "tc_pruning/frequency_diffusion.py": "94b89fc749fa323045f597c3a8a149d55f1cb3b7dfa252116cb28445e27fde5c",
+    "tc_pruning/history_channel.py": "6dc9091f795fa9d5694f3b68374176ebc15ede0146de7823d056b94d04f3b2a9",
+    "tc_pruning/rasp.py": "dc8d9ed0abaaabdf6e3a6125e2821201cc36b7222ba1b85b7e889ceeacce2bb0",
+    "tc_pruning/witness_portfolio.py": "d18fe769436ed527d8d6141e3e5df1e50b60769bf56d65b36aa954b1b591b566",
+    "scripts/history_channel_common.py": "e1559f05c272414f9aa122dd46980613000f1c350053768e83509de7b0d1e502",
+    "configs/budget_evidence_v7.json": "f43b0e32dc190de6614487043679523b25c5afa4c1acdba1a8632a400ad30157"
+  },
+  "validated_inherited_v6_source_sha256": {
+    "tc_pruning/frequency_diffusion.py": "94b89fc749fa323045f597c3a8a149d55f1cb3b7dfa252116cb28445e27fde5c",
+    "tc_pruning/cross_domain_pruning.py": "7d8c2a584a893f88f34d31b4498cb5daf8504a00b31851810cda7fb3311e419d",
+    "tc_pruning/paper_baselines.py": "595a22419a6c2bf339cff9eb33caa6c0eb9a7d1f63d223c48091b7d3179bcab5",
+    "tc_pruning/rasp.py": "dc8d9ed0abaaabdf6e3a6125e2821201cc36b7222ba1b85b7e889ceeacce2bb0",
+    "tc_pruning/rasp_diverse.py": "bde83a15f02bf2d80f535e57a1085f6150c228b4f6dbb891186b0cc86097f569",
+    "tc_pruning/poi_semantic_continuation.py": "68f941c3560fde74caaf5049741737a9f0a5f8157a461d471d38ad484d5f8c4b",
+    "scripts/run_cross_domain_comparison.py": "4b3523d11f6c7dbea34a7c6c77ad631477a20d6bd1435d7a47983daf17e7a236",
+    "tc_pruning/temporal_diffusion.py": "188ef2213d8a581789f607a14f0bcf889ac26294ff0efa6b6efbca02e348f39e",
+    "scripts/run_temporal_comparison.py": "3d8f322881f9b04831595bbd747a0a54a053ca88164e1220228e94f9fedd56aa",
+    "tc_pruning/degree_diffusion.py": "63f19855a384967abd329308c77aee723bf87924687e2797fac9abb268b1136e",
+    "scripts/run_typed_temporal_comparison.py": "9ac48dbb8981a817ba8e3468c349a313797c7ce4583d0ef7f88431f39cabca0c",
+    "tc_pruning/diffusion_portfolio.py": "8a11df47b5cfbc9c1b0e83b371301c42c26245ad0a7e36ae4f23955b7505e34f",
+    "scripts/run_portfolio_comparison.py": "ea78b409b4b6de844ecd20b642bb7297e02fb25d844e8fbc4a8a7d70c91e2b52",
+    "tc_pruning/witness_portfolio.py": "d18fe769436ed527d8d6141e3e5df1e50b60769bf56d65b36aa954b1b591b566",
+    "scripts/run_witness_comparison.py": "e8470d47e53b2def92e66e7054f8c7c6abc908fa15a6696280f90e4e9d43caeb",
+    "tc_pruning/marginal_witness.py": "035eb95d1d284e56f88f5adfde1000466e6f4415b252e5557774efcdacae35d8",
+    "scripts/run_marginal_comparison.py": "fb087d6e389328a31d22af6e4e77160bd3057e6962a2c48dd1abc201bb7e54d7",
+    "scripts/evaluate_marginal_witness.py": "516cd9461f53b9b480ee7ae1498417df68edbb504adcacce2490bdab1597470b",
+    "configs/marginal_witness_v5.json": "b9739c332f720cae70740ea673deca327dabeec5dfac0aa55b43c4f6fb11a949",
+    "scripts/run_matched_kernel_comparison.py": "e15634ddfdcae66152f37c096d0def67c234511e0c0143791abdb361e3ff81c7",
+    "tc_pruning/history_channel.py": "6dc9091f795fa9d5694f3b68374176ebc15ede0146de7823d056b94d04f3b2a9",
+    "scripts/prepare_conditional_history.py": "edfba6f64c0f4c63146ebc119c56704bdc79eeb7ff8a8963543a0017f9da68f7",
+    "scripts/history_channel_common.py": "e1559f05c272414f9aa122dd46980613000f1c350053768e83509de7b0d1e502",
+    "scripts/run_history_channel.py": "82587882f098322fb2ce23ec5808589e88da8ad29f772e5ae3d694d195357d32",
+    "configs/history_channel_v6.json": "b3aaad68b7868e88ada8b43e7abc6f90e6e3f91104b9b825edf3bb9b2a789090"
+  },
+  "postselection_sha256": {
+    "scripts/evaluate_budget_evidence_v7.py": "28908676c556c23fbd3af23421aba09ea707bd9fd171cdea1f5edf2c471033c3",
+    "scripts/diagnose_budget_evidence_v7.py": "9d553475b30256418b49d8da8f58c270a27f539a51cb897acb2af15b1d9f26a9",
+    "scripts/diagnose_group_rank_v7.py": "70c01ad694466db9e99de8a06ca55f97f21d19d41e3b36d897e74c1d3e2a750e",
+    "scripts/report_budget_evidence_v7.py": "1e89e9378b3240d4284e96662186149a6a0b347ca10ccbe2ae42d61ff8ebbfdf"
+  },
+  "config_sha256": "f43b0e32dc190de6614487043679523b25c5afa4c1acdba1a8632a400ad30157",
+  "reference_sha256": "9ab4dc7a796ac7bed73aaa8ea1d53fbe24ca2552f4327611966f06875c8c5bbd",
+  "result_sha256": "208b5450ed58c117ceba7884e630e691d0e0ec38858268662bd1a0cec9bc58a3",
+  "case_manifests": [
+    {
+      "case_index": 0,
+      "path": "/root/NODOZE-pruning-release/output/tc/budget-evidence-v7-r2/case0/manifest.json.gz",
+      "sha256": "cfa2a8164ba6b1aabcca07578c2ac2ac45edd5e23522406c6f970dd1c9ae4f07"
+    },
+    {
+      "case_index": 1,
+      "path": "/root/NODOZE-pruning-release/output/tc/budget-evidence-v7-r2/case1/manifest.json.gz",
+      "sha256": "3d8abdca83cc0a7db98c5c52203c1d9b1f809570c81e671d065ad62cd43f4cc0"
+    },
+    {
+      "case_index": 2,
+      "path": "/root/NODOZE-pruning-release/output/tc/budget-evidence-v7-r2/case2/manifest.json.gz",
+      "sha256": "3414fa06c014cf383129c113c7381e538d55ae49839265b3d82d634a0f8edcd8"
+    },
+    {
+      "case_index": 3,
+      "path": "/root/NODOZE-pruning-release/output/tc/budget-evidence-v7-r2/case3/manifest.json.gz",
+      "sha256": "725ee51451958f45221490df82a2c1be15ded821a095950cb2deb866e6e7d0be"
+    },
+    {
+      "case_index": 4,
+      "path": "/root/NODOZE-pruning-release/output/tc/budget-evidence-v7-r2/case4/manifest.json.gz",
+      "sha256": "a37cfdfb9647d44bcbe639df2d67c0712a0dcae689db8ddcd1895ce371b86774"
+    }
+  ],
+  "label_boundary": "reference read only by evaluator and diagnosis, after decisions were persisted"
+}

@@ -1,0 +1,42 @@
+{
+  "scope": "post-selection only; reference does not enter v7 retrieval",
+  "case_index": 2,
+  "positive_events": 239,
+  "positive_groups": 8,
+  "policies": {
+    "primary": {
+      "visited_descriptors": 17866,
+      "positive_groups_potentially_visited": 8,
+      "positive_events_in_visited_groups": 239,
+      "positive_events_in_actual_materialized_union": 14,
+      "positive_group_ranks_1based": [
+        3,
+        5,
+        2,
+        4,
+        1,
+        14,
+        42,
+        14589
+      ],
+      "largest_positive_group_size": 225
+    },
+    "rrf": {
+      "visited_descriptors": 9678,
+      "positive_groups_potentially_visited": 8,
+      "positive_events_in_visited_groups": 239,
+      "positive_events_in_actual_materialized_union": 14,
+      "positive_group_ranks_1based": [
+        3,
+        4,
+        2,
+        5,
+        1,
+        7,
+        46,
+        4614
+      ],
+      "largest_positive_group_size": 225
+    }
+  }
+}
