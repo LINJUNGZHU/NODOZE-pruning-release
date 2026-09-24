@@ -39,6 +39,7 @@ def episode_audit(selected_ids,id_group,group_counts,pois):
 
 
 def kernel_seconds(method,scenario,report):
+    if method in scenario.get('method_kernel_seconds',{}):return scenario['method_kernel_seconds'][method]
     if method=='pcst_native':return scenario['scoring_seconds']+scenario['pcst_grid_seconds']
     if method=='localdegree_top':return report['localdegree_seconds']
     if method=='coverage_no_frequency':return scenario['nofrequency_seconds']
