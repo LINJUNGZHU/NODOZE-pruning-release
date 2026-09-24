@@ -1,11 +1,12 @@
 """Run frozen P0/E2/E3 development comparisons without reading labels."""
-import argparse,gzip,hashlib,json,resource,time
+import argparse,gzip,hashlib,json,resource,subprocess,time
 from pathlib import Path
 import numpy as np
 from tc_pruning.frequency_diffusion import load_ledger,score
 from tc_pruning.temporal_diffusion import temporal_affinity
 from tc_pruning.history_channel import interaction_groups
 from tc_pruning.deferred_event_groups import GroupIndex
+from tc_pruning.canonical_event_order_v7 import canonical_event_order
 from tc_pruning.rasp import temporal_routes,temporal_fork_routes
 from tc_pruning.witness_portfolio import witness_portfolio
 from tc_pruning.evidence_objective import CandidateSnapshot,select
@@ -13,7 +14,7 @@ from tc_pruning.budget_evidence_v7 import build_snapshot,expand_alternatives,ato
 from tc_pruning.sparse_edge_evaluation import sha256_file
 from scripts.history_channel_common import load_history,prepare_scores
 
-SOURCE_FILES=['tc_pruning/candidate_views.py','tc_pruning/deferred_event_groups.py','tc_pruning/alternative_witnesses.py',
+SOURCE_FILES=['tc_pruning/candidate_views.py','tc_pruning/deferred_event_groups.py','tc_pruning/canonical_event_order_v7.py','tc_pruning/alternative_witnesses.py',
  'tc_pruning/evidence_objective.py','tc_pruning/budget_evidence_v7.py','scripts/run_budget_evidence_v7.py',
  'tc_pruning/frequency_diffusion.py','tc_pruning/history_channel.py','tc_pruning/rasp.py','tc_pruning/witness_portfolio.py',
  'scripts/history_channel_common.py','configs/budget_evidence_v7.json']
@@ -95,6 +96,20 @@ def main():
             if ids!=set(old['selected_ids']):raise ValueError(f'E0 selection ID regression {a.case} {method} {budget}')
             run_id=f'e0-c{a.case}-b{budget}-{method}'
             save_selection(run_id,method,budget,np.flatnonzero(kept),objective='legacy_portfolio',selection_seconds=time.perf_counter()-tick,extra={'matched_frozen_ids':True})
+    # The legacy ID regression above retains its historical row order. New
+    # retrieval, fork witnesses and tie breaks use a fixed event-ID order.
+    legacy_scoring_seconds=score_times
+    d,history=canonical_event_order(d,history)
+    mandatory=set(map(int,np.flatnonzero(d['poi'])))
+    g=interaction_groups(d['src'],d['dst'],d['timestamp'],cfg['group_window_ns'])
+    groups=GroupIndex.from_events(d['src'],d['dst'],d['relation'],d['timestamp'],d['tie'],cfg['group_window_ns'],cfg['group_relation_policy'])
+    vals,score_times,score_diags=prepare_scores(d,report['config'],history,g,['history'])
+    primary=vals['history_channel']
+    affinity=temporal_affinity(d['timestamp'],d['timestamp'][d['poi']],report['config']['temporal_scale_ns'])
+    back=temporal_routes(d['src'],d['dst'],d['timestamp'],d['poi'])[0][0]
+    parent,pivot,_,depth=temporal_fork_routes(d['src'],d['dst'],d['timestamp'],d['poi'],back)
+    routes=(back,parent,pivot)
+    path_view=affinity/(1+np.minimum(depth,len(d['ids'])));path_view[pivot<0]=0
     # E2: exactly four representation/ranking cells, one frozen pool per cell reused across both budgets.
     selected_base=None
     for representation in ['event','group']:
@@ -133,8 +148,10 @@ def main():
                     {'objective_value':s.objective_value,'steps':s.steps,'candidate_diagnostics':diag,'eta':cfg['eta']})
     if len(runs)!=24:raise ValueError('incomplete core matrix')
     manifest_content=dict(protocol=cfg['protocol'],case_index=a.case,case_name=audit['cases'][a.case]['name'],
+        execution_git_commit=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),
         source_sha256=source_hashes,config_sha256=config_hash,ledger_sha256=report['ledger_sha256'],v6_sha256=audit['cases'][a.case]['inputs']['frozen_v6_decisions']['sha256'],
-        history_supported_events=hmeta['supported_events'],scoring_seconds=score_times,walk_diagnostics=score_diags,
+        history_supported_events=hmeta['supported_events'],legacy_scoring_seconds=legacy_scoring_seconds,
+        scoring_seconds=score_times,walk_diagnostics=score_diags,event_order='lexicographic_event_id_for_E2_E3',
         candidate_groups=len(groups),runs=runs,pools=pools,elapsed_seconds=time.perf_counter()-start,
         peak_rss_mib=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss/1024,labels_used_for_selection=False)
     atomic_gzip_json(manifest,manifest_content)
