@@ -12,7 +12,8 @@ names=['FiveDirections 1','FiveDirections 3','THEIA 1','THEIA 3','TRACE 5 (infer
 methods={'diffusion_top':'Original diffusion top-K', 'witness_rerank':'Fixed quota + witnesses (v4)',
  'marginal_rerank':'Marginal witness utility (v5, lambda=1)',
  'marginal_linear':'Same pool: linear greedy', 'marginal_milp':'Same pool: linear MILP',
- 'marginal_nofrequency':'Same selector: no frequency', 'degree_heat':'Degree-normalized heat adapter',
+ 'marginal_nofrequency':'Same selector: no frequency',
+ 'marginal_ppr':'PPR + matched selection', 'marginal_heat':'Heat + matched selection',
  'temporal_pcst':'Public PCST + temporal prizes'}
 for track in ('poi_only','shared_context'):
  fig,axes=plt.subplots(2,5,figsize=(18,7),sharey=True)

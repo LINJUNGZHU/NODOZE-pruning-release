@@ -1,0 +1,102 @@
+[
+  {
+    "case": 0,
+    "name": "Five Dir Case 1",
+    "budget": 1024,
+    "scope": "post-selection local-positive diagnostic, not used for selecting",
+    "pool": {
+      "eligible_anchors": 373521,
+      "pool_anchors": 5844,
+      "pool_raw_events": 6049,
+      "global_pool_limit": 4096,
+      "per_relation_pool_limit": 171,
+      "normalization_scale": 1.0
+    },
+    "positive_events": 38,
+    "eligible_positive_events": 38,
+    "anchor_positive_events": 34,
+    "pool_union_positive_events": 34,
+    "selected_positive_events": 20,
+    "reference_sha256": "9ab4dc7a796ac7bed73aaa8ea1d53fbe24ca2552f4327611966f06875c8c5bbd"
+  },
+  {
+    "case": 1,
+    "name": "Five Dir Case 3",
+    "budget": 1024,
+    "scope": "post-selection local-positive diagnostic, not used for selecting",
+    "pool": {
+      "eligible_anchors": 274262,
+      "pool_anchors": 6056,
+      "pool_raw_events": 6268,
+      "global_pool_limit": 4096,
+      "per_relation_pool_limit": 171,
+      "normalization_scale": 1.0
+    },
+    "positive_events": 15,
+    "eligible_positive_events": 14,
+    "anchor_positive_events": 14,
+    "pool_union_positive_events": 14,
+    "selected_positive_events": 13,
+    "reference_sha256": "9ab4dc7a796ac7bed73aaa8ea1d53fbe24ca2552f4327611966f06875c8c5bbd"
+  },
+  {
+    "case": 2,
+    "name": "Theia Case 1",
+    "budget": 1024,
+    "scope": "post-selection local-positive diagnostic, not used for selecting",
+    "pool": {
+      "eligible_anchors": 887576,
+      "pool_anchors": 6469,
+      "pool_raw_events": 6517,
+      "global_pool_limit": 4096,
+      "per_relation_pool_limit": 228,
+      "normalization_scale": 1.0
+    },
+    "positive_events": 239,
+    "eligible_positive_events": 239,
+    "anchor_positive_events": 16,
+    "pool_union_positive_events": 17,
+    "selected_positive_events": 14,
+    "reference_sha256": "9ab4dc7a796ac7bed73aaa8ea1d53fbe24ca2552f4327611966f06875c8c5bbd"
+  },
+  {
+    "case": 3,
+    "name": "Theia Case 3",
+    "budget": 1024,
+    "scope": "post-selection local-positive diagnostic, not used for selecting",
+    "pool": {
+      "eligible_anchors": 1114184,
+      "pool_anchors": 7426,
+      "pool_raw_events": 7700,
+      "global_pool_limit": 4096,
+      "per_relation_pool_limit": 228,
+      "normalization_scale": 1.0
+    },
+    "positive_events": 229,
+    "eligible_positive_events": 229,
+    "anchor_positive_events": 229,
+    "pool_union_positive_events": 229,
+    "selected_positive_events": 229,
+    "reference_sha256": "9ab4dc7a796ac7bed73aaa8ea1d53fbe24ca2552f4327611966f06875c8c5bbd"
+  },
+  {
+    "case": 4,
+    "name": "Theia Case 5",
+    "budget": 1024,
+    "scope": "post-selection local-positive diagnostic, not used for selecting",
+    "pool": {
+      "eligible_anchors": 123663,
+      "pool_anchors": 4248,
+      "pool_raw_events": 4248,
+      "global_pool_limit": 4096,
+      "per_relation_pool_limit": 241,
+      "normalization_scale": 1.0
+    },
+    "positive_events": 31,
+    "eligible_positive_events": 29,
+    "anchor_positive_events": 29,
+    "pool_union_positive_events": 29,
+    "selected_positive_events": 26,
+    "reference_sha256": "9ab4dc7a796ac7bed73aaa8ea1d53fbe24ca2552f4327611966f06875c8c5bbd"
+  }
+]
