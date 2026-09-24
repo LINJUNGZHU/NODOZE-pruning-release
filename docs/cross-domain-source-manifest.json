@@ -1,0 +1,67 @@
+{
+  "repositories": [
+    {
+      "repository": "G-Retriever",
+      "url": "https://github.com/XiaoxinHe/G-Retriever",
+      "commit": "315b0ff8a206536067602fb97e77c10f4d646d5d",
+      "inspected_source": "src/dataset/utils/retrieval.py",
+      "sha256": "9435924c7f0e3369eba7d5cc3c61e3553b6c32eff23c06dfe2ee6e86106fb2e8",
+      "usage": "read source; invoke matching public kernel through our task adapter, not full paper reproduction"
+    },
+    {
+      "repository": "sparsification",
+      "url": "https://github.com/yuhanchan/sparsification",
+      "commit": "598e580152329c729f031a3f66e082702aff9320",
+      "inspected_source": "src/sparsifiers.py",
+      "sha256": "0ae1ed329914af7710ee55ba00689b6e0a41de7587fa270b09fe0a650ad82643",
+      "usage": "read source; invoke matching public kernel through our task adapter, not full paper reproduction"
+    }
+  ],
+  "kernels": {
+    "pcst_fast": "1.0.10",
+    "networkit": "11.2.2"
+  },
+  "environment": "/root/NODOZE-pruning-release/.venv-cross-domain",
+  "scope": "cross-task component adaptation; no original QA/GNN training reproduction",
+  "installed_files": {
+    "pcst_fast": {
+      "pcst_fast-1.0.10.dist-info/METADATA": "7d78add255a32d61ef9759ee7fb8d46a60ce9da60e1731d3a675d563aaf5a93c",
+      "pcst_fast.cpython-312-x86_64-linux-gnu.so": "965a3a593c2cdfcc713208c367cc0b93d9b497716d249845e5368a02770e50f8"
+    },
+    "networkit": {
+      "libnetworkit.so": "6bba26b4229dce341a0de4950157d6541fe8149005d9903eeb624283efdad56f",
+      "networkit-11.2.2.dist-info/METADATA": "039e7b4fc27089507cf5510d0408427d62592107d694ec30515fa90ab71b42c4",
+      "networkit/base.cpython-312-x86_64-linux-gnu.so": "ddfe3c5d8ff13f1721ade95efed9b215776577c24260bbc2a02cb10fa95b5a08",
+      "networkit/centrality.cpython-312-x86_64-linux-gnu.so": "e2e7202d928a0bf17b743a6c6e3fad863ac472ec5332815c15e11a6bbe14ab67",
+      "networkit/clique.cpython-312-x86_64-linux-gnu.so": "243c37aa64456132ca8258d268c4e0a336ca7b29710e9cca0cc1798787417306",
+      "networkit/coarsening.cpython-312-x86_64-linux-gnu.so": "b9b7aae00a8766a5d62a902a80d4a73a3721494f0f116619935a46084a9032ec",
+      "networkit/community.cpython-312-x86_64-linux-gnu.so": "2612da150cdf8dcae28b78031cf8b2d575dacdb012a2358d51393fdcf69ff3c3",
+      "networkit/components.cpython-312-x86_64-linux-gnu.so": "d31614494cc0d52180c3c7b2fa2ab34c46c25ad2ecf7a16a799cf3793fb4769d",
+      "networkit/correlation.cpython-312-x86_64-linux-gnu.so": "6bf1e3674eaed52a283f128edf98d1394544b81be993877dd4c6bff9d439f5df",
+      "networkit/distance.cpython-312-x86_64-linux-gnu.so": "7a58687f82793138c2482c9e2a121655e093ef37b81dc97ca02503f7f4f692d9",
+      "networkit/dynamics.cpython-312-x86_64-linux-gnu.so": "1e9f4a01e89acd415a4450229c8cba22c7eb25e8c45a3a1bf0e03d6ea09f3eb4",
+      "networkit/dynbase.cpython-312-x86_64-linux-gnu.so": "76f3289685504403c21ec194dfd3870b1ae7da0cc0c182e9c4878cbcd2abde28",
+      "networkit/embedding.cpython-312-x86_64-linux-gnu.so": "4a44145b20814c77b97eb5035fbd972ac1936750316d4197f16d9e07061a1acd",
+      "networkit/engineering.cpython-312-x86_64-linux-gnu.so": "017ca4e1c218e64a21cdcd0e6597ce5ed89c2b10c223c2f2e991990e22b5cb34",
+      "networkit/flow.cpython-312-x86_64-linux-gnu.so": "14dbc27e56800086ab10dd4495c41b65c01571665e72b17428bbd49c0f8f7539",
+      "networkit/generators.cpython-312-x86_64-linux-gnu.so": "52dd44da631861c04858377ece6aede78d5f127eba1f2ff912b58ae4b8376367",
+      "networkit/globals.cpython-312-x86_64-linux-gnu.so": "28fdbf132992dcd12a008af66541fdddfe3f8242bc20a35eec41c59fe9dc78b2",
+      "networkit/graph.cpython-312-x86_64-linux-gnu.so": "641506d2f5dcbd743ace26eb3a47b3c964146b8acb4ae2efadacae698f2f03a8",
+      "networkit/graphio.cpython-312-x86_64-linux-gnu.so": "d6fb64b521a42d80708b2867cc292f3dee17aff870bf134496a36f65bc71923f",
+      "networkit/graphtools.cpython-312-x86_64-linux-gnu.so": "0e48d487bec9f60d20b393f35c561821a5939b8db98556ee2a8a6877e4bfac94",
+      "networkit/helpers.cpython-312-x86_64-linux-gnu.so": "2feea62e5449a285156adde651427671429d62e56d65cc3fcf1998c392008fd3",
+      "networkit/independentset.cpython-312-x86_64-linux-gnu.so": "f3a227d3375e34f5da289b464bf6aae063f4e1f0281f9a42a17a952f512dbb2d",
+      "networkit/linkprediction.cpython-312-x86_64-linux-gnu.so": "a5af9c12c1769449508162a9e2ddb4796a3e876c41e3b80a8b660bbc7cfb9936",
+      "networkit/matching.cpython-312-x86_64-linux-gnu.so": "0e7af5af39222eca13e37d17d9b11c0f82baa93d93de617663b7c57bd314f81b",
+      "networkit/randomization.cpython-312-x86_64-linux-gnu.so": "d7193bab94be014b51c83784b962b1d039428eb3f1b50370f61e9cc52fff326d",
+      "networkit/reachability.cpython-312-x86_64-linux-gnu.so": "0ac65ec132332d3a4a14f3eab76ace7d72b019f6c6d34f0aee572409ca7e3f4f",
+      "networkit/scd.cpython-312-x86_64-linux-gnu.so": "ba56518151a728259a3e75dcb5f7ea9fe31be7e0ef72fc6d603c2a6512522abb",
+      "networkit/simulation.cpython-312-x86_64-linux-gnu.so": "f6a8550f849bf204613cba2406fd5c6d840df499d515d934682c8b7f43732c62",
+      "networkit/sparsification.cpython-312-x86_64-linux-gnu.so": "504981b89cac621986860b51b7fd6b350a72ae3ff81c9177cd580546c7604e82",
+      "networkit/stats.cpython-312-x86_64-linux-gnu.so": "a232aae639a5654d30cfbe3e4ad54f4ce83301ba1531e4d2b41f0d97147545ee",
+      "networkit/structures.cpython-312-x86_64-linux-gnu.so": "c7ff614b711a6c3b171235cfbcaf30622ccd328ef8d11aa8a0e1f48254ff71a2",
+      "networkit/traversal.cpython-312-x86_64-linux-gnu.so": "586262789d6aca727c061dbbc8fa5c31485fc46d4a5fb27ca32fc676f63bd04c",
+      "networkit/viz.cpython-312-x86_64-linux-gnu.so": "c469cff0cb1505e0628d1954050bd704934c735b61efee5de749b4a795229d16"
+    }
+  }
+}

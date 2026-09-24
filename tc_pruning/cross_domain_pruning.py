@@ -23,7 +23,7 @@ def group_members(group):
     return [order[lo:hi] for lo,hi in zip(bounds[:-1],bounds[1:]) if hi>lo]
 
 
-def select_coverage(data,values,group,routes,budget,mandatory=None,semantic=True):
+def select_coverage(data,values,group,routes,budget,mandatory=None,semantic=True,complete_episodes=True):
     """Greedy saturated coverage with bounded episodes and raw fork witnesses."""
     src,dst,rel=data['src'],data['dst'],data['relation']
     backward,parent,pivot=routes
@@ -34,13 +34,20 @@ def select_coverage(data,values,group,routes,budget,mandatory=None,semantic=True
     features=[event_families(src,dst,rel)]
     if semantic:features.append(event_families(data['semantic'][src],data['semantic'][dst],rel))
     covered=[np.zeros(int(f.max())+1) for f in features]
+    group_weight=np.zeros(len(members));np.maximum.at(group_weight,group,values)
+    first=np.asarray([ids[0] for ids in members])
     def update(indices):
-        for f,c in zip(features,covered):np.maximum.at(c,f[indices],values[indices])
+        if complete_episodes:
+            touched=np.unique(group[indices]);done=touched[remaining[touched]==0]
+            for f,c in zip(features,covered):np.maximum.at(c,f[first[done]],group_weight[done])
+        else:
+            for f,c in zip(features,covered):np.maximum.at(c,f[indices],values[indices])
     # POI parallel evidence is completed before saturation, only when affordable.
     used=int(kept.sum())
     for g in sorted(set(map(int,group[data['poi']]))):
         extra=members[g][~kept[members[g]]]
         if used+len(extra)<=budget:kept[extra]=True;used+=len(extra)
+    remaining=np.bincount(group[~kept],minlength=len(members))
     update(np.flatnonzero(kept))
     def gain(i):return sum(max(float(values[i])-c[f[i]],0.) for f,c in zip(features,covered))/len(features)
     eligible=np.flatnonzero((pivot>=0)&(values>0))
@@ -67,5 +74,6 @@ def select_coverage(data,values,group,routes,budget,mandatory=None,semantic=True
         # Shared connectors can reduce cost later; skipping is a heuristic.
         if used+len(path)>budget:continue
         chosen=np.fromiter(path,np.int64)
-        kept[chosen]=True;used+=len(chosen);update(chosen)
+        kept[chosen]=True;used+=len(chosen)
+        np.subtract.at(remaining,group[chosen],1);update(chosen)
     return kept

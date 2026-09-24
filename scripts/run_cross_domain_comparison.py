@@ -60,7 +60,7 @@ def run_case(case_index,config,output):
             pcst_grid_sizes=[dict(multiplier=m,raw_events=int(mask.sum()),prize=p) for m,mask,p in pcst],
             all_walks_converged=all(x['converged'] for z in (diag,nodiag) for x in z['walks'])))
         methods=['old_score_top','rarity_top','diffusion_top','localdegree_top','episode','coverage_exact',
-                 'coverage_semantic','coverage_no_frequency','pcst_native']
+                 'coverage_semantic','coverage_partial','coverage_no_frequency','pcst_native']
         methods += [f'random_{seed}' for seed in config['random_seeds']]
         if scenario!='all':methods=config['sensitivity_methods']
         budgets=config['raw_budgets'] if scenario=='all' else [config['primary_budget']]
@@ -87,7 +87,7 @@ def run_case(case_index,config,output):
                             kept=select_episodes(full,data['poi'],*routes,group,cap,d['tie'],mandatory=mandatory)
                         elif method.startswith('coverage_'):
                             values=nofreq if method=='coverage_no_frequency' else full
-                            kept=select_coverage(data,values,group,routes,cap,mandatory=mandatory,semantic=method!='coverage_exact')
+                            kept=select_coverage(data,values,group,routes,cap,mandatory=mandatory,semantic=method!='coverage_exact',complete_episodes=method!='coverage_partial')
                         else:
                             values={'old_score_top':d['old_score'],'rarity_top':d['rarity'],'diffusion_top':full,'localdegree_top':degree}.get(method)
                             if method.startswith('random_'):values=np.random.default_rng(int(method.split('_')[1])).random(len(group))

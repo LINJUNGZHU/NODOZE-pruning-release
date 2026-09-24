@@ -52,3 +52,11 @@ def test_localdegree_scores_align_with_raw_parallel_edges():
     got=local_degree_scores(np.array([0,0,0,1]),np.array([1,1,2,3]),4)
     assert got.shape==(4,) and np.isfinite(got).all()
     assert got[0]==got[1]
+
+
+def test_partial_connector_does_not_saturate_unfinished_episode():
+    d=dict(src=np.array([0,1,1,2]),dst=np.array([1,2,2,3]),relation=np.zeros(4,int),
+           semantic=np.arange(4),poi=np.array([1,0,0,0],bool),tie=np.arange(4),timestamp=np.arange(4))
+    routes=(np.full(4,-1),np.array([-1,0,0,1]),np.zeros(4,int))
+    kept=cp.select_coverage(d,np.array([1.,.8,.8,.95]),np.array([0,1,1,2]),routes,4)
+    assert kept.all()
