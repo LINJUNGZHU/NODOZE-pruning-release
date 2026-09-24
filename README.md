@@ -158,6 +158,8 @@ OPTC 默认真值来自 `OpTCRedTeamGroundTruth.pdf`，按页码和原文记录�
 
 ## 历史 DARPA 实验与命令行入口
 
+五案例的最新频率扩散、跨领域对照及历史通道检索实验见[研究实验索引](docs/research-experiment-index.md)。各轮次完整保留，指标使用本地部分正例的 proxy 口径。
+
 以下保留 DARPA 离线实验及早期 CLI 的说明，其中候选搜索、配置和指标口径与上面的 OPTC 网页流程不同，各历史模块并非全部叠加运行。
 
 **DARPA 离线选定配置：[RASP-D q=0 / 20% 边预算](docs/selected-default.md)**。历史四案例同预算平均攻击事件召回 95.87%；按已有开发结果选型，不是当前 OPTC 节点识别的正确率或泛化保证。命令入口为 `python -m scripts.run_selected_rasp`；旧实验和流式原型保留独立入口。

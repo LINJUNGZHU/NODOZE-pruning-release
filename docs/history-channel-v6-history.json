@@ -1,0 +1,873 @@
+[
+  {
+    "case": 0,
+    "ledger": "/root/NODOZE-pruning-release/output/tc/sparse-five/fivedirections/case1-phishing-results-ledger/edge-scores.jsonl.gz",
+    "ledger_sha256": "27ac808c4875ff7bc212cd44d0b82e081fc4f0279cf13a9508eab91fadcb7eb2",
+    "database": "/root/NODOZE-pruning-release/output/tc/sparse-five/fivedirections/case1-phishing.db",
+    "database_size": 2693484544,
+    "database_mtime_ns": 1790192365225378254,
+    "origin_poi_ns": 1523300798594000000,
+    "fit_start_ns": 1523214398594000000,
+    "fit_end_ns": 1523297198594000000,
+    "calibration_end_ns": 1523298998594000000,
+    "fit_channels": 51,
+    "calibration_channels": 69392,
+    "candidate_keys": 88181,
+    "candidate_events": 466257,
+    "supported_events": 68162,
+    "groups": [
+      {
+        "host": "D2842312-8456-4C8E-ADD6-E2295D0939D3",
+        "relation": "EVENT_ACCEPT",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 13,
+        "supported": false
+      },
+      {
+        "host": "D2842312-8456-4C8E-ADD6-E2295D0939D3",
+        "relation": "EVENT_BIND",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 62,
+        "supported": false
+      },
+      {
+        "host": "D2842312-8456-4C8E-ADD6-E2295D0939D3",
+        "relation": "EVENT_CHECK_FILE_ATTRIBUTES",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 4502,
+        "supported": false
+      },
+      {
+        "host": "D2842312-8456-4C8E-ADD6-E2295D0939D3",
+        "relation": "EVENT_CLOSE",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 2684,
+        "supported": false
+      },
+      {
+        "host": "D2842312-8456-4C8E-ADD6-E2295D0939D3",
+        "relation": "EVENT_CONNECT",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 67,
+        "supported": false
+      },
+      {
+        "host": "D2842312-8456-4C8E-ADD6-E2295D0939D3",
+        "relation": "EVENT_CREATE_OBJECT",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 32985,
+        "supported": false
+      },
+      {
+        "host": "D2842312-8456-4C8E-ADD6-E2295D0939D3",
+        "relation": "EVENT_CREATE_THREAD",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 432,
+        "supported": false
+      },
+      {
+        "host": "D2842312-8456-4C8E-ADD6-E2295D0939D3",
+        "relation": "EVENT_EXECUTE",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 9,
+        "supported": false
+      },
+      {
+        "host": "D2842312-8456-4C8E-ADD6-E2295D0939D3",
+        "relation": "EVENT_FCNTL",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 1029,
+        "supported": false
+      },
+      {
+        "host": "D2842312-8456-4C8E-ADD6-E2295D0939D3",
+        "relation": "EVENT_FORK",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 450,
+        "supported": false
+      },
+      {
+        "host": "D2842312-8456-4C8E-ADD6-E2295D0939D3",
+        "relation": "EVENT_LINK",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 5,
+        "supported": false
+      },
+      {
+        "host": "D2842312-8456-4C8E-ADD6-E2295D0939D3",
+        "relation": "EVENT_LOADLIBRARY",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 718,
+        "supported": false
+      },
+      {
+        "host": "D2842312-8456-4C8E-ADD6-E2295D0939D3",
+        "relation": "EVENT_MODIFY_FILE_ATTRIBUTES",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 513,
+        "supported": false
+      },
+      {
+        "host": "D2842312-8456-4C8E-ADD6-E2295D0939D3",
+        "relation": "EVENT_OPEN",
+        "fit_occupied_buckets": 51,
+        "calibration_occupied_buckets": 7542,
+        "supported": true
+      },
+      {
+        "host": "D2842312-8456-4C8E-ADD6-E2295D0939D3",
+        "relation": "EVENT_OTHER",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 17769,
+        "supported": false
+      },
+      {
+        "host": "D2842312-8456-4C8E-ADD6-E2295D0939D3",
+        "relation": "EVENT_READ",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 3927,
+        "supported": false
+      },
+      {
+        "host": "D2842312-8456-4C8E-ADD6-E2295D0939D3",
+        "relation": "EVENT_RECVFROM",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 119,
+        "supported": false
+      },
+      {
+        "host": "D2842312-8456-4C8E-ADD6-E2295D0939D3",
+        "relation": "EVENT_RECVMSG",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 2,
+        "supported": false
+      },
+      {
+        "host": "D2842312-8456-4C8E-ADD6-E2295D0939D3",
+        "relation": "EVENT_RENAME",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 173,
+        "supported": false
+      },
+      {
+        "host": "D2842312-8456-4C8E-ADD6-E2295D0939D3",
+        "relation": "EVENT_SENDMSG",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 1,
+        "supported": false
+      },
+      {
+        "host": "D2842312-8456-4C8E-ADD6-E2295D0939D3",
+        "relation": "EVENT_SENDTO",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 16,
+        "supported": false
+      },
+      {
+        "host": "D2842312-8456-4C8E-ADD6-E2295D0939D3",
+        "relation": "EVENT_SIGNAL",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 10,
+        "supported": false
+      },
+      {
+        "host": "D2842312-8456-4C8E-ADD6-E2295D0939D3",
+        "relation": "EVENT_UNLINK",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 331,
+        "supported": false
+      },
+      {
+        "host": "D2842312-8456-4C8E-ADD6-E2295D0939D3",
+        "relation": "EVENT_WRITE",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 826,
+        "supported": false
+      }
+    ],
+    "npz_sha256": "9ea97b2e5985cd0a912b110be09a409f31d04701e6e3895f66264ae4ca98445d",
+    "history_sha256": "fa1bcd97bfb312b82f32ed199bac061b08a69cc4d807d269d01b956a026199cd",
+    "config_sha256": "b3aaad68b7868e88ada8b43e7abc6f90e6e3f91104b9b825edf3bb9b2a789090",
+    "source_sha256": {
+      "tc_pruning/history_channel.py": "6dc9091f795fa9d5694f3b68374176ebc15ede0146de7823d056b94d04f3b2a9",
+      "scripts/prepare_conditional_history.py": "edfba6f64c0f4c63146ebc119c56704bdc79eeb7ff8a8963543a0017f9da68f7"
+    },
+    "load_seconds": 9.879053339362144,
+    "query_seconds": 1.104601014405489,
+    "total_seconds": 12.151798091828823,
+    "scope": "historical edges with current node metadata snapshot, not certified benign or strictly online; logical aggregates stored, database provenance is size/mtime not whole-file hash"
+  },
+  {
+    "case": 1,
+    "ledger": "/root/NODOZE-pruning-release/output/tc/sparse-five/fivedirections/case3-two-poi-results-ledger/edge-scores.jsonl.gz",
+    "ledger_sha256": "e4a914988691c66b4ee83b0475c1193a0d1324843c32d0543031fa9c4e25f7dd",
+    "database": "/root/NODOZE-pruning-release/output/tc/sparse-five/fivedirections/case3-shards.db",
+    "database_size": 2823426048,
+    "database_mtime_ns": 1790185462522828611,
+    "origin_poi_ns": 1523545958865000000,
+    "fit_start_ns": 1523459558865000000,
+    "fit_end_ns": 1523542358865000000,
+    "calibration_end_ns": 1523544158865000000,
+    "fit_channels": 283,
+    "calibration_channels": 24,
+    "candidate_keys": 61567,
+    "candidate_events": 424245,
+    "supported_events": 0,
+    "groups": [
+      {
+        "host": "D2842312-8456-4C8E-ADD6-E2295D0939D3",
+        "relation": "EVENT_ACCEPT",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 0,
+        "supported": false
+      },
+      {
+        "host": "D2842312-8456-4C8E-ADD6-E2295D0939D3",
+        "relation": "EVENT_BIND",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 0,
+        "supported": false
+      },
+      {
+        "host": "D2842312-8456-4C8E-ADD6-E2295D0939D3",
+        "relation": "EVENT_CHECK_FILE_ATTRIBUTES",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 0,
+        "supported": false
+      },
+      {
+        "host": "D2842312-8456-4C8E-ADD6-E2295D0939D3",
+        "relation": "EVENT_CLOSE",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 0,
+        "supported": false
+      },
+      {
+        "host": "D2842312-8456-4C8E-ADD6-E2295D0939D3",
+        "relation": "EVENT_CONNECT",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 0,
+        "supported": false
+      },
+      {
+        "host": "D2842312-8456-4C8E-ADD6-E2295D0939D3",
+        "relation": "EVENT_CREATE_OBJECT",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 0,
+        "supported": false
+      },
+      {
+        "host": "D2842312-8456-4C8E-ADD6-E2295D0939D3",
+        "relation": "EVENT_CREATE_THREAD",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 0,
+        "supported": false
+      },
+      {
+        "host": "D2842312-8456-4C8E-ADD6-E2295D0939D3",
+        "relation": "EVENT_EXECUTE",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 0,
+        "supported": false
+      },
+      {
+        "host": "D2842312-8456-4C8E-ADD6-E2295D0939D3",
+        "relation": "EVENT_FCNTL",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 0,
+        "supported": false
+      },
+      {
+        "host": "D2842312-8456-4C8E-ADD6-E2295D0939D3",
+        "relation": "EVENT_FORK",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 0,
+        "supported": false
+      },
+      {
+        "host": "D2842312-8456-4C8E-ADD6-E2295D0939D3",
+        "relation": "EVENT_LINK",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 0,
+        "supported": false
+      },
+      {
+        "host": "D2842312-8456-4C8E-ADD6-E2295D0939D3",
+        "relation": "EVENT_LOADLIBRARY",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 0,
+        "supported": false
+      },
+      {
+        "host": "D2842312-8456-4C8E-ADD6-E2295D0939D3",
+        "relation": "EVENT_MODIFY_FILE_ATTRIBUTES",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 0,
+        "supported": false
+      },
+      {
+        "host": "D2842312-8456-4C8E-ADD6-E2295D0939D3",
+        "relation": "EVENT_OPEN",
+        "fit_occupied_buckets": 290,
+        "calibration_occupied_buckets": 24,
+        "supported": false
+      },
+      {
+        "host": "D2842312-8456-4C8E-ADD6-E2295D0939D3",
+        "relation": "EVENT_OTHER",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 0,
+        "supported": false
+      },
+      {
+        "host": "D2842312-8456-4C8E-ADD6-E2295D0939D3",
+        "relation": "EVENT_READ",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 0,
+        "supported": false
+      },
+      {
+        "host": "D2842312-8456-4C8E-ADD6-E2295D0939D3",
+        "relation": "EVENT_RECVFROM",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 0,
+        "supported": false
+      },
+      {
+        "host": "D2842312-8456-4C8E-ADD6-E2295D0939D3",
+        "relation": "EVENT_RECVMSG",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 0,
+        "supported": false
+      },
+      {
+        "host": "D2842312-8456-4C8E-ADD6-E2295D0939D3",
+        "relation": "EVENT_RENAME",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 0,
+        "supported": false
+      },
+      {
+        "host": "D2842312-8456-4C8E-ADD6-E2295D0939D3",
+        "relation": "EVENT_SENDMSG",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 0,
+        "supported": false
+      },
+      {
+        "host": "D2842312-8456-4C8E-ADD6-E2295D0939D3",
+        "relation": "EVENT_SENDTO",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 0,
+        "supported": false
+      },
+      {
+        "host": "D2842312-8456-4C8E-ADD6-E2295D0939D3",
+        "relation": "EVENT_SIGNAL",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 0,
+        "supported": false
+      },
+      {
+        "host": "D2842312-8456-4C8E-ADD6-E2295D0939D3",
+        "relation": "EVENT_UNLINK",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 0,
+        "supported": false
+      },
+      {
+        "host": "D2842312-8456-4C8E-ADD6-E2295D0939D3",
+        "relation": "EVENT_WRITE",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 0,
+        "supported": false
+      }
+    ],
+    "npz_sha256": "3d33293767737f127d38eabad29fdc81122bbadc001ec488d71d3eba2f9816ce",
+    "history_sha256": "f68f954b4ca35b8d599e06c74670281d6b25f11cc6ba264dd550acabcd507419",
+    "config_sha256": "b3aaad68b7868e88ada8b43e7abc6f90e6e3f91104b9b825edf3bb9b2a789090",
+    "source_sha256": {
+      "tc_pruning/history_channel.py": "6dc9091f795fa9d5694f3b68374176ebc15ede0146de7823d056b94d04f3b2a9",
+      "scripts/prepare_conditional_history.py": "edfba6f64c0f4c63146ebc119c56704bdc79eeb7ff8a8963543a0017f9da68f7"
+    },
+    "load_seconds": 9.572810657322407,
+    "query_seconds": 0.06458061188459396,
+    "total_seconds": 9.848994493484497,
+    "scope": "historical edges with current node metadata snapshot, not certified benign or strictly online; logical aggregates stored, database provenance is size/mtime not whole-file hash"
+  },
+  {
+    "case": 2,
+    "ledger": "/root/NODOZE-pruning-release/output/tc/sparse-five/theia-case1-direct-3poi-fast-results-ledger/edge-scores.jsonl.gz",
+    "ledger_sha256": "b7924926bc633ef94104179e087bc0dbe0268f610020c194fda664d37927b827",
+    "database": "/root/NODOZE-pruning-release/output/tc/theia-depimpact-case1-2026-09-09_15-35-45.db",
+    "database_size": 5091393536,
+    "database_mtime_ns": 1788940019597767057,
+    "origin_poi_ns": 1523385317249665654,
+    "fit_start_ns": 1523298917249665654,
+    "fit_end_ns": 1523381717249665654,
+    "calibration_end_ns": 1523383517249665654,
+    "fit_channels": 59795,
+    "calibration_channels": 42371,
+    "candidate_keys": 51136,
+    "candidate_events": 898253,
+    "supported_events": 893105,
+    "groups": [
+      {
+        "host": "0A00063C-5254-00F0-0D60-000000000070",
+        "relation": "EVENT_CLONE",
+        "fit_occupied_buckets": 287,
+        "calibration_occupied_buckets": 160,
+        "supported": true
+      },
+      {
+        "host": "0A00063C-5254-00F0-0D60-000000000070",
+        "relation": "EVENT_CONNECT",
+        "fit_occupied_buckets": 256,
+        "calibration_occupied_buckets": 138,
+        "supported": true
+      },
+      {
+        "host": "0A00063C-5254-00F0-0D60-000000000070",
+        "relation": "EVENT_EXECUTE",
+        "fit_occupied_buckets": 186,
+        "calibration_occupied_buckets": 106,
+        "supported": true
+      },
+      {
+        "host": "0A00063C-5254-00F0-0D60-000000000070",
+        "relation": "EVENT_FORK",
+        "fit_occupied_buckets": 316,
+        "calibration_occupied_buckets": 156,
+        "supported": true
+      },
+      {
+        "host": "0A00063C-5254-00F0-0D60-000000000070",
+        "relation": "EVENT_MMAP",
+        "fit_occupied_buckets": 23692,
+        "calibration_occupied_buckets": 13530,
+        "supported": true
+      },
+      {
+        "host": "0A00063C-5254-00F0-0D60-000000000070",
+        "relation": "EVENT_MODIFY_FILE_ATTRIBUTES",
+        "fit_occupied_buckets": 48,
+        "calibration_occupied_buckets": 36,
+        "supported": true
+      },
+      {
+        "host": "0A00063C-5254-00F0-0D60-000000000070",
+        "relation": "EVENT_MPROTECT",
+        "fit_occupied_buckets": 34930,
+        "calibration_occupied_buckets": 21822,
+        "supported": true
+      },
+      {
+        "host": "0A00063C-5254-00F0-0D60-000000000070",
+        "relation": "EVENT_OPEN",
+        "fit_occupied_buckets": 15776,
+        "calibration_occupied_buckets": 9401,
+        "supported": true
+      },
+      {
+        "host": "0A00063C-5254-00F0-0D60-000000000070",
+        "relation": "EVENT_READ",
+        "fit_occupied_buckets": 12854,
+        "calibration_occupied_buckets": 7531,
+        "supported": true
+      },
+      {
+        "host": "0A00063C-5254-00F0-0D60-000000000070",
+        "relation": "EVENT_READ_SOCKET_PARAMS",
+        "fit_occupied_buckets": 306,
+        "calibration_occupied_buckets": 172,
+        "supported": true
+      },
+      {
+        "host": "0A00063C-5254-00F0-0D60-000000000070",
+        "relation": "EVENT_RECVFROM",
+        "fit_occupied_buckets": 713,
+        "calibration_occupied_buckets": 424,
+        "supported": true
+      },
+      {
+        "host": "0A00063C-5254-00F0-0D60-000000000070",
+        "relation": "EVENT_RECVMSG",
+        "fit_occupied_buckets": 698,
+        "calibration_occupied_buckets": 328,
+        "supported": true
+      },
+      {
+        "host": "0A00063C-5254-00F0-0D60-000000000070",
+        "relation": "EVENT_SENDMSG",
+        "fit_occupied_buckets": 478,
+        "calibration_occupied_buckets": 234,
+        "supported": true
+      },
+      {
+        "host": "0A00063C-5254-00F0-0D60-000000000070",
+        "relation": "EVENT_SENDTO",
+        "fit_occupied_buckets": 664,
+        "calibration_occupied_buckets": 348,
+        "supported": true
+      },
+      {
+        "host": "0A00063C-5254-00F0-0D60-000000000070",
+        "relation": "EVENT_SHM",
+        "fit_occupied_buckets": 118,
+        "calibration_occupied_buckets": 76,
+        "supported": true
+      },
+      {
+        "host": "0A00063C-5254-00F0-0D60-000000000070",
+        "relation": "EVENT_UNLINK",
+        "fit_occupied_buckets": 2916,
+        "calibration_occupied_buckets": 1382,
+        "supported": true
+      },
+      {
+        "host": "0A00063C-5254-00F0-0D60-000000000070",
+        "relation": "EVENT_WRITE",
+        "fit_occupied_buckets": 2301,
+        "calibration_occupied_buckets": 1201,
+        "supported": true
+      },
+      {
+        "host": "0A00063C-5254-00F0-0D60-000000000070",
+        "relation": "EVENT_WRITE_SOCKET_PARAMS",
+        "fit_occupied_buckets": 5,
+        "calibration_occupied_buckets": 10,
+        "supported": false
+      }
+    ],
+    "npz_sha256": "36e4b9da6f45f61c478eddc1b28d6f069d2876c491dc34b4901975fe8c9fd3a5",
+    "history_sha256": "d14d87ba72ce2302912216abe0342fcaafddf69e6e795f14fc9327d1b7d9934f",
+    "config_sha256": "b3aaad68b7868e88ada8b43e7abc6f90e6e3f91104b9b825edf3bb9b2a789090",
+    "source_sha256": {
+      "tc_pruning/history_channel.py": "6dc9091f795fa9d5694f3b68374176ebc15ede0146de7823d056b94d04f3b2a9",
+      "scripts/prepare_conditional_history.py": "edfba6f64c0f4c63146ebc119c56704bdc79eeb7ff8a8963543a0017f9da68f7"
+    },
+    "load_seconds": 19.23051342740655,
+    "query_seconds": 9.594968676567078,
+    "total_seconds": 30.601293839514256,
+    "scope": "historical edges with current node metadata snapshot, not certified benign or strictly online; logical aggregates stored, database provenance is size/mtime not whole-file hash"
+  },
+  {
+    "case": 3,
+    "ledger": "/root/NODOZE-pruning-release/output/tc/theia-case3-poi-prefix-fixed-2026-09-09_23-36-33/scenario-theia-case3/poi-prefix-3-ledger/edge-scores.jsonl.gz",
+    "ledger_sha256": "95884055355027cbd379470467f28b1d36f851af1a9ce8da8adf7f94dd70ec5b",
+    "database": "/root/NODOZE-pruning-release/output/tc/theia-depimpact-case3-2026-09-09_15-32-25.db",
+    "database_size": 5025497088,
+    "database_mtime_ns": 1788939898538006661,
+    "origin_poi_ns": 1523551818875640831,
+    "fit_start_ns": 1523465418875640831,
+    "fit_end_ns": 1523548218875640831,
+    "calibration_end_ns": 1523550018875640831,
+    "fit_channels": 159606,
+    "calibration_channels": 44658,
+    "candidate_keys": 68692,
+    "candidate_events": 1132218,
+    "supported_events": 1130232,
+    "groups": [
+      {
+        "host": "0A00063C-5254-00F0-0D60-000000000070",
+        "relation": "EVENT_CLONE",
+        "fit_occupied_buckets": 658,
+        "calibration_occupied_buckets": 274,
+        "supported": true
+      },
+      {
+        "host": "0A00063C-5254-00F0-0D60-000000000070",
+        "relation": "EVENT_CONNECT",
+        "fit_occupied_buckets": 6573,
+        "calibration_occupied_buckets": 1383,
+        "supported": true
+      },
+      {
+        "host": "0A00063C-5254-00F0-0D60-000000000070",
+        "relation": "EVENT_EXECUTE",
+        "fit_occupied_buckets": 508,
+        "calibration_occupied_buckets": 292,
+        "supported": true
+      },
+      {
+        "host": "0A00063C-5254-00F0-0D60-000000000070",
+        "relation": "EVENT_FORK",
+        "fit_occupied_buckets": 576,
+        "calibration_occupied_buckets": 235,
+        "supported": true
+      },
+      {
+        "host": "0A00063C-5254-00F0-0D60-000000000070",
+        "relation": "EVENT_MMAP",
+        "fit_occupied_buckets": 63023,
+        "calibration_occupied_buckets": 15875,
+        "supported": true
+      },
+      {
+        "host": "0A00063C-5254-00F0-0D60-000000000070",
+        "relation": "EVENT_MODIFY_FILE_ATTRIBUTES",
+        "fit_occupied_buckets": 109,
+        "calibration_occupied_buckets": 25,
+        "supported": false
+      },
+      {
+        "host": "0A00063C-5254-00F0-0D60-000000000070",
+        "relation": "EVENT_MPROTECT",
+        "fit_occupied_buckets": 88861,
+        "calibration_occupied_buckets": 20661,
+        "supported": true
+      },
+      {
+        "host": "0A00063C-5254-00F0-0D60-000000000070",
+        "relation": "EVENT_OPEN",
+        "fit_occupied_buckets": 36203,
+        "calibration_occupied_buckets": 9324,
+        "supported": true
+      },
+      {
+        "host": "0A00063C-5254-00F0-0D60-000000000070",
+        "relation": "EVENT_READ",
+        "fit_occupied_buckets": 28885,
+        "calibration_occupied_buckets": 7761,
+        "supported": true
+      },
+      {
+        "host": "0A00063C-5254-00F0-0D60-000000000070",
+        "relation": "EVENT_READ_SOCKET_PARAMS",
+        "fit_occupied_buckets": 559,
+        "calibration_occupied_buckets": 188,
+        "supported": true
+      },
+      {
+        "host": "0A00063C-5254-00F0-0D60-000000000070",
+        "relation": "EVENT_RECVFROM",
+        "fit_occupied_buckets": 5358,
+        "calibration_occupied_buckets": 1183,
+        "supported": true
+      },
+      {
+        "host": "0A00063C-5254-00F0-0D60-000000000070",
+        "relation": "EVENT_RECVMSG",
+        "fit_occupied_buckets": 1337,
+        "calibration_occupied_buckets": 439,
+        "supported": true
+      },
+      {
+        "host": "0A00063C-5254-00F0-0D60-000000000070",
+        "relation": "EVENT_SENDMSG",
+        "fit_occupied_buckets": 938,
+        "calibration_occupied_buckets": 270,
+        "supported": true
+      },
+      {
+        "host": "0A00063C-5254-00F0-0D60-000000000070",
+        "relation": "EVENT_SENDTO",
+        "fit_occupied_buckets": 4835,
+        "calibration_occupied_buckets": 1089,
+        "supported": true
+      },
+      {
+        "host": "0A00063C-5254-00F0-0D60-000000000070",
+        "relation": "EVENT_SHM",
+        "fit_occupied_buckets": 213,
+        "calibration_occupied_buckets": 46,
+        "supported": true
+      },
+      {
+        "host": "0A00063C-5254-00F0-0D60-000000000070",
+        "relation": "EVENT_UNLINK",
+        "fit_occupied_buckets": 6939,
+        "calibration_occupied_buckets": 1355,
+        "supported": true
+      },
+      {
+        "host": "0A00063C-5254-00F0-0D60-000000000070",
+        "relation": "EVENT_WRITE",
+        "fit_occupied_buckets": 5730,
+        "calibration_occupied_buckets": 1171,
+        "supported": true
+      },
+      {
+        "host": "0A00063C-5254-00F0-0D60-000000000070",
+        "relation": "EVENT_WRITE_SOCKET_PARAMS",
+        "fit_occupied_buckets": 29,
+        "calibration_occupied_buckets": 36,
+        "supported": false
+      }
+    ],
+    "npz_sha256": "0011daf6d1a37b72f85e1e09dc0a2b5aaa87410809bc0dbddd9e12c433f22e73",
+    "history_sha256": "1f1681385399025468434d9b1a223672f49e4fa4157927fc26870a1712777894",
+    "config_sha256": "b3aaad68b7868e88ada8b43e7abc6f90e6e3f91104b9b825edf3bb9b2a789090",
+    "source_sha256": {
+      "tc_pruning/history_channel.py": "6dc9091f795fa9d5694f3b68374176ebc15ede0146de7823d056b94d04f3b2a9",
+      "scripts/prepare_conditional_history.py": "edfba6f64c0f4c63146ebc119c56704bdc79eeb7ff8a8963543a0017f9da68f7"
+    },
+    "load_seconds": 24.435240410268307,
+    "query_seconds": 17.084016639739275,
+    "total_seconds": 44.727247674018145,
+    "scope": "historical edges with current node metadata snapshot, not certified benign or strictly online; logical aggregates stored, database provenance is size/mtime not whole-file hash"
+  },
+  {
+    "case": 4,
+    "ledger": "/root/NODOZE-pruning-release/output/tc/sparse-five/trace-case5-paper-results-ledger/edge-scores.jsonl.gz",
+    "ledger_sha256": "cb16eaf3d9c098f5528b334a7d7dc94cfe60faf8cc5a8d59d13b1cb1eeef48a8",
+    "database": "/root/NODOZE-pruning-release/output/tc/sparse-five/trace-case5-paper.db",
+    "database_size": 2909782016,
+    "database_mtime_ns": 1790192400437328747,
+    "origin_poi_ns": 1523643618976000000,
+    "fit_start_ns": 1523557218976000000,
+    "fit_end_ns": 1523640018976000000,
+    "calibration_end_ns": 1523641818976000000,
+    "fit_channels": 0,
+    "calibration_channels": 599934,
+    "candidate_keys": 99970,
+    "candidate_events": 137762,
+    "supported_events": 0,
+    "groups": [
+      {
+        "host": "E621F964-5A66-0F89-30E0-67ADB2A5EC28",
+        "relation": "EVENT_CLONE",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 54,
+        "supported": false
+      },
+      {
+        "host": "E621F964-5A66-0F89-30E0-67ADB2A5EC28",
+        "relation": "EVENT_CLOSE",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 35418,
+        "supported": false
+      },
+      {
+        "host": "E621F964-5A66-0F89-30E0-67ADB2A5EC28",
+        "relation": "EVENT_CONNECT",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 320,
+        "supported": false
+      },
+      {
+        "host": "E621F964-5A66-0F89-30E0-67ADB2A5EC28",
+        "relation": "EVENT_CREATE_OBJECT",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 3426,
+        "supported": false
+      },
+      {
+        "host": "E621F964-5A66-0F89-30E0-67ADB2A5EC28",
+        "relation": "EVENT_EXECUTE",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 296,
+        "supported": false
+      },
+      {
+        "host": "E621F964-5A66-0F89-30E0-67ADB2A5EC28",
+        "relation": "EVENT_EXIT",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 358,
+        "supported": false
+      },
+      {
+        "host": "E621F964-5A66-0F89-30E0-67ADB2A5EC28",
+        "relation": "EVENT_FORK",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 482,
+        "supported": false
+      },
+      {
+        "host": "E621F964-5A66-0F89-30E0-67ADB2A5EC28",
+        "relation": "EVENT_LOADLIBRARY",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 594,
+        "supported": false
+      },
+      {
+        "host": "E621F964-5A66-0F89-30E0-67ADB2A5EC28",
+        "relation": "EVENT_MMAP",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 48354,
+        "supported": false
+      },
+      {
+        "host": "E621F964-5A66-0F89-30E0-67ADB2A5EC28",
+        "relation": "EVENT_MODIFY_FILE_ATTRIBUTES",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 19,
+        "supported": false
+      },
+      {
+        "host": "E621F964-5A66-0F89-30E0-67ADB2A5EC28",
+        "relation": "EVENT_MPROTECT",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 84845,
+        "supported": false
+      },
+      {
+        "host": "E621F964-5A66-0F89-30E0-67ADB2A5EC28",
+        "relation": "EVENT_OPEN",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 32164,
+        "supported": false
+      },
+      {
+        "host": "E621F964-5A66-0F89-30E0-67ADB2A5EC28",
+        "relation": "EVENT_READ",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 29921,
+        "supported": false
+      },
+      {
+        "host": "E621F964-5A66-0F89-30E0-67ADB2A5EC28",
+        "relation": "EVENT_RECVMSG",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 236719,
+        "supported": false
+      },
+      {
+        "host": "E621F964-5A66-0F89-30E0-67ADB2A5EC28",
+        "relation": "EVENT_RENAME",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 3454,
+        "supported": false
+      },
+      {
+        "host": "E621F964-5A66-0F89-30E0-67ADB2A5EC28",
+        "relation": "EVENT_SENDMSG",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 167316,
+        "supported": false
+      },
+      {
+        "host": "E621F964-5A66-0F89-30E0-67ADB2A5EC28",
+        "relation": "EVENT_UNLINK",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 3111,
+        "supported": false
+      },
+      {
+        "host": "E621F964-5A66-0F89-30E0-67ADB2A5EC28",
+        "relation": "EVENT_UPDATE",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 0,
+        "supported": false
+      },
+      {
+        "host": "E621F964-5A66-0F89-30E0-67ADB2A5EC28",
+        "relation": "EVENT_WRITE",
+        "fit_occupied_buckets": 0,
+        "calibration_occupied_buckets": 33774,
+        "supported": false
+      }
+    ],
+    "npz_sha256": "732c454094227004f4384727041ecfedc5c5b38a2efcc50d0b45db40aad9b400",
+    "history_sha256": "1125305074d8a3f34cef5d8bd1d447f0fc921be05fe1fbcd9786ae94f68d779c",
+    "config_sha256": "b3aaad68b7868e88ada8b43e7abc6f90e6e3f91104b9b825edf3bb9b2a789090",
+    "source_sha256": {
+      "tc_pruning/history_channel.py": "6dc9091f795fa9d5694f3b68374176ebc15ede0146de7823d056b94d04f3b2a9",
+      "scripts/prepare_conditional_history.py": "edfba6f64c0f4c63146ebc119c56704bdc79eeb7ff8a8963543a0017f9da68f7"
+    },
+    "load_seconds": 2.923361737281084,
+    "query_seconds": 17.480872962623835,
+    "total_seconds": 30.37813863158226,
+    "scope": "historical edges with current node metadata snapshot, not certified benign or strictly online; logical aggregates stored, database provenance is size/mtime not whole-file hash"
+  }
+]

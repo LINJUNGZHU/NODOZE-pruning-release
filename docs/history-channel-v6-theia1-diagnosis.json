@@ -1,0 +1,129 @@
+{
+  "scope": "post-selection THEIA1 diagnostic; not selection/tuning input",
+  "reference_sha256": "9ab4dc7a796ac7bed73aaa8ea1d53fbe24ca2552f4327611966f06875c8c5bbd",
+  "channel_candidates_before_cap": 161450,
+  "positive_anchors_before_cap": 239,
+  "total_positive": 239,
+  "groups": [
+    {
+      "stage": "browser_shellcode_connect",
+      "positive_events": 1,
+      "untruncated_channel_candidates": 1,
+      "group_count": 1,
+      "minimum_score": 0.015734657934080992,
+      "maximum_score": 0.015734657934080992,
+      "minimum_raw_history_rarity": 0.6832295331373088,
+      "maximum_raw_history_rarity": 0.6832295331373088
+    },
+    {
+      "stage": "browser_shellcode_connect",
+      "positive_events": 1,
+      "untruncated_channel_candidates": 1,
+      "group_count": 1,
+      "minimum_score": 0.015734657934080992,
+      "maximum_score": 0.015734657934080992,
+      "minimum_raw_history_rarity": 0.6752299984489428,
+      "maximum_raw_history_rarity": 0.6752299984489428
+    },
+    {
+      "stage": "browser_shellcode_connect",
+      "positive_events": 223,
+      "untruncated_channel_candidates": 223,
+      "group_count": 1,
+      "minimum_score": 0.015734657934080992,
+      "maximum_score": 0.015734657934080992,
+      "minimum_raw_history_rarity": 0.428469433799595,
+      "maximum_raw_history_rarity": 0.428469433799595
+    },
+    {
+      "stage": "clean_write",
+      "positive_events": 1,
+      "untruncated_channel_candidates": 1,
+      "group_count": 1,
+      "minimum_score": 1.0,
+      "maximum_score": 1.0,
+      "minimum_raw_history_rarity": 0.5791984730555968,
+      "maximum_raw_history_rarity": 0.5791984730555968
+    },
+    {
+      "stage": "clean_execution",
+      "positive_events": 1,
+      "untruncated_channel_candidates": 1,
+      "group_count": 1,
+      "minimum_score": 0.7606318985520018,
+      "maximum_score": 0.7606318985520018,
+      "minimum_raw_history_rarity": 0.6853213712908873,
+      "maximum_raw_history_rarity": 0.6853213712908873
+    },
+    {
+      "stage": "root_implant_c2",
+      "positive_events": 1,
+      "untruncated_channel_candidates": 1,
+      "group_count": 1,
+      "minimum_score": 0.38992160551662564,
+      "maximum_score": 0.38992160551662564,
+      "minimum_raw_history_rarity": 0.6832295331373088,
+      "maximum_raw_history_rarity": 0.6832295331373088
+    },
+    {
+      "stage": "root_implant_c2",
+      "positive_events": 4,
+      "untruncated_channel_candidates": 4,
+      "group_count": 1,
+      "minimum_score": 0.38992160551662564,
+      "maximum_score": 0.38992160551662564,
+      "minimum_raw_history_rarity": 0.6730871413060857,
+      "maximum_raw_history_rarity": 0.6730871413060857
+    },
+    {
+      "stage": "root_implant_c2",
+      "positive_events": 2,
+      "untruncated_channel_candidates": 2,
+      "group_count": 1,
+      "minimum_score": 0.38992160551662564,
+      "maximum_score": 0.38992160551662564,
+      "minimum_raw_history_rarity": 0.4824600441282335,
+      "maximum_raw_history_rarity": 0.4824600441282335
+    },
+    {
+      "stage": "profile_write",
+      "positive_events": 1,
+      "untruncated_channel_candidates": 1,
+      "group_count": 1,
+      "minimum_score": 1.0,
+      "maximum_score": 1.0,
+      "minimum_raw_history_rarity": 0.5791984730555968,
+      "maximum_raw_history_rarity": 0.5791984730555968
+    },
+    {
+      "stage": "profile_write",
+      "positive_events": 1,
+      "untruncated_channel_candidates": 1,
+      "group_count": 1,
+      "minimum_score": 0.8409281933135471,
+      "maximum_score": 0.8409281933135471,
+      "minimum_raw_history_rarity": 0.6853213712908873,
+      "maximum_raw_history_rarity": 0.6853213712908873
+    },
+    {
+      "stage": "xdev_write",
+      "positive_events": 1,
+      "untruncated_channel_candidates": 1,
+      "group_count": 1,
+      "minimum_score": 1.0,
+      "maximum_score": 1.0,
+      "minimum_raw_history_rarity": 0.5183090299965777,
+      "maximum_raw_history_rarity": 0.5183090299965777
+    },
+    {
+      "stage": "xdev_write",
+      "positive_events": 2,
+      "untruncated_channel_candidates": 2,
+      "group_count": 1,
+      "minimum_score": 0.5287688189012051,
+      "maximum_score": 0.5287688189012051,
+      "minimum_raw_history_rarity": 0.6730871413060857,
+      "maximum_raw_history_rarity": 0.6730871413060857
+    }
+  ]
+}
