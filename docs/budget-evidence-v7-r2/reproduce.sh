@@ -43,6 +43,6 @@ for case in range(5):
             if a[key]!=b[key]:raise SystemExit(f'reproduction differs: {src.name} {key}')
 print('PASS: all 120 frozen statuses, selected IDs and anchor IDs match')
 PY
-cp docs/budget-evidence-v7-r2/report.md docs/budget-evidence-v7-r2/missing_artifacts.md docs/budget-evidence-v7-r2/reproduce.sh "$DOC_ROOT/"
+cp docs/budget-evidence-v7-r2/report.md docs/budget-evidence-v7-r2/algorithm_and_experiment_process.md docs/budget-evidence-v7-r2/missing_artifacts.md docs/budget-evidence-v7-r2/reproduce.sh "$DOC_ROOT/"
 printf '\nThis report reproduces the frozen decisions; its elapsed-time statements refer to the original five processes. See this run\x27s profiles.csv for its own times.\n' >> "$DOC_ROOT/report.md"
 echo "Completed outputs: $RUN_ROOT and $DOC_ROOT"
