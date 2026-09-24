@@ -61,4 +61,4 @@
 - [x] Write tests verifying event alignment, negative-universe convention, unknown handling, and metric arithmetic.
 - [x] Run tests red, then implement minimal evaluator and run green.
 - [x] Evaluate all five cases and document graph-granularity, POI, and label limitations.
-- [ ] Run full tests, source-hash checks, code review, and commit the auditable results.
+- [x] Run full tests, source-hash checks, code review, and commit the auditable results.

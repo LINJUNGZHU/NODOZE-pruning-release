@@ -17,6 +17,7 @@
       "budget_key": "0.2",
       "decision_path": "/root/NODOZE-pruning-release/output/tc/sparse-five/fivedirections/case3-local-ref-semantic-v6/decisions.jsonl.gz",
       "decision_key": "rasp_semantic@0.00012",
+      "comparison_baseline_ledger": "/root/NODOZE-pruning-release/output/tc/sparse-five/fivedirections/case3-two-poi-results-ledger/edge-scores.jsonl.gz",
       "report_path": "/root/NODOZE-pruning-release/output/tc/sparse-five/fivedirections/case3-local-ref-semantic-v6/report.json"
     },
     {

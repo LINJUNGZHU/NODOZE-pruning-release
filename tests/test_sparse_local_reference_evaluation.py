@@ -1,9 +1,11 @@
 import gzip
 import json
+import sys
 
 import pytest
 
-from scripts.evaluate_sparse_local_reference import evaluate_case
+from scripts.evaluate_sparse_local_reference import evaluate_case, main
+from tc_pruning.sparse_edge_evaluation import sha256_file
 
 
 def test_proxy_metrics_count_exact_event_ids_and_group_coverage(tmp_path):
@@ -91,3 +93,48 @@ def test_uncertain_events_are_excluded_from_proxy_negative_counts(tmp_path):
     assert result['selected_uncertain_edges'] == 1
     assert result['proxy_fp'] == 1
     assert result['proxy_precision'] == 0.5
+
+
+def test_main_uses_equal_poi_baseline_and_records_one_poi_ablation(tmp_path, monkeypatch):
+    choices = tmp_path / 'choices.json'
+    choices.write_text('{}')
+    one_poi = tmp_path / 'one.jsonl'
+    two_poi = tmp_path / 'two.jsonl'
+    decision = tmp_path / 'decision.jsonl'
+    one_poi.write_text(json.dumps({'event_id': 'critical',
+                                   'decisions': [{'budget_key': '0.2', 'kept': False}]}) + '\n')
+    two_poi.write_text(json.dumps({'event_id': 'critical',
+                                   'decisions': [{'budget_key': '0.2', 'kept': True}]}) + '\n')
+    decision.write_text(json.dumps({'event_id': 'critical',
+                                    'decisions': {'method': True}}) + '\n')
+    reference = tmp_path / 'reference.json'
+    reference.write_text(json.dumps({
+        'choices_sha256': sha256_file(choices),
+        'cases': [{'name': 'case', 'ledger_sha256': sha256_file(two_poi),
+                   'critical_event_ids': ['critical'],
+                   'exemplars': [{'event_id': 'critical', 'stage': 'drop',
+                                  'parallel_event_ids': ['critical']}]}],
+    }))
+    inventory = tmp_path / 'inventory.json'
+    inventory.write_text(json.dumps({'cases': [
+        {'name': 'case', 'ledger': str(one_poi), 'budget_key': '0.2'},
+    ]}))
+    variants = tmp_path / 'variants.json'
+    variants.write_text(json.dumps({'variants': [
+        {'name': 'case | equal POI', 'ledger': str(two_poi),
+         'comparison_baseline_ledger': str(two_poi), 'budget_key': '0.2',
+         'decision_path': str(decision), 'decision_key': 'method'},
+    ]}))
+    output = tmp_path / 'results.json'
+    monkeypatch.setattr(sys, 'argv', ['evaluate', '--reference', str(reference),
+                                     '--choices', str(choices), '--inventory', str(inventory),
+                                     '--variants', str(variants), '--output', str(output)])
+    main()
+    result = json.loads(output.read_text())['cases'][0]
+    assert result['baseline']['proxy_tp'] == 1
+    assert result['one_poi_ablation']['proxy_tp'] == 0
+    variant_data = json.loads(variants.read_text())
+    del variant_data['variants'][0]['comparison_baseline_ledger']
+    variants.write_text(json.dumps(variant_data))
+    with pytest.raises(ValueError, match='comparison baseline ledger differs'):
+        main()

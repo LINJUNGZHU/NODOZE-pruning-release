@@ -134,16 +134,24 @@ def main() -> None:
             raise ValueError(f'case order/name mismatch: {name}')
         if case['ledger_sha256'] != sha256_file(Path(optimized['ledger'])):
             raise ValueError(f'frozen reference ledger differs for {name}')
+        comparison_ledger = Path(optimized.get('comparison_baseline_ledger', baseline['ledger']))
+        if case['ledger_sha256'] != sha256_file(comparison_ledger):
+            raise ValueError(f'comparison baseline ledger differs from frozen reference for {name}')
         baseline_metrics = evaluate_case(
-            Path(baseline['ledger']), case, budget_key=baseline['budget_key'],
+            comparison_ledger, case, budget_key=baseline['budget_key'],
         )
         optimized_metrics = evaluate_case(
             Path(optimized['ledger']), case, budget_key=optimized['budget_key'],
             decision_path=Path(optimized['decision_path']),
             decision_key=optimized['decision_key'],
         )
-        cases.append({'name': name, 'baseline': baseline_metrics,
-                      'optimized': optimized_metrics})
+        case_result = {'name': name, 'baseline': baseline_metrics,
+                       'optimized': optimized_metrics}
+        if comparison_ledger != Path(baseline['ledger']):
+            case_result['one_poi_ablation'] = evaluate_case(
+                Path(baseline['ledger']), case, budget_key=baseline['budget_key'],
+            )
+        cases.append(case_result)
         print(name, f"baseline {baseline_metrics['proxy_tp']}/{baseline_metrics['reference_critical_events']}",
               f"optimized {optimized_metrics['proxy_tp']}/{optimized_metrics['reference_critical_events']}")
     output = {
