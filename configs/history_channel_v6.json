@@ -1,0 +1,87 @@
+{
+  "protocol": "historical-channel-development-v6",
+  "restart": 0.15,
+  "iterations": 200,
+  "tolerance": 1e-10,
+  "rarity_floor": 0.2,
+  "escape_floor": 1e-06,
+  "episode_window_ns": 10000000000,
+  "raw_budgets": [
+    64,
+    256,
+    1024,
+    4096
+  ],
+  "primary_budget": 1024,
+  "primary_method": "history_channel",
+  "random_seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "timing_repeats": 3,
+  "pcst_multipliers": [
+    1e-06,
+    3e-06,
+    1e-05,
+    3e-05,
+    0.0001,
+    0.0003,
+    0.001,
+    0.003,
+    0.01,
+    0.03,
+    0.1,
+    0.3,
+    1.0,
+    3.0
+  ],
+  "sensitivity_methods": [
+    "diffusion_top",
+    "episode",
+    "coverage_semantic",
+    "coverage_no_frequency"
+  ],
+  "temporal_scale_ns": 300000000000,
+  "temporal_sensitivity_ns": [
+    30000000000,
+    3000000000000
+  ],
+  "heat_time": 3.0,
+  "portfolio_fraction": 0.5,
+  "portfolio_sensitivity": [
+    0.25,
+    0.75
+  ],
+  "marginal_diversity": 1.0,
+  "marginal_sensitivity": 4.0,
+  "marginal_pool_minimum": 4096,
+  "milp_time_limit": 20.0,
+  "milp_relative_gap": 0.01,
+  "milp_budgets": [
+    256,
+    1024
+  ],
+  "history_fit_hours": 24,
+  "history_fit_gap_minutes": 60,
+  "history_guard_minutes": 30,
+  "history_bucket_ns": 60000000000,
+  "history_alpha": 10.0,
+  "history_minimum_support": 32,
+  "history_mix": 0.5,
+  "channel_window_ns": 10000000000,
+  "channel_pool_minimum": 32768,
+  "channel_pool_multiplier": 8,
+  "history_milp_budgets": [
+    1024
+  ],
+  "history_databases": [
+    "/root/NODOZE-pruning-release/output/tc/sparse-five/fivedirections/case1-phishing.db",
+    "/root/NODOZE-pruning-release/output/tc/sparse-five/fivedirections/case3-shards.db",
+    "/root/NODOZE-pruning-release/output/tc/theia-depimpact-case1-2026-09-09_15-35-45.db",
+    "/root/NODOZE-pruning-release/output/tc/theia-depimpact-case3-2026-09-09_15-32-25.db",
+    "/root/NODOZE-pruning-release/output/tc/sparse-five/trace-case5-paper.db"
+  ]
+}
