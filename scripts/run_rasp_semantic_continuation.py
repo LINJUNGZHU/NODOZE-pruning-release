@@ -15,6 +15,7 @@ from tc_pruning.poi_semantic_continuation import (
     network_poi_episode, poi_bridge_continuations, file_poi_io_origin,
     forward_file_execution,
     post_write_parent_connect,
+    file_poi_named_context, shell_forks_after_connections,
 )
 from tc_pruning.rasp import propagate, temporal_fork_routes, temporal_routes
 from tc_pruning.rasp_diverse import event_families, select_diverse
@@ -24,7 +25,8 @@ from tc_pruning.sparse_edge_evaluation import sha256_file
 def run(ledger: Path, output_dir: Path, ratio: float, scoring_config: Path,
         raw_cdm_json: Path | None = None, file_io_origin: bool = False,
         forward_execution: bool = False,
-        post_write_connect: bool = False) -> dict:
+        post_write_connect: bool = False,
+        named_file_context: bool = False) -> dict:
     if not 0 < ratio <= 1:
         raise ValueError('ratio must be in (0, 1]')
     output_dir.mkdir(parents=True, exist_ok=False)
@@ -45,6 +47,17 @@ def run(ledger: Path, output_dir: Path, ratio: float, scoring_config: Path,
     io_origin_continuations = file_poi_io_origin(relevant) if file_io_origin else set()
     forward_continuations = forward_file_execution(relevant) if forward_execution else set()
     post_write_continuations = post_write_parent_connect(relevant) if post_write_connect else set()
+    named_file_continuations = file_poi_named_context(relevant) if named_file_context else set()
+    explicit_connects = (
+        io_origin_continuations | forward_continuations | post_write_continuations
+        | network_continuations | bridge_continuations
+    )
+    explicit_connects.update(row['event_id'] for row in relevant
+                             if row.get('is_declared_poi') is True
+                             and row.get('relation') == 'EVENT_CONNECT')
+    shell_fork_continuations = shell_forks_after_connections(
+        relevant, explicit_connects,
+    ) if forward_execution or post_write_connect else set()
     raw_continuations = set()
     if raw_cdm_json is not None:
         with raw_cdm_json.open('rt', encoding='utf-8') as raw_stream:
@@ -52,7 +65,8 @@ def run(ledger: Path, output_dir: Path, ratio: float, scoring_config: Path,
     continuations = (
         execute_continuations | write_continuations | network_continuations
         | bridge_continuations | io_origin_continuations | forward_continuations
-        | post_write_continuations | raw_continuations
+        | post_write_continuations | named_file_continuations
+        | shell_fork_continuations | raw_continuations
     )
     candidates = load_candidates(ledger)
     index = {event_id: i for i, event_id in enumerate(candidates['ids'])}
@@ -98,6 +112,8 @@ def run(ledger: Path, output_dir: Path, ratio: float, scoring_config: Path,
         'file_io_origin_event_ids': sorted(io_origin_continuations),
         'forward_execution_event_ids': sorted(forward_continuations),
         'post_write_connect_event_ids': sorted(post_write_continuations),
+        'named_file_context_event_ids': sorted(named_file_continuations),
+        'shell_fork_event_ids': sorted(shell_fork_continuations),
         'raw_command_line_event_ids': sorted(raw_continuations),
         'raw_command_line_outside_candidate': sorted(raw_outside),
         'poi_uses_external_alert': False,
@@ -105,7 +121,8 @@ def run(ledger: Path, output_dir: Path, ratio: float, scoring_config: Path,
         'file_io_origin_enabled': file_io_origin,
         'forward_execution_enabled': forward_execution,
         'post_write_connect_enabled': post_write_connect,
-        'policy': 'For write POIs, preserve same-file writes within one second and the first same-basename EXECUTE within one second afterward. For CONNECT POIs, preserve up to eight most recent same-process CONNECT events in the preceding ten minutes and the first same-socket SENDTO within one second afterward. When CONNECT and WRITE POIs occur on one host within ten minutes, preserve up to eight same-socket RECVFROM events and bounded READ/OPEN edges joining their processes through a shared file UUID; the OPEN process may be one nearby FORK child of the CONNECT process, with its FORK edge preserved. Optional file IO origin keeps one nearby parent FORK and up to 80 READ/RECVFROM events on the highest-volume socket of the file-writing process or its parent. Optional forward execution requires a matching EXECUTE, follows it to its child, then keeps a bounded number of same-process output files and one CONNECT per destination /24. Optional post-write continuation preserves the first new socket of the writer or its parent, plus the parent FORK when needed. If raw CDM is supplied, preserve up to two same-host EXECUTEs with the POI file basename in their cmdLine within one minute. Reserve budget slots before RASP-D q=0 selection.',
+        'named_file_context_enabled': named_file_context,
+        'policy': 'For write POIs, preserve same-file writes within one second and the first same-basename EXECUTE within one second afterward. For CONNECT POIs, preserve up to eight most recent same-process CONNECT events in the preceding ten minutes and the first same-socket SENDTO within one second afterward. When CONNECT and WRITE POIs occur on one host within ten minutes, preserve up to eight same-socket RECVFROM events and bounded READ/OPEN edges joining their processes through a shared file UUID; the OPEN process may be one nearby FORK child of the CONNECT process, with its FORK edge preserved. Optional file IO origin keeps one nearby parent FORK, up to 80 READ/RECVFROM events on the highest-volume socket, and its first SENDTO. Optional named-file context keeps two preceding same-basename writes and 16 following same-basename reads on the same host. Optional forward execution requires a matching EXECUTE, follows it to its child, then keeps a bounded number of same-process output files and one CONNECT per destination /24. Optional post-write continuation preserves the first new socket of the writer or its parent, plus the parent FORK when needed. Forward/post-write rules also keep the first same-process shell FORK within one second of a retained CONNECT. If raw CDM is supplied, preserve up to two same-host EXECUTEs with the POI file basename in their cmdLine within one minute. Reserve budget slots before RASP-D q=0 selection.',
         'ledger_sha256': sha256_file(ledger),
         'decision_sha256': sha256_file(decision_path),
         'scoring_config_sha256': sha256_file(scoring_config),
@@ -135,11 +152,13 @@ def main() -> None:
     parser.add_argument('--file-io-origin', action='store_true')
     parser.add_argument('--forward-file-execution', action='store_true')
     parser.add_argument('--post-write-connect', action='store_true')
+    parser.add_argument('--named-file-context', action='store_true')
     args = parser.parse_args()
     print(json.dumps(run(args.ledger, args.output_dir, args.ratio, args.scoring_config,
                          args.raw_cdm_json, args.file_io_origin,
                          args.forward_file_execution,
-                         args.post_write_connect), indent=2))
+                         args.post_write_connect,
+                         args.named_file_context), indent=2))
 
 
 if __name__ == '__main__':

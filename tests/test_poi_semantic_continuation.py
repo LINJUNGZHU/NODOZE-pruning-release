@@ -5,6 +5,7 @@ from tc_pruning.poi_semantic_continuation import (
     network_poi_episode, poi_bridge_continuations, file_poi_io_origin,
     forward_file_execution,
     post_write_parent_connect,
+    file_poi_named_context, shell_forks_after_connections,
 )
 
 
@@ -154,6 +155,8 @@ def test_file_poi_origin_uses_nearby_parent_and_largest_socket_episode():
         {'event_id': 'read-2', 'relation': 'EVENT_READ', 'src': 'large-socket',
          'src_type': 'socket', 'dst': 'writer', 'timestamp_ns': 105,
          'data_size': 8, 'host': 'h'},
+        {'event_id': 'send', 'relation': 'EVENT_SENDTO', 'src': 'parent',
+         'dst': 'large-socket', 'timestamp_ns': 94, 'host': 'h'},
         {'event_id': 'small', 'relation': 'EVENT_READ', 'src': 'small-socket',
          'src_type': 'socket', 'dst': 'writer', 'timestamp_ns': 102,
          'data_size': 2, 'host': 'h'},
@@ -162,7 +165,7 @@ def test_file_poi_origin_uses_nearby_parent_and_largest_socket_episode():
          'data_size': 1000, 'host': 'h'},
     ]
     assert file_poi_io_origin(rows, before_ns=20, after_ns=20) == {
-        'lineage', 'connect', 'read-1', 'read-2',
+        'lineage', 'connect', 'send', 'read-1', 'read-2',
     }
 
 
@@ -229,3 +232,78 @@ def test_post_write_parent_connect_selects_new_socket_after_download():
     ]
     assert post_write_parent_connect(rows, parent_lookback_ns=20,
                                      after_ns=10) == {'fork', 'c2'}
+
+
+def test_named_file_context_follows_path_aliases_with_bounded_reads():
+    rows = [
+        {'event_id': 'poi', 'is_declared_poi': True, 'relation': 'EVENT_WRITE',
+         'dst': 'poi-file', 'dst_semantic': r'file:\\Device\\Volume\\update.ps1',
+         'timestamp_ns': 100, 'host': 'h'},
+        {'event_id': 'alias-write', 'relation': 'EVENT_WRITE',
+         'dst': 'alias-file', 'dst_semantic': r'file:C:\\ProgramData\\update.ps1',
+         'timestamp_ns': 98, 'host': 'h'},
+        {'event_id': 'same-uuid-write', 'relation': 'EVENT_WRITE',
+         'dst': 'poi-file', 'dst_semantic': r'file:\\Device\\Volume\\update.ps1',
+         'timestamp_ns': 99, 'host': 'h'},
+        {'event_id': 'read-first', 'relation': 'EVENT_READ',
+         'src_semantic': r'file:C:\\ProgramData\\update.ps1', 'timestamp_ns': 101, 'host': 'h'},
+        {'event_id': 'read-second', 'relation': 'EVENT_READ',
+         'src_semantic': r'file:C:\\ProgramData\\update.ps1', 'timestamp_ns': 102, 'host': 'h'},
+        {'event_id': 'wrong-host', 'relation': 'EVENT_READ',
+         'src_semantic': 'file:update.ps1', 'timestamp_ns': 101, 'host': 'other'},
+        {'event_id': 'wrong-name', 'relation': 'EVENT_READ',
+         'src_semantic': 'file:other.ps1', 'timestamp_ns': 101, 'host': 'h'},
+    ]
+    assert file_poi_named_context(rows, before_ns=5, after_ns=5,
+                                  max_reads=1) == {'alias-write', 'read-first'}
+
+
+def test_shell_fork_follows_selected_connection_same_process_host_and_time():
+    rows = [
+        {'event_id': 'connect', 'relation': 'EVENT_CONNECT', 'src': 'parent',
+         'timestamp_ns': 100, 'host': 'h'},
+        {'event_id': 'shell', 'relation': 'EVENT_FORK', 'src': 'parent',
+         'dst_semantic': 'process:"cmd.exe"', 'timestamp_ns': 101, 'host': 'h'},
+        {'event_id': 'other', 'relation': 'EVENT_FORK', 'src': 'parent',
+         'dst_semantic': 'process:calculator.exe', 'timestamp_ns': 101, 'host': 'h'},
+        {'event_id': 'wrong-host', 'relation': 'EVENT_FORK', 'src': 'parent',
+         'dst_semantic': 'process:/bin/sh', 'timestamp_ns': 102, 'host': 'other'},
+    ]
+    assert shell_forks_after_connections(rows, {'connect'}, after_ns=5) == {'shell'}
+
+
+def test_forward_execution_accepts_execute_from_fork_child_and_same_child_lineage():
+    rows = [
+        {'event_id': 'poi', 'is_declared_poi': True, 'relation': 'EVENT_WRITE',
+         'src': 'writer', 'dst': 'payload', 'dst_semantic': 'file:/tmp/payload',
+         'timestamp_ns': 100, 'host': 'h'},
+        {'event_id': 'writer-fork', 'relation': 'EVENT_FORK', 'src': 'writer',
+         'dst': 'child', 'timestamp_ns': 101, 'host': 'h'},
+        {'event_id': 'lineage-fork', 'relation': 'EVENT_FORK', 'src': 'parent',
+         'dst': 'child', 'timestamp_ns': 101, 'host': 'h'},
+        {'event_id': 'execute', 'relation': 'EVENT_EXECUTE', 'src': 'child',
+         'dst_semantic': 'file:payload', 'timestamp_ns': 101, 'host': 'h'},
+    ]
+    assert forward_file_execution(rows, max_execution_ns=5) == {
+        'writer-fork', 'lineage-fork', 'execute',
+    }
+
+
+def test_forward_execution_uses_new_process_version_for_connections():
+    rows = [
+        {'event_id': 'poi', 'is_declared_poi': True, 'relation': 'EVENT_WRITE',
+         'src': 'writer', 'dst': 'payload', 'dst_semantic': 'file:/tmp/payload',
+         'timestamp_ns': 100, 'host': 'h'},
+        {'event_id': 'writer-fork', 'relation': 'EVENT_FORK', 'src': 'writer',
+         'dst': 'old-version', 'timestamp_ns': 101, 'host': 'h'},
+        {'event_id': 'new-version-fork', 'relation': 'EVENT_FORK', 'src': 'writer',
+         'dst': 'new-version', 'timestamp_ns': 101, 'host': 'h'},
+        {'event_id': 'execute', 'relation': 'EVENT_EXECUTE', 'src': 'old-version',
+         'dst': 'new-version', 'dst_semantic': 'process:payload',
+         'timestamp_ns': 101, 'host': 'h'},
+        {'event_id': 'c2', 'relation': 'EVENT_CONNECT', 'src': 'new-version',
+         'dst_semantic': 'socket:1.2.3.4:80', 'timestamp_ns': 102, 'host': 'h'},
+    ]
+    assert forward_file_execution(rows, max_execution_ns=5, max_forward_ns=5) == {
+        'writer-fork', 'new-version-fork', 'execute', 'c2',
+    }

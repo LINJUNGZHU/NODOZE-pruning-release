@@ -1,0 +1,11 @@
+case,method,candidate_edges,output_edges,proxy_tp,proxy_fp,proxy_fn,proxy_tn,proxy_precision_pct,proxy_recall_pct,proxy_f1_pct,proxy_fpr_pct,proxy_fnr_pct,critical_groups_hit,critical_groups_total,attack_stages_hit,attack_stages_total,sparse_equivalent_fp,sparse_equivalent_fn,sparse_equivalent_precision,sparse_equivalent_recall,sparse_equivalent_f1
+Five Dir Case 1,baseline,466257,93251,18,93233,20,372986,0.019303,47.368421,0.038590,19.997683,52.631579,2,9,1,3,NA,NA,NA,NA,NA
+Five Dir Case 1,optimized,466257,51,38,13,0,466206,74.509804,100.000000,85.393258,0.002788,0.000000,9,9,3,3,NA,NA,NA,NA,NA
+Five Dir Case 3,baseline,424245,84849,3,84846,12,339384,0.003536,20.000000,0.007070,20.000000,80.000000,2,7,1,3,NA,NA,NA,NA,NA
+Five Dir Case 3,optimized,424245,49,15,34,0,424196,30.612245,100.000000,46.875000,0.008015,0.000000,7,7,3,3,NA,NA,NA,NA,NA
+Theia Case 1,baseline,898253,179650,16,179634,223,718380,0.008906,6.694561,0.017789,20.003474,93.305439,11,12,6,6,NA,NA,NA,NA,NA
+Theia Case 1,optimized,898253,179650,49,179601,190,718413,0.027275,20.502092,0.054478,19.999800,79.497908,12,12,6,6,NA,NA,NA,NA,NA
+Theia Case 3,baseline,1132218,226443,229,226214,0,905775,0.101129,100.000000,0.202054,19.983763,0.000000,9,9,5,5,NA,NA,NA,NA,NA
+Theia Case 3,optimized,1132218,226443,229,226214,0,905775,0.101129,100.000000,0.202054,19.983763,0.000000,9,9,5,5,NA,NA,NA,NA,NA
+Theia Case 5,baseline,137762,27552,29,27523,2,110208,0.105256,93.548387,0.210274,19.983156,6.451613,6,8,5,6,NA,NA,NA,NA,NA
+Theia Case 5,optimized,137762,144,31,113,0,137618,21.527778,100.000000,35.428571,0.082044,0.000000,8,8,6,6,NA,NA,NA,NA,NA

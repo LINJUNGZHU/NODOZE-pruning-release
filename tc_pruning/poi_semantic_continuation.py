@@ -62,6 +62,7 @@ def forward_file_execution(
     executes_by_process: dict[str, list[dict]] = {}
     executes_by_child: dict[str, list[dict]] = {}
     forks_by_process: dict[str, list[dict]] = {}
+    forks_by_child: dict[str, list[dict]] = {}
     connects_by_process: dict[str, list[dict]] = {}
     for row in rows:
         relation = row.get('relation')
@@ -73,6 +74,7 @@ def forward_file_execution(
             executes_by_child.setdefault(row.get('dst'), []).append(row)
         elif relation == 'EVENT_FORK':
             forks_by_process.setdefault(source, []).append(row)
+            forks_by_child.setdefault(row.get('dst'), []).append(row)
         elif relation == 'EVENT_CONNECT':
             connects_by_process.setdefault(source, []).append(row)
 
@@ -100,16 +102,25 @@ def forward_file_execution(
                        if row.get('dst') and same_host(row)
                        and _process_basename(row.get('dst_semantic')) == name
                        and start <= int(row['timestamp_ns']) <= start + max_execution_ns]
+        candidates += [row for child in executable_children
+                       for row in executes_by_process.get(child, [])
+                       if same_host(row) and _file_basename(row.get('dst_semantic')) == name
+                       and start <= int(row['timestamp_ns']) <= start + max_execution_ns]
         if not candidates:
             continue
         execute = min(candidates, key=lambda row: (int(row['timestamp_ns']), row['event_id']))
         selected.add(execute['event_id'])
         execute_time = int(execute['timestamp_ns'])
-        forks = [row for row in matching_forks
-                 if row.get('dst') == execute.get('dst') and same_host(row)
-                 and start <= int(row['timestamp_ns']) <= execute_time]
-        if forks:
-            selected.add(max(forks, key=lambda row: (int(row['timestamp_ns']), row['event_id']))['event_id'])
+        execution_child = (execute.get('src') if execute.get('src') in executable_children
+                           else execute.get('dst'))
+        activity_process = (execute.get('dst') if str(execute.get('dst_semantic', '')).startswith('process:')
+                            else execute.get('src'))
+        fork_children = {execution_child, activity_process}
+        forks = [row for child in fork_children for row in forks_by_child.get(child, [])
+                 if same_host(row) and start <= int(row['timestamp_ns']) <= execute_time]
+        selected.update(row['event_id'] for row in sorted(
+            forks, key=lambda row: (int(row['timestamp_ns']), row['event_id']), reverse=True,
+        )[:3])
 
         poi_directory = ntpath.dirname(str(poi.get('dst_semantic'))[5:]).casefold()
         side_effects = [row for row in writes_by_process.get(poi.get('src'), [])
@@ -129,7 +140,7 @@ def forward_file_execution(
                 if len(seen_files) >= max_side_effect_files:
                     break
 
-        connects = [row for row in connects_by_process.get(execute.get('dst'), [])
+        connects = [row for row in connects_by_process.get(activity_process, [])
                     if same_host(row) and execute_time <= int(row['timestamp_ns']) <= start + max_forward_ns
                     and _socket_destination_group(row.get('dst_semantic'))]
         connects.sort(key=lambda row: (
@@ -233,6 +244,68 @@ def adjacent_file_writes(rows: list[dict], *, max_delay_ns: int = 1_000_000_000)
             if row.get('dst') == poi.get('dst') and abs(int(row['timestamp_ns']) - int(poi['timestamp_ns'])) <= max_delay_ns:
                 selected.add(row['event_id'])
                 break
+    return selected
+
+
+def file_poi_named_context(
+    rows: list[dict], *, before_ns: int = 1_000_000_000,
+    after_ns: int = 1_000_000_000, max_writes: int = 2,
+    max_reads: int = 16,
+) -> set[str]:
+    """Keep bounded nearby writes and reads of a written POI file across path aliases."""
+    if min(before_ns, after_ns, max_writes, max_reads) < 0:
+        raise ValueError('file-context bounds must be nonnegative')
+    selected: set[str] = set()
+    for poi in rows:
+        if poi.get('is_declared_poi') is not True or poi.get('relation') != 'EVENT_WRITE':
+            continue
+        name = _file_basename(poi.get('dst_semantic'))
+        if not name:
+            continue
+        timestamp = int(poi['timestamp_ns'])
+        host = poi.get('host')
+        def same_host(row: dict) -> bool:
+            return not host or not row.get('host') or row['host'] == host
+        writes = sorted((row for row in rows
+                         if row.get('relation') == 'EVENT_WRITE'
+                         and row.get('event_id') != poi.get('event_id')
+                         and row.get('dst') != poi.get('dst')
+                         and _file_basename(row.get('dst_semantic')) == name
+                         and same_host(row)
+                         and timestamp - before_ns <= int(row['timestamp_ns']) <= timestamp),
+                        key=lambda row: (-int(row['timestamp_ns']), row['event_id']))
+        reads = sorted((row for row in rows
+                        if row.get('relation') == 'EVENT_READ'
+                        and _file_basename(row.get('src_semantic')) == name
+                        and same_host(row)
+                        and timestamp <= int(row['timestamp_ns']) <= timestamp + after_ns),
+                       key=lambda row: (int(row['timestamp_ns']), row['event_id']))
+        selected.update(row['event_id'] for row in writes[:max_writes])
+        selected.update(row['event_id'] for row in reads[:max_reads])
+    return selected
+
+
+def shell_forks_after_connections(
+    rows: list[dict], connect_ids: set[str], *, after_ns: int = 1_000_000_000,
+) -> set[str]:
+    """Keep the first shell child immediately after a retained connection."""
+    if after_ns < 0:
+        raise ValueError('after_ns must be nonnegative')
+    forks_by_process: dict[str, list[dict]] = {}
+    for row in rows:
+        if row.get('relation') == 'EVENT_FORK' and _process_basename(row.get('dst_semantic')).strip('"') in {'cmd.exe', 'sh', 'bash'}:
+            forks_by_process.setdefault(row.get('src'), []).append(row)
+    selected: set[str] = set()
+    for connect in rows:
+        if connect.get('event_id') not in connect_ids or connect.get('relation') != 'EVENT_CONNECT':
+            continue
+        timestamp = int(connect['timestamp_ns'])
+        host = connect.get('host')
+        candidates = [row for row in forks_by_process.get(connect.get('src'), [])
+                      if (not host or not row.get('host') or row['host'] == host)
+                      and timestamp <= int(row['timestamp_ns']) <= timestamp + after_ns]
+        if candidates:
+            selected.add(min(candidates, key=lambda row: (int(row['timestamp_ns']), row['event_id']))['event_id'])
     return selected
 
 
@@ -373,6 +446,7 @@ def file_poi_io_origin(
     forks_by_child: dict[str, list[dict]] = {}
     socket_reads_by_process: dict[str, list[dict]] = {}
     connects_by_socket: dict[str, list[dict]] = {}
+    sends_by_socket: dict[str, list[dict]] = {}
     for row in rows:
         relation = row.get('relation')
         if relation == 'EVENT_FORK':
@@ -384,6 +458,8 @@ def file_poi_io_origin(
             socket_reads_by_process.setdefault(row.get('dst'), []).append(row)
         elif relation == 'EVENT_CONNECT':
             connects_by_socket.setdefault(row.get('dst'), []).append(row)
+        elif relation == 'EVENT_SENDTO':
+            sends_by_socket.setdefault(row.get('dst'), []).append(row)
 
     selected: set[str] = set()
     for write in writes:
@@ -422,6 +498,13 @@ def file_poi_io_origin(
                     and timestamp - before_ns <= int(row['timestamp_ns']) <= timestamp + after_ns]
         if connects:
             selected.add(min(connects, key=lambda row: (
+                abs(int(row['timestamp_ns']) - timestamp), row['event_id'],
+            ))['event_id'])
+        sends = [row for row in sends_by_socket.get(socket_id, [])
+                 if row.get('src') in processes and same_host(row)
+                 and timestamp - before_ns <= int(row['timestamp_ns']) <= timestamp + after_ns]
+        if sends:
+            selected.add(min(sends, key=lambda row: (
                 abs(int(row['timestamp_ns']) - timestamp), row['event_id'],
             ))['event_id'])
     return selected

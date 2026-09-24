@@ -1,5 +1,7 @@
 # NODOZE 五个案例的依赖图实验（开发集）
 
+新增的 [SPARSE 式本地关键边实验](sparse-five-local-critical-study.md)逐边选取报告步骤、计算封闭世界代理指标，并列出更新后的选择器结果。下文保留早先 DEPIMPACT 实体对展开与 PDF 代表步骤的独立审计；两套参考集和指标不能混用。
+
 ## 案例、POI 和数据来源
 
 实验只覆盖用户图中的五行。原始事件来自 [DARPA Transparent Computing E3 发布清单](https://github.com/darpa-i2o/Transparent-Computing/blob/master/README-E3.md)所列流；攻击时间和行为依据本地官方 `TC_Ground_Truth_Report_E3_Update.pdf`（SHA-256 `eccf295b566b8e981fe90e0f1aea61116bd5a5694441396af63f22a914cbc39c`）。POI 是先从报告中的文件或通信目标定位，再解析到原始 CDM 事件的调查种子，没有调用外部告警。所有 POI 都是利用真值选定的 **oracle POI**，不能宣称自动告警发现能力。[清单](../configs/sparse_five_cases.json)记录原始文件、时间段、数据库、POI 和结果账本。

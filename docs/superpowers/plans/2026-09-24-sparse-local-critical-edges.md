@@ -36,29 +36,29 @@
 
 **Interfaces:** Input case config and stage-anchor config; output JSON packets containing anchors, bounded same-host temporal neighbors, POI lineage, and the frozen ledger SHA-256. Exclude `decisions` from packet output.
 
-- [ ] Write a test with parallel and unrelated-host events; require distinct IDs and no unrelated-host neighbors.
-- [ ] Run the test and confirm it fails before implementation.
-- [ ] Implement streaming extraction and deterministic output.
-- [ ] Run the focused test and produce the five packets.
+- [x] Write a test with parallel and unrelated-host events; require distinct IDs and no unrelated-host neighbors.
+- [x] Run the test and confirm it fails before implementation.
+- [x] Implement streaming extraction and deterministic output.
+- [x] Run the focused test and produce the five packets.
 
 ### Task 2: Curate event-level critical reference
 
-**Files:** Create `configs/sparse_five_local_critical_edges.json`; create `scripts/validate_sparse_local_critical_edges.py`; create `tests/test_sparse_local_critical_edges.py`.
+**Files:** Implemented as `configs/sparse_five_local_critical_choices.json`, `docs/sparse-five-local-critical-reference.json`, `scripts/validate_sparse_local_critical_edges.py`, and `tests/test_sparse_local_critical_edges.py`.
 
 **Interfaces:** Each positive contains its exact event ID and attack-stage rationale; validator joins it to the frozen ledger and checks host, timestamp, relation, endpoints, uniqueness, PDF page, and graph linkage. Include explicit uncertain event IDs and reasons without scoring them as positives or negatives.
 
-- [ ] Inspect official report stages and review packets, recording the exact event IDs selected for each case.
-- [ ] Write failing validation tests for a wrong host, duplicate ID, stale ledger hash, and unsupported stage.
-- [ ] Implement and run validation.
-- [ ] Freeze the manifest and record its SHA-256 before running any comparative score.
+- [x] Inspect official report stages and review packets, recording the exact event IDs selected for each case.
+- [x] Write failing validation tests for a wrong host, duplicate ID, stale ledger hash, and unsupported stage.
+- [x] Implement and run validation.
+- [x] Freeze the manifest and record its SHA-256 before running any comparative score.
 
 ### Task 3: Evaluate baseline and optimized outputs
 
-**Files:** Create `scripts/evaluate_sparse_local_reference.py`; create `tests/test_sparse_local_reference.py`; create `docs/sparse-five-local-critical-results.json`; update `docs/sparse-five-case-study.md` and CSV.
+**Files:** Implemented as `scripts/evaluate_sparse_local_reference.py`, `tests/test_sparse_local_reference_evaluation.py`, `scripts/export_sparse_local_reference_csv.py`, `docs/sparse-five-local-critical-results.json`, `docs/sparse-five-local-critical-performance.csv`, and `docs/sparse-five-local-critical-study.md`.
 
 **Interfaces:** Pair each frozen candidate ledger with baseline and optimized decisions. Report exact positive hits, stage coverage, `proxy_tp/fp/fn/tn`, `proxy_precision/recall/f1`, and the number of uncertain edges. Report separate SPARSE-equivalent metric fields as `NA`.
 
-- [ ] Write tests verifying event alignment, negative-universe convention, unknown handling, and metric arithmetic.
-- [ ] Run tests red, then implement minimal evaluator and run green.
-- [ ] Evaluate all five cases and document graph-granularity, POI, and label limitations.
+- [x] Write tests verifying event alignment, negative-universe convention, unknown handling, and metric arithmetic.
+- [x] Run tests red, then implement minimal evaluator and run green.
+- [x] Evaluate all five cases and document graph-granularity, POI, and label limitations.
 - [ ] Run full tests, source-hash checks, code review, and commit the auditable results.
