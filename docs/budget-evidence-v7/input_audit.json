@@ -1,0 +1,626 @@
+{
+  "protocol": "budget-evidence-input-audit-v7",
+  "code_root": "/root/NODOZE-pruning-release/.worktrees/sparse-five-case-study",
+  "git": {
+    "branch": "research/sparse-five-case-study",
+    "head": "f6fa89da19449cc2b01459697903f8df0f7a5799",
+    "initial_status": "clean"
+  },
+  "python": {
+    "executable": "/root/NODOZE-pruning-release/.venv-cross-domain/bin/python",
+    "version": "3.12.6",
+    "packages": {
+      "numpy": "1.26.4",
+      "scipy": "1.14.1",
+      "pcst_fast": "1.0.10",
+      "networkit": "11.2.2",
+      "pytest": "9.1.1"
+    }
+  },
+  "common_files": [
+    {
+      "path": "/root/NODOZE-pruning-release/.worktrees/sparse-five-case-study/configs/sparse_five_cases.json",
+      "exists": true,
+      "size": 6160,
+      "mtime_ns": 1790193193903801537,
+      "sha256": "05f4da59f2ab30f13b2861f97165da5b2c665c5d916e927ee5a47606d409bd7a"
+    },
+    {
+      "path": "/root/NODOZE-pruning-release/.worktrees/sparse-five-case-study/configs/history_channel_v6.json",
+      "exists": true,
+      "size": 1924,
+      "mtime_ns": 1790246494945518714,
+      "sha256": "b3aaad68b7868e88ada8b43e7abc6f90e6e3f91104b9b825edf3bb9b2a789090"
+    },
+    {
+      "path": "/root/NODOZE-pruning-release/.worktrees/sparse-five-case-study/docs/depimpact-artifact-case-map.json",
+      "exists": true,
+      "size": 5398,
+      "mtime_ns": 1790191753894140276,
+      "sha256": "0aca122f33cd3d1d6c6f01dcf59222b3e088684a7eac5a9c8596fabd33068244"
+    },
+    {
+      "path": "/root/NODOZE-pruning-release/.worktrees/sparse-five-case-study/docs/sparse-five-local-critical-reference.json",
+      "exists": true,
+      "size": 94177,
+      "mtime_ns": 1790231091750039801,
+      "sha256": "9ab4dc7a796ac7bed73aaa8ea1d53fbe24ca2552f4327611966f06875c8c5bbd"
+    },
+    {
+      "path": "/root/NODOZE-pruning-release/.worktrees/sparse-five-case-study/docs/history-channel-v6-results.csv",
+      "exists": true,
+      "size": 1221001,
+      "mtime_ns": 1790247509483864799,
+      "sha256": "b59fee37473f7e31e2d11a9aa24d3876294f12727af1809b5cb510ba58458f0a"
+    },
+    {
+      "path": "/root/NODOZE-pruning-release/.worktrees/sparse-five-case-study/docs/history-channel-study.md",
+      "exists": true,
+      "size": 19181,
+      "mtime_ns": 1790247877791304510,
+      "sha256": "66730d72558edd13b93bdaa4e2c9309aff834b21d3fcd4b7a701d9b232a5bb12"
+    },
+    {
+      "path": "/root/NODOZE-pruning-release/.worktrees/sparse-five-case-study/tc_pruning/frequency_diffusion.py",
+      "exists": true,
+      "size": 10211,
+      "mtime_ns": 1790238060228009855,
+      "sha256": "94b89fc749fa323045f597c3a8a149d55f1cb3b7dfa252116cb28445e27fde5c"
+    },
+    {
+      "path": "/root/NODOZE-pruning-release/.worktrees/sparse-five-case-study/tc_pruning/temporal_diffusion.py",
+      "exists": true,
+      "size": 5112,
+      "mtime_ns": 1790242771943392223,
+      "sha256": "188ef2213d8a581789f607a14f0bcf889ac26294ff0efa6b6efbca02e348f39e"
+    },
+    {
+      "path": "/root/NODOZE-pruning-release/.worktrees/sparse-five-case-study/tc_pruning/degree_diffusion.py",
+      "exists": true,
+      "size": 1293,
+      "mtime_ns": 1790243081538777593,
+      "sha256": "63f19855a384967abd329308c77aee723bf87924687e2797fac9abb268b1136e"
+    },
+    {
+      "path": "/root/NODOZE-pruning-release/.worktrees/sparse-five-case-study/tc_pruning/rasp.py",
+      "exists": true,
+      "size": 10934,
+      "mtime_ns": 1790183877797753841,
+      "sha256": "dc8d9ed0abaaabdf6e3a6125e2821201cc36b7222ba1b85b7e889ceeacce2bb0"
+    },
+    {
+      "path": "/root/NODOZE-pruning-release/.worktrees/sparse-five-case-study/tc_pruning/witness_portfolio.py",
+      "exists": true,
+      "size": 2092,
+      "mtime_ns": 1790243822345690475,
+      "sha256": "d18fe769436ed527d8d6141e3e5df1e50b60769bf56d65b36aa954b1b591b566"
+    },
+    {
+      "path": "/root/NODOZE-pruning-release/.worktrees/sparse-five-case-study/tc_pruning/marginal_witness.py",
+      "exists": true,
+      "size": 7492,
+      "mtime_ns": 1790245061615745027,
+      "sha256": "035eb95d1d284e56f88f5adfde1000466e6f4415b252e5557774efcdacae35d8"
+    },
+    {
+      "path": "/root/NODOZE-pruning-release/.worktrees/sparse-five-case-study/tc_pruning/history_channel.py",
+      "exists": true,
+      "size": 5491,
+      "mtime_ns": 1790246429173636808,
+      "sha256": "6dc9091f795fa9d5694f3b68374176ebc15ede0146de7823d056b94d04f3b2a9"
+    },
+    {
+      "path": "/root/NODOZE-pruning-release/.worktrees/sparse-five-case-study/tc_pruning/cross_domain_pruning.py",
+      "exists": true,
+      "size": 3629,
+      "mtime_ns": 1790238805470603874,
+      "sha256": "7d8c2a584a893f88f34d31b4498cb5daf8504a00b31851810cda7fb3311e419d"
+    },
+    {
+      "path": "/root/NODOZE-pruning-release/.worktrees/sparse-five-case-study/scripts/history_channel_common.py",
+      "exists": true,
+      "size": 2268,
+      "mtime_ns": 1790246613409296883,
+      "sha256": "e1559f05c272414f9aa122dd46980613000f1c350053768e83509de7b0d1e502"
+    },
+    {
+      "path": "/root/NODOZE-pruning-release/.worktrees/sparse-five-case-study/scripts/prepare_conditional_history.py",
+      "exists": true,
+      "size": 4362,
+      "mtime_ns": 1790246494949518707,
+      "sha256": "edfba6f64c0f4c63146ebc119c56704bdc79eeb7ff8a8963543a0017f9da68f7"
+    },
+    {
+      "path": "/root/NODOZE-pruning-release/.worktrees/sparse-five-case-study/scripts/run_history_channel.py",
+      "exists": true,
+      "size": 6483,
+      "mtime_ns": 1790246613413296876,
+      "sha256": "82587882f098322fb2ce23ec5808589e88da8ad29f772e5ae3d694d195357d32"
+    },
+    {
+      "path": "/root/NODOZE-pruning-release/.worktrees/sparse-five-case-study/scripts/evaluate_marginal_witness.py",
+      "exists": true,
+      "size": 7412,
+      "mtime_ns": 1790245151495575170,
+      "sha256": "516cd9461f53b9b480ee7ae1498417df68edbb504adcacce2490bdab1597470b"
+    },
+    {
+      "path": "/root/NODOZE-pruning-release/.worktrees/sparse-five-case-study/scripts/diagnose_history_pool.py",
+      "exists": true,
+      "size": 2517,
+      "mtime_ns": 1790246786412906759,
+      "sha256": "a79580c0485f2ceabbabf0665d6d55f9df737f9563f5ae02b8ea2c54a83da6a6"
+    },
+    {
+      "path": "/root/NODOZE-pruning-release/.worktrees/sparse-five-case-study/scripts/diagnose_history_theia1.py",
+      "exists": true,
+      "size": 2241,
+      "mtime_ns": 1790247701407599515,
+      "sha256": "b7d206b17efa74c7161beebd801363d03e8fe0b3864d3dae801e0c82ca0c9a4f"
+    },
+    {
+      "path": "/root/NODOZE-pruning-release/.worktrees/sparse-five-case-study/scripts/profile_history_channel.py",
+      "exists": true,
+      "size": 3363,
+      "mtime_ns": 1790246698825144037,
+      "sha256": "1ad99130c408f9b57a994a965e10804736d218054ada8dea5c20acaf9d8960eb"
+    },
+    {
+      "path": "/root/NODOZE-pruning-release/.worktrees/sparse-five-case-study/scripts/summarize_history_channel.py",
+      "exists": true,
+      "size": 17585,
+      "mtime_ns": 1790247876199307973,
+      "sha256": "409e3ba89a8ec7292717f67edbd168f061a8f11372410323ce66d7e4a8bb6a9d"
+    }
+  ],
+  "cases": [
+    {
+      "case_index": 0,
+      "name": "Five Dir Case 1",
+      "poi_source": "official_report_oracle_derived",
+      "label_scope": "artifact_entity_pair_expansion_positive_subset",
+      "event_unit": "unique frozen ledger event_id; LINEAGE: synthetic counted separately",
+      "history_scope": {
+        "origin_poi_ns": 1523300798594000000,
+        "fit_start_ns": 1523214398594000000,
+        "fit_end_ns": 1523297198594000000,
+        "calibration_end_ns": 1523298998594000000,
+        "fit_channels": 51,
+        "calibration_channels": 69392,
+        "supported_events": 68162,
+        "candidate_events": 466257,
+        "metadata_time_safety": "unverified"
+      },
+      "inputs": {
+        "ledger": {
+          "path": "/root/NODOZE-pruning-release/output/tc/sparse-five/fivedirections/case1-phishing-results-ledger/edge-scores.jsonl.gz",
+          "exists": true,
+          "size": 33429831,
+          "mtime_ns": 1790192863936636746,
+          "sha256": "27ac808c4875ff7bc212cd44d0b82e081fc4f0279cf13a9508eab91fadcb7eb2"
+        },
+        "frozen_v6_decisions": {
+          "path": "/root/NODOZE-pruning-release/output/tc/history-channel-v6/case0.json.gz",
+          "exists": true,
+          "size": 13686159,
+          "mtime_ns": 1790247064664465735,
+          "sha256": "ab98c7ccd99d98dc63ea2f9c9128dd86285757f401e36f8d40e6b9d215468385"
+        },
+        "history_cache": {
+          "path": "/root/NODOZE-pruning-release/output/tc/history-channel-v6/history/case0.npz",
+          "exists": true,
+          "size": 163039,
+          "mtime_ns": 1790246529209453946,
+          "sha256": "9ea97b2e5985cd0a912b110be09a409f31d04701e6e3895f66264ae4ca98445d"
+        },
+        "history_manifest": {
+          "path": "/root/NODOZE-pruning-release/output/tc/history-channel-v6/history/case0.json",
+          "exists": true,
+          "size": 6423,
+          "mtime_ns": 1790246530009452378,
+          "sha256": "9fca1d57280e839916845cf10243a9ae007fe3b6d95dd5999c42509aa6f71422"
+        },
+        "history_aggregate": {
+          "path": "/root/NODOZE-pruning-release/output/tc/history-channel-v6/history/case0.history.json.gz",
+          "exists": true,
+          "size": 1461932,
+          "mtime_ns": 1790246529901452590,
+          "sha256": "fa1bcd97bfb312b82f32ed199bac061b08a69cc4d807d269d01b956a026199cd"
+        },
+        "poi_manifest": {
+          "path": "/root/NODOZE-pruning-release/.worktrees/sparse-five-case-study/poi/fivedirections-e3-case1-phishing-report-poi.json",
+          "exists": true,
+          "size": 827,
+          "mtime_ns": 1790192651000991499,
+          "sha256": "94b0d961fde801c83774e6d817227d2fac7a6b83d94b9b9e814a964c62f369af"
+        },
+        "database_provenance": {
+          "path": "/root/NODOZE-pruning-release/output/tc/sparse-five/fivedirections/case1-phishing.db",
+          "exists": true,
+          "size": 2693484544,
+          "mtime_ns": 1790192365225378254,
+          "sha256": null,
+          "hash_reason": "source database/PDF not read by v7; cached history and ledger are hashed"
+        },
+        "official_report": {
+          "path": "/root/PIDSMaker-main/Ground_Truth/TC_Ground_Truth_Report_E3_Update.pdf",
+          "exists": true,
+          "size": 1244912,
+          "mtime_ns": 1788016708000000000,
+          "sha256": null,
+          "hash_reason": "source database/PDF not read by v7; cached history and ledger are hashed"
+        },
+        "local_label_path": {
+          "path": "/root/NODOZE-pruning-release/.worktrees/sparse-five-case-study/docs/sparse-five-local-critical-reference.json",
+          "exists": true,
+          "size": 94177,
+          "mtime_ns": 1790231091750039801,
+          "sha256": "9ab4dc7a796ac7bed73aaa8ea1d53fbe24ca2552f4327611966f06875c8c5bbd"
+        }
+      },
+      "reported_ledger_sha256": "27ac808c4875ff7bc212cd44d0b82e081fc4f0279cf13a9508eab91fadcb7eb2",
+      "input_hash_match": true
+    },
+    {
+      "case_index": 1,
+      "name": "Five Dir Case 3",
+      "poi_source": "official_report_oracle_derived",
+      "label_scope": "artifact_entity_pair_expansion_positive_subset",
+      "event_unit": "unique frozen ledger event_id; LINEAGE: synthetic counted separately",
+      "history_scope": {
+        "origin_poi_ns": 1523545958865000000,
+        "fit_start_ns": 1523459558865000000,
+        "fit_end_ns": 1523542358865000000,
+        "calibration_end_ns": 1523544158865000000,
+        "fit_channels": 283,
+        "calibration_channels": 24,
+        "supported_events": 0,
+        "candidate_events": 424245,
+        "metadata_time_safety": "unverified"
+      },
+      "inputs": {
+        "ledger": {
+          "path": "/root/NODOZE-pruning-release/output/tc/sparse-five/fivedirections/case3-two-poi-results-ledger/edge-scores.jsonl.gz",
+          "exists": true,
+          "size": 29199067,
+          "mtime_ns": 1790187198148719678,
+          "sha256": "e4a914988691c66b4ee83b0475c1193a0d1324843c32d0543031fa9c4e25f7dd"
+        },
+        "frozen_v6_decisions": {
+          "path": "/root/NODOZE-pruning-release/output/tc/history-channel-v6/case1.json.gz",
+          "exists": true,
+          "size": 16478671,
+          "mtime_ns": 1790247220920244107,
+          "sha256": "0465b4d51ca1a7adfcb32e5a135dd1590cdf47d261a802cf5f6719a58eaeb872"
+        },
+        "history_cache": {
+          "path": "/root/NODOZE-pruning-release/output/tc/history-channel-v6/history/case1.npz",
+          "exists": true,
+          "size": 72548,
+          "mtime_ns": 1790246527613457074,
+          "sha256": "3d33293767737f127d38eabad29fdc81122bbadc001ec488d71d3eba2f9816ce"
+        },
+        "history_manifest": {
+          "path": "/root/NODOZE-pruning-release/output/tc/history-channel-v6/history/case1.json",
+          "exists": true,
+          "size": 6374,
+          "mtime_ns": 1790246527709456885,
+          "sha256": "baeeb6d6167d4b783ddc48b2fec8d1d1e68de5cc06c86e162b6648733c1febb2"
+        },
+        "history_aggregate": {
+          "path": "/root/NODOZE-pruning-release/output/tc/history-channel-v6/history/case1.history.json.gz",
+          "exists": true,
+          "size": 4625,
+          "mtime_ns": 1790246527617457066,
+          "sha256": "f68f954b4ca35b8d599e06c74670281d6b25f11cc6ba264dd550acabcd507419"
+        },
+        "poi_manifest": {
+          "path": "/root/NODOZE-pruning-release/.worktrees/sparse-five-case-study/poi/fivedirections-e3-case3-report-poi.json",
+          "exists": true,
+          "size": 1460,
+          "mtime_ns": 1790185112779334639,
+          "sha256": "858484240fe99e19a1b851366568d27733ec36bdab6d8d6bdd1e1d6f9d1d7b44"
+        },
+        "database_provenance": {
+          "path": "/root/NODOZE-pruning-release/output/tc/sparse-five/fivedirections/case3-shards.db",
+          "exists": true,
+          "size": 2823426048,
+          "mtime_ns": 1790185462522828611,
+          "sha256": null,
+          "hash_reason": "source database/PDF not read by v7; cached history and ledger are hashed"
+        },
+        "official_report": {
+          "path": "/root/PIDSMaker-main/Ground_Truth/TC_Ground_Truth_Report_E3_Update.pdf",
+          "exists": true,
+          "size": 1244912,
+          "mtime_ns": 1788016708000000000,
+          "sha256": null,
+          "hash_reason": "source database/PDF not read by v7; cached history and ledger are hashed"
+        },
+        "local_label_path": {
+          "path": "/root/NODOZE-pruning-release/.worktrees/sparse-five-case-study/docs/sparse-five-local-critical-reference.json",
+          "exists": true,
+          "size": 94177,
+          "mtime_ns": 1790231091750039801,
+          "sha256": "9ab4dc7a796ac7bed73aaa8ea1d53fbe24ca2552f4327611966f06875c8c5bbd"
+        }
+      },
+      "reported_ledger_sha256": "e4a914988691c66b4ee83b0475c1193a0d1324843c32d0543031fa9c4e25f7dd",
+      "input_hash_match": true
+    },
+    {
+      "case_index": 2,
+      "name": "Theia Case 1",
+      "poi_source": "official_report_oracle_derived",
+      "label_scope": "derived_positive_events_only",
+      "event_unit": "unique frozen ledger event_id; LINEAGE: synthetic counted separately",
+      "history_scope": {
+        "origin_poi_ns": 1523385317249665654,
+        "fit_start_ns": 1523298917249665654,
+        "fit_end_ns": 1523381717249665654,
+        "calibration_end_ns": 1523383517249665654,
+        "fit_channels": 59795,
+        "calibration_channels": 42371,
+        "supported_events": 893105,
+        "candidate_events": 898253,
+        "metadata_time_safety": "unverified"
+      },
+      "inputs": {
+        "ledger": {
+          "path": "/root/NODOZE-pruning-release/output/tc/sparse-five/theia-case1-direct-3poi-fast-results-ledger/edge-scores.jsonl.gz",
+          "exists": true,
+          "size": 42113416,
+          "mtime_ns": 1790191993425843459,
+          "sha256": "b7924926bc633ef94104179e087bc0dbe0268f610020c194fda664d37927b827"
+        },
+        "frozen_v6_decisions": {
+          "path": "/root/NODOZE-pruning-release/output/tc/history-channel-v6/case2.json.gz",
+          "exists": true,
+          "size": 6481009,
+          "mtime_ns": 1790247390412019153,
+          "sha256": "79001e07fd83ece7429cd55c4cdab8d7db1869f526b6d4f0d3c695fe3e224568"
+        },
+        "history_cache": {
+          "path": "/root/NODOZE-pruning-release/output/tc/history-channel-v6/history/case2.npz",
+          "exists": true,
+          "size": 75100,
+          "mtime_ns": 1790246547365419555,
+          "sha256": "36e4b9da6f45f61c478eddc1b28d6f069d2876c491dc34b4901975fe8c9fd3a5"
+        },
+        "history_manifest": {
+          "path": "/root/NODOZE-pruning-release/output/tc/history-channel-v6/history/case2.json",
+          "exists": true,
+          "size": 5243,
+          "mtime_ns": 1790246548461417653,
+          "sha256": "091eb6d6fa8a5f37743beb5533d600f4635d9c1a5d74febbacec737f28c26175"
+        },
+        "history_aggregate": {
+          "path": "/root/NODOZE-pruning-release/output/tc/history-channel-v6/history/case2.history.json.gz",
+          "exists": true,
+          "size": 779381,
+          "mtime_ns": 1790246548345417855,
+          "sha256": "d14d87ba72ce2302912216abe0342fcaafddf69e6e795f14fc9327d1b7d9934f"
+        },
+        "poi_manifest": {
+          "path": "/root/NODOZE-pruning-release/.worktrees/sparse-five-case-study/poi/theia-e3-case1-three-report-pois-focused.json",
+          "exists": true,
+          "size": 1175,
+          "mtime_ns": 1790189034762221104,
+          "sha256": "6d010658701c8c7151e02363a0f1052ed3fc06171c8a631067d04b0e715de5cf"
+        },
+        "database_provenance": {
+          "path": "/root/NODOZE-pruning-release/output/tc/theia-depimpact-case1-2026-09-09_15-35-45.db",
+          "exists": true,
+          "size": 5091393536,
+          "mtime_ns": 1788940019597767057,
+          "sha256": null,
+          "hash_reason": "source database/PDF not read by v7; cached history and ledger are hashed"
+        },
+        "official_report": {
+          "path": "/root/PIDSMaker-main/Ground_Truth/TC_Ground_Truth_Report_E3_Update.pdf",
+          "exists": true,
+          "size": 1244912,
+          "mtime_ns": 1788016708000000000,
+          "sha256": null,
+          "hash_reason": "source database/PDF not read by v7; cached history and ledger are hashed"
+        },
+        "local_label_path": {
+          "path": "/root/NODOZE-pruning-release/.worktrees/sparse-five-case-study/docs/sparse-five-local-critical-reference.json",
+          "exists": true,
+          "size": 94177,
+          "mtime_ns": 1790231091750039801,
+          "sha256": "9ab4dc7a796ac7bed73aaa8ea1d53fbe24ca2552f4327611966f06875c8c5bbd"
+        }
+      },
+      "reported_ledger_sha256": "b7924926bc633ef94104179e087bc0dbe0268f610020c194fda664d37927b827",
+      "input_hash_match": true
+    },
+    {
+      "case_index": 3,
+      "name": "Theia Case 3",
+      "poi_source": "official_report_oracle_derived",
+      "label_scope": "derived_positive_events_only",
+      "event_unit": "unique frozen ledger event_id; LINEAGE: synthetic counted separately",
+      "history_scope": {
+        "origin_poi_ns": 1523551818875640831,
+        "fit_start_ns": 1523465418875640831,
+        "fit_end_ns": 1523548218875640831,
+        "calibration_end_ns": 1523550018875640831,
+        "fit_channels": 159606,
+        "calibration_channels": 44658,
+        "supported_events": 1130232,
+        "candidate_events": 1132218,
+        "metadata_time_safety": "unverified"
+      },
+      "inputs": {
+        "ledger": {
+          "path": "/root/NODOZE-pruning-release/output/tc/theia-case3-poi-prefix-fixed-2026-09-09_23-36-33/scenario-theia-case3/poi-prefix-3-ledger/edge-scores.jsonl.gz",
+          "exists": true,
+          "size": 51621440,
+          "mtime_ns": 1788987193689373664,
+          "sha256": "95884055355027cbd379470467f28b1d36f851af1a9ce8da8adf7f94dd70ec5b"
+        },
+        "frozen_v6_decisions": {
+          "path": "/root/NODOZE-pruning-release/output/tc/history-channel-v6/case3.json.gz",
+          "exists": true,
+          "size": 6368123,
+          "mtime_ns": 1790247427099977597,
+          "sha256": "2d6da16ea78f58f5178f81dc8dda87f1bed7f2f29cd0ff9cef2dea01640e461d"
+        },
+        "history_cache": {
+          "path": "/root/NODOZE-pruning-release/output/tc/history-channel-v6/history/case3.npz",
+          "exists": true,
+          "size": 118384,
+          "mtime_ns": 1790246560389396956,
+          "sha256": "0011daf6d1a37b72f85e1e09dc0a2b5aaa87410809bc0dbddd9e12c433f22e73"
+        },
+        "history_manifest": {
+          "path": "/root/NODOZE-pruning-release/output/tc/history-channel-v6/history/case3.json",
+          "exists": true,
+          "size": 5292,
+          "mtime_ns": 1790246562585393146,
+          "sha256": "2d1ff7dc693d5d9ce8c270120ab3deb92e148e434a08f5a2a884d0ebaa47e116"
+        },
+        "history_aggregate": {
+          "path": "/root/NODOZE-pruning-release/output/tc/history-channel-v6/history/case3.history.json.gz",
+          "exists": true,
+          "size": 1388175,
+          "mtime_ns": 1790246562425393424,
+          "sha256": "1f1681385399025468434d9b1a223672f49e4fa4157927fc26870a1712777894"
+        },
+        "poi_manifest": {
+          "path": "/root/NODOZE-pruning-release/poi/theia-e3-case3-report-pois.json",
+          "exists": true,
+          "size": 1113,
+          "mtime_ns": 1788968142165662196,
+          "sha256": "ae6853c3e33d7a43da729f78b86b7a990e344706bec3970aeb5e36d2c31fc34b"
+        },
+        "database_provenance": {
+          "path": "/root/NODOZE-pruning-release/output/tc/theia-depimpact-case3-2026-09-09_15-32-25.db",
+          "exists": true,
+          "size": 5025497088,
+          "mtime_ns": 1788939898538006661,
+          "sha256": null,
+          "hash_reason": "source database/PDF not read by v7; cached history and ledger are hashed"
+        },
+        "official_report": {
+          "path": "/root/PIDSMaker-main/Ground_Truth/TC_Ground_Truth_Report_E3_Update.pdf",
+          "exists": true,
+          "size": 1244912,
+          "mtime_ns": 1788016708000000000,
+          "sha256": null,
+          "hash_reason": "source database/PDF not read by v7; cached history and ledger are hashed"
+        },
+        "local_label_path": {
+          "path": "/root/NODOZE-pruning-release/.worktrees/sparse-five-case-study/docs/sparse-five-local-critical-reference.json",
+          "exists": true,
+          "size": 94177,
+          "mtime_ns": 1790231091750039801,
+          "sha256": "9ab4dc7a796ac7bed73aaa8ea1d53fbe24ca2552f4327611966f06875c8c5bbd"
+        }
+      },
+      "reported_ledger_sha256": "95884055355027cbd379470467f28b1d36f851af1a9ce8da8adf7f94dd70ec5b",
+      "input_hash_match": true
+    },
+    {
+      "case_index": 4,
+      "name": "Theia Case 5",
+      "poi_source": "official_report_oracle_derived",
+      "label_scope": "artifact_entity_pair_expansion_positive_subset",
+      "event_unit": "unique frozen ledger event_id; LINEAGE: synthetic counted separately",
+      "history_scope": {
+        "origin_poi_ns": 1523643618976000000,
+        "fit_start_ns": 1523557218976000000,
+        "fit_end_ns": 1523640018976000000,
+        "calibration_end_ns": 1523641818976000000,
+        "fit_channels": 0,
+        "calibration_channels": 599934,
+        "supported_events": 0,
+        "candidate_events": 137762,
+        "metadata_time_safety": "unverified"
+      },
+      "inputs": {
+        "ledger": {
+          "path": "/root/NODOZE-pruning-release/output/tc/sparse-five/trace-case5-paper-results-ledger/edge-scores.jsonl.gz",
+          "exists": true,
+          "size": 10488380,
+          "mtime_ns": 1790192833660691064,
+          "sha256": "cb16eaf3d9c098f5528b334a7d7dc94cfe60faf8cc5a8d59d13b1cb1eeef48a8"
+        },
+        "frozen_v6_decisions": {
+          "path": "/root/NODOZE-pruning-release/output/tc/history-channel-v6/case4.json.gz",
+          "exists": true,
+          "size": 13541528,
+          "mtime_ns": 1790246748488984372,
+          "sha256": "76882131903187b33e995a4152b17cc6986f0ae1f4ac1fba5b46cafb01044986"
+        },
+        "history_cache": {
+          "path": "/root/NODOZE-pruning-release/output/tc/history-channel-v6/history/case4.npz",
+          "exists": true,
+          "size": 5938,
+          "mtime_ns": 1790246539289434190,
+          "sha256": "732c454094227004f4384727041ecfedc5c5b38a2efcc50d0b45db40aad9b400"
+        },
+        "history_manifest": {
+          "path": "/root/NODOZE-pruning-release/output/tc/history-channel-v6/history/case4.json",
+          "exists": true,
+          "size": 5385,
+          "mtime_ns": 1790246548237418042,
+          "sha256": "39fc40c08ce06209c1ad60bedde990fff4b1166cdac9fe5a8b3fd1af6bbbd2da"
+        },
+        "history_aggregate": {
+          "path": "/root/NODOZE-pruning-release/output/tc/history-channel-v6/history/case4.history.json.gz",
+          "exists": true,
+          "size": 16431018,
+          "mtime_ns": 1790246548097418285,
+          "sha256": "1125305074d8a3f34cef5d8bd1d447f0fc921be05fe1fbcd9786ae94f68d779c"
+        },
+        "poi_manifest": {
+          "path": "/root/NODOZE-pruning-release/.worktrees/sparse-five-case-study/poi/trace-e3-case5-phishing-report-poi.json",
+          "exists": true,
+          "size": 914,
+          "mtime_ns": 1790192651000991499,
+          "sha256": "4fedc991c71db6a912c1067cb0191c1bcca27bc45f094b2ef03a139e741d75ef"
+        },
+        "database_provenance": {
+          "path": "/root/NODOZE-pruning-release/output/tc/sparse-five/trace-case5-paper.db",
+          "exists": true,
+          "size": 2909782016,
+          "mtime_ns": 1790192400437328747,
+          "sha256": null,
+          "hash_reason": "source database/PDF not read by v7; cached history and ledger are hashed"
+        },
+        "official_report": {
+          "path": "/root/PIDSMaker-main/Ground_Truth/TC_Ground_Truth_Report_E3_Update.pdf",
+          "exists": true,
+          "size": 1244912,
+          "mtime_ns": 1788016708000000000,
+          "sha256": null,
+          "hash_reason": "source database/PDF not read by v7; cached history and ledger are hashed"
+        },
+        "local_label_path": {
+          "path": "/root/NODOZE-pruning-release/.worktrees/sparse-five-case-study/docs/sparse-five-local-critical-reference.json",
+          "exists": true,
+          "size": 94177,
+          "mtime_ns": 1790231091750039801,
+          "sha256": "9ab4dc7a796ac7bed73aaa8ea1d53fbe24ca2552f4327611966f06875c8c5bbd"
+        }
+      },
+      "reported_ledger_sha256": "cb16eaf3d9c098f5528b334a7d7dc94cfe60faf8cc5a8d59d13b1cb1eeef48a8",
+      "input_hash_match": true
+    }
+  ],
+  "methods": {
+    "diffusion_top": "frequency_diffusion.score + cross_domain runner",
+    "witness_rerank": "witness_portfolio.witness_portfolio + temporal rerank",
+    "history_channel": "run_history_channel + expanded_pool + greedy_select",
+    "channel_only": "run_history_channel, original rarity + channel",
+    "history_channel_portfolio": "run_history_channel + witness_portfolio",
+    "temporal_pcst": "run_temporal_comparison + pcst_fast adapter",
+    "localdegree_top": "run_cross_domain_comparison + NetworKit LocalDegree",
+    "channel_ppr/channel_heat": "degree_diffusion.degree_normalized_score + v6 runner"
+  },
+  "reference_policy": "labels only by independent evaluation/post-selection diagnosis; local partial positives",
+  "event_identity": "unique event_id, host-qualified nodes; ledger entries including synthetic LINEAGE count toward budget",
+  "history_metadata_time_safety": "unverified"
+}
