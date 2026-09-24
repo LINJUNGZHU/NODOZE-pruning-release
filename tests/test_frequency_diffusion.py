@@ -84,3 +84,21 @@ def test_existing_semantic_continuation_preserves_written_file_execution(tmp_pat
     with gzip.open(path,'wt') as f:
         for row in rows:f.write(json.dumps(row)+'\n')
     assert 'execute' in fd.semantic_continuations(path)
+
+
+def test_semantic_continuations_cannot_cross_hosts(tmp_path):
+    import gzip,json
+    path=tmp_path/'edges.gz'
+    base=dict(src='p',dst='f',src_type='process',dst_type='file',src_semantic='process:p',
+              dst_semantic='file:/tmp/x',relation='EVENT_WRITE',timestamp_ns=0,data_size=1)
+    rows=[base|dict(host='a',event_id='poi',is_declared_poi=True),
+          base|dict(host='b',event_id='unrelated',is_declared_poi=False)]
+    with gzip.open(path,'wt') as f:
+        for r in rows:f.write(json.dumps(r)+'\n')
+    assert 'unrelated' not in fd.semantic_continuations(path)
+
+
+def test_episode_evidence_counts_distinct_times_without_duplicate_inflation():
+    boosted=fd.episode_evidence(np.array([.2,.2,.2,.8]),np.array([0,0,0,1]),np.array([10,10,11,10]))
+    assert np.allclose(boosted[:3],.2*np.sqrt(2))
+    assert boosted[3]==.8

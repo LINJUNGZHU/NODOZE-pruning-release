@@ -187,11 +187,27 @@ def semantic_continuations(path):
             if row['relation'] in {'EVENT_WRITE','EVENT_EXECUTE','EVENT_CONNECT','EVENT_SENDTO',
                 'EVENT_RECVFROM','EVENT_READ','EVENT_OPEN','EVENT_FORK'} or row.get('is_declared_poi'):
                 rows.append({k:row[k] for k in keys if k in row})
+    by_host={}
+    for row in rows:by_host.setdefault(row['host'],[]).append(row)
     chosen=set()
-    for fn in (pc.executable_continuations,pc.adjacent_file_writes,pc.network_poi_episode,
-               pc.poi_bridge_continuations,pc.file_poi_io_origin,pc.forward_file_execution,
-               pc.post_write_parent_connect,pc.file_poi_named_context):
-        chosen.update(fn(rows))
-    connects=chosen|{r['event_id'] for r in rows if r.get('is_declared_poi') and r['relation']=='EVENT_CONNECT'}
-    chosen.update(pc.shell_forks_after_connections(rows,connects))
+    for host_rows in by_host.values():
+        local=set()
+        for fn in (pc.executable_continuations,pc.adjacent_file_writes,pc.network_poi_episode,
+                   pc.poi_bridge_continuations,pc.file_poi_io_origin,pc.forward_file_execution,
+                   pc.post_write_parent_connect,pc.file_poi_named_context):
+            local.update(fn(host_rows))
+        connects=local|{r['event_id'] for r in host_rows if r.get('is_declared_poi') and r['relation']=='EVENT_CONNECT'}
+        local.update(pc.shell_forks_after_connections(host_rows,connects))
+        chosen.update(local)
     return chosen
+
+
+def episode_evidence(values,group,timestamp):
+    """Concave short-window occupancy evidence; not an anomaly probability.
+
+    Distinct event timestamps provide sublinear corroboration. Repeated copies
+    of the same timestamp in one episode cannot increase this priority.
+    """
+    distinct=np.unique(np.column_stack((group,timestamp)),axis=0)
+    counts=np.bincount(distinct[:,0],minlength=int(group.max())+1)
+    return values*np.sqrt(counts[group])

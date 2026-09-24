@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse,hashlib,json,resource,time
 from pathlib import Path
 import numpy as np
-from tc_pruning.frequency_diffusion import load_ledger,episodes,score,select_episodes,semantic_continuations
+from tc_pruning.frequency_diffusion import load_ledger,episodes,score,select_episodes,semantic_continuations,episode_evidence
 from tc_pruning.rasp import temporal_routes,temporal_fork_routes
 from tc_pruning.sparse_edge_evaluation import sha256_file
 
@@ -21,11 +21,12 @@ def run_case(ledger,config,output):
         mandatory=np.asarray([e in continuation_ids for e in d['ids']],bool)
     preprocessing=time.perf_counter()-tick
     results=[];diagnostics={};scoring={}
-    full=None
+    full=None;classic=None
     for method,kwargs in config['methods'].items():
         tick=time.perf_counter();values,diag=score(d,config,**kwargs);scoring[method]=time.perf_counter()-tick
         diagnostics[method]=diag
         if method=='full':full=values
+        if method=='classic':classic=values
         for cap in config['raw_budgets']:
             tick=time.perf_counter();kept=select_episodes(values,poi,backward,parent,pivot,group,cap,d['tie'])
             results.append(record(d,group,kept,method,cap,time.perf_counter()-tick))
@@ -37,6 +38,16 @@ def run_case(ledger,config,output):
                 kept=select_episodes(values,poi,backward,parent,pivot,group,cap,d['tie'],mandatory=mandatory)
                 results.append(record(d,group,kept,method+'_hybrid',cap,time.perf_counter()-tick))
         print(f'{output.name} {method} done',flush=True)
+    if config.get('episode_occupancy'):
+        for label,base in [('burst',full),('classic_burst',classic)]:
+            values=episode_evidence(base,group,ts)
+            for hybrid in (False,True):
+                forced=mandatory if hybrid else None
+                for cap in config['raw_budgets']:
+                    if hybrid and int((mandatory|poi).sum())>cap:continue
+                    tick=time.perf_counter()
+                    kept=select_episodes(values,poi,backward,parent,pivot,group,cap,d['tie'],mandatory=forced)
+                    results.append(record(d,group,kept,label+('_hybrid' if hybrid else ''),cap,time.perf_counter()-tick))
     for method,values in [('no_episode_expansion',full),('old_score_top',d['old_score'])]:
         for cap in config['raw_budgets']:
             tick=time.perf_counter()
