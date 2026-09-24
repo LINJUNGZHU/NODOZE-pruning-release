@@ -1,18 +1,18 @@
 {
-  "protocol": "sparse-five-optimized-variants-v2",
-  "variants_sha256": "85f64990ecac3319765e5765e6ff290546f1bba631f88da479edf325259d78ec",
+  "protocol": "sparse-five-optimized-variants-v3-pdf-stage-corrected",
+  "variants_sha256": "fb0a61f1be5451fcf9d15965b967ea2eeb46a6149f223602e163fdcc1f1441ae",
   "rows": [
     {
-      "name": "Five Dir Case 1 | one report POI | file IO origin | 23 edges",
+      "name": "Five Dir Case 1 | one POI | origin and post-write C2 | 24 edges",
       "metrics": {
         "ledger_sha256": "27ac808c4875ff7bc212cd44d0b82e081fc4f0279cf13a9508eab91fadcb7eb2",
         "reference_sha256": "dc27bcdf85503f7d13586f5a6d95e409ba95f9d02676af2d70c29cca11f62210",
-        "decision_sha256": "96aa9cf4ce037e216a78cefabe98e8b520526fcd385d53b931bbced94b86444b",
-        "decision_key": "rasp_semantic@5e-05",
+        "decision_sha256": "b7d25e305b9aeb1e85dc53edb9fb5a7a0d1d08f7f02839b7ebf92b66a4223a6f",
+        "decision_key": "rasp_semantic@5.2e-05",
         "budget_key": "0.2",
         "reference_complete": false,
         "candidate_edges": 466257,
-        "output_edges": 23,
+        "output_edges": 24,
         "known_positive_edges": 20,
         "known_positive_outside_candidate": 0,
         "candidate_positive_coverage": 1.0,
@@ -23,7 +23,7 @@
         "non_poi_positive_edges": 19,
         "non_poi_positive_hits": 19,
         "non_poi_observed_recall": 1.0,
-        "unreviewed_selected_edges": 3,
+        "unreviewed_selected_edges": 4,
         "tp": null,
         "fp": null,
         "fn": null,
@@ -37,7 +37,7 @@
       "sources": {
         "ledger": "/root/NODOZE-pruning-release/output/tc/sparse-five/fivedirections/case1-phishing-results-ledger/edge-scores.jsonl.gz",
         "reference": "/root/NODOZE-pruning-release/.worktrees/sparse-five-case-study/poi/fivedirections-e3-case1-phishing-depimpact-pair-events.json",
-        "decision_path": "/root/NODOZE-pruning-release/output/tc/sparse-five/fivedirections/case1-phishing-rasp-origin-23/decisions.jsonl.gz"
+        "decision_path": "/root/NODOZE-pruning-release/output/tc/sparse-five/fivedirections/case1-phishing-rasp-origin-postwrite-v3/decisions.jsonl.gz"
       }
     },
     {
@@ -155,16 +155,16 @@
       }
     },
     {
-      "name": "Theia Case 5 / TRACE artifact | one report POI | file IO origin | 135 edges",
+      "name": "Theia Case 5 / TRACE artifact | one POI | origin and forward execution | 144 edges",
       "metrics": {
         "ledger_sha256": "cb16eaf3d9c098f5528b334a7d7dc94cfe60faf8cc5a8d59d13b1cb1eeef48a8",
         "reference_sha256": "b6ff8574ecfa18e38101edfac22d2322822693f0ba1f91e002b23c512040c043",
-        "decision_sha256": "59df84511017a8e5ca5d252a5459e2f07c329d9450e5b5822c61a0fa7d1b4cc3",
-        "decision_key": "rasp_semantic@0.001",
+        "decision_sha256": "d513d1ac1fcef8a99bca80fcd9a5f096fc66ce8c94fcf484044becb49574971c",
+        "decision_key": "rasp_semantic@0.00106",
         "budget_key": "0.2",
         "reference_complete": false,
         "candidate_edges": 137762,
-        "output_edges": 135,
+        "output_edges": 144,
         "known_positive_edges": 104,
         "known_positive_outside_candidate": 0,
         "candidate_positive_coverage": 1.0,
@@ -175,7 +175,7 @@
         "non_poi_positive_edges": 103,
         "non_poi_positive_hits": 103,
         "non_poi_observed_recall": 1.0,
-        "unreviewed_selected_edges": 31,
+        "unreviewed_selected_edges": 40,
         "tp": null,
         "fp": null,
         "fn": null,
@@ -189,7 +189,7 @@
       "sources": {
         "ledger": "/root/NODOZE-pruning-release/output/tc/sparse-five/trace-case5-paper-results-ledger/edge-scores.jsonl.gz",
         "reference": "/root/NODOZE-pruning-release/.worktrees/sparse-five-case-study/poi/trace-e3-case5-depimpact-pair-events.json",
-        "decision_path": "/root/NODOZE-pruning-release/output/tc/sparse-five/trace-case5-paper-rasp-origin-137/decisions.jsonl.gz"
+        "decision_path": "/root/NODOZE-pruning-release/output/tc/sparse-five/trace-case5-paper-rasp-origin-forward-v5/decisions.jsonl.gz"
       }
     }
   ]

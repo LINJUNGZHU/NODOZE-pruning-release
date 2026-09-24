@@ -1,13 +1,13 @@
 {
-  "protocol": "sparse-five-optimized-variants-v2",
+  "protocol": "sparse-five-optimized-variants-v3-pdf-stage-corrected",
   "variants": [
     {
-      "name": "Five Dir Case 1 | one report POI | file IO origin | 23 edges",
+      "name": "Five Dir Case 1 | one POI | origin and post-write C2 | 24 edges",
       "ledger": "/root/NODOZE-pruning-release/output/tc/sparse-five/fivedirections/case1-phishing-results-ledger/edge-scores.jsonl.gz",
       "reference": "../poi/fivedirections-e3-case1-phishing-depimpact-pair-events.json",
       "budget_key": "0.2",
-      "decision_path": "/root/NODOZE-pruning-release/output/tc/sparse-five/fivedirections/case1-phishing-rasp-origin-23/decisions.jsonl.gz",
-      "decision_key": "rasp_semantic@5e-05"
+      "decision_path": "/root/NODOZE-pruning-release/output/tc/sparse-five/fivedirections/case1-phishing-rasp-origin-postwrite-v3/decisions.jsonl.gz",
+      "decision_key": "rasp_semantic@5.2e-05"
     },
     {
       "name": "Five Dir Case 3 | two report POIs | bridge | 39 edges",
@@ -34,12 +34,12 @@
       "decision_key": "rasp_d0@0.2"
     },
     {
-      "name": "Theia Case 5 / TRACE artifact | one report POI | file IO origin | 135 edges",
+      "name": "Theia Case 5 / TRACE artifact | one POI | origin and forward execution | 144 edges",
       "ledger": "/root/NODOZE-pruning-release/output/tc/sparse-five/trace-case5-paper-results-ledger/edge-scores.jsonl.gz",
       "reference": "../poi/trace-e3-case5-depimpact-pair-events.json",
       "budget_key": "0.2",
-      "decision_path": "/root/NODOZE-pruning-release/output/tc/sparse-five/trace-case5-paper-rasp-origin-137/decisions.jsonl.gz",
-      "decision_key": "rasp_semantic@0.001"
+      "decision_path": "/root/NODOZE-pruning-release/output/tc/sparse-five/trace-case5-paper-rasp-origin-forward-v5/decisions.jsonl.gz",
+      "decision_key": "rasp_semantic@0.00106"
     }
   ]
 }

@@ -1,0 +1,220 @@
+{
+  "protocol": "pdf-report-stage-anchor-audit-v1",
+  "pdf": "/root/PIDSMaker-main/Ground_Truth/TC_Ground_Truth_Report_E3_Update.pdf",
+  "pdf_sha256": "eccf295b566b8e981fe90e0f1aea61116bd5a5694441396af63f22a914cbc39c",
+  "label_scope": "selected representative report-confirmed observables; not exhaustive attack events or verified negatives",
+  "cases": [
+    {
+      "name": "Five Dir Case 1",
+      "baseline_budget_key": "0.2",
+      "optimized_decision_path": "/root/NODOZE-pruning-release/output/tc/sparse-five/fivedirections/case1-phishing-rasp-origin-postwrite-v3/decisions.jsonl.gz",
+      "optimized_decision_key": "rasp_semantic@5.2e-05",
+      "anchors": [
+        {
+          "stage": "script_download",
+          "event_id": "3D42DCC8-59DC-4516-8ED4-C657F9974F78",
+          "expected_relation": "EVENT_CONNECT",
+          "expected_semantic_contains": "208.75.117.5:80",
+          "pdf_page": 35
+        },
+        {
+          "stage": "update_script_write",
+          "event_id": "531B25EB-CDAC-4D6B-9227-9ADCB32AE832",
+          "expected_relation": "EVENT_WRITE",
+          "expected_semantic_contains": "update.ps1",
+          "pdf_page": 35
+        },
+        {
+          "stage": "reverse_shell_connect",
+          "event_id": "BA654337-DB25-408B-AFA9-9DAEC82822F5",
+          "expected_relation": "EVENT_CONNECT",
+          "expected_semantic_contains": "208.75.117.6:80",
+          "pdf_page": 35
+        }
+      ],
+      "baseline_ledger": "/root/NODOZE-pruning-release/output/tc/sparse-five/fivedirections/case1-phishing-results-ledger/edge-scores.jsonl.gz",
+      "optimized_ledger": "/root/NODOZE-pruning-release/output/tc/sparse-five/fivedirections/case1-phishing-results-ledger/edge-scores.jsonl.gz"
+    },
+    {
+      "name": "Five Dir Case 3",
+      "baseline_budget_key": "0.2",
+      "optimized_decision_path": "/root/NODOZE-pruning-release/output/tc/sparse-five/fivedirections/case3-two-poi-rasp-bridge-fork-40/decisions.jsonl.gz",
+      "optimized_decision_key": "rasp_semantic@9.5e-05",
+      "anchors": [
+        {
+          "stage": "shellcode_server_connect",
+          "event_id": "0A84AEEB-C668-4527-B564-69F1C69ED4B6",
+          "expected_relation": "EVENT_CONNECT",
+          "expected_semantic_contains": "135.84.161.202:80",
+          "pdf_page": 19
+        },
+        {
+          "stage": "dropped_executable_write",
+          "event_id": "1DBC1412-7102-4706-9A96-60216801F06B",
+          "expected_relation": "EVENT_WRITE",
+          "expected_semantic_contains": "hJauWl01",
+          "pdf_page": 19
+        },
+        {
+          "stage": "failed_payload_execution",
+          "event_id": "D6041E19-B4E1-4926-A4D9-6781DFBB7158",
+          "expected_relation": "EVENT_EXECUTE",
+          "expected_semantic_contains": "hJauWl01",
+          "pdf_page": 19
+        }
+      ],
+      "baseline_ledger": "/root/NODOZE-pruning-release/output/tc/sparse-five/fivedirections/case3-report-poi-results-ledger/edge-scores.jsonl.gz",
+      "optimized_ledger": "/root/NODOZE-pruning-release/output/tc/sparse-five/fivedirections/case3-two-poi-results-ledger/edge-scores.jsonl.gz"
+    },
+    {
+      "name": "Theia Case 1",
+      "baseline_budget_key": "0.2",
+      "optimized_decision_path": "/root/NODOZE-pruning-release/output/tc/sparse-five/theia-case1-rasp-semantic-20pct/decisions.jsonl.gz",
+      "optimized_decision_key": "rasp_semantic@0.2",
+      "anchors": [
+        {
+          "stage": "browser_shellcode_connect",
+          "event_id": "45B0FB64-A926-2415-5BAB-3B0000000010",
+          "expected_relation": "EVENT_CONNECT",
+          "expected_semantic_contains": "141.43.176.203:80",
+          "pdf_page": 9
+        },
+        {
+          "stage": "clean_write",
+          "event_id": "764AB6F2-DF26-2415-B8F5-3B0000000010",
+          "expected_relation": "EVENT_WRITE",
+          "expected_semantic_contains": "/clean",
+          "pdf_page": 8
+        },
+        {
+          "stage": "clean_execution",
+          "event_id": "D76CBCF4-E226-2415-3BF6-3B0000000010",
+          "expected_relation": "EVENT_EXECUTE",
+          "expected_semantic_contains": "/clean",
+          "pdf_page": 8
+        },
+        {
+          "stage": "root_implant_c2",
+          "event_id": "9795E2F4-E226-2415-4DF6-3B0000000010",
+          "expected_relation": "EVENT_CONNECT",
+          "expected_semantic_contains": "161.116.88.72:80",
+          "pdf_page": 9
+        },
+        {
+          "stage": "profile_write",
+          "event_id": "AB9231DC-0828-2415-DEA1-400000000010",
+          "expected_relation": "EVENT_WRITE",
+          "expected_semantic_contains": "/profile",
+          "pdf_page": 9
+        },
+        {
+          "stage": "xdev_write",
+          "event_id": "5338C80F-2428-2415-3146-410000000010",
+          "expected_relation": "EVENT_WRITE",
+          "expected_semantic_contains": "/xdev",
+          "pdf_page": 9
+        }
+      ],
+      "baseline_ledger": "/root/NODOZE-pruning-release/output/tc/sparse-five/theia-case1-direct-3poi-fast-results-ledger/edge-scores.jsonl.gz",
+      "optimized_ledger": "/root/NODOZE-pruning-release/output/tc/sparse-five/theia-case1-direct-3poi-fast-results-ledger/edge-scores.jsonl.gz"
+    },
+    {
+      "name": "Theia Case 3",
+      "baseline_budget_key": "0.2",
+      "optimized_decision_path": "/root/NODOZE-pruning-release/output/tc/selected-rasp-THEIA-2026-09-10_18-49-06/diverse-decisions.jsonl.gz",
+      "optimized_decision_key": "rasp_d0@0.2",
+      "anchors": [
+        {
+          "stage": "gtcache_drop",
+          "event_id": "FF9BFBA0-4EBE-2415-E1F7-620200000010",
+          "expected_relation": "EVENT_WRITE",
+          "expected_semantic_contains": "gtcache",
+          "pdf_page": 21
+        },
+        {
+          "stage": "memtrace_write",
+          "event_id": "01FD23F0-FDBE-2415-1B13-640200000010",
+          "expected_relation": "EVENT_WRITE",
+          "expected_semantic_contains": "memtrace.so",
+          "pdf_page": 21
+        },
+        {
+          "stage": "micro_apt_file_write",
+          "event_id": "C284C9F8-C0BF-2415-3276-670200000010",
+          "expected_relation": "EVENT_WRITE",
+          "expected_semantic_contains": "/var/log/mail",
+          "pdf_page": 21
+        },
+        {
+          "stage": "micro_apt_execution",
+          "event_id": "D3225666-C4BF-2415-2778-670200000010",
+          "expected_relation": "EVENT_EXECUTE",
+          "expected_semantic_contains": "/var/log/mail",
+          "pdf_page": 21
+        },
+        {
+          "stage": "micro_apt_c2",
+          "event_id": "424E0D67-C4BF-2415-3978-670200000010",
+          "expected_relation": "EVENT_CONNECT",
+          "expected_semantic_contains": "149.52.198.23:80",
+          "pdf_page": 21
+        }
+      ],
+      "baseline_ledger": "/root/NODOZE-pruning-release/output/tc/theia-case3-poi-prefix-fixed-2026-09-09_23-36-33/scenario-theia-case3/poi-prefix-3-ledger/edge-scores.jsonl.gz",
+      "optimized_ledger": "/root/NODOZE-pruning-release/output/tc/theia-case3-poi-prefix-fixed-2026-09-09_23-36-33/scenario-theia-case3/poi-prefix-3-ledger/edge-scores.jsonl.gz"
+    },
+    {
+      "name": "Theia Case 5",
+      "baseline_budget_key": "0.2",
+      "optimized_decision_path": "/root/NODOZE-pruning-release/output/tc/sparse-five/trace-case5-paper-rasp-origin-forward-v5/decisions.jsonl.gz",
+      "optimized_decision_key": "rasp_semantic@0.00106",
+      "anchors": [
+        {
+          "stage": "pine_writes_tcexfil",
+          "event_id": "BE2C3A0A-E8DD-6694-4BC6-E632A27E5468",
+          "expected_relation": "EVENT_WRITE",
+          "expected_semantic_contains": "/tmp/tcexfil",
+          "pdf_page": 41
+        },
+        {
+          "stage": "pine_writes_tcexec",
+          "event_id": "C2D1D51A-9857-998A-3271-F5A2B00930D8",
+          "expected_relation": "EVENT_WRITE",
+          "expected_semantic_contains": "/tmp/tcexec",
+          "pdf_page": 41
+        },
+        {
+          "stage": "payload_execution",
+          "event_id": "0C44F657-15D6-5BF4-D497-C6ACB216E269",
+          "expected_relation": "EVENT_EXECUTE",
+          "expected_semantic_contains": "tcexec",
+          "pdf_page": 41
+        },
+        {
+          "stage": "micro_apt_c2",
+          "event_id": "DFFF3780-99A1-0713-24FE-958FA85955D4",
+          "expected_relation": "EVENT_CONNECT",
+          "expected_semantic_contains": "162.66.239.75:80",
+          "pdf_page": 41
+        },
+        {
+          "stage": "port_scan_start",
+          "event_id": "AFD556E7-B608-C376-6BE3-AD4BC82C57CD",
+          "expected_relation": "EVENT_CONNECT",
+          "expected_semantic_contains": "128.55.12.55:22",
+          "pdf_page": 41
+        },
+        {
+          "stage": "failed_shell_attempt",
+          "event_id": "2A0DE8BB-C8E0-8949-CA89-EB727965B021",
+          "expected_relation": "EVENT_CONNECT",
+          "expected_semantic_contains": "103.12.253.24:80",
+          "pdf_page": 41
+        }
+      ],
+      "baseline_ledger": "/root/NODOZE-pruning-release/output/tc/sparse-five/trace-case5-paper-results-ledger/edge-scores.jsonl.gz",
+      "optimized_ledger": "/root/NODOZE-pruning-release/output/tc/sparse-five/trace-case5-paper-results-ledger/edge-scores.jsonl.gz"
+    }
+  ],
+  "pdf_page_numbering": "printed page number shown in the DARPA report footer"
+}

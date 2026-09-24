@@ -19,6 +19,177 @@ def _file_basename(semantic: object) -> str:
     return ntpath.basename(path).casefold()
 
 
+def _socket_destination_group(semantic: object) -> str:
+    """Group IPv4 destinations by /24 to avoid retaining an entire scan."""
+    if not isinstance(semantic, str) or not semantic.startswith('socket:'):
+        return ''
+    host = semantic[7:].rsplit(':', 1)[0]
+    octets = host.split('.')
+    if len(octets) == 4 and all(part.isdigit() and 0 <= int(part) <= 255 for part in octets):
+        return '.'.join(octets[:3])
+    return host
+
+
+def _socket_destination_port(semantic: object) -> int:
+    if not isinstance(semantic, str) or not semantic.startswith('socket:'):
+        return 65536
+    port = semantic.rsplit(':', 1)[-1]
+    return int(port) if port.isdigit() else 65536
+
+
+def _process_basename(semantic: object) -> str:
+    if not isinstance(semantic, str) or not semantic.startswith('process:'):
+        return ''
+    command = semantic[8:].strip()
+    return ntpath.basename(command.split()[0]).casefold() if command else ''
+
+
+def forward_file_execution(
+    rows: list[dict], *, max_execution_ns: int = 2_000_000_000,
+    max_forward_ns: int = 360_000_000_000,
+    side_effect_lookback_ns: int = 30_000_000_000,
+    max_side_effect_files: int = 1, max_network_groups: int = 3,
+) -> set[str]:
+    """Follow a written executable into its child and bounded network activity.
+
+    This uses the declared file-write POI and raw graph fields only. A process
+    that scans thousands of ports contributes at most one edge per /24 group.
+    """
+    if min(max_execution_ns, max_forward_ns, side_effect_lookback_ns,
+           max_side_effect_files, max_network_groups) < 0:
+        raise ValueError('forward bounds must be nonnegative')
+    writes_by_process: dict[str, list[dict]] = {}
+    executes_by_process: dict[str, list[dict]] = {}
+    executes_by_child: dict[str, list[dict]] = {}
+    forks_by_process: dict[str, list[dict]] = {}
+    connects_by_process: dict[str, list[dict]] = {}
+    for row in rows:
+        relation = row.get('relation')
+        source = row.get('src')
+        if relation == 'EVENT_WRITE':
+            writes_by_process.setdefault(source, []).append(row)
+        elif relation == 'EVENT_EXECUTE':
+            executes_by_process.setdefault(source, []).append(row)
+            executes_by_child.setdefault(row.get('dst'), []).append(row)
+        elif relation == 'EVENT_FORK':
+            forks_by_process.setdefault(source, []).append(row)
+        elif relation == 'EVENT_CONNECT':
+            connects_by_process.setdefault(source, []).append(row)
+
+    selected: set[str] = set()
+    for poi in rows:
+        if poi.get('is_declared_poi') is not True or poi.get('relation') != 'EVENT_WRITE':
+            continue
+        name = _file_basename(poi.get('dst_semantic'))
+        if not name:
+            continue
+        start = int(poi['timestamp_ns'])
+        host = poi.get('host')
+        def same_host(row: dict) -> bool:
+            return not host or not row.get('host') or row['host'] == host
+
+        matching_forks = [row for row in forks_by_process.get(poi.get('src'), [])
+                          if row.get('dst') and same_host(row)
+                          and start <= int(row['timestamp_ns']) <= start + max_execution_ns]
+        executable_children = {row['dst'] for row in matching_forks}
+        candidates = [row for child in executable_children
+                      for row in executes_by_child.get(child, [])
+                      if same_host(row) and _process_basename(row.get('dst_semantic')) == name
+                      and start <= int(row['timestamp_ns']) <= start + max_execution_ns]
+        candidates += [row for row in executes_by_process.get(poi.get('src'), [])
+                       if row.get('dst') and same_host(row)
+                       and _process_basename(row.get('dst_semantic')) == name
+                       and start <= int(row['timestamp_ns']) <= start + max_execution_ns]
+        if not candidates:
+            continue
+        execute = min(candidates, key=lambda row: (int(row['timestamp_ns']), row['event_id']))
+        selected.add(execute['event_id'])
+        execute_time = int(execute['timestamp_ns'])
+        forks = [row for row in matching_forks
+                 if row.get('dst') == execute.get('dst') and same_host(row)
+                 and start <= int(row['timestamp_ns']) <= execute_time]
+        if forks:
+            selected.add(max(forks, key=lambda row: (int(row['timestamp_ns']), row['event_id']))['event_id'])
+
+        poi_directory = ntpath.dirname(str(poi.get('dst_semantic'))[5:]).casefold()
+        side_effects = [row for row in writes_by_process.get(poi.get('src'), [])
+                        if row.get('dst') != poi.get('dst')
+                        and str(row.get('dst_semantic', '')).startswith('file:')
+                        and same_host(row)
+                        and start - side_effect_lookback_ns <= int(row['timestamp_ns']) <= start]
+        side_effects.sort(key=lambda row: (
+            ntpath.dirname(str(row['dst_semantic'])[5:]).casefold() != poi_directory,
+            start - int(row['timestamp_ns']), row['event_id'],
+        ))
+        seen_files: set[str] = set()
+        for row in side_effects if max_side_effect_files else []:
+            if row.get('dst') not in seen_files:
+                selected.add(row['event_id'])
+                seen_files.add(row.get('dst'))
+                if len(seen_files) >= max_side_effect_files:
+                    break
+
+        connects = [row for row in connects_by_process.get(execute.get('dst'), [])
+                    if same_host(row) and execute_time <= int(row['timestamp_ns']) <= start + max_forward_ns
+                    and _socket_destination_group(row.get('dst_semantic'))]
+        connects.sort(key=lambda row: (
+            int(row['timestamp_ns']), _socket_destination_port(row.get('dst_semantic')),
+            row['event_id'],
+        ))
+        seen_groups: set[str] = set()
+        for row in connects if max_network_groups else []:
+            group = _socket_destination_group(row.get('dst_semantic'))
+            if group not in seen_groups:
+                selected.add(row['event_id'])
+                seen_groups.add(group)
+                if len(seen_groups) >= max_network_groups:
+                    break
+    return selected
+
+
+def post_write_parent_connect(
+    rows: list[dict], *, parent_lookback_ns: int = 60_000_000_000,
+    after_ns: int = 2_000_000_000,
+) -> set[str]:
+    """Keep the first new socket opened by a writer or its parent after a write POI."""
+    if parent_lookback_ns < 0 or after_ns < 0:
+        raise ValueError('post-write bounds must be nonnegative')
+    forks_by_child: dict[str, list[dict]] = {}
+    connects_by_process: dict[str, list[dict]] = {}
+    for row in rows:
+        if row.get('relation') == 'EVENT_FORK':
+            forks_by_child.setdefault(row.get('dst'), []).append(row)
+        elif row.get('relation') == 'EVENT_CONNECT':
+            connects_by_process.setdefault(row.get('src'), []).append(row)
+    selected: set[str] = set()
+    for poi in rows:
+        if poi.get('is_declared_poi') is not True or poi.get('relation') != 'EVENT_WRITE':
+            continue
+        timestamp = int(poi['timestamp_ns'])
+        host = poi.get('host')
+        def same_host(row: dict) -> bool:
+            return not host or not row.get('host') or row['host'] == host
+        parents = [row for row in forks_by_child.get(poi.get('src'), [])
+                   if same_host(row)
+                   and timestamp - parent_lookback_ns <= int(row['timestamp_ns']) <= timestamp]
+        parent = max(parents, key=lambda row: (int(row['timestamp_ns']), row['event_id']), default=None)
+        processes = {poi.get('src')}
+        if parent:
+            processes.add(parent.get('src'))
+        all_connects = [row for process in processes
+                        for row in connects_by_process.get(process, []) if same_host(row)]
+        prior_sockets = {row.get('dst') for row in all_connects
+                         if timestamp - parent_lookback_ns <= int(row['timestamp_ns']) < timestamp}
+        later = [row for row in all_connects if row.get('dst') not in prior_sockets
+                 and timestamp < int(row['timestamp_ns']) <= timestamp + after_ns]
+        if later:
+            connect = min(later, key=lambda row: (int(row['timestamp_ns']), row['event_id']))
+            selected.add(connect['event_id'])
+            if parent and connect.get('src') == parent.get('src'):
+                selected.add(parent['event_id'])
+    return selected
+
+
 def executable_continuations(rows: list[dict], *, max_delay_ns: int = 1_000_000_000) -> set[str]:
     """Return the earliest matching EXECUTE within the bound for each WRITE POI."""
     if max_delay_ns < 0:

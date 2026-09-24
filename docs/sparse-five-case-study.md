@@ -28,15 +28,31 @@ THEIA 1/3 的工件 DOT 关键边也已按实体对和时间定位，但部分�
 
 | 案例 | 候选边 | 基线 #E | 基线已知正例命中 | 优化 #E | 优化已知正例命中 | 优化非 POI 正例命中 | 图中 SPARSE #E |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| Five Dir Case 1 | 466,257 | 93,251 | 7/20 | **23** | **20/20** | 19/19 | 11 |
+| Five Dir Case 1 | 466,257 | 93,251 | 7/20 | **24** | **20/20** | 19/19 | 11 |
 | Five Dir Case 3（基线 1 POI；优化 2 POI） | 424,245 | 84,849 | 5/13 | **39** | **13/13** | 12/12（仅排除落在参考集内的 1 个 POI） | 40 |
 | Theia Case 1（3 POI） | 898,253 | 179,650 | 405/25,217 | **179,650** | **521/25,217** | 518/25,214 | 106 |
 | Theia Case 3（3 POI） | 1,132,218 | 226,443 | 664/870 | **226,443** | **870/870** | 867/867 | 129 |
-| 图中 Theia Case 5（推断为 TRACE） | 137,762 | 27,552 | 104/104 | **135** | **104/104** | 103/103 | 7 |
+| 图中 Theia Case 5（推断为 TRACE） | 137,762 | 27,552 | 104/104 | **144** | **104/104** | 103/103 | 7 |
 
 Five Dir Case 3 的 20% 基线只使用写文件 POI；优化时加入报告中的 C2 `CONNECT`，因此两列不是严格等信息对比。两个 POI 的 20% 基线也已经覆盖 13/13；在 **39 边**预算下，未加桥接规则的选择只保留 2/13，加入同 socket 接收、共享文件读/打开及一个进程派生桥后才达到 13/13，详见 [配对审计](sparse-five-case3-depimpact-pair-audit.json)。优化图有两个 UUID 连通分量，其中两 POI 与全部 13 个正例处于同一分量；另一分量只有一条额外边。
 
-Five Dir Case 1 和 TRACE 的 `file_poi_io_origin` 规则从写文件 POI 沿一个父进程与最高流量 socket 的近邻读取追溯来源，分别在 23 和 135 边预算下覆盖工件展开的正例。两幅优化图各只有一个 UUID 连通分量。该规则和预算是在这些案例上分析后确定的，因此结果是**开发集拟合**，不是独立测试。THEIA Case 1 的增益有限；THEIA Case 3 的 870/870 仍需 226,443 条输出边，远未达到图中 129 边的紧凑度。优化不能据此称为顶会水平或超越 SPARSE。
+Five Dir Case 1 和 TRACE 的 `file_poi_io_origin` 规则从写文件 POI 沿一个父进程与最高流量 socket 的近邻读取追溯来源。再次用 PDF 核对时发现先前 23 边图漏掉 Five Dir Case 1 的反连 shell；135 边图漏掉 TRACE 的 `tcexfil` 写入、`tcexec` 执行、micro APT 回连、扫描及失败的 shell 尝试。现在分别加入有界的写后新连接、文件执行与子进程网络延续，输出修正为 24 和 144 边。两个优化图各只有一个 UUID 连通分量，PDF 锚点也在这个分量内；这只证明无向连通，不证明严格时间因果路径。两个案例的工件展开正例命中没有变化，但 PDF 阶段覆盖有了实质改善。这些规则和预算是在案例上分析后确定的，因此结果是**开发集拟合**，不是独立测试。THEIA Case 1 的增益有限；THEIA Case 3 的 870/870 仍需 226,443 条输出边，远未达到图中 129 边的紧凑度。优化不能据此称为顶会水平或超越 SPARSE。
+
+## 用 PDF 判断“对不对”
+
+可以。官方 E3 报告的§4.4、§3.10、§3.3、§3.11、§4.9分别给出五案的攻击步骤、文件名和通信目标。我们先把每个明确步骤绑定到一条原始 CDM 事件，再检查候选图、20% 基线及优化图是否保留该事件。[逐事件阶段审计](sparse-five-pdf-stage-audit.json)记录 PDF 印刷页码、事件 ID、主机、事件时间、语义端点和两组决策；[审计配置](../configs/sparse_five_pdf_stage_anchors.json)可复算。
+
+| 案例 | PDF 代表步骤数 | 基线找回 | 修正后优化找回 | 论文表 IV 的回溯图 #E | 本次候选图 #E |
+|---|---:|---:|---:|---:|---:|
+| Five Dir Case 1 | 3 | 1/3 | **3/3** | 473 | 466,257 |
+| Five Dir Case 3 | 3 | 1/3 | **3/3** | 83,154 | 424,245 |
+| Theia Case 1 | 6 | 6/6 | **6/6** | 794,341 | 898,253 |
+| Theia Case 3 | 5 | 5/5 | **5/5** | 1,137,829 | 1,132,218 |
+| 图中 Theia Case 5（推断为 TRACE） | 6 | 5/6 | **6/6** | 1,309 | 137,762 |
+
+这是**报告步骤的代表事件覆盖**：例如 TRACE 用 `tcexfil` 写入、`tcexec` 写入与执行、micro APT 回连、一次端口扫描和一次失败的 shell 连接各一条事件核验；没有把一次扫描的数万次连接全部变成关键边。THEIA Case 3 的扫描 socket 在本地 CDM 中缺少可核对的目标地址，所以没有加入其五条锚点。Five Dir Case 1 的实验窗口约为美东 14:58–15:12，而 PDF 的调查操作继续到 15:42；TRACE 的窗口约为美东 14:19–14:26，而 PDF 涵盖 13:50–14:28。因此表中的满分只表示**所列窗口内锚点全保留**，不表示完整攻击经过都在图中。报告列的是行为和 IOC，并未给每条普通日志提供正负判定。[SPARSE 表 IV/V](https://arxiv.org/html/2405.02629v1)列出了每案的边数、关键边总数及各方法的 FP/FN，但没有列出其人工逐边判定的事件 ID。尤其 Five Dir Case 1 与 TRACE 的候选图边数分别相差约 986 倍和 105 倍，不能把论文的 FP/FN 或 `#CE` 直接套到本次输出上。
+
+因此 PDF 足以发现和修正**明确的阶段遗漏**；要计算“本次图的 FP/FN/Precision/Recall/F1”，还需要在本次候选图中逐边判定哪些是关键边。不能用 `优化图边数 − PDF 代表步骤数` 充当 FP；一条报告步骤可对应多条 CDM 事件，未列出的边也未必是正常活动。
 
 ## 复现与进一步验证
 
@@ -49,6 +65,9 @@ python -m scripts.run_sparse_five_audit \
 python -m scripts.run_sparse_variant_audit \
   --variants configs/sparse_five_optimized_variants.json \
   --output docs/sparse-five-optimized-results.json
+python -m scripts.audit_pdf_stage_anchors \
+  --config configs/sparse_five_pdf_stage_anchors.json \
+  --output docs/sparse-five-pdf-stage-audit.json
 python -m pytest -q
 ```
 

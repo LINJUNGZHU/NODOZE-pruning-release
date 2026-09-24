@@ -3,6 +3,8 @@ import json
 from tc_pruning.poi_semantic_continuation import (
     adjacent_file_writes, command_line_executions, executable_continuations,
     network_poi_episode, poi_bridge_continuations, file_poi_io_origin,
+    forward_file_execution,
+    post_write_parent_connect,
 )
 
 
@@ -162,3 +164,68 @@ def test_file_poi_origin_uses_nearby_parent_and_largest_socket_episode():
     assert file_poi_io_origin(rows, before_ns=20, after_ns=20) == {
         'lineage', 'connect', 'read-1', 'read-2',
     }
+
+
+def test_forward_file_execution_keeps_payload_run_and_bounded_network_stages():
+    rows = [
+        {'event_id': 'poi', 'is_declared_poi': True, 'relation': 'EVENT_WRITE',
+         'src': 'writer', 'dst': 'payload', 'dst_semantic': 'file:/tmp/tcexec',
+         'timestamp_ns': 100, 'host': 'h'},
+        {'event_id': 'side-effect', 'relation': 'EVENT_WRITE', 'src': 'writer',
+         'dst': 'other', 'dst_semantic': 'file:/tmp/tcexfil', 'timestamp_ns': 90, 'host': 'h'},
+        {'event_id': 'nearby-debug', 'relation': 'EVENT_WRITE', 'src': 'writer',
+         'dst': 'debug', 'dst_semantic': 'file:/home/user/.debug', 'timestamp_ns': 99, 'host': 'h'},
+        {'event_id': 'fork', 'relation': 'EVENT_FORK', 'src': 'writer',
+         'dst': 'child', 'timestamp_ns': 101, 'host': 'h'},
+        {'event_id': 'execute', 'relation': 'EVENT_EXECUTE', 'src': 'older-process-version',
+         'dst': 'child', 'dst_semantic': 'process:tcexec', 'timestamp_ns': 101, 'host': 'h'},
+        {'event_id': 'c2', 'relation': 'EVENT_CONNECT', 'src': 'child',
+         'dst_semantic': 'socket:162.66.239.75:80', 'timestamp_ns': 102, 'host': 'h'},
+        {'event_id': 'scan', 'relation': 'EVENT_CONNECT', 'src': 'child',
+         'dst_semantic': 'socket:128.55.12.55:22', 'timestamp_ns': 103, 'host': 'h'},
+        {'event_id': 'scan-duplicate', 'relation': 'EVENT_CONNECT', 'src': 'child',
+         'dst_semantic': 'socket:128.55.12.55:23', 'timestamp_ns': 104, 'host': 'h'},
+        {'event_id': 'shell', 'relation': 'EVENT_CONNECT', 'src': 'child',
+         'dst_semantic': 'socket:103.12.253.24:80', 'timestamp_ns': 105, 'host': 'h'},
+        {'event_id': 'late', 'relation': 'EVENT_CONNECT', 'src': 'child',
+         'dst_semantic': 'socket:207.103.191.4:80', 'timestamp_ns': 150, 'host': 'h'},
+        {'event_id': 'other-host', 'relation': 'EVENT_CONNECT', 'src': 'child',
+         'dst_semantic': 'socket:8.8.8.8:80', 'timestamp_ns': 106, 'host': 'other'},
+    ]
+    assert forward_file_execution(rows, max_execution_ns=10, max_forward_ns=20,
+                                  side_effect_lookback_ns=20,
+                                  max_side_effect_files=1) == {
+        'side-effect', 'fork', 'execute', 'c2', 'scan', 'shell',
+    }
+
+
+def test_forward_file_execution_requires_matching_execution_before_side_effects():
+    rows = [
+        {'event_id': 'poi', 'is_declared_poi': True, 'relation': 'EVENT_WRITE',
+         'src': 'writer', 'dst': 'payload', 'dst_semantic': 'file:/tmp/payload',
+         'timestamp_ns': 100, 'host': 'h'},
+        {'event_id': 'unrelated-write', 'relation': 'EVENT_WRITE', 'src': 'writer',
+         'dst': 'other', 'dst_semantic': 'file:/tmp/other', 'timestamp_ns': 90, 'host': 'h'},
+    ]
+    assert forward_file_execution(rows) == set()
+
+
+def test_post_write_parent_connect_selects_new_socket_after_download():
+    rows = [
+        {'event_id': 'poi', 'is_declared_poi': True, 'relation': 'EVENT_WRITE',
+         'src': 'writer', 'timestamp_ns': 100, 'host': 'h'},
+        {'event_id': 'fork', 'relation': 'EVENT_FORK', 'src': 'parent',
+         'dst': 'writer', 'timestamp_ns': 90, 'host': 'h'},
+        {'event_id': 'download', 'relation': 'EVENT_CONNECT', 'src': 'parent',
+         'dst': 'download-socket', 'timestamp_ns': 95, 'host': 'h'},
+        {'event_id': 'same-socket', 'relation': 'EVENT_CONNECT', 'src': 'parent',
+         'dst': 'download-socket', 'timestamp_ns': 101, 'host': 'h'},
+        {'event_id': 'c2', 'relation': 'EVENT_CONNECT', 'src': 'parent',
+         'dst': 'c2-socket', 'timestamp_ns': 102, 'host': 'h'},
+        {'event_id': 'later', 'relation': 'EVENT_CONNECT', 'src': 'parent',
+         'dst': 'later-socket', 'timestamp_ns': 103, 'host': 'h'},
+        {'event_id': 'other-host', 'relation': 'EVENT_CONNECT', 'src': 'parent',
+         'dst': 'wrong-host', 'timestamp_ns': 101, 'host': 'elsewhere'},
+    ]
+    assert post_write_parent_connect(rows, parent_lookback_ns=20,
+                                     after_ns=10) == {'fork', 'c2'}
