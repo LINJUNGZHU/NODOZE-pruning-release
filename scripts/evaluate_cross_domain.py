@@ -38,6 +38,15 @@ def episode_audit(selected_ids,id_group,group_counts,pois):
                 complete_poi_episodes=len(complete&poi_groups),poi_episodes=len(poi_groups))
 
 
+def kernel_seconds(method,scenario,report):
+    if method=='pcst_native':return scenario['scoring_seconds']+scenario['pcst_grid_seconds']
+    if method=='localdegree_top':return report['localdegree_seconds']
+    if method=='coverage_no_frequency':return scenario['nofrequency_seconds']
+    if method in ('diffusion_top','episode','coverage_exact','coverage_semantic','coverage_partial'):
+        return scenario['scoring_seconds']
+    return None # historical scores are cached; random has no scoring kernel
+
+
 def main():
     p=argparse.ArgumentParser(description=__doc__);p.add_argument('--input',type=Path,required=True)
     p.add_argument('--output',type=Path,required=True);a=p.parse_args()
@@ -72,11 +81,7 @@ def main():
                 times=x.pop('selection_seconds');x['timing_samples']=len(times)
                 x['selection_seconds_median']=statistics.median(times)
                 x['selection_seconds_min']=min(times);x['selection_seconds_max']=max(times)
-                if row['method']=='pcst_native':x['shared_kernel_seconds']=s['pcst_grid_seconds']
-                elif row['method']=='localdegree_top':x['shared_kernel_seconds']=report['localdegree_seconds']
-                elif row['method']=='coverage_no_frequency':x['shared_kernel_seconds']=s['nofrequency_seconds']
-                elif row['method'] in ('diffusion_top','episode','coverage_exact','coverage_semantic','coverage_partial'):x['shared_kernel_seconds']=s['scoring_seconds']
-                else:x['shared_kernel_seconds']=None # cached historical scores or no scoring kernel
+                x['shared_kernel_seconds']=kernel_seconds(row['method'],s,report)
                 x['kernel_plus_selection_seconds']=x['shared_kernel_seconds']+x['selection_seconds_median'] if x['shared_kernel_seconds'] is not None else None
             rows.append(x)
         random=[]
@@ -95,7 +100,7 @@ def main():
     a.output.write_text(json.dumps(result,indent=2))
     flat=[dict(case=c['name'],**{k:v for k,v in r.items() if k!='official_equivalent'}) for c in cases for r in c['results']]
     fields=list(dict.fromkeys(k for r in flat for k in r))
-    with a.output.with_suffix('.csv').open('w') as f:w=csv.DictWriter(f,fieldnames=fields);w.writeheader();w.writerows(flat)
+    with a.output.with_suffix('.csv').open('w') as f:w=csv.DictWriter(f,fieldnames=fields,lineterminator="\n");w.writeheader();w.writerows(flat)
 
 
 if __name__=='__main__':main()

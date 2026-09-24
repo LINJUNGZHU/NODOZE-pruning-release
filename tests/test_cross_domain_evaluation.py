@@ -25,3 +25,10 @@ def test_episode_audit_exposes_partial_poi_evidence():
     a=episode_audit(['a','c'],{'a':0,'b':0,'c':1},[2,1],{'a'})
     assert a['complete_episodes']==1 and a['partial_episodes']==1
     assert a['complete_poi_episodes']==0 and a['poi_episodes']==1
+
+
+def test_pcst_runtime_charges_diffusion_prizes_and_entire_grid():
+    from scripts.evaluate_cross_domain import kernel_seconds
+    scenario={'scoring_seconds':2.0,'pcst_grid_seconds':5.0}
+    assert kernel_seconds('pcst_native',scenario,{})==7.0
+    assert kernel_seconds('diffusion_top',scenario,{})==2.0

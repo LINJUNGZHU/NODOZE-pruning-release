@@ -1,0 +1,10 @@
+{
+  "decisions": 664,
+  "evaluated": 619,
+  "infeasible": 45,
+  "v2_current_source_matches_frozen": true,
+  "v1_only_runtime_attribution_changed": true,
+  "profile_matches": 25,
+  "all_walks_converged": true,
+  "scope": "independent evaluator validates IDs, POIs, budgets, references; shared-context retention asserted by runner, not independently regenerated"
+}
