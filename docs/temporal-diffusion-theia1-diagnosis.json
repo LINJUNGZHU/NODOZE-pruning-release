@@ -1,0 +1,197 @@
+{
+  "scope": "development-only label-based posthoc diagnosis; never input to selection",
+  "events": [
+    {
+      "stage": "browser_shellcode_connect",
+      "rel": "EVENT_CONNECT",
+      "src": "process:fluxbox",
+      "dst": "socket:141.43.176.203:80",
+      "n": 1,
+      "score": 0.028797039347079684,
+      "rank": 69504,
+      "ranks": [
+        69504,
+        69504
+      ],
+      "reachable": 1,
+      "rarity": 0.37360192341747467,
+      "seconds_from_first_poi": -234.306050609
+    },
+    {
+      "stage": "browser_shellcode_connect",
+      "rel": "EVENT_SENDTO",
+      "src": "process:fluxbox",
+      "dst": "socket:141.43.176.203:80",
+      "n": 1,
+      "score": 0.02857038596252991,
+      "rank": 69536,
+      "ranks": [
+        69536,
+        69536
+      ],
+      "reachable": 1,
+      "rarity": 0.3647457111835999,
+      "seconds_from_first_poi": -234.306040822
+    },
+    {
+      "stage": "browser_shellcode_connect",
+      "rel": "EVENT_RECVFROM",
+      "src": "socket:141.43.176.203:80",
+      "dst": "process:fluxbox",
+      "n": 223,
+      "score": 0.016864527109204917,
+      "rank": 280317,
+      "ranks": [
+        280311,
+        280533
+      ],
+      "reachable": 223,
+      "rarity": 0.05177454835036375,
+      "seconds_from_first_poi": -234.302616507
+    },
+    {
+      "stage": "clean_write",
+      "rel": "EVENT_WRITE",
+      "src": "process:/usr/bin/firefox",
+      "dst": "file:/home/*/clean",
+      "n": 1,
+      "score": 1.0,
+      "rank": 2,
+      "ranks": [
+        2,
+        2
+      ],
+      "reachable": 1,
+      "rarity": 0.2165848097853415,
+      "seconds_from_first_poi": 0.0
+    },
+    {
+      "stage": "clean_execution",
+      "rel": "EVENT_EXECUTE",
+      "src": "process:/home/admin/clean",
+      "dst": "file:/home/*/clean",
+      "n": 1,
+      "score": 0.9702841448654445,
+      "rank": 7,
+      "ranks": [
+        7,
+        7
+      ],
+      "reachable": 1,
+      "rarity": 0.5234205203595524,
+      "seconds_from_first_poi": 12.918858337
+    },
+    {
+      "stage": "root_implant_c2",
+      "rel": "EVENT_CONNECT",
+      "src": "process:/home/admin/clean",
+      "dst": "socket:161.116.88.72:80",
+      "n": 1,
+      "score": 0.44082339064290577,
+      "rank": 56,
+      "ranks": [
+        56,
+        56
+      ],
+      "reachable": 1,
+      "rarity": 0.37360192341747467,
+      "seconds_from_first_poi": 12.921359137
+    },
+    {
+      "stage": "root_implant_c2",
+      "rel": "EVENT_SENDTO",
+      "src": "process:/home/admin/clean",
+      "dst": "socket:161.116.88.72:80",
+      "n": 4,
+      "score": 0.320026240466204,
+      "rank": 175,
+      "ranks": [
+        173,
+        176
+      ],
+      "reachable": 4,
+      "rarity": 0.3647457111835999,
+      "seconds_from_first_poi": 12.92260283
+    },
+    {
+      "stage": "root_implant_c2",
+      "rel": "EVENT_RECVFROM",
+      "src": "socket:161.116.88.72:80",
+      "dst": "process:/home/admin/clean",
+      "n": 2,
+      "score": 0.2393343749015005,
+      "rank": 470,
+      "ranks": [
+        469,
+        470
+      ],
+      "reachable": 2,
+      "rarity": 0.05177454835036375,
+      "seconds_from_first_poi": 12.973708098
+    },
+    {
+      "stage": "profile_write",
+      "rel": "EVENT_WRITE",
+      "src": "process:/usr/bin/firefox",
+      "dst": "file:/home/*/profile",
+      "n": 1,
+      "score": 1.0,
+      "rank": 4,
+      "ranks": [
+        4,
+        4
+      ],
+      "reachable": 1,
+      "rarity": 0.2165848097853415,
+      "seconds_from_first_poi": 1275.227490357
+    },
+    {
+      "stage": "profile_write",
+      "rel": "EVENT_EXECUTE",
+      "src": "process:/home/admin/profile",
+      "dst": "file:/home/*/profile",
+      "n": 1,
+      "score": 0.9999997043112688,
+      "rank": 6,
+      "ranks": [
+        6,
+        6
+      ],
+      "reachable": 1,
+      "rarity": 0.5234205203595524,
+      "seconds_from_first_poi": 1282.541784886
+    },
+    {
+      "stage": "xdev_write",
+      "rel": "EVENT_WRITE",
+      "src": "process:/home/admin/profile",
+      "dst": "file:/var/log/xdev",
+      "n": 1,
+      "score": 1.0,
+      "rank": 1,
+      "ranks": [
+        1,
+        1
+      ],
+      "reachable": 1,
+      "rarity": 0.2165848097853415,
+      "seconds_from_first_poi": 1392.057118173
+    },
+    {
+      "stage": "xdev_write",
+      "rel": "EVENT_SENDTO",
+      "src": "process:/home/admin/profile",
+      "dst": "socket:161.116.88.72:80",
+      "n": 2,
+      "score": 0.5728680861758709,
+      "rank": 23,
+      "ranks": [
+        22,
+        23
+      ],
+      "reachable": 2,
+      "rarity": 0.3647457111835999,
+      "seconds_from_first_poi": 1392.057209725
+    }
+  ]
+}

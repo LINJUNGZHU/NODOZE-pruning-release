@@ -1,0 +1,20 @@
+{
+  "decision_rows": 2072,
+  "evaluated": 1937,
+  "infeasible": 135,
+  "counts_by_case": [
+    360,
+    428,
+    462,
+    462,
+    360
+  ],
+  "unique_configuration_keys": true,
+  "frozen_sources_match": true,
+  "all_diffusions_converged": true,
+  "primary_1024_poi_only_all_temporal_fork_fraction": 1.0,
+  "v1_shared_config_independently_verified": true,
+  "fresh_process_selection_matches": 55,
+  "pytest_passed": 616,
+  "scope": "development partial-positive proxy; not SPARSE official equivalence"
+}
