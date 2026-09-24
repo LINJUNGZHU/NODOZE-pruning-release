@@ -20,6 +20,8 @@ class CandidateSnapshot:
     event_scores:np.ndarray
     group_weights:np.ndarray
     event_count:int
+    materialized_events:tuple[int,...]=()
+    certificates:tuple=()
 
     def __post_init__(self):
         if len(self.event_scores)!=self.event_count or not np.isfinite(self.event_scores).all() or np.any(self.event_scores<0):raise ValueError('invalid event scores')
@@ -52,12 +54,13 @@ def complete_group(pool,group,selected):
 def objective_value(pool,selected,anchors,objective,eta=1.):
     selected=set(selected);anchors=set(anchors)
     if objective=='edge_score':return float(pool.event_scores[list(selected)].sum()) if selected else 0.
-    if objective=='anchor_score':return sum(max(a.score for a in pool.actions if a.anchor==i) for i in anchors)
-    if objective!='witness_plus_detail':raise ValueError('unknown objective')
-    wg=float(pool.group_weights.sum())
-    coverage=sum(float(w) for g,w in enumerate(pool.group_weights) if w>0 and complete_group(pool,g,selected))/wg if wg>0 else 0.
     anchor_max={}
     for a in pool.actions:anchor_max[a.anchor]=max(anchor_max.get(a.anchor,0.),a.score)
+    if objective=='anchor_score':return sum(anchor_max[i] for i in anchors)
+    if objective!='witness_plus_detail':raise ValueError('unknown objective')
+    wg=float(pool.group_weights.sum())
+    complete={a.group for a in pool.actions if set(a.events)<=selected}
+    coverage=sum(float(pool.group_weights[g]) for g in complete)/wg if wg>0 else 0.
     denom=sum(anchor_max.values())
     detail=sum(anchor_max[i] for i in anchors)/denom if denom>0 else 0.
     return coverage+eta*detail
@@ -84,21 +87,23 @@ def select(pool,mandatory,budget,objective,eta=1.):
     anchor_score={}
     for a in actions:anchor_score[a.anchor]=max(anchor_score.get(a.anchor,0.),a.score)
     detail_denom=sum(anchor_score.values())
+    anchor_gain=np.array([anchor_score[a.anchor] for a in actions])
+    group_id=np.array([a.group for a in actions],np.int32)
     used=int(kept.sum());steps=0
     while used<=budget:
-        remaining=budget-used;best=-1;best_density=0.
-        for j,a in enumerate(actions):
-            if not active[j] or costs[j]>remaining:continue
-            if objective=='edge_score':gain=edge_gain[j]
-            elif objective=='anchor_score':gain=anchor_score[a.anchor]
-            else:
-                c=pool.group_weights[a.group]/group_denom if group_denom>0 and not covered[a.group] else 0.
-                d=eta*anchor_score[a.anchor]/detail_denom if detail_denom>0 else 0.
-                gain=c+d
-            if gain<=0:continue
-            density=math.inf if costs[j]==0 else gain/costs[j]
-            if density>best_density+1e-15:best=j;best_density=density
-        if best<0:break
+        remaining=budget-used
+        if objective=='edge_score':gain=edge_gain
+        elif objective=='anchor_score':gain=anchor_gain
+        else:
+            c=pool.group_weights[group_id]*(~covered[group_id])/group_denom if group_denom>0 else np.zeros(n)
+            d=eta*anchor_gain/detail_denom if detail_denom>0 else np.zeros(n)
+            gain=c+d
+        feasible=active&(costs<=remaining)&(gain>0)
+        if not np.any(feasible):break
+        density=np.full(n,-np.inf)
+        density[feasible]=gain[feasible]/np.maximum(costs[feasible],1)
+        density[feasible&(costs==0)]=np.inf
+        best=int(np.argmax(density))
         a=actions[best];extra=[e for e in a.events if not kept[e]]
         for j in by_anchor[a.anchor]:active[j]=False
         chosen_anchors.append(a.anchor);chosen_witnesses.append(a.witness_id)

@@ -35,3 +35,12 @@ def test_equal_time_link_is_rejected_and_missing_routes_do_not_invent_certificat
     p,v,_,_=temporal_fork_routes(isolated_src,isolated_dst,isolated_ts,isolated_poi,b)
     a=alternative_fork_index(isolated_src,isolated_dst,isolated_ts,isolated_poi,b,3)
     assert build_witnesses(1,isolated_src,isolated_dst,isolated_ts,isolated_poi,b,p,v,a,3)==()
+
+
+def test_poi_exposes_both_endpoints_for_same_channel_prior_event():
+    src=np.array([0,0]);dst=np.array([1,1]);ts=np.array([10,5]);poi=np.array([1,0],bool)
+    back=temporal_routes(src,dst,ts,poi)[0][0]
+    parent,pivot,_,_=temporal_fork_routes(src,dst,ts,poi,back)
+    w=build_witnesses(1,src,dst,ts,poi,back,parent,pivot,None,1)
+    assert len(w)==1 and w[0].events==(0,1)
+    assert validate_witness(w[0],src,dst,ts,poi)

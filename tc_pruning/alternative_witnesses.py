@@ -77,9 +77,13 @@ def validate_witness(w,src,dst,timestamp,poi):
     for child,parent in zip(f,f[1:]):
         # A pivot exposes both endpoints: the sibling branch may leave its
         # source, while later links must follow the previous destination.
-        linked=(dst[parent]==src[child] or (parent==f[-1] and src[parent]==src[child]))
+        linked=(dst[parent]==src[child] or ((parent==f[-1] or poi[parent]) and src[parent]==src[child]))
         if not linked or timestamp[parent]>=timestamp[child]:return False
-    if any(dst[child]!=src[parent] or timestamp[child]>=timestamp[parent] for child,parent in zip(b,b[1:])):return False
+    for child,parent in zip(b,b[1:]):
+        # The frozen route search treats both endpoints of a declared POI as
+        # investigative starting states, including parallel same-channel logs.
+        linked=(dst[child]==src[parent] or (poi[parent] and dst[child]==dst[parent]))
+        if not linked or timestamp[child]>=timestamp[parent]:return False
     return True
 
 
@@ -98,6 +102,7 @@ def build_witnesses(anchor,src,dst,timestamp,poi,back,parent,pivot,alternatives,
     first=_make(anchor,forward,backward,'legacy_fork')
     if not validate_witness(first,src,dst,timestamp,poi):raise ValueError('invalid legacy witness')
     out=[first];unique={first.events}
+    if k==1:return tuple(out)
     for z in range(alternatives.pivot.shape[1]):
         if len(out)>=k:break
         if alternatives.pivot[anchor,z]<0:continue
