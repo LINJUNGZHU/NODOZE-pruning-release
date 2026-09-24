@@ -1,0 +1,3 @@
+# Optional baseline kernels; use an isolated environment, as described in the study.
+pcst_fast==1.0.10
+networkit==11.2.2

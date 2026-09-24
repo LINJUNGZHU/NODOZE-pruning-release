@@ -1,0 +1,17 @@
+# Cross-domain comparison and saturated coverage pruning
+
+User requests broader literature, experimental recommendations, actual baseline reproduction, algorithm improvement and complete comparisons on the same five cases. Preserve frequency statistics + graph diffusion. Existing authorization is autonomous; no approval pause.
+
+## Literature and choices
+G-Retriever (NeurIPS 2024), Appendix B/D: four random seeds, PCST vs top-k triples/neighbors/shortest paths; author code uses pcst_fast. Demystifying Graph Sparsification (PVLDB17/VLDB2024), section3.4: combines NetworKit and Laplacians.jl with custom implementations. Lin & Bilmes (ACL2011): budgeted coverage/diversity, DUC03 development/DUC04 testing, ablations. Omics Integrator (PLOS Computational Biology2016): evidence-weighted PCSF reconstruction and noise/knockout robustness. SimpleLocal (ICML2016): seeded local graph clustering. Conductance, QA accuracy and biological pathway quality are not interchangeable with attack recall.
+
+## Frozen protocol
+Five previously inspected development cases, unchanged candidate graphs/report-derived oracle POIs/reference. No external alerts or held-out claim. Budgets64/256/1024/4096 raw events, primary1024. Two tracks: POIs only; POIs plus identical existing semantic continuation evidence for EVERY method. Infeasible mandatory budget is recorded rather than enlarged.
+
+Baselines: uniform random raw top-K (seeds0..4), historical rarity top-K, existing pipeline score top-K, v3 diffusion top-K, v3 episode selector, NetworKit LocalDegree scores with shared raw top-K adapter, official pcst_fast with explicit event-prize adapter. Native PCST scans fixed cost multipliers, chooses feasible output by label-free episode prize; do not fill outside its solution. These are reusable algorithm components, NOT full G-Retriever or VLDB reproduction. Published SPARSE numbers remain contextual only.
+
+## Improvement
+Keep frequency/diffusion scores. Saturate evidence utility after an exact directed endpoint/relation family is represented; optionally include host-qualified semantic endpoint/relation family as a second view. Greedy priority sums marginal increases of max importance per feature. Selected bounded episodes carry existing raw temporal-fork witnesses; raw members and connectors count against cap. Process mandatory POI episodes first when affordable; partial mandatory coverage can saturate features and is a limitation, explicitly measured. All selected raw events update coverage including connectors. Marginal gain is nonincreasing: a lazy heap is valid WITHOUT dividing by changing connector costs. No approximation guarantee for overlapping path costs. Compare one-view/two-view and no-frequency ablations. No case-specific names/IPs/rules.
+
+## Experiments
+Effectiveness: raw/episode E, partial-positive event/group/stage recall, closed-world proxy confusion matrix/P/R/F1/FPR/FNR. Official-equivalent metrics NA. Structure: components and temporal-fork reachable fraction after pruning without treating mandatory context as new seeds. Efficiency: loading/preprocessing/scoring/selection separately; repeat deterministic selection3 times at primary budget. One compute thread. Stochastic baselines5 seeds; repeated deterministic timing is not extra accuracy samples. Robustness: remove one POI at a time for multi-POI cases, primary budget, rebuild scores/context. Save all masks before label evaluation; input/source/dependency hashes. Keep negative results.

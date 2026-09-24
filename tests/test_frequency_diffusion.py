@@ -102,3 +102,14 @@ def test_episode_evidence_counts_distinct_times_without_duplicate_inflation():
     boosted=fd.episode_evidence(np.array([.2,.2,.2,.8]),np.array([0,0,0,1]),np.array([10,10,11,10]))
     assert np.allclose(boosted[:3],.2*np.sqrt(2))
     assert boosted[3]==.8
+
+
+def test_semantic_continuations_respect_replaced_poi_set(tmp_path):
+    import gzip,json
+    path=tmp_path/'edges.gz'
+    base=dict(host='h',src='p',dst='f',src_type='process',dst_type='file',src_semantic='process:p',dst_semantic='file:/tmp/x',timestamp_ns=0)
+    rows=[base|dict(event_id='write',relation='EVENT_WRITE',is_declared_poi=True),
+          base|dict(event_id='execute',relation='EVENT_EXECUTE',is_declared_poi=False)]
+    with gzip.open(path,'wt') as f:
+        for row in rows:f.write(json.dumps(row)+'\n')
+    assert fd.semantic_continuations(path,poi_ids=set())==set()

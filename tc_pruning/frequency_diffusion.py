@@ -171,7 +171,7 @@ def select_episodes(score,poi,backward,parent,pivot,group,budget,ties,mandatory=
     return kept
 
 
-def semantic_continuations(path):
+def semantic_continuations(path, *, poi_ids=None):
     """Reuse all existing bounded POI semantic rules uniformly across cases.
 
     This preserves investigator context; these events are mandatory evidence,
@@ -184,6 +184,7 @@ def semantic_continuations(path):
     with gzip.open(path,'rt') as stream:
         for line in stream:
             row=json.loads(line)
+            if poi_ids is not None:row['is_declared_poi']=row['event_id'] in poi_ids
             if row['relation'] in {'EVENT_WRITE','EVENT_EXECUTE','EVENT_CONNECT','EVENT_SENDTO',
                 'EVENT_RECVFROM','EVENT_READ','EVENT_OPEN','EVENT_FORK'} or row.get('is_declared_poi'):
                 rows.append({k:row[k] for k in keys if k in row})
