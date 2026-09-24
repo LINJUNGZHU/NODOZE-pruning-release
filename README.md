@@ -158,7 +158,7 @@ OPTC 默认真值来自 `OpTCRedTeamGroundTruth.pdf`，按页码和原文记录�
 
 ## 历史 DARPA 实验与命令行入口
 
-五案例的最新频率扩散、跨领域对照及历史通道检索实验见[研究实验索引](docs/research-experiment-index.md)。各轮次完整保留，指标使用本地部分正例的 proxy 口径。
+五案例的算法流程、公式、借鉴方法及实验结果见[完整方法与实验说明](docs/experiment-methods-overview.md)；各轮记录见[研究实验索引](docs/research-experiment-index.md)。各轮次完整保留，指标使用本地部分正例的 proxy 口径。
 
 以下保留 DARPA 离线实验及早期 CLI 的说明，其中候选搜索、配置和指标口径与上面的 OPTC 网页流程不同，各历史模块并非全部叠加运行。
 
