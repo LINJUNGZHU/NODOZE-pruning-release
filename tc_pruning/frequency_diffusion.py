@@ -9,7 +9,6 @@ import hashlib
 import json
 from pathlib import Path
 import numpy as np
-from .rasp_diverse import event_families
 
 
 def load_ledger(path):
@@ -61,14 +60,17 @@ def semantic_uniqueness(src,dst,relation,process_nodes,semantic):
     Counts come from the frozen candidate graph (transductive), not benign
     training data. Both endpoints can be processes; use the least unique side.
     """
-    result=np.ones(len(src))
+    result=np.ones(len(src)); incidence=[]; views=[]
     for proc,obj in ((src,dst),(dst,src)):
         rows=np.flatnonzero(process_nodes[proc])
-        if not len(rows):continue
-        keys=np.column_stack((semantic[obj[rows]],relation[rows],proc[rows]))
-        unique=np.unique(keys,axis=0)
-        categories,counts=np.unique(unique[:,:2],axis=0,return_counts=True)
-        lookup={(int(a),int(b)):1/np.log2(1+int(c)) for (a,b),c in zip(categories,counts)}
+        if len(rows):
+            incidence.append(np.column_stack((semantic[obj[rows]],relation[rows],proc[rows])))
+            views.append((rows,obj))
+    if not incidence:return result
+    unique=np.unique(np.concatenate(incidence),axis=0)
+    categories,counts=np.unique(unique[:,:2],axis=0,return_counts=True)
+    lookup={(int(a),int(b)):1/np.log2(1+int(c)) for (a,b),c in zip(categories,counts)}
+    for rows,obj in views:
         weights=np.fromiter((lookup[(int(semantic[obj[i]]),int(relation[i]))] for i in rows),float,count=len(rows))
         result[rows]=np.minimum(result[rows],weights)
     return result
@@ -130,7 +132,7 @@ def score(data,config,*,balanced=True,semantic_frequency=True,frequency=True,end
     return result,dict(walks=diagnostics,channels=len(a)//2)
 
 
-def select_episodes(score,poi,backward,parent,pivot,group,budget,ties):
+def select_episodes(score,poi,backward,parent,pivot,group,budget,ties,mandatory=None):
     """Admit complete episodes and one temporal witness per episode.
 
     A POI is mandatory individually. Other members of its episode still cost
@@ -138,12 +140,17 @@ def select_episodes(score,poi,backward,parent,pivot,group,budget,ties):
     """
     n=len(score)
     if not int(poi.sum())<=budget<=n:raise ValueError('invalid raw-event cap')
-    kept=np.asarray(poi,bool).copy();used=int(kept.sum())
+    kept=np.asarray(poi,bool).copy()
+    if mandatory is not None:kept |= np.asarray(mandatory,bool)
+    used=int(kept.sum())
+    if used>budget:raise ValueError('mandatory events exceed raw cap')
     order=np.argsort(group,kind='stable')
     boundaries=np.r_[0,np.flatnonzero(np.diff(group[order]))+1,n]
     members={int(group[order[lo]]):order[lo:hi] for lo,hi in zip(boundaries[:-1],boundaries[1:]) if hi>lo}
     eligible=np.flatnonzero((pivot>=0)&(score>0))
-    ranking=eligible[np.lexsort((ties[eligible],-score[eligible]))]
+    max_score=np.zeros(int(group.max())+1)
+    np.maximum.at(max_score,group,score)
+    ranking=eligible[np.lexsort((ties[eligible],-score[eligible],-max_score[group[eligible]]))]
     visited=set()
     for i in ranking:
         g=int(group[i])
@@ -162,3 +169,29 @@ def select_episodes(score,poi,backward,parent,pivot,group,budget,ties):
             kept[list(path)]=True;used+=len(path)
         if used==budget:break
     return kept
+
+
+def semantic_continuations(path):
+    """Reuse all existing bounded POI semantic rules uniformly across cases.
+
+    This preserves investigator context; these events are mandatory evidence,
+    not new diffusion seeds and not certified temporal paths.
+    """
+    from . import poi_semantic_continuation as pc
+    keys=('event_id','host','src','dst','src_type','dst_type','src_semantic','dst_semantic',
+          'relation','timestamp_ns','data_size','is_declared_poi')
+    rows=[]
+    with gzip.open(path,'rt') as stream:
+        for line in stream:
+            row=json.loads(line)
+            if row['relation'] in {'EVENT_WRITE','EVENT_EXECUTE','EVENT_CONNECT','EVENT_SENDTO',
+                'EVENT_RECVFROM','EVENT_READ','EVENT_OPEN','EVENT_FORK'} or row.get('is_declared_poi'):
+                rows.append({k:row[k] for k in keys if k in row})
+    chosen=set()
+    for fn in (pc.executable_continuations,pc.adjacent_file_writes,pc.network_poi_episode,
+               pc.poi_bridge_continuations,pc.file_poi_io_origin,pc.forward_file_execution,
+               pc.post_write_parent_connect,pc.file_poi_named_context):
+        chosen.update(fn(rows))
+    connects=chosen|{r['event_id'] for r in rows if r.get('is_declared_poi') and r['relation']=='EVENT_CONNECT'}
+    chosen.update(pc.shell_forks_after_connections(rows,connects))
+    return chosen

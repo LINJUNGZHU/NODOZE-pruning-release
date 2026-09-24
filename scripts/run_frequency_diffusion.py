@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse,hashlib,json,resource,time
 from pathlib import Path
 import numpy as np
-from tc_pruning.frequency_diffusion import load_ledger,episodes,score,select_episodes
+from tc_pruning.frequency_diffusion import load_ledger,episodes,score,select_episodes,semantic_continuations
 from tc_pruning.rasp import temporal_routes,temporal_fork_routes
 from tc_pruning.sparse_edge_evaluation import sha256_file
 
@@ -15,6 +15,10 @@ def run_case(ledger,config,output):
     group=episodes(src,dst,d['relation'],ts,config['episode_window_ns'])
     backward=temporal_routes(src,dst,ts,poi)[0][0]
     parent,pivot,reachable,depth=temporal_fork_routes(src,dst,ts,poi,backward)
+    mandatory=np.zeros(n,bool)
+    if config.get('semantic_hybrid'):
+        continuation_ids=semantic_continuations(ledger)
+        mandatory=np.asarray([e in continuation_ids for e in d['ids']],bool)
     preprocessing=time.perf_counter()-tick
     results=[];diagnostics={};scoring={}
     full=None
@@ -25,6 +29,13 @@ def run_case(ledger,config,output):
         for cap in config['raw_budgets']:
             tick=time.perf_counter();kept=select_episodes(values,poi,backward,parent,pivot,group,cap,d['tie'])
             results.append(record(d,group,kept,method,cap,time.perf_counter()-tick))
+        if config.get('semantic_hybrid') and method in ('full','classic'):
+            for cap in config['raw_budgets']:
+                if int((mandatory|poi).sum())>cap:
+                    continue
+                tick=time.perf_counter()
+                kept=select_episodes(values,poi,backward,parent,pivot,group,cap,d['tie'],mandatory=mandatory)
+                results.append(record(d,group,kept,method+'_hybrid',cap,time.perf_counter()-tick))
         print(f'{output.name} {method} done',flush=True)
     for method,values in [('no_episode_expansion',full),('old_score_top',d['old_score'])]:
         for cap in config['raw_budgets']:
@@ -35,8 +46,8 @@ def run_case(ledger,config,output):
                 kept=select_episodes(values,poi,backward,parent,pivot,np.arange(n),cap,d['tie'])
             results.append(record(d,group,kept,method,cap,time.perf_counter()-tick))
     report=dict(ledger=str(ledger),ledger_sha256=sha256_file(ledger),config=config,
-        source_sha256={p:sha256_file(Path(p)) for p in ['tc_pruning/frequency_diffusion.py','tc_pruning/rasp.py','scripts/run_frequency_diffusion.py']},
-        candidate_events=n,candidate_episodes=int(group.max())+1,poi_ids=[d['ids'][i] for i in np.flatnonzero(poi)],
+        source_sha256={p:sha256_file(Path(p)) for p in ['tc_pruning/frequency_diffusion.py','tc_pruning/rasp.py','tc_pruning/poi_semantic_continuation.py','scripts/run_frequency_diffusion.py']},
+        mandatory_continuations=int(mandatory.sum()),candidate_events=n,candidate_episodes=int(group.max())+1,poi_ids=[d['ids'][i] for i in np.flatnonzero(poi)],
         labels_used_for_selection=False,load_seconds=load_seconds,preprocessing_seconds=preprocessing,
         scoring_seconds=scoring,diagnostics=diagnostics,results=results,
         elapsed_seconds=time.perf_counter()-start,peak_rss_mib=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss/1024)

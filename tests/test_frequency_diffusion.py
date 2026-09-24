@@ -54,3 +54,33 @@ def test_loader_host_isolation_and_type_aware_execute(tmp_path):
     assert len(d['process_nodes'])==4
     assert d['src'].tolist()==[1,2] and d['dst'].tolist()==[0,3]
     assert d['semantic'][0]!=d['semantic'][2]
+
+
+def test_frequency_unifies_process_endpoint_orientations():
+    u=fd.semantic_uniqueness(np.array([0,2]),np.array([2,1]),np.zeros(2,int),np.ones(3,bool),np.arange(3))
+    assert np.allclose(u,1/np.log2(3))
+
+
+def test_episode_priority_includes_unreachable_corroborating_members():
+    kept=fd.select_episodes(np.array([1,.9,.3,.8,.8]),np.array([1,0,0,0,0],bool),
+        np.array([-1,-1,0,0,0]),np.full(5,-1),np.array([0,-1,2,3,4]),np.array([0,1,1,2,2]),3,np.arange(5))
+    assert kept.tolist()==[True,True,True,False,False]
+
+
+def test_mandatory_continuations_cost_budget_without_becoming_seeds():
+    kept=fd.select_episodes(np.array([1,.9,.8]),np.array([1,0,0],bool),np.array([-1,0,-1]),
+        np.full(3,-1),np.array([0,1,-1]),np.arange(3),2,np.arange(3),mandatory=np.array([0,0,1],bool))
+    assert kept.tolist()==[True,False,True]
+    with pytest.raises(ValueError,match='mandatory'):
+        fd.select_episodes(np.ones(3),np.array([1,0,0],bool),np.full(3,-1),np.full(3,-1),np.arange(3),np.arange(3),1,np.arange(3),mandatory=np.array([0,0,1],bool))
+
+
+def test_existing_semantic_continuation_preserves_written_file_execution(tmp_path):
+    import gzip,json
+    path=tmp_path/'edges.gz'
+    base=dict(host='h',src='p',src_type='process',src_semantic='process:writer',dst='f',dst_type='file',dst_semantic='file:/tmp/payload',data_size=1)
+    rows=[base|dict(event_id='write',relation='EVENT_WRITE',timestamp_ns=0,is_declared_poi=True),
+          base|dict(event_id='execute',relation='EVENT_EXECUTE',timestamp_ns=100,is_declared_poi=False)]
+    with gzip.open(path,'wt') as f:
+        for row in rows:f.write(json.dumps(row)+'\n')
+    assert 'execute' in fd.semantic_continuations(path)

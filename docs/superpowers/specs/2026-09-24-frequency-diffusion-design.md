@@ -29,3 +29,8 @@ Metrics: raw events, 10s episodes, retained partial-positive events/groups/stage
 - Diffusion Improves Graph Learning, NeurIPS 2019: https://proceedings.neurips.cc/paper/2019/hash/23c894276a2c5a16470e6a31f4618d73-Abstract.html — graph diffusion and sparsification, already related work for RASP.
 
 A GNN is deferred: five previously inspected attacks do not provide a defensible independent training/test split. Adding one now would confound architecture and leakage.
+
+## v2 revision after v1 evaluation and review
+The v1 semantic count incorrectly split process incidence by endpoint orientation; v2 pools incidences before counting. The v1 archive remains marked superseded. Episode priority now uses all members, with a reachable witness, as specified.
+
+Preserve existing bounded POI semantic continuation rules uniformly on all five cases (all optional rules on, no raw command-line scan). Mandatory continuation edges consume the same raw budget but never become diffusion seeds. When mandatory evidence exceeds a budget, omit that hybrid budget and record the mandatory count; do not enlarge the cap or truncate mandatory evidence. Add classic+continuations and full+continuations controls. These are inherited development-tuned rules, not a new contribution or independently learned discovery. Primary remains 1024 raw events; v2 primary method full_hybrid. v1 showed no all-case gain: THEIA3 full ties old-score top-K at 1024, and no-frequency can outperform full. Preserve those negative controls.
