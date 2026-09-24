@@ -1,0 +1,263 @@
+{
+  "protocol": "sparse-local-critical-choices-v1",
+  "pdf": "/root/PIDSMaker-main/Ground_Truth/TC_Ground_Truth_Report_E3_Update.pdf",
+  "pdf_sha256": "eccf295b566b8e981fe90e0f1aea61116bd5a5694441396af63f22a914cbc39c",
+  "parallel_window_ns": 10000000000,
+  "cases": [
+    {
+      "name": "Five Dir Case 1",
+      "packet": "docs/sparse-five-critical-review/five-dir-case-1.json",
+      "exemplars": [
+        {
+          "event_id": "3D42DCC8-59DC-4516-8ED4-C657F9974F78",
+          "stage": "script_download",
+          "rationale": "报告 §4.4 的脚本下载目标 208.75.117.5，PowerShell 建立连接"
+        },
+        {
+          "event_id": "3F9F4D4A-487A-4F88-B1D6-F6164F334AE4",
+          "stage": "script_download",
+          "rationale": "同一下载 socket 上发送请求"
+        },
+        {
+          "event_id": "83CEC876-AF3C-4F49-883E-1A8174410803",
+          "stage": "script_download",
+          "rationale": "同一下载 socket 上接收脚本数据"
+        },
+        {
+          "event_id": "471A522B-6451-4B6D-A079-296883EE4A37",
+          "stage": "script_download",
+          "rationale": "接收后写入报告指定的 update.ps1"
+        },
+        {
+          "event_id": "531B25EB-CDAC-4D6B-9227-9ADCB32AE832",
+          "stage": "update_script_write",
+          "rationale": "报告指定的 update.ps1 文件写入"
+        },
+        {
+          "event_id": "0A29F25F-F003-476F-A4A7-2653BA38FDB1",
+          "stage": "update_script_write",
+          "rationale": "PowerShell 随后读取 update.ps1，形成写后使用"
+        },
+        {
+          "event_id": "BA654337-DB25-408B-AFA9-9DAEC82822F5",
+          "stage": "reverse_shell_connect",
+          "rationale": "报告指定的 208.75.117.6:80 反连"
+        },
+        {
+          "event_id": "0F71F26B-49DD-4D1E-B983-6BF973F55C5B",
+          "stage": "reverse_shell_connect",
+          "rationale": "反连前 PowerShell 读取 update.ps1"
+        },
+        {
+          "event_id": "LINEAGE:923A397B-83F9-4CCC-A856-8B673F596457",
+          "stage": "reverse_shell_connect",
+          "rationale": "反连后启动 cmd.exe，符合报告 powercat -e cmd.exe"
+        }
+      ]
+    },
+    {
+      "name": "Five Dir Case 3",
+      "packet": "docs/sparse-five-critical-review/five-dir-case-3.json",
+      "exemplars": [
+        {
+          "event_id": "0A84AEEB-C668-4527-B564-69F1C69ED4B6",
+          "stage": "shellcode_server_connect",
+          "rationale": "报告 §3.10 的浏览器扩展连接 135.84.161.202"
+        },
+        {
+          "event_id": "7853F675-D763-4663-876A-AAA6F8DA868F",
+          "stage": "shellcode_server_connect",
+          "rationale": "同一 shellcode socket 的发送事件"
+        },
+        {
+          "event_id": "6E7B7DF6-2C4C-4275-B3F0-C42645EBA929",
+          "stage": "shellcode_server_connect",
+          "rationale": "同一 shellcode socket 的接收事件"
+        },
+        {
+          "event_id": "1DBC1412-7102-4706-9A96-60216801F06B",
+          "stage": "dropped_executable_write",
+          "rationale": "报告指定 hJauWl01 落盘"
+        },
+        {
+          "event_id": "B64CA259-698E-4620-9A30-A9936E24699E",
+          "stage": "dropped_executable_write",
+          "rationale": "写入后创建 hJauWl01 进程"
+        },
+        {
+          "event_id": "D6041E19-B4E1-4926-A4D9-6781DFBB7158",
+          "stage": "failed_payload_execution",
+          "rationale": "报告明确描述的失败执行尝试"
+        },
+        {
+          "event_id": "LINEAGE:7082E8FD-A4A6-4198-82D7-1A3165474B89",
+          "stage": "failed_payload_execution",
+          "rationale": "浏览器扩展到 hJauWl01 的进程派生"
+        }
+      ]
+    },
+    {
+      "name": "Theia Case 1",
+      "packet": "docs/sparse-five-critical-review/theia-case-1.json",
+      "exemplars": [
+        {
+          "event_id": "45B0FB64-A926-2415-5BAB-3B0000000010",
+          "stage": "browser_shellcode_connect",
+          "rationale": "报告 §3.3 的 141.43.176.203 shellcode 连接"
+        },
+        {
+          "event_id": "80D6FB64-A926-2415-5CAB-3B0000000010",
+          "stage": "browser_shellcode_connect",
+          "rationale": "同一 shellcode 连接的发送"
+        },
+        {
+          "event_id": "BB163065-A926-2415-5DAB-3B0000000010",
+          "stage": "browser_shellcode_connect",
+          "rationale": "同一 shellcode 连接的接收"
+        },
+        {
+          "event_id": "764AB6F2-DF26-2415-B8F5-3B0000000010",
+          "stage": "clean_write",
+          "rationale": "Firefox 写入报告指定 clean"
+        },
+        {
+          "event_id": "D76CBCF4-E226-2415-3BF6-3B0000000010",
+          "stage": "clean_execution",
+          "rationale": "报告指定 clean 提权执行"
+        },
+        {
+          "event_id": "9795E2F4-E226-2415-4DF6-3B0000000010",
+          "stage": "root_implant_c2",
+          "rationale": "clean 进程回连报告指定 161.116.88.72"
+        },
+        {
+          "event_id": "C48FF5F4-E226-2415-51F6-3B0000000010",
+          "stage": "root_implant_c2",
+          "rationale": "clean C2 socket 上发送"
+        },
+        {
+          "event_id": "B85D01F8-E226-2415-53F6-3B0000000010",
+          "stage": "root_implant_c2",
+          "rationale": "clean C2 socket 上接收"
+        },
+        {
+          "event_id": "AB9231DC-0828-2415-DEA1-400000000010",
+          "stage": "profile_write",
+          "rationale": "报告指定 profile 落盘"
+        },
+        {
+          "event_id": "ACD92890-0A28-2415-4DB3-400000000010",
+          "stage": "profile_write",
+          "rationale": "写入后的 profile 执行"
+        },
+        {
+          "event_id": "5338C80F-2428-2415-3146-410000000010",
+          "stage": "xdev_write",
+          "rationale": "报告指定 /var/log/xdev 落盘"
+        },
+        {
+          "event_id": "F39DC90F-2428-2415-3346-410000000010",
+          "stage": "xdev_write",
+          "rationale": "profile 进程写 xdev 阶段的 C2 发送"
+        }
+      ]
+    },
+    {
+      "name": "Theia Case 3",
+      "packet": "docs/sparse-five-critical-review/theia-case-3.json",
+      "exemplars": [
+        {
+          "event_id": "FF9BFBA0-4EBE-2415-E1F7-620200000010",
+          "stage": "gtcache_drop",
+          "rationale": "报告 §3.11 的 gtcache 落盘"
+        },
+        {
+          "event_id": "1F0EFAA0-4EBE-2415-DFF7-620200000010",
+          "stage": "gtcache_drop",
+          "rationale": "Firefox 从报告 shellcode 服务器接收数据后落盘"
+        },
+        {
+          "event_id": "01FD23F0-FDBE-2415-1B13-640200000010",
+          "stage": "memtrace_write",
+          "rationale": "gtcache 写入报告指定 /tmp/memtrace.so"
+        },
+        {
+          "event_id": "F05F25F0-FDBE-2415-1D13-640200000010",
+          "stage": "memtrace_write",
+          "rationale": "gtcache 同阶段向 loader socket 发送"
+        },
+        {
+          "event_id": "C284C9F8-C0BF-2415-3276-670200000010",
+          "stage": "micro_apt_file_write",
+          "rationale": "报告指定 micro APT /var/log/mail 落盘"
+        },
+        {
+          "event_id": "D3225666-C4BF-2415-2778-670200000010",
+          "stage": "micro_apt_execution",
+          "rationale": "报告指定 /var/log/mail 提权执行"
+        },
+        {
+          "event_id": "424E0D67-C4BF-2415-3978-670200000010",
+          "stage": "micro_apt_c2",
+          "rationale": "报告指定 149.52.198.23 C2 连接"
+        },
+        {
+          "event_id": "3F973067-C4BF-2415-3A78-670200000010",
+          "stage": "micro_apt_c2",
+          "rationale": "同一 C2 socket 的接收"
+        },
+        {
+          "event_id": "69DA3A67-C4BF-2415-4D78-670200000010",
+          "stage": "micro_apt_c2",
+          "rationale": "同一 C2 socket 的发送"
+        }
+      ]
+    },
+    {
+      "name": "Theia Case 5",
+      "packet": "docs/sparse-five-critical-review/theia-case-5.json",
+      "exemplars": [
+        {
+          "event_id": "BE2C3A0A-E8DD-6694-4BC6-E632A27E5468",
+          "stage": "pine_writes_tcexfil",
+          "rationale": "报告 §4.9 的 /tmp/tcexfil 写入"
+        },
+        {
+          "event_id": "C2D1D51A-9857-998A-3271-F5A2B00930D8",
+          "stage": "pine_writes_tcexec",
+          "rationale": "Pine 写入报告指定 /tmp/tcexec"
+        },
+        {
+          "event_id": "LINEAGE:0BF26B23-2DE5-B70A-45F7-64BE377293F3",
+          "stage": "pine_writes_tcexec",
+          "rationale": "Pine 派生 tcexec 子进程"
+        },
+        {
+          "event_id": "0C44F657-15D6-5BF4-D497-C6ACB216E269",
+          "stage": "payload_execution",
+          "rationale": "报告指定 tcexec 附件执行"
+        },
+        {
+          "event_id": "DFFF3780-99A1-0713-24FE-958FA85955D4",
+          "stage": "micro_apt_c2",
+          "rationale": "报告指定 162.66.239.75 C2 回连"
+        },
+        {
+          "event_id": "AFD556E7-B608-C376-6BE3-AD4BC82C57CD",
+          "stage": "port_scan_start",
+          "rationale": "报告 14:22 端口扫描的 22 端口代表连接"
+        },
+        {
+          "event_id": "2A0DE8BB-C8E0-8949-CA89-EB727965B021",
+          "stage": "failed_shell_attempt",
+          "rationale": "报告 14:25 对 103.12.253.24 的失败 shell 尝试"
+        },
+        {
+          "event_id": "LINEAGE:D4E126FC-0499-29C7-E2A0-98ACD7FB85C5",
+          "stage": "failed_shell_attempt",
+          "rationale": "失败 shell 尝试期间派生 /bin/sh"
+        }
+      ]
+    }
+  ]
+}

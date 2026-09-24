@@ -6,6 +6,8 @@
 
 **Architecture:** Keep the existing candidate ledgers and POI decisions frozen. A review-packet extractor finds report-related CDM events and bounded temporal/causal neighbors without consulting detector decisions. A separate case-specific annotation manifest records reviewed critical event IDs, attack-stage rationale, and PDF evidence. A local-reference evaluator calculates operational proxy confusion matrices only under an explicit closed-world benchmark convention, while the existing strict evaluator continues to report official-equivalence FP/FN/Precision/Recall/F1 as unavailable. Include a leakage and uncertainty audit.
 
+**Implementation ruling:** Annotators choose one exact exemplar event per meaningful report action. The resolver expands each exemplar to raw parallel events with identical host, directed endpoints, and relation within 10 seconds. This reflects SPARSE's parallel-edge compaction while retaining this repository's event-ID granularity. It may group extra traffic on a busy pair, so results remain a local proxy.
+
 **Tech Stack:** Python 3, gzip JSONL ledgers, JSON manifests, pytest, local DARPA E3 report PDF.
 
 **Spec:** User request on 2026-09-24; SPARSE §V-A2 and §IV-D, [paper](https://arxiv.org/html/2405.02629v1); existing [five-case study](../../sparse-five-case-study.md).
