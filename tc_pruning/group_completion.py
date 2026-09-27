@@ -135,6 +135,7 @@ def build_pool(data,primary,groups,routes,mandatory,cap=32768,max_examined=32768
             states[g]=dict(members=ordered,cursor=0,witnesses=[])
         s=states[g];pending=list(s['witnesses'][:target])
         union={e for w in pending for e in w.events}
+        pending_cost=sum(e not in materialized for e in union)
         while len(pending)<target and s['cursor']<len(s['members']):
             i=int(s['members'][s['cursor']])
             if not seen[i]:
@@ -144,15 +145,15 @@ def build_pool(data,primary,groups,routes,mandatory,cap=32768,max_examined=32768
                 s['cursor']+=1;unreachable+=1;continue
             ws=build_witnesses(i,data['src'],data['dst'],data['timestamp'],data['poi'],back,parent,pivot,None,1)
             if not ws:s['cursor']+=1;continue
-            proposed=union|set(ws[0].events)
+            extra={e for e in ws[0].events if e not in union and e not in materialized}
             # Retain only prefixes admitted to the real event union. A blocked member
             # stays at the cursor and may become affordable through later sharing.
-            if len(materialized|proposed)>limit:break
-            pending.append(ws[0]);union=proposed;s['cursor']+=1
+            if len(materialized)+pending_cost+len(extra)>limit:break
+            pending_cost+=len(extra);pending.append(ws[0]);union.update(ws[0].events);s['cursor']+=1
         if not pending:return
         anchors=tuple(w.anchor for w in pending)
         if (g,anchors) in admitted_prefixes:return
-        if len(materialized|union)>limit:return
+        if len(materialized)+sum(e not in materialized for e in union)>limit:return
         s['witnesses']=pending
         full=s['cursor']==len(s['members'])
         level='full' if full else 'representative' if len(pending)==1 else 'continuation'
