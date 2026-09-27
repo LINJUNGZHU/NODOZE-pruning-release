@@ -36,12 +36,12 @@ def test_best_single_bundle_protects_against_density_trap():
     assert result.objective_value==pytest.approx(8)
 
 
-def tiny_pool(cap=4,max_examined=100):
+def tiny_pool(cap=4,max_examined=100,builder=build_pool):
     src=np.array([1,0,0,0]);dst=np.array([2,1,1,1]);t=np.array([10,1,2,3]);poi=np.array([True,False,False,False]);ties=np.array([0,1,2,3])
     data=dict(ids=['seed','a','b','c'],src=src,dst=dst,timestamp=t,poi=poi,tie=ties,relation=np.zeros(4,int))
     groups=GroupIndex.from_events(src,dst,np.zeros(4),t,ties,20)
     back=temporal_routes(src,dst,t,poi)[0][0];parent,pivot,_,_=temporal_fork_routes(src,dst,t,poi,back)
-    pool,diag=build_pool(data,np.array([1.,1.,0.,0.]),groups,(back,parent,pivot),{0},cap,max_examined)
+    pool,diag=builder(data,np.array([1.,1.,0.,0.]),groups,(back,parent,pivot),{0},cap,max_examined)
     return data,pool,diag
 
 
@@ -124,3 +124,13 @@ def test_rrf_adapter_uses_only_unlabeled_views_and_same_witness_contract():
     order=np.array([1,0]);ranked=RankedGroups(g,order)
     assert np.array_equal(ranked.ranked_descriptors(np.ones(4),data['tie']),order)
     assert np.array_equal(ranked.group_of,g.group_of)
+
+
+def test_expansion_reserve_is_spent_on_previously_explored_groups():
+    from tc_pruning.group_completion_expansion import build_pool as fixed
+    data,pool,diag=tiny_pool(builder=fixed)
+    assert diag['exploration_limit']==2
+    assert diag['expansion_groups']==2
+    assert any(set(a.anchors)=={1,2,3} and a.level=='full' for a in pool.actions)
+    assert len(pool.materialized_events)==4
+    assert all(validate_witness(w,data['src'],data['dst'],data['timestamp'],data['poi']) for w in pool.certificates)
