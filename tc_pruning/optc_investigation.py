@@ -99,7 +99,7 @@ def _validate_routes_linear(src, dst, timestamp, poi, backward, parent, pivot):
 
 
 def rescore(data, poi_id, budget_ratio=None, selection_mode=None, attack_quantile=None, detector=None,
-            algorithm_mode='legacy'):
+            algorithm_mode='legacy', focal_node_id=None, pruning_only=False, budget_edges=None):
     """Update one isolated cache value; truth only declares the manual seed."""
     started = time.monotonic()
     edges = sorted(data['edges'], key=lambda e:(e['timestamp_ns'],e['id']))
@@ -110,6 +110,9 @@ def rescore(data, poi_id, budget_ratio=None, selection_mode=None, attack_quantil
     selected = next((i for i,e in enumerate(edges) if e['id'] == poi_id), None)
     if selected is None:
         raise ValueError('POI event ID is not in the candidate window')
+    if focal_node_id is not None and (algorithm_mode != 'legacy' or
+            focal_node_id not in (edges[selected]['source'], edges[selected]['target'])):
+        raise ValueError('node focus requires legacy propagation and an incident anchor event')
     budget_ratio = data['algorithm']['budget_ratio'] if budget_ratio is None else budget_ratio
     if isinstance(budget_ratio, bool) or not isinstance(budget_ratio, (int,float)) or not 0 < budget_ratio <= 1:
         raise ValueError('budget must be a number in (0, 1]')
@@ -135,7 +138,8 @@ def rescore(data, poi_id, budget_ratio=None, selection_mode=None, attack_quantil
     legacy_config = data['algorithm'].get('legacy_config', data['algorithm']['config'])
     config = legacy_config if algorithm_mode == 'legacy' else data['algorithm']['config']
     if algorithm_mode == 'legacy':
-        scores, diag = propagate(src,dst,relation,rarity,poi,np.array([nodes[n]['type']=='process' for n in node_ids]),config)
+        scores, diag = propagate(src,dst,relation,rarity,poi,np.array([nodes[n]['type']=='process' for n in node_ids]),config,
+                                 **({'focal_node': ids[focal_node_id]} if focal_node_id is not None else {}))
         score_components = [dict(rarity=float(rarity[i]), diffusion=float(diag['diffusion'][i])) for i in range(len(edges))]
         rcvp_fields = {}
         rcvp_roots = []
@@ -162,6 +166,10 @@ def rescore(data, poi_id, budget_ratio=None, selection_mode=None, attack_quantil
     parent,pivot,_,_ = temporal_fork_routes(src,dst,timestamp,poi,backward)
     ties = np.array([int(hashlib.sha256(e['id'].encode()).hexdigest()[:15],16) for e in edges])
     budget = max(1, int(len(edges)*budget_ratio))
+    if budget_edges is not None:
+        if isinstance(budget_edges, bool) or not isinstance(budget_edges, int) or not 1 <= budget_edges <= len(edges):
+            raise ValueError('budget_edges must be an integer within the candidate count')
+        budget = budget_edges
     evidence = diag['contrast_only']
     certified = diag['positive_lift_certified']
     numerical_routes_valid = (_validate_routes_linear(src,dst,timestamp,poi,backward,parent,pivot)
@@ -265,6 +273,8 @@ def rescore(data, poi_id, budget_ratio=None, selection_mode=None, attack_quantil
         owner=audit['owner'].tolist(),eligible=audit['eligible'].tolist(),budget=budget,
         retained=kept.tolist(),quality=.05,propagation_score=scores.tolist(),legacy_family=event_families(src,dst,relation).tolist(),tie_order=ties.tolist(),
         algorithm_mode=algorithm_mode,algorithm_config_sha256=algorithm_details.get('config_sha256'))
+    if focal_node_id is not None:
+        data['decision_inputs']['focal_node_id'] = focal_node_id
     certificate['certificate_kind'] = 'ppr_residual_bound' if algorithm_mode == 'legacy' else 'exact_temporal_witness'
     certificate['inputs_sha256']=hashlib.sha256(json.dumps(data['decision_inputs'],sort_keys=True,separators=(',',':')).encode()).hexdigest()
     data['decision_trace']=trace
@@ -322,7 +332,30 @@ def rescore(data, poi_id, budget_ratio=None, selection_mode=None, attack_quantil
         if selection_mode == 'progressive':
             e['decision']['progressive'] = progressive.audit[i]
             e['progressive'] = progressive.audit[i]
-        e['reference_evidence'] = reference_evidence(e)
+        if not pruning_only:
+            e['reference_evidence'] = reference_evidence(e)
+        else:
+            for field in ('reference_evidence', 'attack_role', 'rcvp', 'progressive'):
+                e.pop(field, None)
+    if pruning_only:
+        data['poi'] = dict(event_id=poi_id, node_id=focal_node_id,
+                           timestamp=edges[selected]['timestamp'], label='用户指定节点与时间锚事件',
+                           groundtruth_backed=False)
+        data['history'] = history
+        data['metrics'] = dict(candidate_edges=len(edges), retained_edges=int(kept.sum()),
+            candidate_nodes=len(nodes), retained_nodes=len({e[k] for e in edges if e['retained'] for k in ('source','target')}),
+            budget_edges=budget, history_edges=history['history_edges'])
+        data['nodes'] = list(nodes.values())
+        data['algorithm'].update(algorithm_details, budget_ratio=budget/len(edges), selection_mode=selection_mode,
+            product_version='node_focus_rasp_v1', seed_policy='single_node' if focal_node_id else 'anchor_endpoints',
+            focal_node_id=focal_node_id, seed_source='user_selected_node_with_explicit_event_time',
+            truth_used=False, external_alert_used=False)
+        for field in ('truth', 'attack', 'context_graph', 'poi_presets', 'paths', 'prefix_metrics', 'sample', 'display_event_ids'):
+            data.pop(field, None)
+        data['logs'] = [f"候选 {len(edges)}；历史 {history['history_edges']}；严格早于锚事件",
+            f"保留 {int(kept.sum())}；预算 {budget}；完整路径计入预算",
+            f"纯调查剪枝；无真值评估、无外部告警、无攻击检测；{time.monotonic()-started:.3f} 秒"]
+        return data
     refs = np.array([bool(e['reference_evidence']) for e in edges])
     reference_without_poi = refs & ~poi
     matched, retained = int(refs.sum()), int((refs & kept).sum())

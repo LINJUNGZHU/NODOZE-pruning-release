@@ -7,7 +7,7 @@ const score=n=>n==null?'—':Number(n)===0?'0':Number(n).toPrecision(6);
 const localTime=s=>String(s??'').split('T')[1]?.replace(/[-+]\d\d:\d\d$/,'')||String(s??'');
 const short=(s,n=48)=>s.length>n?'…'+s.slice(1-n):s;
 const base=()=>`/api/datasets/${encodeURIComponent(state.data.dataset.id)}`;
-async function api(url,options){const r=await fetch(url,options);const d=await r.json();if(!r.ok)throw Error(d.error||`请求失败 (${r.status})`);return d;}
+async function api(url,options){if(state.data?.run&&url.startsWith(base()+'/')&&!url.endsWith('/prune'))url+=(url.includes('?')?'&':'?')+'run_id='+encodeURIComponent(state.data.run.id);const r=await fetch(url,options);const d=await r.json();if(!r.ok)throw Error(d.error||`请求失败 (${r.status})`);return d;}
 function fail(e){$('#error').hidden=false;$('#error').textContent=e.message;}
 function renderCases(){
  $('#case-list').innerHTML=state.cases.map(c=>`<button class="case-card ${state.data?.dataset.id===c.id?'active':''}" data-case="${esc(c.id)}" aria-pressed="${state.data?.dataset.id===c.id}" ${state.busy?'disabled':''}><span class="case-title">${esc(c.name)}</span><span class="case-count">${fmt(c.metrics.candidate_edges)}<small>条原始边</small></span><span class="case-desc">${esc(c.description)}</span></button>`).join('');
@@ -34,7 +34,7 @@ function render(d){
  $('#edge-budget').value=String(d.algorithm.budget_ratio);$('#selection-mode').value=d.algorithm.selection_mode||'context';$('#algorithm-mode').value=d.algorithm.mode||'legacy';$('#detector').value=d.attack?.detector||'rules';$('#attack-quantile').value=String(d.attack?.config.anomaly_quantile||.9);updateDetectorControl();
  $('#history-note').textContent=`频率来自起点 ${localTime(d.poi.timestamp)} 之前的全部 ${fmt(d.history.history_edges)} 条同主机历史事件；不含起点同刻及之后的事件。时间均为数据集本地 UTC−04:00。`;
  $('#run-log').textContent=d.logs.map((line,i)=>`${String(i+1).padStart(2,'0')}  ${line}`).join('\n');
- $('#download-audit').href=base()+'/decision-audit';
+ $('#download-audit').href=base()+'/decision-audit'+(d.run?'?run_id='+d.run.id:'');
  const c=d.decision_certificate,roots=d.algorithm.roots||[];$('#decision-summary').textContent=c?`请求预算 ${fmt(m.budget_edges)} 条；实际保留 ${fmt(m.retained_edges)} 条；预算校验：${c.budget_valid?'通过':'未通过'}；证书：${c.complete_witnesses?'完整':'不完整'}；根候选 ${fmt(roots.length)} 个；剩余 ${fmt(c.unused_budget)} 条预算。`:'';
  $('#source-note').textContent=JSON.stringify({数据范围:d.dataset,真值参考:d.truth.source,边评分与选择:d.decision_contract},null,2);
  renderCases();layoutGraph();setGraphView();renderAttack();if(!$('#panel-events').hidden)renderTable();

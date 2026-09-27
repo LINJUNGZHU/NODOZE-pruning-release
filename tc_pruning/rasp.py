@@ -45,13 +45,17 @@ def personalized_pagerank(a, b, weight, teleport, restart=.15, iterations=100, t
                "converged": residual <= tolerance}, degree
 
 
-def propagate(src, dst, relation, rarity, poi, process_nodes, config):
+def propagate(src, dst, relation, rarity, poi, process_nodes, config, focal_node=None):
     src, dst, rarity, poi = map(np.asarray, (src, dst, rarity, poi))
     if len(src) == 0 or not poi.any():
         raise ValueError("RASP requires candidate events and at least one POI")
     if not np.all(np.isfinite(rarity)) or np.any((rarity < 0) | (rarity > 1)):
         raise ValueError("rarity must be finite in [0,1]")
     n = int(max(src.max(), dst.max()))+1
+    if focal_node is not None and (isinstance(focal_node, (bool, np.bool_)) or
+            not isinstance(focal_node, (int, np.integer)) or
+            any(focal_node not in (src[i], dst[i]) for i in np.flatnonzero(poi))):
+        raise ValueError('focal node must be an endpoint of every anchor event')
     a, b, channel_rarity = interaction_graph(src, dst, relation, rarity)
     floor = config["rarity_floor"]
     weights = floor+(1-floor)*channel_rarity
@@ -68,8 +72,11 @@ def propagate(src, dst, relation, rarity, poi, process_nodes, config):
     background_error = background_diag["residual_l1"] / config["restart"]
     for seed_edge in np.flatnonzero(poi):
         seed = np.zeros(n)
-        seed[src[seed_edge]] += .5
-        seed[dst[seed_edge]] += .5
+        if focal_node is None:
+            seed[src[seed_edge]] += .5
+            seed[dst[seed_edge]] += .5
+        else:
+            seed[focal_node] = 1.
         p, diag, _ = personalized_pagerank(a, b, weights, seed, **kwargs)
         # Contraction gives ||p - p*||_1 <= residual / restart.
         # Certify positive lift only when both endpoint differences exceed the

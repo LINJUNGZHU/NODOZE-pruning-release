@@ -111,7 +111,8 @@ def test_api_recomputes_and_persists_manual_selection(dataset,tmp_path):
     assert response.status_code==200
     assert response.json['history']['history_edges']==6
     assert response.json['poi']['event_id']=='seed2'
-    assert json.loads(cache.read_text())['poi']['event_id']=='seed2'
+    assert json.loads(cache.read_text())['poi']['event_id']=='seed'
+    assert client.get('/api/datasets/optc-0201/view',query_string={'run_id':response.json['run']['id']}).json['poi']['event_id']=='seed2'
     saved=cache.read_bytes()
     for body in [None,{},[],dict(poi_event_id='missing'),dict(poi_event_id='seed',budget_ratio=0)]:
         assert client.post('/api/datasets/optc-0201/prune',json=body).status_code==400
@@ -198,7 +199,8 @@ def test_compact_view_keeps_every_edge_and_paginated_logs(dataset,tmp_path):
     assert cache.read_bytes()==saved
     update=client.post(base+'/prune',json=dict(poi_event_id='seed2',compact=True))
     assert update.status_code==200 and 'graph' in update.json and 'edges' not in update.json
-    assert client.get(base+'/view').json['poi']['event_id']=='seed2'
+    assert client.get(base+'/view').json['poi']['event_id']=='seed'
+    assert client.get(base+'/view',query_string={'run_id':update.json['run']['id']}).json['poi']['event_id']=='seed2'
 
 
 def test_multiple_cases_persist_independently(dataset,tmp_path):
@@ -213,4 +215,5 @@ def test_multiple_cases_persist_independently(dataset,tmp_path):
     assert r.status_code==200
     assert one.read_bytes()==before
     assert client.get('/api/datasets/optc-0201/view').json['poi']['event_id']=='seed'
-    assert client.get('/api/datasets/second/view').json['poi']['event_id']=='seed2'
+    assert client.get('/api/datasets/second/view').json['poi']['event_id']=='seed'
+    assert client.get('/api/datasets/second/view',query_string={'run_id':r.json['run']['id']}).json['poi']['event_id']=='seed2'

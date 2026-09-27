@@ -1,0 +1,24 @@
+{
+  "full_ui_seconds": 5.907,
+  "metrics": "候选事件\n27,011\n6,992 个节点\n保留事件\n502\n202 个节点\n事件缩减\n98.1%\n精确事件数量比例\n预算使用\n50.2%\n预算上限 1,000 条",
+  "run_id": "7ec340cb58ca47019d765f66d9069143",
+  "certificate": {
+    "budget_valid": true,
+    "certificate_kind": "ppr_residual_bound",
+    "complete_witnesses": true,
+    "eligible_count": 485,
+    "inputs_sha256": "2169f39345a7aa8f7b565af0d9777157f962b1bb850b9ee4f7b46401c742fd81",
+    "ledger_replayed": true,
+    "objective": 57.49587974815637,
+    "objective_fraction_of_upper_bound": 1.0,
+    "objective_upper_bound": 57.49587974815637,
+    "poi_preserved": true,
+    "stop_reason": "all_eligible_evidence_retained",
+    "temporal_links_valid": true,
+    "unused_budget": 498
+  },
+  "csv_download": "nodoze-7ec340cb58ca47019d765f66d9069143.csv",
+  "offline_reopen_and_export": true,
+  "mobile_overflow": false,
+  "browser_errors": []
+}

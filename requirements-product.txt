@@ -1,0 +1,5 @@
+# Versions used for the single-organization pilot verification.
+Flask==3.0.3
+numpy==1.26.4
+pypdf==6.17.0
+gunicorn==26.2.0

@@ -9,16 +9,19 @@ import sys
 import threading
 import time
 import uuid
+import hmac
 from pathlib import Path
 
-from flask import Flask, jsonify, request, send_from_directory
+from flask import Flask, jsonify, request, send_from_directory, session
 from werkzeug.utils import secure_filename
+from werkzeug.exceptions import HTTPException
 
 
 WEBAPP_DIR = Path(__file__).resolve().parents[1]
 PROJECT_DIR = WEBAPP_DIR.parent
 sys.path.insert(0, str(PROJECT_DIR))
 from tc_pruning.optc_investigation import rescore
+from webapp.backend.investigations import RunStore, register_investigations
 FRONTEND_DIR = WEBAPP_DIR / "frontend"
 RUNTIME_DIR = WEBAPP_DIR / "runtime"
 UPLOAD_DIR = RUNTIME_DIR / "uploads"
@@ -26,7 +29,8 @@ DEFAULT_CACHE = RUNTIME_DIR / "optc-demo.json"
 ALLOWED_UPLOAD_SUFFIXES = {".json", ".jsonl", ".gz", ".avro"}
 
 
-def create_app(cache_path: str | Path | None = None, dataset_catalog: str | Path | None = None) -> Flask:
+def create_app(cache_path: str | Path | None = None, dataset_catalog: str | Path | None = None,
+               run_store: str | Path | None = None) -> Flask:
     app = Flask(__name__, static_folder=None)
     app.config["MAX_CONTENT_LENGTH"] = int(
         os.environ.get("NODOZE_MAX_UPLOAD_BYTES", 2 * 1024**3)
@@ -37,15 +41,76 @@ def create_app(cache_path: str | Path | None = None, dataset_catalog: str | Path
     jobs: dict[str, dict] = {}
     jobs_lock = threading.Lock()
     pruning_lock = threading.Lock()
+    store = RunStore(run_store or os.environ.get('NODOZE_RUN_STORE', (Path(cache_path).parent/'investigations') if cache_path else RUNTIME_DIR/'investigations'))
+    token = os.environ.get('NODOZE_ACCESS_TOKEN', '')
+    secret = os.environ.get('NODOZE_SESSION_SECRET', '')
+    if token and (len(token) < 32 or len(secret) < 32):
+        raise ValueError('Private deployment requires access token and session secret of at least 32 characters')
+    if os.environ.get('NODOZE_WEB_HOST', '127.0.0.1') not in ('127.0.0.1', 'localhost', '::1') and not token:
+        raise ValueError('Non-loopback deployment requires NODOZE_ACCESS_TOKEN and NODOZE_SESSION_SECRET')
+    app.secret_key = secret or os.urandom(32)
+    app.config.update(SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SAMESITE='Strict',
+                      SESSION_COOKIE_SECURE=os.environ.get('NODOZE_SECURE_COOKIE') == '1',
+                      PERMANENT_SESSION_LIFETIME=3600)
+    login_attempts = {}
+    login_lock = threading.Lock()
     cached = {}
-    catalog_path = Path(dataset_catalog) if dataset_catalog else RUNTIME_DIR/'examples/catalog.json'
+    catalog_path = Path(dataset_catalog or os.environ.get('NODOZE_DATASET_CATALOG', RUNTIME_DIR/'examples/catalog.json'))
 
     def catalog():
-        return json.loads(catalog_path.read_text()) if (dataset_catalog or (cache_path is None and not os.environ.get('NODOZE_DEMO_CACHE'))) and catalog_path.is_file() else []
+        return json.loads(catalog_path.read_text()) if (dataset_catalog or os.environ.get('NODOZE_DATASET_CATALOG') or (cache_path is None and not os.environ.get('NODOZE_DEMO_CACHE'))) and catalog_path.is_file() else []
 
     @app.get("/")
     def index():
-        return send_from_directory(FRONTEND_DIR, "index.html")
+        return send_from_directory(FRONTEND_DIR, "product.html")
+
+    @app.get('/research')
+    def research():
+        return send_from_directory(FRONTEND_DIR, 'index.html')
+
+    @app.before_request
+    def protect():
+        if request.method in ('POST', 'PUT', 'PATCH', 'DELETE'):
+            origin = request.headers.get('Origin')
+            if origin and origin.rstrip('/') != request.host_url.rstrip('/'):
+                return jsonify(error='Cross-origin write requests are forbidden'), 403
+        if request.path.startswith('/api/') and request.path not in ('/api/health', '/api/session') and token:
+            supplied = request.headers.get('Authorization', '').removeprefix('Bearer ')
+            if not session.get('authenticated') and not hmac.compare_digest(supplied, token):
+                return jsonify(error='请登录企业调查工作台。'), 401
+
+    @app.after_request
+    def response_headers(response):
+        response.headers['X-Content-Type-Options'] = 'nosniff'
+        response.headers['X-Frame-Options'] = 'DENY'
+        response.headers['Referrer-Policy'] = 'no-referrer'
+        response.headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; object-src 'none'; frame-ancestors 'none'; base-uri 'none'"
+        if request.path.startswith('/api/'):
+            response.headers['Cache-Control'] = 'no-store'
+        return response
+
+    @app.route('/api/session', methods=['GET', 'POST', 'DELETE'])
+    def access_session():
+        if request.method == 'DELETE':
+            session.clear()
+        elif request.method == 'POST':
+            payload = request.get_json(silent=True)
+            if not isinstance(payload, dict):
+                return jsonify(error='JSON object required'), 400
+            with login_lock:
+                now = time.monotonic(); address = request.remote_addr or 'local'
+                attempts = [t for t in login_attempts.get(address, []) if now-t < 60]
+                login_attempts[address] = attempts
+                if len(attempts) >= 5:
+                    return jsonify(error='登录尝试过多，请稍后重试。'), 429
+                supplied = payload.get('token', '')
+                if not isinstance(supplied, str) or (token and not hmac.compare_digest(supplied, token)):
+                    attempts.append(now)
+                    return jsonify(error='访问口令不正确。'), 401
+                login_attempts.pop(address, None)
+            session.clear(); session['authenticated'] = True; session.permanent = True
+        return jsonify(auth_required=bool(token), authenticated=bool(session.get('authenticated')) or not token,
+                       deployment='private' if token else 'local_demo')
 
     @app.get("/assets/<path:name>")
     def assets(name: str):
@@ -56,6 +121,12 @@ def create_app(cache_path: str | Path | None = None, dataset_catalog: str | Path
         return jsonify({"status": "ok", "cache_ready": app.config["DEMO_CACHE"].is_file()})
 
     def load_cache(dataset_id=None) -> dict:
+        run_id = request.args.get('run_id') if request else None
+        if run_id:
+            result = store.load(run_id)
+            if result['dataset']['id'] != dataset_id:
+                raise KeyError('investigation dataset mismatch')
+            return result
         path = app.config["DEMO_CACHE"]
         entry=next((e for e in catalog() if e['id']==dataset_id),None)
         if entry:path=Path(entry['cache_path'])
@@ -67,10 +138,6 @@ def create_app(cache_path: str | Path | None = None, dataset_catalog: str | Path
         if key not in cached or cached[key][0]!=version:
             cached[key]=(version,json.loads(path.read_text(encoding='utf-8')))
         return cached[key][1]
-
-    def cache_target(dataset_id):
-        entry=next((e for e in catalog() if e['id']==dataset_id),None)
-        return Path(entry['cache_path']) if entry else app.config['DEMO_CACHE']
 
     def neural_available():
         from tc_pruning.deep_graph import available_model
@@ -97,7 +164,7 @@ def create_app(cache_path: str | Path | None = None, dataset_catalog: str | Path
                 "id": data["dataset"]["id"],
                 "name": data["dataset"]["name"],
                 "description": data["dataset"]["description"],
-                "metrics": data["metrics"],
+                "metrics": data.get("metrics", dict(candidate_edges=len(data["edges"]))),
             }]
         })
 
@@ -140,13 +207,10 @@ def create_app(cache_path: str | Path | None = None, dataset_catalog: str | Path
             rescore(data, payload["poi_event_id"], budget_ratio, selection_mode,
                     payload.get('attack_quantile'), payload.get('detector'),
                     algorithm_mode=algorithm_mode)
-            target = cache_target(dataset_id)
-            temporary = target.with_name(target.name + "." + uuid.uuid4().hex + ".tmp")
-            try:
-                temporary.write_text(json.dumps(data, ensure_ascii=False, allow_nan=False), encoding="utf-8")
-                temporary.replace(target)
-            finally:
-                temporary.unlink(missing_ok=True)
+            store.save(data, dict(node_id=None, node_label=data.get('poi',{}).get('label','研究调查'),
+                anchor_event_id=payload['poi_event_id'], budget_edges=data.get('metrics',{}).get('budget_edges'),
+                retained_edges=data.get('metrics',{}).get('retained_edges'),candidate_edges=data.get('metrics',{}).get('candidate_edges'),
+                algorithm_version='research',status='research'))
             return jsonify(view_payload(data) if payload.get('compact') else data)
         except FileNotFoundError as exc:
             return jsonify({"error": str(exc)}), 503
@@ -193,7 +257,7 @@ def create_app(cache_path: str | Path | None = None, dataset_catalog: str | Path
     def view_payload(data):
         # Every raw event appears once in this compact canvas payload. No sampling.
         nodes=data['nodes'];ids={n['id']:i for i,n in enumerate(nodes)}
-        fields=('dataset','metrics','poi','poi_presets','history','algorithm','truth','logs','attack')
+        fields=('dataset','metrics','poi','poi_presets','history','algorithm','truth','logs','attack','run')
         payload={k:data[k] for k in fields if k in data}
         if 'attack' in payload:
             payload['attack']=dict(payload['attack'])
@@ -326,6 +390,17 @@ def create_app(cache_path: str | Path | None = None, dataset_catalog: str | Path
             )[-4000:]
         return jsonify(response)
 
+    register_investigations(app, load_cache, store, pruning_lock)
+
+    @app.errorhandler(HTTPException)
+    def http_error(exc):
+        return jsonify(error=exc.description), exc.code
+
+    @app.errorhandler(Exception)
+    def unexpected_error(exc):
+        incident = uuid.uuid4().hex[:12]
+        app.logger.exception('Investigation service error %s', incident)
+        return jsonify(error='调查服务暂不可用，请联系部署管理员。', incident_id=incident), 500
     return app
 
 
