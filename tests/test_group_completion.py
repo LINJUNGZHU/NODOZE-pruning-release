@@ -115,3 +115,12 @@ def test_unknown_pool_hash_cannot_disable_independent_replay():
         resolve_pool(dict(pool_sha256='missing',candidate_scope='bounded'),{})
     with pytest.raises(ValueError,match='unknown frozen'):
         resolve_pool(dict(pool_sha256='missing',candidate_scope='full_ledger'),{})
+
+
+def test_rrf_adapter_uses_only_unlabeled_views_and_same_witness_contract():
+    from tc_pruning.group_completion_rrf import RankedGroups
+    data,pool,diag=tiny_pool()
+    g=GroupIndex.from_events(data['src'],data['dst'],data['relation'],data['timestamp'],data['tie'],20)
+    order=np.array([1,0]);ranked=RankedGroups(g,order)
+    assert np.array_equal(ranked.ranked_descriptors(np.ones(4),data['tie']),order)
+    assert np.array_equal(ranked.group_of,g.group_of)

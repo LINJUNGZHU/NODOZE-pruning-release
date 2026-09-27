@@ -4,7 +4,7 @@ from pathlib import Path
 
 
 def main():
-    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--output',type=Path,required=True);p.add_argument('--data-root',type=Path,required=True);p.add_argument('--workers',type=int,default=2);a=p.parse_args()
+    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--output',type=Path,required=True);p.add_argument('--data-root',type=Path,required=True);p.add_argument('--workers',type=int,default=2);p.add_argument('--runner',default='scripts/run_group_completion_v8.py');a=p.parse_args()
     if a.output.exists():raise FileExistsError(a.output)
     if a.workers<1:raise ValueError('workers must be positive')
     (a.output/'logs').mkdir(parents=True)
@@ -12,7 +12,7 @@ def main():
     def run(job):
         i,rep=job;tag=f'quality-case{i}' if rep is None else f'repeat{rep}-case{i}'
         out=a.output/'quality' if rep is None else a.output/'profiles'/f'repeat{rep}'
-        cmd=[sys.executable,'scripts/run_group_completion_v8.py','--case',str(i),'--data-root',str(a.data_root),'--output-dir',str(out)]
+        cmd=[sys.executable,a.runner,'--case',str(i),'--data-root',str(a.data_root),'--output-dir',str(out)]
         if rep is not None:cmd+=['--profile-only']
         with (a.output/'logs'/f'{tag}.log').open('w') as f:r=subprocess.run(cmd,env=env,stdout=f,stderr=subprocess.STDOUT)
         print(tag,r.returncode,flush=True)

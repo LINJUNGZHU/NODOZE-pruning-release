@@ -12,9 +12,9 @@
 
 [实现、公式与配置](docs/rasp-rcvp-method.md) · [多场景消融与负结果](docs/rasp-rcvp-report.md) · [研究来源](docs/rasp-rcvp-references.md)。CLI 完整配置为 `configs/rcvp_full.json`，传播单独启用可用 `configs/rcvp_relation_aware.json`。
 
-### 本轮评估范围：不执行 THEIA 数据集
+### 历史 RASP-RCVP 评估范围：该轮未重跑 THEIA
 
-按用户要求，后续本轮 RASP-RCVP 评估**不启动、不重跑 THEIA 数据集**，仅使用已完成的 CADETS 06、12、13，汇总 3 场景 × 9 方法 × 4 预算（5%、10%、20%、30%），共 108 组结果。此前已启动的 THEIA 进程保留运行，不人为终止；本轮交付不等待它，也不将其未完成结果纳入结论。
+按当时的用户要求，该历史轮次 RASP-RCVP 评估**不启动、不重跑 THEIA 数据集**，仅使用已完成的 CADETS 06、12、13，汇总 3 场景 × 9 方法 × 4 预算（5%、10%、20%、30%），共 108 组结果。此前已启动的 THEIA 进程保留运行，不人为终止；本轮交付不等待它，也不将其未完成结果纳入结论。
 
 现有结果显示传播与核验在部分场景改善派生路径保留，但渐进剪枝在低预算下存在事件或正例实体保留退步，**不切换默认算法**。完整比较与标签限制见 [评估报告](docs/rasp-rcvp-report.md)。
 

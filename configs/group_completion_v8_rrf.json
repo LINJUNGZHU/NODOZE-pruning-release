@@ -1,0 +1,61 @@
+{
+  "protocol": "group-completion-v8-rrf-development-revision",
+  "cases": [
+    {
+      "case_index": 0,
+      "name": "Five Dir Case 1",
+      "ledger": "output/tc/sparse-five/fivedirections/case1-phishing-results-ledger/edge-scores.jsonl.gz",
+      "ledger_sha256": "27ac808c4875ff7bc212cd44d0b82e081fc4f0279cf13a9508eab91fadcb7eb2",
+      "history_prefix": "output/tc/history-channel-v6/history/case0"
+    },
+    {
+      "case_index": 1,
+      "name": "Five Dir Case 3",
+      "ledger": "output/tc/sparse-five/fivedirections/case3-two-poi-results-ledger/edge-scores.jsonl.gz",
+      "ledger_sha256": "e4a914988691c66b4ee83b0475c1193a0d1324843c32d0543031fa9c4e25f7dd",
+      "history_prefix": "output/tc/history-channel-v6/history/case1"
+    },
+    {
+      "case_index": 2,
+      "name": "Theia Case 1",
+      "ledger": "output/tc/sparse-five/theia-case1-direct-3poi-fast-results-ledger/edge-scores.jsonl.gz",
+      "ledger_sha256": "b7924926bc633ef94104179e087bc0dbe0268f610020c194fda664d37927b827",
+      "history_prefix": "output/tc/history-channel-v6/history/case2"
+    },
+    {
+      "case_index": 3,
+      "name": "Theia Case 3",
+      "ledger": "output/tc/theia-case3-poi-prefix-fixed-2026-09-09_23-36-33/scenario-theia-case3/poi-prefix-3-ledger/edge-scores.jsonl.gz",
+      "ledger_sha256": "95884055355027cbd379470467f28b1d36f851af1a9ce8da8adf7f94dd70ec5b",
+      "history_prefix": "output/tc/history-channel-v6/history/case3"
+    },
+    {
+      "case_index": 4,
+      "name": "Theia Case 5",
+      "ledger": "output/tc/sparse-five/trace-case5-paper-results-ledger/edge-scores.jsonl.gz",
+      "ledger_sha256": "cb16eaf3d9c098f5528b334a7d7dc94cfe60faf8cc5a8d59d13b1cb1eeef48a8",
+      "history_prefix": "output/tc/history-channel-v6/history/case4"
+    }
+  ],
+  "budgets": [
+    64,
+    256,
+    1024,
+    4096
+  ],
+  "eta": 1.0,
+  "materialized_cap": 32768,
+  "max_examined": 327680,
+  "group_window_ns": 10000000000,
+  "group_relation_policy": "across_relations",
+  "methods": [
+    "v8_rrf_group_edge",
+    "v8_rrf_group_concave"
+  ],
+  "profiling_repeats": 5,
+  "score_config": "configs/history_channel_v6.json",
+  "label_policy": "independent_evaluator_only",
+  "split": "previously_used_development_cases",
+  "rrf_c": 60,
+  "revision_reason": "after r3 candidate losses; one fixed development revision, not unseen confirmation"
+}

@@ -55,13 +55,13 @@ def verify(decision,pool,data):
 
 
 def main():
-    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--input',type=Path,required=True);p.add_argument('--output',type=Path,required=True);p.add_argument('--profiles',type=Path);a=p.parse_args()
+    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--input',type=Path,required=True);p.add_argument('--output',type=Path,required=True);p.add_argument('--profiles',type=Path);p.add_argument('--config',type=Path,default=Path('configs/group_completion_v8.json'));a=p.parse_args()
     if a.output.exists():raise FileExistsError(a.output)
-    cfg=json.loads(Path('configs/group_completion_v8.json').read_text())
+    cfg=json.loads(a.config.read_text())
     refpath=Path('docs/sparse-five-local-critical-reference.json');reference=json.loads(refpath.read_text());rows=[];cases=[]
     for i,ref in enumerate(reference['cases']):
         manifest=read(a.input/f'case{i}'/'manifest.json.gz')
-        if manifest['labels_used'] or manifest['ledger_sha256']!=ref['ledger_sha256'] or manifest['config_sha256']!=sha256_file(Path('configs/group_completion_v8.json')):raise ValueError('freeze/reference mismatch')
+        if manifest['labels_used'] or manifest['ledger_sha256']!=ref['ledger_sha256'] or manifest['config_sha256']!=sha256_file(a.config):raise ValueError('freeze/reference mismatch')
         for source,digest in manifest['source_sha256'].items():
             if sha256_file(Path(source))!=digest:raise ValueError('source changed: '+source)
         ledger=Path(manifest['ledger_path'])
