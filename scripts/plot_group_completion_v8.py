@@ -17,8 +17,8 @@ def main():
             y=[100*r[key] if key.startswith('macro') else 100*statistics.mean(x[key] for x in report['rows'] if x['method']==method and x['budget']==r['budget']) for r in rows]
             ax.plot([r['budget'] for r in rows],y,marker='o',label=method)
     for ax,title in zip(axes,['Known-positive recall','Known-positive recall excluding POI','Reference group: any known member','Reference group: all known members']):
-        ax.set_xscale('log',base=2);ax.set_xticks([64,256,1024,4096],labels=['64','256','1024','4096']);ax.set_ylim(0,101);ax.set_xlabel('Raw ledger-event budget');ax.set_ylabel('Macro recall (%)');ax.set_title(title);ax.grid(alpha=.2)
-    fig.legend(*axes[1].get_legend_handles_labels(),fontsize=8,loc='lower center',bbox_to_anchor=(.5,-.08),ncol=3)
+        ax.set_xscale('log',base=2);ax.set_xticks([64,256,1024,4096],labels=['64','256','1024','4096']);ax.set_ylim(0,101);ax.set_xlabel('Raw ledger-event budget');ax.set_ylabel('Macro recall (%)' if 'recall' in title else 'Macro group coverage (%)');ax.set_title(title);ax.grid(alpha=.2)
+    fig.legend(*axes[1].get_legend_handles_labels(),fontsize=8,loc='lower center',bbox_to_anchor=(.5,-.15),ncol=3)
     fig.suptitle('Five development cases; partial positives; Case 5 uses inferred TRACE mapping',fontsize=9)
     for ext in ('pdf','png'):fig.savefig(a.output/f'budget-curves.{ext}',dpi=180,bbox_inches='tight')
     plt.close(fig)
