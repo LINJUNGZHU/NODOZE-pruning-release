@@ -1,8 +1,10 @@
 # NODOZE：基于历史对比与可核验证据的溯源图攻击调查
 
-当前 OPTC 网页主流程是：**用 POI 与历史行为对比寻找值得保留的边；在完整候选日志上独立推断攻击进程；把进程活动和判定依据整理成证据图；最后用原始 PDF 的 Ground Truth 核验。** 边的相关性评分、攻击节点判定和真值评估是三个不同环节。
+当前产品入口 `/` 是**指定节点的预算约束调查**：搜索进程、文件或网络实体，选择关联时间锚，以该节点作为图扩散起点，输出带严格时间见证的事件集合。默认产品流程无需外部告警，不读取参考真值；结果可以重开、导出和离线复放。原攻击检测实验界面保留在 `/research`。
 
-[网页启动与操作说明](webapp/README.md) · [PDF 真值与最新实测](docs/pdf-groundtruth-study.md) · [逐边选择方法与证明范围](docs/evidence-selection-method.md)
+[产品评审、实测与交付范围](docs/product/README.md) · [私有部署与客户数据接入](docs/product/deployment.md) · [节点调查 HTML](webapp/frontend/product.html) · [论文实验协议](docs/group-completion-v8/paper-protocol.md)
+
+可交付范围为单组织私有部署试点。五案 V8 完整事件组研究保持离线实验；评分仍以频率统计和图扩散为中心。各轮指标、候选范围及失败结果分别记录，当前没有完整真值支持“超过 SPARSE”的结论。
 
 ## RASP-RCVP 实验分支
 
@@ -22,7 +24,7 @@
 
 | 部分 | 入口与用途 |
 |---|---|
-| 前端 | `webapp/frontend/`：`index.html` 页面、`styles.css` 样式、`app.js` 案例/图/日志交互、`attack.js` 攻击线索展示；原生 HTML/CSS/JS，无需 npm 构建。 |
+| 前端 | `webapp/frontend/`：`product.html`、`product.css`、`product.js` 节点调查；`index.html`、`app.js`、`attack.js` 原研究界面；原生 HTML/CSS/JS，无需 npm 构建。 |
 | 后端 | `webapp/backend/app.py`：Flask，同时提供静态页面与分析 API，连接案例、POI、剪枝及攻击报告。 |
 | 算法与实验 | `tc_pruning/` 算法；`scripts/` 离线实验；`webapp/scripts/` 案例准备、评估和报告核验。社交传播新方法仍是离线实验，未替换网页默认算法。 |
 | 本地数据 | `webapp/runtime/` 存放案例缓存与研究数据；`output/` 存放实验输出。原始日志、数据库、真值归档不随 Git 上传，新机器需按 [网页说明](webapp/README.md) 准备数据。 |

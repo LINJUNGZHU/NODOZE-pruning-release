@@ -154,8 +154,8 @@ def build_pool(data,primary,groups,routes,mandatory,cap=32768,max_examined=32768
         anchors=tuple(w.anchor for w in pending)
         if (g,anchors) in admitted_prefixes:return
         if len(materialized)+sum(e not in materialized for e in union)>limit:return
-        s['witnesses']=pending
-        full=s['cursor']==len(s['members'])
+        if len(pending)>len(s['witnesses']):s['witnesses']=pending
+        full=s['cursor']==len(s['members']) and len(pending)==len(s['witnesses'])
         level='full' if full else 'representative' if len(pending)==1 else 'continuation'
         actions.append(Bundle(anchors,tuple(sorted(union)),tuple(w.digest for w in pending),g,level))
         materialized.update(union);admitted_prefixes.add((g,anchors))

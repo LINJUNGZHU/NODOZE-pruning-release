@@ -14,6 +14,9 @@
 | 时间与路径 | [v1–v4](temporal-diffusion-study.md) | 时间条件、PPR/热核、配额与原始路径 |
 | 边际收益 | [v5](marginal-witness-study.md) | 同池贪心/MILP、同选择规则的PPR/热核 |
 | 历史与通道 | [v6](history-channel-study.md) | 历史条件频率、通道共享和候选扩展 |
+| 真实候选预算 | [v7-r2](budget-evidence-v7-r2/report.md) | 组检索、原始事件物化与资源约束 |
+| 完整事件组 | [v8 协议](group-completion-v8/paper-protocol.md) | 分辨率展开、精确跨组边际、同池收益消融 |
+| 节点调查产品 | [交付评审](product/README.md) | HTML、节点起点、不可变记录及证据导出 |
 
 v6 主要入口：
 

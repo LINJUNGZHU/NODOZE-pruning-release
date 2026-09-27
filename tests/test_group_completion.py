@@ -101,3 +101,17 @@ def test_independent_replay_rejects_incorrect_union():
     data,_,_=tiny_pool()
     decision=dict(selected_ids=['seed','a'],mandatory_ids=['seed'],budget=2,certificates=[])
     with pytest.raises(ValueError,match='certificate union'):verify(decision,None,data)
+
+
+def test_final_representative_does_not_shrink_or_claim_complete_group():
+    _,pool,diag=tiny_pool()
+    assert not any(a.anchors==(1,) and a.level=='full' for a in pool.actions)
+    assert diag['cached_certificates']==len(pool.certificates)
+
+
+def test_unknown_pool_hash_cannot_disable_independent_replay():
+    from scripts.evaluate_group_completion_v8 import resolve_pool
+    with pytest.raises(ValueError,match='missing frozen'):
+        resolve_pool(dict(pool_sha256='missing',candidate_scope='bounded'),{})
+    with pytest.raises(ValueError,match='unknown frozen'):
+        resolve_pool(dict(pool_sha256='missing',candidate_scope='full_ledger'),{})

@@ -20,6 +20,13 @@ def literal_utility(pool,events,edge=False,eta=1.):
     return eta*linear+sum(pool['group_weights'][str(g)]*math.sqrt(c) for g,c in counts.items())
 
 
+def resolve_pool(decision,pools):
+    pool=pools.get(decision['pool_sha256'])
+    if decision['candidate_scope']=='bounded' and pool is None:raise ValueError('missing frozen candidate pool')
+    if decision['pool_sha256'] is not None and pool is None:raise ValueError('unknown frozen candidate pool hash')
+    return pool
+
+
 def verify(decision,pool,data):
     ids=data['ids'];index={e:i for i,e in enumerate(ids)}
     chosen=set(decision['selected_ids']);mandatory=set(decision['mandatory_ids'])
@@ -70,7 +77,8 @@ def main():
         for entry in manifest['decisions']:
             path=Path(entry['path'])
             if sha256_file(path)!=entry['sha256']:raise ValueError('decision changed')
-            d=read(path);pool=pools.get(d['pool_sha256']);certs=verify(d,pool,data)
+            d=read(path);pool=resolve_pool(d,pools)
+            certs=verify(d,pool,data)
             selected=set(d['selected_ids']);mandatory=set(d['mandatory_ids']);new_positive=positive-mandatory
             groups=[set(ex['parallel_event_ids']) for ex in ref['exemplars']]
             rows.append(dict(case_index=i,name=manifest['name'],method=d['method'],budget=d['budget'],selected_events=len(selected),
