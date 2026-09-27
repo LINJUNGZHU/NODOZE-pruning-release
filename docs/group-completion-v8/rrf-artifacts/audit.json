@@ -1,0 +1,213 @@
+{
+  "quality_executions": 5,
+  "profile_executions": 25,
+  "decisions": 40,
+  "workers": 5,
+  "threads_per_process": 1,
+  "python": "3.12.6",
+  "numpy": "1.26.4",
+  "scipy": "1.14.1",
+  "platform": "Linux-5.15.0-25-generic-x86_64-with-glibc2.35",
+  "processor": "x86_64",
+  "cpu_info": "Architecture:                    x86_64\nCPU op-mode(s):                  32-bit, 64-bit\nAddress sizes:                   46 bits physical, 48 bits virtual\nByte Order:                      Little Endian\nCPU(s):                          112\nOn-line CPU(s) list:             0-111\nVendor ID:                       GenuineIntel\nModel name:                      Intel(R) Xeon(R) Gold 6258R CPU @ 2.70GHz\nCPU family:                      6\nModel:                           85\nThread(s) per core:              2\nCore(s) per socket:              28\nSocket(s):                       2\nStepping:                        7\nCPU max MHz:                     4000.0000\nCPU min MHz:                     1000.0000\nBogoMIPS:                        5400.00\nFlags:                           fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc art arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc cpuid aperfmperf pni pclmulqdq dtes64 ds_cpl vmx smx est tm2 ssse3 sdbg fma cx16 xtpr pdcm pcid dca sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm 3dnowprefetch cpuid_fault epb cat_l3 cdp_l3 invpcid_single intel_ppin ssbd mba ibrs ibpb stibp ibrs_enhanced tpr_shadow vnmi flexpriority ept vpid ept_ad fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid cqm mpx rdt_a avx512f avx512dq rdseed adx smap clflushopt clwb intel_pt avx512cd avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local dtherm ida arat pln pts hwp hwp_act_window hwp_epp hwp_pkg_req pku ospke avx512_vnni md_clear flush_l1d arch_capabilities\nVirtualization:                  VT-x\nL1d cache:                       1.8 MiB (56 instances)\nL1i cache:                       1.8 MiB (56 instances)\nL2 cache:                        56 MiB (56 instances)\nL3 cache:                        77 MiB (2 instances)\nNUMA node(s):                    2\nNUMA node0 CPU(s):               0-27,56-83\nNUMA node1 CPU(s):               28-55,84-111\nVulnerability Itlb multihit:     KVM: Mitigation: VMX disabled\nVulnerability L1tf:              Not affected\nVulnerability Mds:               Not affected\nVulnerability Meltdown:          Not affected\nVulnerability Spec store bypass: Mitigation; Speculative Store Bypass disabled via prctl and seccomp\nVulnerability Spectre v1:        Mitigation; usercopy/swapgs barriers and __user pointer sanitization\nVulnerability Spectre v2:        Mitigation; Enhanced IBRS, IBPB conditional, RSB filling\nVulnerability Srbds:             Not affected\nVulnerability Tsx async abort:   Mitigation; TSX disabled\n",
+  "cpu_quota": "1800000 100000",
+  "inputs": [
+    {
+      "case_index": 0,
+      "ledger_sha256": "27ac808c4875ff7bc212cd44d0b82e081fc4f0279cf13a9508eab91fadcb7eb2",
+      "history_files": {
+        "/root/NODOZE-pruning-release/output/tc/history-channel-v6/history/case0.json": "9fca1d57280e839916845cf10243a9ae007fe3b6d95dd5999c42509aa6f71422",
+        "/root/NODOZE-pruning-release/output/tc/history-channel-v6/history/case0.npz": "9ea97b2e5985cd0a912b110be09a409f31d04701e6e3895f66264ae4ca98445d",
+        "/root/NODOZE-pruning-release/output/tc/history-channel-v6/history/case0.history.json.gz": "fa1bcd97bfb312b82f32ed199bac061b08a69cc4d807d269d01b956a026199cd"
+      },
+      "pool_records": [
+        {
+          "method": "v8_rrf_group",
+          "path": "/root/NODOZE-pruning-release/output/tc/group-completion-v8-rrf-r4/quality/case0/pools/v8_rrf_group.json.gz",
+          "sha256": "16b0203d73e42c920f86c766cd26b670e002bde97e64eee1cc52974f3e8982bc",
+          "diag": {
+            "cap": 32768,
+            "max_examined": 327680,
+            "examined_events": 189531,
+            "unreachable_examined": 90937,
+            "materialized_events": 32768,
+            "actions": 32244,
+            "certificates": 32244,
+            "executable_anchors": 32244,
+            "zero_score_details_admitted": 0,
+            "cached_certificates": 32244,
+            "representative_actions": 11713,
+            "continuation_actions": 8249,
+            "full_actions": 12282,
+            "full_scope": "all examined reachable members only; not attack truth",
+            "scan_truncated": false,
+            "representatives_only": false,
+            "seconds": 22.86211534962058,
+            "labels_used": false,
+            "rank_policy": "rrf",
+            "rrf_c": 60,
+            "revision": "r4; same V8 scoring/objective/path contract; three original unlabeled ranking views"
+          }
+        }
+      ]
+    },
+    {
+      "case_index": 1,
+      "ledger_sha256": "e4a914988691c66b4ee83b0475c1193a0d1324843c32d0543031fa9c4e25f7dd",
+      "history_files": {
+        "/root/NODOZE-pruning-release/output/tc/history-channel-v6/history/case1.json": "baeeb6d6167d4b783ddc48b2fec8d1d1e68de5cc06c86e162b6648733c1febb2",
+        "/root/NODOZE-pruning-release/output/tc/history-channel-v6/history/case1.npz": "3d33293767737f127d38eabad29fdc81122bbadc001ec488d71d3eba2f9816ce",
+        "/root/NODOZE-pruning-release/output/tc/history-channel-v6/history/case1.history.json.gz": "f68f954b4ca35b8d599e06c74670281d6b25f11cc6ba264dd550acabcd507419"
+      },
+      "pool_records": [
+        {
+          "method": "v8_rrf_group",
+          "path": "/root/NODOZE-pruning-release/output/tc/group-completion-v8-rrf-r4/quality/case1/pools/v8_rrf_group.json.gz",
+          "sha256": "587d9736561f9c35906914724a73244a6956c06b7124807bb3f0d3f996270d63",
+          "diag": {
+            "cap": 32768,
+            "max_examined": 327680,
+            "examined_events": 209883,
+            "unreachable_examined": 147529,
+            "materialized_events": 32768,
+            "actions": 32513,
+            "certificates": 32513,
+            "executable_anchors": 32513,
+            "zero_score_details_admitted": 0,
+            "cached_certificates": 32513,
+            "representative_actions": 11368,
+            "continuation_actions": 7340,
+            "full_actions": 13805,
+            "full_scope": "all examined reachable members only; not attack truth",
+            "scan_truncated": false,
+            "representatives_only": false,
+            "seconds": 11.757688879966736,
+            "labels_used": false,
+            "rank_policy": "rrf",
+            "rrf_c": 60,
+            "revision": "r4; same V8 scoring/objective/path contract; three original unlabeled ranking views"
+          }
+        }
+      ]
+    },
+    {
+      "case_index": 2,
+      "ledger_sha256": "b7924926bc633ef94104179e087bc0dbe0268f610020c194fda664d37927b827",
+      "history_files": {
+        "/root/NODOZE-pruning-release/output/tc/history-channel-v6/history/case2.json": "091eb6d6fa8a5f37743beb5533d600f4635d9c1a5d74febbacec737f28c26175",
+        "/root/NODOZE-pruning-release/output/tc/history-channel-v6/history/case2.npz": "36e4b9da6f45f61c478eddc1b28d6f069d2876c491dc34b4901975fe8c9fd3a5",
+        "/root/NODOZE-pruning-release/output/tc/history-channel-v6/history/case2.history.json.gz": "d14d87ba72ce2302912216abe0342fcaafddf69e6e795f14fc9327d1b7d9934f"
+      },
+      "pool_records": [
+        {
+          "method": "v8_rrf_group",
+          "path": "/root/NODOZE-pruning-release/output/tc/group-completion-v8-rrf-r4/quality/case2/pools/v8_rrf_group.json.gz",
+          "sha256": "c432693a5017add093f79b6fc653652ab1f6a54ab3e43ae42121e33fbd9c40f6",
+          "diag": {
+            "cap": 32768,
+            "max_examined": 327680,
+            "examined_events": 106714,
+            "unreachable_examined": 10646,
+            "materialized_events": 32768,
+            "actions": 31213,
+            "certificates": 31213,
+            "executable_anchors": 31213,
+            "zero_score_details_admitted": 0,
+            "cached_certificates": 31213,
+            "representative_actions": 14427,
+            "continuation_actions": 11354,
+            "full_actions": 5432,
+            "full_scope": "all examined reachable members only; not attack truth",
+            "scan_truncated": false,
+            "representatives_only": false,
+            "seconds": 23.340921327471733,
+            "labels_used": false,
+            "rank_policy": "rrf",
+            "rrf_c": 60,
+            "revision": "r4; same V8 scoring/objective/path contract; three original unlabeled ranking views"
+          }
+        }
+      ]
+    },
+    {
+      "case_index": 3,
+      "ledger_sha256": "95884055355027cbd379470467f28b1d36f851af1a9ce8da8adf7f94dd70ec5b",
+      "history_files": {
+        "/root/NODOZE-pruning-release/output/tc/history-channel-v6/history/case3.json": "2d1ff7dc693d5d9ce8c270120ab3deb92e148e434a08f5a2a884d0ebaa47e116",
+        "/root/NODOZE-pruning-release/output/tc/history-channel-v6/history/case3.npz": "0011daf6d1a37b72f85e1e09dc0a2b5aaa87410809bc0dbddd9e12c433f22e73",
+        "/root/NODOZE-pruning-release/output/tc/history-channel-v6/history/case3.history.json.gz": "1f1681385399025468434d9b1a223672f49e4fa4157927fc26870a1712777894"
+      },
+      "pool_records": [
+        {
+          "method": "v8_rrf_group",
+          "path": "/root/NODOZE-pruning-release/output/tc/group-completion-v8-rrf-r4/quality/case3/pools/v8_rrf_group.json.gz",
+          "sha256": "6b209a88f60904866365d00289e94d4e862a558fd11188cd127913839ed50293",
+          "diag": {
+            "cap": 32768,
+            "max_examined": 327680,
+            "examined_events": 145757,
+            "unreachable_examined": 17180,
+            "materialized_events": 32768,
+            "actions": 32022,
+            "certificates": 32023,
+            "executable_anchors": 32023,
+            "zero_score_details_admitted": 0,
+            "cached_certificates": 32023,
+            "representative_actions": 8702,
+            "continuation_actions": 5256,
+            "full_actions": 18064,
+            "full_scope": "all examined reachable members only; not attack truth",
+            "scan_truncated": false,
+            "representatives_only": false,
+            "seconds": 32.499610126018524,
+            "labels_used": false,
+            "rank_policy": "rrf",
+            "rrf_c": 60,
+            "revision": "r4; same V8 scoring/objective/path contract; three original unlabeled ranking views"
+          }
+        }
+      ]
+    },
+    {
+      "case_index": 4,
+      "ledger_sha256": "cb16eaf3d9c098f5528b334a7d7dc94cfe60faf8cc5a8d59d13b1cb1eeef48a8",
+      "history_files": {
+        "/root/NODOZE-pruning-release/output/tc/history-channel-v6/history/case4.json": "39fc40c08ce06209c1ad60bedde990fff4b1166cdac9fe5a8b3fd1af6bbbd2da",
+        "/root/NODOZE-pruning-release/output/tc/history-channel-v6/history/case4.npz": "732c454094227004f4384727041ecfedc5c5b38a2efcc50d0b45db40aad9b400",
+        "/root/NODOZE-pruning-release/output/tc/history-channel-v6/history/case4.history.json.gz": "1125305074d8a3f34cef5d8bd1d447f0fc921be05fe1fbcd9786ae94f68d779c"
+      },
+      "pool_records": [
+        {
+          "method": "v8_rrf_group",
+          "path": "/root/NODOZE-pruning-release/output/tc/group-completion-v8-rrf-r4/quality/case4/pools/v8_rrf_group.json.gz",
+          "sha256": "a72371b374d8359a8e02166b8e0d065f4b394fcd1f7d8cd72724fe4305c12781",
+          "diag": {
+            "cap": 32768,
+            "max_examined": 327680,
+            "examined_events": 78415,
+            "unreachable_examined": 446,
+            "materialized_events": 32768,
+            "actions": 32755,
+            "certificates": 32755,
+            "executable_anchors": 32755,
+            "zero_score_details_admitted": 0,
+            "cached_certificates": 32755,
+            "representative_actions": 16331,
+            "continuation_actions": 81,
+            "full_actions": 16343,
+            "full_scope": "all examined reachable members only; not attack truth",
+            "scan_truncated": false,
+            "representatives_only": false,
+            "seconds": 9.748795688152313,
+            "labels_used": false,
+            "rank_policy": "rrf",
+            "rrf_c": 60,
+            "revision": "r4; same V8 scoring/objective/path contract; three original unlabeled ranking views"
+          }
+        }
+      ]
+    }
+  ],
+  "large_pool_archive": "/root/NODOZE-pruning-release/output/tc/group-completion-v8-rrf-r4/quality",
+  "limitation": "pool certificates remain in local archive; published decisions include selected certificates; manifest paths are original execution paths, restore data or rerun to replay full pools"
+}

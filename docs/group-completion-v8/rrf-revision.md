@@ -6,7 +6,7 @@
 
 代码：group_completion_rrf.py 为原 GroupIndex 包装固定排序，所有成员/分数/偏移仍由原组索引提供。运行器不读取标签，生成后独立评测。两方法：相同候选池的 edge 和 concave；B=64/256/1024/4096。五案质量 40 项，五次独立进程资源重复。没有为每个案例挑参数，也不扫描新的参数网格。
 
-这是观察已用开发案例后提出的修订，不是未见确认实验。无论结果好坏都保存，不把两轮最高单元格拼成一个方法。本次到此结束调参；产品默认保持已验收版本。
+这是观察已用开发案例后提出的修订，不是未见确认实验。无论结果好坏都保存，不把两轮最高单元格拼成一个方法。未新增评分参数搜索；后续只修复已定位的[展开准入问题](expansion-fix.md)，不是扩大超参数网格。产品默认保持已验收版本。
 
 ```bash
 PYTHONPATH=. python scripts/run_group_completion_matrix_v8.py --runner scripts/run_group_completion_rrf_v8.py --workers 5 --data-root /path/to/data --output /path/to/v8-rrf

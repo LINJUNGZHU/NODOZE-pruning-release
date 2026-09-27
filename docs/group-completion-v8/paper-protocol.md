@@ -58,6 +58,10 @@ F(S)=Σ_g w_g√|S∩g|+ηΣ_e∈S score(e)，固定 η=1。事件集合上的�
 - [Iyer & Bilmes, AISTATS 2019](https://proceedings.mlr.press/v89/iyer19b.html)：缓存可维护统计来加速子模优化。借鉴事件到动作的反向索引和组计数更新，仍独立核验字面目标。
 - [Yaroslavtsev et al., AISTATS 2020](https://proceedings.mlr.press/v108/yaroslavtsev20a.html)：标准线性背包约束下的 Greedy+Max。本实现只采用贪心之外检查单动作的启发，不是论文算法，路径共享成本不满足其假设。
 
+## 后续实际结果
+
+三轮开发结果、全部失败与 200 项质量决策见[完整对比](comparison.md)。RRF 换序未解决主问题；展开准入修正使 B=1024 单边目标宏覆盖从 13.98% 提高到 57.98%，仍低于原完整账本强基线 76.96%。凹组目标也未胜过同池单边目标。已完成各轮五次资源重复；新增方法未替换产品默认。
+
 ## 复现
 
 Python 环境须包含 numpy、scipy 与仓库已有依赖。原始日志/历史缓存不上传 GitHub。质量运行器在读标签之前完成输出：

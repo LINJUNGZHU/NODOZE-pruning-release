@@ -1,0 +1,1837 @@
+{
+  "protocol": "group-completion-v8-rrf-development-revision",
+  "label_sha256": "9ab4dc7a796ac7bed73aaa8ea1d53fbe24ca2552f4327611966f06875c8c5bbd",
+  "scope": "five previously inspected development cases; partial positives, no official-equivalent accuracy claim",
+  "rows": [
+    {
+      "case_index": 0,
+      "name": "Five Dir Case 1",
+      "method": "v8_rrf_group_edge",
+      "budget": 64,
+      "selected_events": 64,
+      "candidate_events": 466257,
+      "materialized_events": 32768,
+      "tp_known": 1,
+      "positive_events": 38,
+      "recall_known": 0.02631578947368421,
+      "recall_incremental": 0.0,
+      "group_any": 0.1111111111111111,
+      "group_full": 0.0,
+      "pool_positive_recall": 0.21052631578947367,
+      "lineage_selected": 0,
+      "verified_certificates": 61,
+      "selection_seconds": 0.561810452491045,
+      "candidate_scope": "bounded",
+      "official_equivalent": {
+        "fp": null,
+        "fn": null,
+        "precision": null,
+        "recall": null,
+        "f1": null
+      }
+    },
+    {
+      "case_index": 0,
+      "name": "Five Dir Case 1",
+      "method": "v8_rrf_group_edge",
+      "budget": 256,
+      "selected_events": 256,
+      "candidate_events": 466257,
+      "materialized_events": 32768,
+      "tp_known": 1,
+      "positive_events": 38,
+      "recall_known": 0.02631578947368421,
+      "recall_incremental": 0.0,
+      "group_any": 0.1111111111111111,
+      "group_full": 0.0,
+      "pool_positive_recall": 0.21052631578947367,
+      "lineage_selected": 0,
+      "verified_certificates": 253,
+      "selection_seconds": 0.6071590185165405,
+      "candidate_scope": "bounded",
+      "official_equivalent": {
+        "fp": null,
+        "fn": null,
+        "precision": null,
+        "recall": null,
+        "f1": null
+      }
+    },
+    {
+      "case_index": 0,
+      "name": "Five Dir Case 1",
+      "method": "v8_rrf_group_edge",
+      "budget": 1024,
+      "selected_events": 1024,
+      "candidate_events": 466257,
+      "materialized_events": 32768,
+      "tp_known": 1,
+      "positive_events": 38,
+      "recall_known": 0.02631578947368421,
+      "recall_incremental": 0.0,
+      "group_any": 0.1111111111111111,
+      "group_full": 0.0,
+      "pool_positive_recall": 0.21052631578947367,
+      "lineage_selected": 0,
+      "verified_certificates": 1012,
+      "selection_seconds": 0.936839122325182,
+      "candidate_scope": "bounded",
+      "official_equivalent": {
+        "fp": null,
+        "fn": null,
+        "precision": null,
+        "recall": null,
+        "f1": null
+      }
+    },
+    {
+      "case_index": 0,
+      "name": "Five Dir Case 1",
+      "method": "v8_rrf_group_edge",
+      "budget": 4096,
+      "selected_events": 4096,
+      "candidate_events": 466257,
+      "materialized_events": 32768,
+      "tp_known": 6,
+      "positive_events": 38,
+      "recall_known": 0.15789473684210525,
+      "recall_incremental": 0.13513513513513514,
+      "group_any": 0.5555555555555556,
+      "group_full": 0.3333333333333333,
+      "pool_positive_recall": 0.21052631578947367,
+      "lineage_selected": 11,
+      "verified_certificates": 4040,
+      "selection_seconds": 1.826701007783413,
+      "candidate_scope": "bounded",
+      "official_equivalent": {
+        "fp": null,
+        "fn": null,
+        "precision": null,
+        "recall": null,
+        "f1": null
+      }
+    },
+    {
+      "case_index": 0,
+      "name": "Five Dir Case 1",
+      "method": "v8_rrf_group_concave",
+      "budget": 64,
+      "selected_events": 64,
+      "candidate_events": 466257,
+      "materialized_events": 32768,
+      "tp_known": 1,
+      "positive_events": 38,
+      "recall_known": 0.02631578947368421,
+      "recall_incremental": 0.0,
+      "group_any": 0.1111111111111111,
+      "group_full": 0.0,
+      "pool_positive_recall": 0.21052631578947367,
+      "lineage_selected": 0,
+      "verified_certificates": 61,
+      "selection_seconds": 0.6721418164670467,
+      "candidate_scope": "bounded",
+      "official_equivalent": {
+        "fp": null,
+        "fn": null,
+        "precision": null,
+        "recall": null,
+        "f1": null
+      }
+    },
+    {
+      "case_index": 0,
+      "name": "Five Dir Case 1",
+      "method": "v8_rrf_group_concave",
+      "budget": 256,
+      "selected_events": 256,
+      "candidate_events": 466257,
+      "materialized_events": 32768,
+      "tp_known": 1,
+      "positive_events": 38,
+      "recall_known": 0.02631578947368421,
+      "recall_incremental": 0.0,
+      "group_any": 0.1111111111111111,
+      "group_full": 0.0,
+      "pool_positive_recall": 0.21052631578947367,
+      "lineage_selected": 0,
+      "verified_certificates": 252,
+      "selection_seconds": 1.0461571253836155,
+      "candidate_scope": "bounded",
+      "official_equivalent": {
+        "fp": null,
+        "fn": null,
+        "precision": null,
+        "recall": null,
+        "f1": null
+      }
+    },
+    {
+      "case_index": 0,
+      "name": "Five Dir Case 1",
+      "method": "v8_rrf_group_concave",
+      "budget": 1024,
+      "selected_events": 1024,
+      "candidate_events": 466257,
+      "materialized_events": 32768,
+      "tp_known": 1,
+      "positive_events": 38,
+      "recall_known": 0.02631578947368421,
+      "recall_incremental": 0.0,
+      "group_any": 0.1111111111111111,
+      "group_full": 0.0,
+      "pool_positive_recall": 0.21052631578947367,
+      "lineage_selected": 1,
+      "verified_certificates": 1009,
+      "selection_seconds": 2.6880329363048077,
+      "candidate_scope": "bounded",
+      "official_equivalent": {
+        "fp": null,
+        "fn": null,
+        "precision": null,
+        "recall": null,
+        "f1": null
+      }
+    },
+    {
+      "case_index": 0,
+      "name": "Five Dir Case 1",
+      "method": "v8_rrf_group_concave",
+      "budget": 4096,
+      "selected_events": 4096,
+      "candidate_events": 466257,
+      "materialized_events": 32768,
+      "tp_known": 5,
+      "positive_events": 38,
+      "recall_known": 0.13157894736842105,
+      "recall_incremental": 0.10810810810810811,
+      "group_any": 0.5555555555555556,
+      "group_full": 0.3333333333333333,
+      "pool_positive_recall": 0.21052631578947367,
+      "lineage_selected": 11,
+      "verified_certificates": 4032,
+      "selection_seconds": 8.853819157928228,
+      "candidate_scope": "bounded",
+      "official_equivalent": {
+        "fp": null,
+        "fn": null,
+        "precision": null,
+        "recall": null,
+        "f1": null
+      }
+    },
+    {
+      "case_index": 1,
+      "name": "Five Dir Case 3",
+      "method": "v8_rrf_group_edge",
+      "budget": 64,
+      "selected_events": 64,
+      "candidate_events": 424245,
+      "materialized_events": 32768,
+      "tp_known": 4,
+      "positive_events": 15,
+      "recall_known": 0.26666666666666666,
+      "recall_incremental": 0.15384615384615385,
+      "group_any": 0.42857142857142855,
+      "group_full": 0.14285714285714285,
+      "pool_positive_recall": 0.4,
+      "lineage_selected": 0,
+      "verified_certificates": 59,
+      "selection_seconds": 0.45551667362451553,
+      "candidate_scope": "bounded",
+      "official_equivalent": {
+        "fp": null,
+        "fn": null,
+        "precision": null,
+        "recall": null,
+        "f1": null
+      }
+    },
+    {
+      "case_index": 1,
+      "name": "Five Dir Case 3",
+      "method": "v8_rrf_group_edge",
+      "budget": 256,
+      "selected_events": 256,
+      "candidate_events": 424245,
+      "materialized_events": 32768,
+      "tp_known": 5,
+      "positive_events": 15,
+      "recall_known": 0.3333333333333333,
+      "recall_incremental": 0.23076923076923078,
+      "group_any": 0.5714285714285714,
+      "group_full": 0.2857142857142857,
+      "pool_positive_recall": 0.4,
+      "lineage_selected": 1,
+      "verified_certificates": 240,
+      "selection_seconds": 0.5499457232654095,
+      "candidate_scope": "bounded",
+      "official_equivalent": {
+        "fp": null,
+        "fn": null,
+        "precision": null,
+        "recall": null,
+        "f1": null
+      }
+    },
+    {
+      "case_index": 1,
+      "name": "Five Dir Case 3",
+      "method": "v8_rrf_group_edge",
+      "budget": 1024,
+      "selected_events": 1024,
+      "candidate_events": 424245,
+      "materialized_events": 32768,
+      "tp_known": 5,
+      "positive_events": 15,
+      "recall_known": 0.3333333333333333,
+      "recall_incremental": 0.23076923076923078,
+      "group_any": 0.5714285714285714,
+      "group_full": 0.2857142857142857,
+      "pool_positive_recall": 0.4,
+      "lineage_selected": 2,
+      "verified_certificates": 995,
+      "selection_seconds": 0.8372061960399151,
+      "candidate_scope": "bounded",
+      "official_equivalent": {
+        "fp": null,
+        "fn": null,
+        "precision": null,
+        "recall": null,
+        "f1": null
+      }
+    },
+    {
+      "case_index": 1,
+      "name": "Five Dir Case 3",
+      "method": "v8_rrf_group_edge",
+      "budget": 4096,
+      "selected_events": 4096,
+      "candidate_events": 424245,
+      "materialized_events": 32768,
+      "tp_known": 6,
+      "positive_events": 15,
+      "recall_known": 0.4,
+      "recall_incremental": 0.3076923076923077,
+      "group_any": 0.7142857142857143,
+      "group_full": 0.42857142857142855,
+      "pool_positive_recall": 0.4,
+      "lineage_selected": 8,
+      "verified_certificates": 3961,
+      "selection_seconds": 1.8047206923365593,
+      "candidate_scope": "bounded",
+      "official_equivalent": {
+        "fp": null,
+        "fn": null,
+        "precision": null,
+        "recall": null,
+        "f1": null
+      }
+    },
+    {
+      "case_index": 1,
+      "name": "Five Dir Case 3",
+      "method": "v8_rrf_group_concave",
+      "budget": 64,
+      "selected_events": 64,
+      "candidate_events": 424245,
+      "materialized_events": 32768,
+      "tp_known": 4,
+      "positive_events": 15,
+      "recall_known": 0.26666666666666666,
+      "recall_incremental": 0.15384615384615385,
+      "group_any": 0.42857142857142855,
+      "group_full": 0.14285714285714285,
+      "pool_positive_recall": 0.4,
+      "lineage_selected": 0,
+      "verified_certificates": 60,
+      "selection_seconds": 0.6084801554679871,
+      "candidate_scope": "bounded",
+      "official_equivalent": {
+        "fp": null,
+        "fn": null,
+        "precision": null,
+        "recall": null,
+        "f1": null
+      }
+    },
+    {
+      "case_index": 1,
+      "name": "Five Dir Case 3",
+      "method": "v8_rrf_group_concave",
+      "budget": 256,
+      "selected_events": 256,
+      "candidate_events": 424245,
+      "materialized_events": 32768,
+      "tp_known": 5,
+      "positive_events": 15,
+      "recall_known": 0.3333333333333333,
+      "recall_incremental": 0.23076923076923078,
+      "group_any": 0.5714285714285714,
+      "group_full": 0.2857142857142857,
+      "pool_positive_recall": 0.4,
+      "lineage_selected": 1,
+      "verified_certificates": 242,
+      "selection_seconds": 0.9348252713680267,
+      "candidate_scope": "bounded",
+      "official_equivalent": {
+        "fp": null,
+        "fn": null,
+        "precision": null,
+        "recall": null,
+        "f1": null
+      }
+    },
+    {
+      "case_index": 1,
+      "name": "Five Dir Case 3",
+      "method": "v8_rrf_group_concave",
+      "budget": 1024,
+      "selected_events": 1024,
+      "candidate_events": 424245,
+      "materialized_events": 32768,
+      "tp_known": 5,
+      "positive_events": 15,
+      "recall_known": 0.3333333333333333,
+      "recall_incremental": 0.23076923076923078,
+      "group_any": 0.5714285714285714,
+      "group_full": 0.2857142857142857,
+      "pool_positive_recall": 0.4,
+      "lineage_selected": 2,
+      "verified_certificates": 994,
+      "selection_seconds": 2.1605470292270184,
+      "candidate_scope": "bounded",
+      "official_equivalent": {
+        "fp": null,
+        "fn": null,
+        "precision": null,
+        "recall": null,
+        "f1": null
+      }
+    },
+    {
+      "case_index": 1,
+      "name": "Five Dir Case 3",
+      "method": "v8_rrf_group_concave",
+      "budget": 4096,
+      "selected_events": 4096,
+      "candidate_events": 424245,
+      "materialized_events": 32768,
+      "tp_known": 6,
+      "positive_events": 15,
+      "recall_known": 0.4,
+      "recall_incremental": 0.3076923076923077,
+      "group_any": 0.7142857142857143,
+      "group_full": 0.42857142857142855,
+      "pool_positive_recall": 0.4,
+      "lineage_selected": 8,
+      "verified_certificates": 3950,
+      "selection_seconds": 7.407764170318842,
+      "candidate_scope": "bounded",
+      "official_equivalent": {
+        "fp": null,
+        "fn": null,
+        "precision": null,
+        "recall": null,
+        "f1": null
+      }
+    },
+    {
+      "case_index": 2,
+      "name": "Theia Case 1",
+      "method": "v8_rrf_group_edge",
+      "budget": 64,
+      "selected_events": 64,
+      "candidate_events": 898253,
+      "materialized_events": 32768,
+      "tp_known": 10,
+      "positive_events": 239,
+      "recall_known": 0.04184100418410042,
+      "recall_incremental": 0.029661016949152543,
+      "group_any": 0.75,
+      "group_full": 0.5833333333333334,
+      "pool_positive_recall": 0.0502092050209205,
+      "lineage_selected": 1,
+      "verified_certificates": 56,
+      "selection_seconds": 0.44260308519005775,
+      "candidate_scope": "bounded",
+      "official_equivalent": {
+        "fp": null,
+        "fn": null,
+        "precision": null,
+        "recall": null,
+        "f1": null
+      }
+    },
+    {
+      "case_index": 2,
+      "name": "Theia Case 1",
+      "method": "v8_rrf_group_edge",
+      "budget": 256,
+      "selected_events": 256,
+      "candidate_events": 898253,
+      "materialized_events": 32768,
+      "tp_known": 10,
+      "positive_events": 239,
+      "recall_known": 0.04184100418410042,
+      "recall_incremental": 0.029661016949152543,
+      "group_any": 0.75,
+      "group_full": 0.5833333333333334,
+      "pool_positive_recall": 0.0502092050209205,
+      "lineage_selected": 29,
+      "verified_certificates": 224,
+      "selection_seconds": 0.5574671886861324,
+      "candidate_scope": "bounded",
+      "official_equivalent": {
+        "fp": null,
+        "fn": null,
+        "precision": null,
+        "recall": null,
+        "f1": null
+      }
+    },
+    {
+      "case_index": 2,
+      "name": "Theia Case 1",
+      "method": "v8_rrf_group_edge",
+      "budget": 1024,
+      "selected_events": 1024,
+      "candidate_events": 898253,
+      "materialized_events": 32768,
+      "tp_known": 10,
+      "positive_events": 239,
+      "recall_known": 0.04184100418410042,
+      "recall_incremental": 0.029661016949152543,
+      "group_any": 0.75,
+      "group_full": 0.5833333333333334,
+      "pool_positive_recall": 0.0502092050209205,
+      "lineage_selected": 50,
+      "verified_certificates": 964,
+      "selection_seconds": 0.8300945162773132,
+      "candidate_scope": "bounded",
+      "official_equivalent": {
+        "fp": null,
+        "fn": null,
+        "precision": null,
+        "recall": null,
+        "f1": null
+      }
+    },
+    {
+      "case_index": 2,
+      "name": "Theia Case 1",
+      "method": "v8_rrf_group_edge",
+      "budget": 4096,
+      "selected_events": 4096,
+      "candidate_events": 898253,
+      "materialized_events": 32768,
+      "tp_known": 10,
+      "positive_events": 239,
+      "recall_known": 0.04184100418410042,
+      "recall_incremental": 0.029661016949152543,
+      "group_any": 0.75,
+      "group_full": 0.5833333333333334,
+      "pool_positive_recall": 0.0502092050209205,
+      "lineage_selected": 63,
+      "verified_certificates": 3957,
+      "selection_seconds": 1.6164940260350704,
+      "candidate_scope": "bounded",
+      "official_equivalent": {
+        "fp": null,
+        "fn": null,
+        "precision": null,
+        "recall": null,
+        "f1": null
+      }
+    },
+    {
+      "case_index": 2,
+      "name": "Theia Case 1",
+      "method": "v8_rrf_group_concave",
+      "budget": 64,
+      "selected_events": 64,
+      "candidate_events": 898253,
+      "materialized_events": 32768,
+      "tp_known": 9,
+      "positive_events": 239,
+      "recall_known": 0.03765690376569038,
+      "recall_incremental": 0.025423728813559324,
+      "group_any": 0.6666666666666666,
+      "group_full": 0.5833333333333334,
+      "pool_positive_recall": 0.0502092050209205,
+      "lineage_selected": 2,
+      "verified_certificates": 54,
+      "selection_seconds": 0.586412325501442,
+      "candidate_scope": "bounded",
+      "official_equivalent": {
+        "fp": null,
+        "fn": null,
+        "precision": null,
+        "recall": null,
+        "f1": null
+      }
+    },
+    {
+      "case_index": 2,
+      "name": "Theia Case 1",
+      "method": "v8_rrf_group_concave",
+      "budget": 256,
+      "selected_events": 256,
+      "candidate_events": 898253,
+      "materialized_events": 32768,
+      "tp_known": 10,
+      "positive_events": 239,
+      "recall_known": 0.04184100418410042,
+      "recall_incremental": 0.029661016949152543,
+      "group_any": 0.75,
+      "group_full": 0.5833333333333334,
+      "pool_positive_recall": 0.0502092050209205,
+      "lineage_selected": 32,
+      "verified_certificates": 223,
+      "selection_seconds": 0.9051729999482632,
+      "candidate_scope": "bounded",
+      "official_equivalent": {
+        "fp": null,
+        "fn": null,
+        "precision": null,
+        "recall": null,
+        "f1": null
+      }
+    },
+    {
+      "case_index": 2,
+      "name": "Theia Case 1",
+      "method": "v8_rrf_group_concave",
+      "budget": 1024,
+      "selected_events": 1024,
+      "candidate_events": 898253,
+      "materialized_events": 32768,
+      "tp_known": 10,
+      "positive_events": 239,
+      "recall_known": 0.04184100418410042,
+      "recall_incremental": 0.029661016949152543,
+      "group_any": 0.75,
+      "group_full": 0.5833333333333334,
+      "pool_positive_recall": 0.0502092050209205,
+      "lineage_selected": 52,
+      "verified_certificates": 959,
+      "selection_seconds": 2.179324720054865,
+      "candidate_scope": "bounded",
+      "official_equivalent": {
+        "fp": null,
+        "fn": null,
+        "precision": null,
+        "recall": null,
+        "f1": null
+      }
+    },
+    {
+      "case_index": 2,
+      "name": "Theia Case 1",
+      "method": "v8_rrf_group_concave",
+      "budget": 4096,
+      "selected_events": 4096,
+      "candidate_events": 898253,
+      "materialized_events": 32768,
+      "tp_known": 10,
+      "positive_events": 239,
+      "recall_known": 0.04184100418410042,
+      "recall_incremental": 0.029661016949152543,
+      "group_any": 0.75,
+      "group_full": 0.5833333333333334,
+      "pool_positive_recall": 0.0502092050209205,
+      "lineage_selected": 64,
+      "verified_certificates": 4020,
+      "selection_seconds": 7.219946563243866,
+      "candidate_scope": "bounded",
+      "official_equivalent": {
+        "fp": null,
+        "fn": null,
+        "precision": null,
+        "recall": null,
+        "f1": null
+      }
+    },
+    {
+      "case_index": 3,
+      "name": "Theia Case 3",
+      "method": "v8_rrf_group_edge",
+      "budget": 64,
+      "selected_events": 64,
+      "candidate_events": 1132218,
+      "materialized_events": 32768,
+      "tp_known": 9,
+      "positive_events": 229,
+      "recall_known": 0.039301310043668124,
+      "recall_incremental": 0.02654867256637168,
+      "group_any": 0.8888888888888888,
+      "group_full": 0.5555555555555556,
+      "pool_positive_recall": 0.048034934497816595,
+      "lineage_selected": 2,
+      "verified_certificates": 61,
+      "selection_seconds": 0.3756244443356991,
+      "candidate_scope": "bounded",
+      "official_equivalent": {
+        "fp": null,
+        "fn": null,
+        "precision": null,
+        "recall": null,
+        "f1": null
+      }
+    },
+    {
+      "case_index": 3,
+      "name": "Theia Case 3",
+      "method": "v8_rrf_group_edge",
+      "budget": 256,
+      "selected_events": 256,
+      "candidate_events": 1132218,
+      "materialized_events": 32768,
+      "tp_known": 9,
+      "positive_events": 229,
+      "recall_known": 0.039301310043668124,
+      "recall_incremental": 0.02654867256637168,
+      "group_any": 0.8888888888888888,
+      "group_full": 0.5555555555555556,
+      "pool_positive_recall": 0.048034934497816595,
+      "lineage_selected": 3,
+      "verified_certificates": 250,
+      "selection_seconds": 0.4219472110271454,
+      "candidate_scope": "bounded",
+      "official_equivalent": {
+        "fp": null,
+        "fn": null,
+        "precision": null,
+        "recall": null,
+        "f1": null
+      }
+    },
+    {
+      "case_index": 3,
+      "name": "Theia Case 3",
+      "method": "v8_rrf_group_edge",
+      "budget": 1024,
+      "selected_events": 1024,
+      "candidate_events": 1132218,
+      "materialized_events": 32768,
+      "tp_known": 9,
+      "positive_events": 229,
+      "recall_known": 0.039301310043668124,
+      "recall_incremental": 0.02654867256637168,
+      "group_any": 0.8888888888888888,
+      "group_full": 0.5555555555555556,
+      "pool_positive_recall": 0.048034934497816595,
+      "lineage_selected": 3,
+      "verified_certificates": 1018,
+      "selection_seconds": 0.6183728016912937,
+      "candidate_scope": "bounded",
+      "official_equivalent": {
+        "fp": null,
+        "fn": null,
+        "precision": null,
+        "recall": null,
+        "f1": null
+      }
+    },
+    {
+      "case_index": 3,
+      "name": "Theia Case 3",
+      "method": "v8_rrf_group_edge",
+      "budget": 4096,
+      "selected_events": 4096,
+      "candidate_events": 1132218,
+      "materialized_events": 32768,
+      "tp_known": 9,
+      "positive_events": 229,
+      "recall_known": 0.039301310043668124,
+      "recall_incremental": 0.02654867256637168,
+      "group_any": 0.8888888888888888,
+      "group_full": 0.5555555555555556,
+      "pool_positive_recall": 0.048034934497816595,
+      "lineage_selected": 3,
+      "verified_certificates": 4090,
+      "selection_seconds": 1.7154049277305603,
+      "candidate_scope": "bounded",
+      "official_equivalent": {
+        "fp": null,
+        "fn": null,
+        "precision": null,
+        "recall": null,
+        "f1": null
+      }
+    },
+    {
+      "case_index": 3,
+      "name": "Theia Case 3",
+      "method": "v8_rrf_group_concave",
+      "budget": 64,
+      "selected_events": 64,
+      "candidate_events": 1132218,
+      "materialized_events": 32768,
+      "tp_known": 9,
+      "positive_events": 229,
+      "recall_known": 0.039301310043668124,
+      "recall_incremental": 0.02654867256637168,
+      "group_any": 0.8888888888888888,
+      "group_full": 0.5555555555555556,
+      "pool_positive_recall": 0.048034934497816595,
+      "lineage_selected": 2,
+      "verified_certificates": 60,
+      "selection_seconds": 0.44339918717741966,
+      "candidate_scope": "bounded",
+      "official_equivalent": {
+        "fp": null,
+        "fn": null,
+        "precision": null,
+        "recall": null,
+        "f1": null
+      }
+    },
+    {
+      "case_index": 3,
+      "name": "Theia Case 3",
+      "method": "v8_rrf_group_concave",
+      "budget": 256,
+      "selected_events": 256,
+      "candidate_events": 1132218,
+      "materialized_events": 32768,
+      "tp_known": 9,
+      "positive_events": 229,
+      "recall_known": 0.039301310043668124,
+      "recall_incremental": 0.02654867256637168,
+      "group_any": 0.8888888888888888,
+      "group_full": 0.5555555555555556,
+      "pool_positive_recall": 0.048034934497816595,
+      "lineage_selected": 2,
+      "verified_certificates": 252,
+      "selection_seconds": 0.6633635833859444,
+      "candidate_scope": "bounded",
+      "official_equivalent": {
+        "fp": null,
+        "fn": null,
+        "precision": null,
+        "recall": null,
+        "f1": null
+      }
+    },
+    {
+      "case_index": 3,
+      "name": "Theia Case 3",
+      "method": "v8_rrf_group_concave",
+      "budget": 1024,
+      "selected_events": 1024,
+      "candidate_events": 1132218,
+      "materialized_events": 32768,
+      "tp_known": 9,
+      "positive_events": 229,
+      "recall_known": 0.039301310043668124,
+      "recall_incremental": 0.02654867256637168,
+      "group_any": 0.8888888888888888,
+      "group_full": 0.5555555555555556,
+      "pool_positive_recall": 0.048034934497816595,
+      "lineage_selected": 2,
+      "verified_certificates": 1020,
+      "selection_seconds": 1.582700613886118,
+      "candidate_scope": "bounded",
+      "official_equivalent": {
+        "fp": null,
+        "fn": null,
+        "precision": null,
+        "recall": null,
+        "f1": null
+      }
+    },
+    {
+      "case_index": 3,
+      "name": "Theia Case 3",
+      "method": "v8_rrf_group_concave",
+      "budget": 4096,
+      "selected_events": 4096,
+      "candidate_events": 1132218,
+      "materialized_events": 32768,
+      "tp_known": 9,
+      "positive_events": 229,
+      "recall_known": 0.039301310043668124,
+      "recall_incremental": 0.02654867256637168,
+      "group_any": 0.8888888888888888,
+      "group_full": 0.5555555555555556,
+      "pool_positive_recall": 0.048034934497816595,
+      "lineage_selected": 2,
+      "verified_certificates": 4092,
+      "selection_seconds": 5.403752394020557,
+      "candidate_scope": "bounded",
+      "official_equivalent": {
+        "fp": null,
+        "fn": null,
+        "precision": null,
+        "recall": null,
+        "f1": null
+      }
+    },
+    {
+      "case_index": 4,
+      "name": "Theia Case 5",
+      "method": "v8_rrf_group_edge",
+      "budget": 64,
+      "selected_events": 64,
+      "candidate_events": 137762,
+      "materialized_events": 32768,
+      "tp_known": 4,
+      "positive_events": 31,
+      "recall_known": 0.12903225806451613,
+      "recall_incremental": 0.1,
+      "group_any": 0.25,
+      "group_full": 0.125,
+      "pool_positive_recall": 0.25806451612903225,
+      "lineage_selected": 0,
+      "verified_certificates": 62,
+      "selection_seconds": 0.327216487377882,
+      "candidate_scope": "bounded",
+      "official_equivalent": {
+        "fp": null,
+        "fn": null,
+        "precision": null,
+        "recall": null,
+        "f1": null
+      }
+    },
+    {
+      "case_index": 4,
+      "name": "Theia Case 5",
+      "method": "v8_rrf_group_edge",
+      "budget": 256,
+      "selected_events": 256,
+      "candidate_events": 137762,
+      "materialized_events": 32768,
+      "tp_known": 5,
+      "positive_events": 31,
+      "recall_known": 0.16129032258064516,
+      "recall_incremental": 0.13333333333333333,
+      "group_any": 0.375,
+      "group_full": 0.25,
+      "pool_positive_recall": 0.25806451612903225,
+      "lineage_selected": 5,
+      "verified_certificates": 242,
+      "selection_seconds": 0.5083789452910423,
+      "candidate_scope": "bounded",
+      "official_equivalent": {
+        "fp": null,
+        "fn": null,
+        "precision": null,
+        "recall": null,
+        "f1": null
+      }
+    },
+    {
+      "case_index": 4,
+      "name": "Theia Case 5",
+      "method": "v8_rrf_group_edge",
+      "budget": 1024,
+      "selected_events": 1024,
+      "candidate_events": 137762,
+      "materialized_events": 32768,
+      "tp_known": 8,
+      "positive_events": 31,
+      "recall_known": 0.25806451612903225,
+      "recall_incremental": 0.23333333333333334,
+      "group_any": 0.75,
+      "group_full": 0.625,
+      "pool_positive_recall": 0.25806451612903225,
+      "lineage_selected": 15,
+      "verified_certificates": 1009,
+      "selection_seconds": 0.6978994719684124,
+      "candidate_scope": "bounded",
+      "official_equivalent": {
+        "fp": null,
+        "fn": null,
+        "precision": null,
+        "recall": null,
+        "f1": null
+      }
+    },
+    {
+      "case_index": 4,
+      "name": "Theia Case 5",
+      "method": "v8_rrf_group_edge",
+      "budget": 4096,
+      "selected_events": 4096,
+      "candidate_events": 137762,
+      "materialized_events": 32768,
+      "tp_known": 8,
+      "positive_events": 31,
+      "recall_known": 0.25806451612903225,
+      "recall_incremental": 0.23333333333333334,
+      "group_any": 0.75,
+      "group_full": 0.625,
+      "pool_positive_recall": 0.25806451612903225,
+      "lineage_selected": 15,
+      "verified_certificates": 4081,
+      "selection_seconds": 1.522292334586382,
+      "candidate_scope": "bounded",
+      "official_equivalent": {
+        "fp": null,
+        "fn": null,
+        "precision": null,
+        "recall": null,
+        "f1": null
+      }
+    },
+    {
+      "case_index": 4,
+      "name": "Theia Case 5",
+      "method": "v8_rrf_group_concave",
+      "budget": 64,
+      "selected_events": 64,
+      "candidate_events": 137762,
+      "materialized_events": 32768,
+      "tp_known": 3,
+      "positive_events": 31,
+      "recall_known": 0.0967741935483871,
+      "recall_incremental": 0.06666666666666667,
+      "group_any": 0.125,
+      "group_full": 0.0,
+      "pool_positive_recall": 0.25806451612903225,
+      "lineage_selected": 0,
+      "verified_certificates": 61,
+      "selection_seconds": 0.4212714433670044,
+      "candidate_scope": "bounded",
+      "official_equivalent": {
+        "fp": null,
+        "fn": null,
+        "precision": null,
+        "recall": null,
+        "f1": null
+      }
+    },
+    {
+      "case_index": 4,
+      "name": "Theia Case 5",
+      "method": "v8_rrf_group_concave",
+      "budget": 256,
+      "selected_events": 256,
+      "candidate_events": 137762,
+      "materialized_events": 32768,
+      "tp_known": 5,
+      "positive_events": 31,
+      "recall_known": 0.16129032258064516,
+      "recall_incremental": 0.13333333333333333,
+      "group_any": 0.375,
+      "group_full": 0.25,
+      "pool_positive_recall": 0.25806451612903225,
+      "lineage_selected": 8,
+      "verified_certificates": 241,
+      "selection_seconds": 0.743864681571722,
+      "candidate_scope": "bounded",
+      "official_equivalent": {
+        "fp": null,
+        "fn": null,
+        "precision": null,
+        "recall": null,
+        "f1": null
+      }
+    },
+    {
+      "case_index": 4,
+      "name": "Theia Case 5",
+      "method": "v8_rrf_group_concave",
+      "budget": 1024,
+      "selected_events": 1024,
+      "candidate_events": 137762,
+      "materialized_events": 32768,
+      "tp_known": 8,
+      "positive_events": 31,
+      "recall_known": 0.25806451612903225,
+      "recall_incremental": 0.23333333333333334,
+      "group_any": 0.75,
+      "group_full": 0.625,
+      "pool_positive_recall": 0.25806451612903225,
+      "lineage_selected": 15,
+      "verified_certificates": 1008,
+      "selection_seconds": 1.6848686523735523,
+      "candidate_scope": "bounded",
+      "official_equivalent": {
+        "fp": null,
+        "fn": null,
+        "precision": null,
+        "recall": null,
+        "f1": null
+      }
+    },
+    {
+      "case_index": 4,
+      "name": "Theia Case 5",
+      "method": "v8_rrf_group_concave",
+      "budget": 4096,
+      "selected_events": 4096,
+      "candidate_events": 137762,
+      "materialized_events": 32768,
+      "tp_known": 8,
+      "positive_events": 31,
+      "recall_known": 0.25806451612903225,
+      "recall_incremental": 0.23333333333333334,
+      "group_any": 0.75,
+      "group_full": 0.625,
+      "pool_positive_recall": 0.25806451612903225,
+      "lineage_selected": 15,
+      "verified_certificates": 4080,
+      "selection_seconds": 5.763415317982435,
+      "candidate_scope": "bounded",
+      "official_equivalent": {
+        "fp": null,
+        "fn": null,
+        "precision": null,
+        "recall": null,
+        "f1": null
+      }
+    }
+  ],
+  "summary": [
+    {
+      "method": "v8_rrf_group_edge",
+      "budget": 64,
+      "macro_recall_known": 0.1006314056865271,
+      "total_tp_known": 28,
+      "macro_recall_incremental": 0.062011168672335616
+    },
+    {
+      "method": "v8_rrf_group_edge",
+      "budget": 256,
+      "macro_recall_known": 0.12041635192308625,
+      "total_tp_known": 30,
+      "macro_recall_incremental": 0.08406245072361766
+    },
+    {
+      "method": "v8_rrf_group_edge",
+      "budget": 1024,
+      "macro_recall_known": 0.13977119063276366,
+      "total_tp_known": 33,
+      "macro_recall_incremental": 0.10406245072361767
+    },
+    {
+      "method": "v8_rrf_group_edge",
+      "budget": 4096,
+      "macro_recall_known": 0.1794203134397812,
+      "total_tp_known": 39,
+      "macro_recall_incremental": 0.14647409313526008
+    },
+    {
+      "method": "v8_rrf_group_concave",
+      "budget": 64,
+      "macro_recall_known": 0.09334297269961929,
+      "total_tp_known": 26,
+      "macro_recall_incremental": 0.054497044378550304
+    },
+    {
+      "method": "v8_rrf_group_concave",
+      "budget": 256,
+      "macro_recall_known": 0.12041635192308625,
+      "total_tp_known": 30,
+      "macro_recall_incremental": 0.08406245072361766
+    },
+    {
+      "method": "v8_rrf_group_concave",
+      "budget": 1024,
+      "macro_recall_known": 0.13977119063276366,
+      "total_tp_known": 33,
+      "macro_recall_incremental": 0.10406245072361767
+    },
+    {
+      "method": "v8_rrf_group_concave",
+      "budget": 4096,
+      "macro_recall_known": 0.17415715554504438,
+      "total_tp_known": 38,
+      "macro_recall_incremental": 0.14106868772985467
+    }
+  ],
+  "cases": [
+    {
+      "case_index": 0,
+      "name": "Five Dir Case 1",
+      "elapsed_seconds": 59.20376268401742,
+      "whole_matrix_peak_rss_mib": 421.03515625,
+      "execution_git_commit": "4e6c1a34da7d181f55ab503de7ef981cfe77caa3"
+    },
+    {
+      "case_index": 1,
+      "name": "Five Dir Case 3",
+      "elapsed_seconds": 44.93499357625842,
+      "whole_matrix_peak_rss_mib": 375.0,
+      "execution_git_commit": "4e6c1a34da7d181f55ab503de7ef981cfe77caa3"
+    },
+    {
+      "case_index": 2,
+      "name": "Theia Case 1",
+      "elapsed_seconds": 77.7294051758945,
+      "whole_matrix_peak_rss_mib": 608.734375,
+      "execution_git_commit": "4e6c1a34da7d181f55ab503de7ef981cfe77caa3"
+    },
+    {
+      "case_index": 3,
+      "name": "Theia Case 3",
+      "elapsed_seconds": 90.97797343507409,
+      "whole_matrix_peak_rss_mib": 715.4453125,
+      "execution_git_commit": "4e6c1a34da7d181f55ab503de7ef981cfe77caa3"
+    },
+    {
+      "case_index": 4,
+      "name": "Theia Case 5",
+      "elapsed_seconds": 29.7418988160789,
+      "whole_matrix_peak_rss_mib": 285.77734375,
+      "execution_git_commit": "4e6c1a34da7d181f55ab503de7ef981cfe77caa3"
+    }
+  ],
+  "profiles": [
+    {
+      "case_index": 0,
+      "repeats": 5,
+      "whole_matrix_elapsed_median": 56.852012783288956,
+      "whole_matrix_elapsed_quartiles": {
+        "median": 56.852012783288956,
+        "q1": 56.57677809521556,
+        "q3": 56.96047678589821
+      },
+      "whole_matrix_peak_rss_median": 344.0078125,
+      "whole_matrix_peak_rss_quartiles": {
+        "median": 344.0078125,
+        "q1": 343.62890625,
+        "q3": 344.01953125
+      },
+      "selection": [
+        {
+          "method": "v8_rrf_group_edge",
+          "budget": 64,
+          "median_seconds": 0.5722429342567921,
+          "q1_seconds": 0.5640902332961559,
+          "q3_seconds": 0.5722959227859974,
+          "samples_seconds": [
+            0.5640902332961559,
+            0.5722959227859974,
+            0.5722429342567921,
+            0.6039727739989758,
+            0.556955523788929
+          ]
+        },
+        {
+          "method": "v8_rrf_group_edge",
+          "budget": 256,
+          "median_seconds": 0.6818559132516384,
+          "q1_seconds": 0.6784436888992786,
+          "q3_seconds": 0.6887088380753994,
+          "samples_seconds": [
+            0.6887088380753994,
+            0.6818559132516384,
+            0.6784436888992786,
+            0.7141925469040871,
+            0.665009394288063
+          ]
+        },
+        {
+          "method": "v8_rrf_group_edge",
+          "budget": 1024,
+          "median_seconds": 0.8781408853828907,
+          "q1_seconds": 0.8656643815338612,
+          "q3_seconds": 0.87972392141819,
+          "samples_seconds": [
+            0.8656643815338612,
+            0.87972392141819,
+            0.8781408853828907,
+            0.9036651328206062,
+            0.8540983349084854
+          ]
+        },
+        {
+          "method": "v8_rrf_group_edge",
+          "budget": 4096,
+          "median_seconds": 1.8216072097420692,
+          "q1_seconds": 1.8191807344555855,
+          "q3_seconds": 1.8273007571697235,
+          "samples_seconds": [
+            1.8191807344555855,
+            1.8273007571697235,
+            1.8216072097420692,
+            1.8615531623363495,
+            1.795373521745205
+          ]
+        },
+        {
+          "method": "v8_rrf_group_concave",
+          "budget": 64,
+          "median_seconds": 0.681747991591692,
+          "q1_seconds": 0.6811719536781311,
+          "q3_seconds": 0.6828306317329407,
+          "samples_seconds": [
+            0.6801262274384499,
+            0.6811719536781311,
+            0.681747991591692,
+            0.7150961346924305,
+            0.6828306317329407
+          ]
+        },
+        {
+          "method": "v8_rrf_group_concave",
+          "budget": 256,
+          "median_seconds": 1.1173365712165833,
+          "q1_seconds": 1.1161476820707321,
+          "q3_seconds": 1.13792010769248,
+          "samples_seconds": [
+            1.1074591726064682,
+            1.1173365712165833,
+            1.13792010769248,
+            1.1487156637012959,
+            1.1161476820707321
+          ]
+        },
+        {
+          "method": "v8_rrf_group_concave",
+          "budget": 1024,
+          "median_seconds": 2.6010745279490948,
+          "q1_seconds": 2.5801879316568375,
+          "q3_seconds": 2.605271402746439,
+          "samples_seconds": [
+            2.605271402746439,
+            2.7316658347845078,
+            2.5801879316568375,
+            2.6010745279490948,
+            2.574566874653101
+          ]
+        },
+        {
+          "method": "v8_rrf_group_concave",
+          "budget": 4096,
+          "median_seconds": 8.948011551052332,
+          "q1_seconds": 8.941815499216318,
+          "q3_seconds": 8.95470679178834,
+          "samples_seconds": [
+            8.920297469943762,
+            8.948011551052332,
+            8.95470679178834,
+            8.941815499216318,
+            8.97989634051919
+          ]
+        }
+      ]
+    },
+    {
+      "case_index": 1,
+      "repeats": 5,
+      "whole_matrix_elapsed_median": 41.731849547475576,
+      "whole_matrix_elapsed_quartiles": {
+        "median": 41.731849547475576,
+        "q1": 41.69917964190245,
+        "q3": 42.16210500523448
+      },
+      "whole_matrix_peak_rss_median": 306.890625,
+      "whole_matrix_peak_rss_quartiles": {
+        "median": 306.890625,
+        "q1": 306.27734375,
+        "q3": 307.01953125
+      },
+      "selection": [
+        {
+          "method": "v8_rrf_group_edge",
+          "budget": 64,
+          "median_seconds": 0.459457915276289,
+          "q1_seconds": 0.4465516433119774,
+          "q3_seconds": 0.4602910615503788,
+          "samples_seconds": [
+            0.4602910615503788,
+            0.47299862653017044,
+            0.44549671560525894,
+            0.4465516433119774,
+            0.459457915276289
+          ]
+        },
+        {
+          "method": "v8_rrf_group_edge",
+          "budget": 256,
+          "median_seconds": 0.6069942973554134,
+          "q1_seconds": 0.6024689339101315,
+          "q3_seconds": 0.6094479225575924,
+          "samples_seconds": [
+            0.6235317029058933,
+            0.6094479225575924,
+            0.5933099500834942,
+            0.6024689339101315,
+            0.6069942973554134
+          ]
+        },
+        {
+          "method": "v8_rrf_group_edge",
+          "budget": 1024,
+          "median_seconds": 0.8330260366201401,
+          "q1_seconds": 0.8252085968852043,
+          "q3_seconds": 0.8428190350532532,
+          "samples_seconds": [
+            0.8330260366201401,
+            0.8428190350532532,
+            0.8221159279346466,
+            0.8252085968852043,
+            0.8543126210570335
+          ]
+        },
+        {
+          "method": "v8_rrf_group_edge",
+          "budget": 4096,
+          "median_seconds": 1.7412773743271828,
+          "q1_seconds": 1.7359542697668076,
+          "q3_seconds": 1.7601804062724113,
+          "samples_seconds": [
+            1.7359542697668076,
+            1.8170403018593788,
+            1.723407007753849,
+            1.7412773743271828,
+            1.7601804062724113
+          ]
+        },
+        {
+          "method": "v8_rrf_group_concave",
+          "budget": 64,
+          "median_seconds": 0.5959915518760681,
+          "q1_seconds": 0.5937357023358345,
+          "q3_seconds": 0.6119692586362362,
+          "samples_seconds": [
+            0.5959915518760681,
+            0.6361607685685158,
+            0.5937357023358345,
+            0.5913159735500813,
+            0.6119692586362362
+          ]
+        },
+        {
+          "method": "v8_rrf_group_concave",
+          "budget": 256,
+          "median_seconds": 0.9328683204948902,
+          "q1_seconds": 0.9287157766520977,
+          "q3_seconds": 0.9458379149436951,
+          "samples_seconds": [
+            0.9328683204948902,
+            0.9506751410663128,
+            0.9287157766520977,
+            0.9236236475408077,
+            0.9458379149436951
+          ]
+        },
+        {
+          "method": "v8_rrf_group_concave",
+          "budget": 1024,
+          "median_seconds": 2.1883161552250385,
+          "q1_seconds": 2.1805294565856457,
+          "q3_seconds": 2.220208093523979,
+          "samples_seconds": [
+            2.1883161552250385,
+            2.220208093523979,
+            2.170529752969742,
+            2.1805294565856457,
+            2.239290401339531
+          ]
+        },
+        {
+          "method": "v8_rrf_group_concave",
+          "budget": 4096,
+          "median_seconds": 7.284566715359688,
+          "q1_seconds": 7.234528090804815,
+          "q3_seconds": 7.346736926585436,
+          "samples_seconds": [
+            7.234528090804815,
+            7.284566715359688,
+            7.206343118101358,
+            7.346736926585436,
+            7.481188483536243
+          ]
+        }
+      ]
+    },
+    {
+      "case_index": 2,
+      "repeats": 5,
+      "whole_matrix_elapsed_median": 75.97053439170122,
+      "whole_matrix_elapsed_quartiles": {
+        "median": 75.97053439170122,
+        "q1": 75.46641266345978,
+        "q3": 75.9942839667201
+      },
+      "whole_matrix_peak_rss_median": 568.52734375,
+      "whole_matrix_peak_rss_quartiles": {
+        "median": 568.52734375,
+        "q1": 568.26171875,
+        "q3": 568.578125
+      },
+      "selection": [
+        {
+          "method": "v8_rrf_group_edge",
+          "budget": 64,
+          "median_seconds": 0.4665192551910877,
+          "q1_seconds": 0.45540516823530197,
+          "q3_seconds": 0.46784164011478424,
+          "samples_seconds": [
+            0.4665192551910877,
+            0.45540516823530197,
+            0.46784164011478424,
+            0.4473837800323963,
+            0.47704604640603065
+          ]
+        },
+        {
+          "method": "v8_rrf_group_edge",
+          "budget": 256,
+          "median_seconds": 0.6569056212902069,
+          "q1_seconds": 0.6546075269579887,
+          "q3_seconds": 0.6645509041845798,
+          "samples_seconds": [
+            0.6546075269579887,
+            0.6569056212902069,
+            0.6675512045621872,
+            0.6497652567923069,
+            0.6645509041845798
+          ]
+        },
+        {
+          "method": "v8_rrf_group_edge",
+          "budget": 1024,
+          "median_seconds": 0.9236332438886166,
+          "q1_seconds": 0.9069657251238823,
+          "q3_seconds": 0.9271010048687458,
+          "samples_seconds": [
+            0.8931148946285248,
+            0.9271010048687458,
+            0.9388830065727234,
+            0.9069657251238823,
+            0.9236332438886166
+          ]
+        },
+        {
+          "method": "v8_rrf_group_edge",
+          "budget": 4096,
+          "median_seconds": 1.6529889069497585,
+          "q1_seconds": 1.6465570852160454,
+          "q3_seconds": 1.6550416573882103,
+          "samples_seconds": [
+            1.642814926803112,
+            1.6550416573882103,
+            1.6529889069497585,
+            1.6465570852160454,
+            1.6705327667295933
+          ]
+        },
+        {
+          "method": "v8_rrf_group_concave",
+          "budget": 64,
+          "median_seconds": 0.6019881926476955,
+          "q1_seconds": 0.599619135260582,
+          "q3_seconds": 0.6061515174806118,
+          "samples_seconds": [
+            0.6019881926476955,
+            0.599619135260582,
+            0.6061515174806118,
+            0.5917852222919464,
+            0.6111339367926121
+          ]
+        },
+        {
+          "method": "v8_rrf_group_concave",
+          "budget": 256,
+          "median_seconds": 0.9244628213346004,
+          "q1_seconds": 0.9207783080637455,
+          "q3_seconds": 0.9298678040504456,
+          "samples_seconds": [
+            0.9204044975340366,
+            0.9298678040504456,
+            0.9244628213346004,
+            0.9207783080637455,
+            0.9448411799967289
+          ]
+        },
+        {
+          "method": "v8_rrf_group_concave",
+          "budget": 1024,
+          "median_seconds": 2.1141053587198257,
+          "q1_seconds": 2.1087169907987118,
+          "q3_seconds": 2.13468961045146,
+          "samples_seconds": [
+            2.1141053587198257,
+            2.13468961045146,
+            2.098101757466793,
+            2.1087169907987118,
+            2.148926567286253
+          ]
+        },
+        {
+          "method": "v8_rrf_group_concave",
+          "budget": 4096,
+          "median_seconds": 7.263834945857525,
+          "q1_seconds": 7.260076530277729,
+          "q3_seconds": 7.285763848572969,
+          "samples_seconds": [
+            7.285763848572969,
+            7.260076530277729,
+            7.204202704131603,
+            7.418233063071966,
+            7.263834945857525
+          ]
+        }
+      ]
+    },
+    {
+      "case_index": 3,
+      "repeats": 5,
+      "whole_matrix_elapsed_median": 88.06758766621351,
+      "whole_matrix_elapsed_quartiles": {
+        "median": 88.06758766621351,
+        "q1": 87.71622742339969,
+        "q3": 88.6071169488132
+      },
+      "whole_matrix_peak_rss_median": 661.97265625,
+      "whole_matrix_peak_rss_quartiles": {
+        "median": 661.97265625,
+        "q1": 661.8203125,
+        "q3": 663.8671875
+      },
+      "selection": [
+        {
+          "method": "v8_rrf_group_edge",
+          "budget": 64,
+          "median_seconds": 0.4574030190706253,
+          "q1_seconds": 0.4496012255549431,
+          "q3_seconds": 0.46037939190864563,
+          "samples_seconds": [
+            0.4574030190706253,
+            0.4710463136434555,
+            0.46037939190864563,
+            0.4496012255549431,
+            0.44577738270163536
+          ]
+        },
+        {
+          "method": "v8_rrf_group_edge",
+          "budget": 256,
+          "median_seconds": 0.4291691780090332,
+          "q1_seconds": 0.4278864488005638,
+          "q3_seconds": 0.4319321922957897,
+          "samples_seconds": [
+            0.4319321922957897,
+            0.4418576955795288,
+            0.4291691780090332,
+            0.4278864488005638,
+            0.4181235395371914
+          ]
+        },
+        {
+          "method": "v8_rrf_group_edge",
+          "budget": 1024,
+          "median_seconds": 0.6224399022758007,
+          "q1_seconds": 0.621107641607523,
+          "q3_seconds": 0.6263761334121227,
+          "samples_seconds": [
+            0.621107641607523,
+            0.6224399022758007,
+            0.6147452779114246,
+            0.636457871645689,
+            0.6263761334121227
+          ]
+        },
+        {
+          "method": "v8_rrf_group_edge",
+          "budget": 4096,
+          "median_seconds": 1.6059626452624798,
+          "q1_seconds": 1.6027897633612156,
+          "q3_seconds": 1.6098903231322765,
+          "samples_seconds": [
+            1.6098903231322765,
+            1.590971976518631,
+            1.6027897633612156,
+            1.623034156858921,
+            1.6059626452624798
+          ]
+        },
+        {
+          "method": "v8_rrf_group_concave",
+          "budget": 64,
+          "median_seconds": 0.43822056427598,
+          "q1_seconds": 0.43654264509677887,
+          "q3_seconds": 0.4509505517780781,
+          "samples_seconds": [
+            0.4572722129523754,
+            0.4509505517780781,
+            0.43654264509677887,
+            0.43500928580760956,
+            0.43822056427598
+          ]
+        },
+        {
+          "method": "v8_rrf_group_concave",
+          "budget": 256,
+          "median_seconds": 0.6599330641329288,
+          "q1_seconds": 0.6593192927539349,
+          "q3_seconds": 0.661289568990469,
+          "samples_seconds": [
+            0.667372103780508,
+            0.6599330641329288,
+            0.6590874120593071,
+            0.6593192927539349,
+            0.661289568990469
+          ]
+        },
+        {
+          "method": "v8_rrf_group_concave",
+          "budget": 1024,
+          "median_seconds": 1.5663456991314888,
+          "q1_seconds": 1.5592963881790638,
+          "q3_seconds": 1.5815830640494823,
+          "samples_seconds": [
+            1.5592963881790638,
+            1.5481449142098427,
+            1.5815830640494823,
+            1.5663456991314888,
+            1.625585749745369
+          ]
+        },
+        {
+          "method": "v8_rrf_group_concave",
+          "budget": 4096,
+          "median_seconds": 5.395273938775063,
+          "q1_seconds": 5.318719621747732,
+          "q3_seconds": 5.4166747815907,
+          "samples_seconds": [
+            5.310215551406145,
+            5.318719621747732,
+            5.4166747815907,
+            5.395273938775063,
+            5.578537750989199
+          ]
+        }
+      ]
+    },
+    {
+      "case_index": 4,
+      "repeats": 5,
+      "whole_matrix_elapsed_median": 27.11950297653675,
+      "whole_matrix_elapsed_quartiles": {
+        "median": 27.11950297653675,
+        "q1": 27.083421126008034,
+        "q3": 27.174169689416885
+      },
+      "whole_matrix_peak_rss_median": 202.734375,
+      "whole_matrix_peak_rss_quartiles": {
+        "median": 202.734375,
+        "q1": 202.46484375,
+        "q3": 202.7734375
+      },
+      "selection": [
+        {
+          "method": "v8_rrf_group_edge",
+          "budget": 64,
+          "median_seconds": 0.3090037703514099,
+          "q1_seconds": 0.3035786896944046,
+          "q3_seconds": 0.30973706394433975,
+          "samples_seconds": [
+            0.30973706394433975,
+            0.3026193343102932,
+            0.3090037703514099,
+            0.3121583163738251,
+            0.3035786896944046
+          ]
+        },
+        {
+          "method": "v8_rrf_group_edge",
+          "budget": 256,
+          "median_seconds": 0.5155198462307453,
+          "q1_seconds": 0.5086353085935116,
+          "q3_seconds": 0.5369298346340656,
+          "samples_seconds": [
+            0.5155198462307453,
+            0.5086353085935116,
+            0.5034630335867405,
+            0.5369298346340656,
+            0.5549618676304817
+          ]
+        },
+        {
+          "method": "v8_rrf_group_edge",
+          "budget": 1024,
+          "median_seconds": 0.6848916001617908,
+          "q1_seconds": 0.6780048608779907,
+          "q3_seconds": 0.695530541241169,
+          "samples_seconds": [
+            0.695530541241169,
+            0.6848916001617908,
+            0.6654257364571095,
+            0.6956780292093754,
+            0.6780048608779907
+          ]
+        },
+        {
+          "method": "v8_rrf_group_edge",
+          "budget": 4096,
+          "median_seconds": 1.5107488483190536,
+          "q1_seconds": 1.5060813650488853,
+          "q3_seconds": 1.5120263807475567,
+          "samples_seconds": [
+            1.5107488483190536,
+            1.5120263807475567,
+            1.500224344432354,
+            1.527354832738638,
+            1.5060813650488853
+          ]
+        },
+        {
+          "method": "v8_rrf_group_concave",
+          "budget": 64,
+          "median_seconds": 0.40909065678715706,
+          "q1_seconds": 0.4086390733718872,
+          "q3_seconds": 0.4139644540846348,
+          "samples_seconds": [
+            0.40909065678715706,
+            0.3996157683432102,
+            0.4227662645280361,
+            0.4139644540846348,
+            0.4086390733718872
+          ]
+        },
+        {
+          "method": "v8_rrf_group_concave",
+          "budget": 256,
+          "median_seconds": 0.7260702587664127,
+          "q1_seconds": 0.7252092622220516,
+          "q3_seconds": 0.7295600138604641,
+          "samples_seconds": [
+            0.7295600138604641,
+            0.716182567179203,
+            0.7260702587664127,
+            0.7442080713808537,
+            0.7252092622220516
+          ]
+        },
+        {
+          "method": "v8_rrf_group_concave",
+          "budget": 1024,
+          "median_seconds": 1.6713977567851543,
+          "q1_seconds": 1.6664611026644707,
+          "q3_seconds": 1.6732665002346039,
+          "samples_seconds": [
+            1.663775023072958,
+            1.6664611026644707,
+            1.6732665002346039,
+            1.6713977567851543,
+            1.6794808097183704
+          ]
+        },
+        {
+          "method": "v8_rrf_group_concave",
+          "budget": 4096,
+          "median_seconds": 5.601585600525141,
+          "q1_seconds": 5.591846875846386,
+          "q3_seconds": 5.637682676315308,
+          "samples_seconds": [
+            5.601585600525141,
+            5.637682676315308,
+            5.57880500331521,
+            5.591846875846386,
+            5.691435035318136
+          ]
+        }
+      ]
+    }
+  ],
+  "verified_quality_report_sha256": "e19ffff40bc3015c44c938735a3e56dcfdcacdc3101333045d10e2c49e0d040f",
+  "resource_merge_source_sha256": "eb5931ab95dc580fe95853ba92799776c9790d2c749a08ac3c74132320d105de",
+  "profile_identity_validation": "counts/objectives/traces where emitted; methods without trace do not establish identical selected IDs"
+}

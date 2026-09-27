@@ -2,7 +2,7 @@
 
 当前产品入口 `/` 是**指定节点的预算约束调查**：搜索进程、文件或网络实体，选择关联时间锚，以该节点作为图扩散起点，输出带严格时间见证的事件集合。默认产品流程无需外部告警，不读取参考真值；结果可以重开、导出和离线复放。原攻击检测实验界面保留在 `/research`。
 
-[产品评审、实测与交付范围](docs/product/README.md) · [私有部署与客户数据接入](docs/product/deployment.md) · [节点调查 HTML](webapp/frontend/product.html) · [论文实验协议](docs/group-completion-v8/paper-protocol.md)
+[产品评审、实测与交付范围](docs/product/README.md) · [私有部署与客户数据接入](docs/product/deployment.md) · [节点调查 HTML](webapp/frontend/product.html) · [最新 200 项对比实验](docs/group-completion-v8/comparison.md) · [论文实验协议](docs/group-completion-v8/paper-protocol.md)
 
 可交付范围为单组织私有部署试点。五案 V8 完整事件组研究保持离线实验；评分仍以频率统计和图扩散为中心。各轮指标、候选范围及失败结果分别记录，当前没有完整真值支持“超过 SPARSE”的结论。
 
