@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>NODOZE · 完整参考链实验</title>
+  <link rel="stylesheet" href="/assets/chain-study.css">
+  <script src="/assets/chain-study.js" defer></script>
+</head>
+<body>
+<header class="topbar"><a class="brand" href="/" aria-label="NODOZE 首页"><span class="brand-mark">N</span>NODOZE<span class="brand-sub">剪枝实验</span></a><a href="/research">返回攻击调查 ↗</a></header>
+<main>
+  <div class="intro"><div><p class="eyebrow">RARITY · DIFFUSION · PATH PRESERVATION</p><h1>压缩一张图，保留多少条完整链？</h1><p>比较真实事件预算下的参考链保留情况，逐阶段定位缺失，再核对每一条原始事件。</p></div><span class="scope-badge">参考链 ≠ 已核验完整攻击链</span></div>
+  <p id="load-status" role="status" aria-live="polite">正在读取实验报告…</p>
+  <section id="load-error" class="panel empty-state" role="alert" hidden><h2>实验报告暂不可用</h2><p id="load-error-detail"></p><p>请先在项目根目录生成实验报告：</p><code>python -m scripts.run_adaptive_chains --output output/adaptive-chain-study --publish</code><p>结果文件应位于 <code>webapp/frontend/chain-study-results.json</code>。完成后刷新本页。</p><button id="reload-button" type="button">重新读取</button></section>
+  <div id="study-content" hidden>
+    <section class="panel controls" aria-label="选择实验结果"><label>数据集<select id="case-select"></select></label><label>当前方法<select id="method-select"></select></label><label>保留预算点<select id="budget-select"></select></label><a id="download-report" class="download" href="/assets/chain-study-results.json" download>下载完整结果 JSON ↓</a><p id="case-note" class="hint full-row"></p></section>
+    <section id="aggregate-notice" class="panel aggregate-notice" role="status" hidden><strong>仅展示汇总指标；完整链事件请在本机生成详细报告</strong><p>参考链数量与曲线仍按固定参考统计，汇总文件不包含逐事件日志。</p><code>python -m scripts.run_adaptive_chains --output output/adaptive-chain-study --publish</code></section>
+    <section class="metric-grid" aria-label="当前预算实验指标" id="metrics"></section>
+    <section class="panel chart-panel" aria-labelledby="curve-title"><div class="section-heading"><div><span class="eyebrow">THE PRIMARY EXPERIMENT</span><h2 id="curve-title">压缩率—完整参考链保留率</h2><p class="hint">每个点使用实际保留的原始事件数。曲线连接实验点，不代表未测预算的表现。</p></div><span id="case-kind" class="scope-badge"></span></div><div id="chart-legend" class="legend"></div><svg id="retention-chart" viewBox="0 0 1000 420" role="img" aria-labelledby="curve-title chart-description"><desc id="chart-description">横轴为实际事件压缩率，纵轴为完整参考链保留率。下方按钮提供相同点的数值和键盘操作。</desc></svg><p id="chart-note" class="hint"></p><div id="point-buttons" class="point-buttons" aria-label="选择当前方法的预算点"></div></section>
+    <section class="panel diagnostic-panel" aria-labelledby="diagnostic-title"><div class="section-heading"><div><span class="eyebrow">WHERE EVIDENCE IS LOST</span><h2 id="diagnostic-title">分阶段损失诊断</h2><p class="hint">完整链需要全部必需事件和分支。首次损失计数将缺失归入最早失败阶段。</p></div></div><div class="table-scroll"><table><thead><tr><th>阶段</th><th>完整参考链</th><th>首次丢失链数</th><th>保留参考事件</th><th>首次丢失事件数</th><th>阶段条件保留率</th></tr></thead><tbody id="stage-rows"></tbody></table></div><p id="stage-note" class="hint"></p><details><summary>当前预算的完整诊断字段</summary><pre id="diagnostic-json"></pre></details></section>
+    <section class="panel chain-panel" aria-labelledby="chain-title"><div class="section-heading"><div><span class="eyebrow">FOLLOW THE ORIGINAL EVENTS</span><h2 id="chain-title">参考链与断点</h2><p class="hint">箭头按信息流因果方向展示；EXECUTE 从可执行文件指向进程，并附原始记录方向。红色虚线表示缺失事件；分支之间不补造连接。</p></div><label>筛选<select id="chain-filter"><option value="all">全部参考链</option><option value="complete">完整保留</option><option value="broken">断裂或不完整</option></select></label></div><div id="chain-layout" class="chain-layout"><div id="chain-list" class="chain-list" aria-label="选择参考链"></div><article id="chain-detail" class="chain-detail"><div class="chain-detail-heading"><div><h3 id="selected-chain-title"></h3><p id="chain-status" class="hint"></p></div><label id="branch-control" hidden>分支<select id="branch-select"></select></label></div><p id="chain-scope" class="scope-note"></p><div id="chain-events" class="chain-events"></div><div id="event-pagination" class="pagination"><span id="event-page-note" class="hint"></span><div><button id="event-prev" type="button">上一页</button><button id="event-next" type="button">下一页</button></div></div><details><summary>链验证与缺失事件</summary><pre id="chain-validation"></pre></details></article></div></section>
+    <details class="panel methodology"><summary>实验方法、来源与适用范围</summary><p>固定参考链之外、采集之前或调查窗口之外的攻击行为，不能由当前日志证明完整。派生参考链、合成链和独立核验链分别统计；无独立完整链真值时，已核验指标显示 N/A。</p><pre id="methodology-json"></pre><h3>本案例来源</h3><pre id="provenance-json"></pre></details>
+    <footer id="report-meta"></footer>
+  </div>
+</main>
+</body>
+</html>

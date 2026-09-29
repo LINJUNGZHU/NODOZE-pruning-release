@@ -1,0 +1,169 @@
+{
+  "schema_version": "adaptive-chain-validation-v1",
+  "workspace_tests": {
+    "passed": 678,
+    "failed": 0
+  },
+  "release_on_latest_main_tests": {
+    "passed": 831,
+    "skipped": 2,
+    "failed": 0
+  },
+  "random_temporal_graph_checks": 400,
+  "actual_flask_browser": {
+    "ok": true,
+    "report": "webapp/frontend/chain-study-results.json",
+    "cases": [
+      {
+        "case": "cadets06",
+        "methods": 6,
+        "budget_checks": 12,
+        "reference_chains": 121,
+        "data_visibility": "detailed",
+        "mobile_overflow": false
+      },
+      {
+        "case": "cadets12",
+        "methods": 6,
+        "budget_checks": 12,
+        "reference_chains": 31,
+        "data_visibility": "detailed",
+        "mobile_overflow": false
+      },
+      {
+        "case": "cadets13",
+        "methods": 6,
+        "budget_checks": 12,
+        "reference_chains": 75,
+        "data_visibility": "detailed",
+        "mobile_overflow": false
+      },
+      {
+        "case": "synthetic101",
+        "methods": 6,
+        "budget_checks": 12,
+        "reference_chains": 6,
+        "data_visibility": "detailed",
+        "mobile_overflow": false
+      },
+      {
+        "case": "synthetic202",
+        "methods": 6,
+        "budget_checks": 12,
+        "reference_chains": 6,
+        "data_visibility": "detailed",
+        "mobile_overflow": false
+      },
+      {
+        "case": "synthetic303",
+        "methods": 6,
+        "budget_checks": 12,
+        "reference_chains": 6,
+        "data_visibility": "detailed",
+        "mobile_overflow": false
+      }
+    ],
+    "console_errors": []
+  },
+  "evidence_browser": {
+    "ok": true,
+    "checks": [
+      {
+        "case": "cadets06",
+        "evidence_rows": 26
+      },
+      {
+        "case": "cadets12",
+        "evidence_rows": 9
+      },
+      {
+        "case": "cadets13",
+        "evidence_rows": 27
+      },
+      {
+        "case": "synthetic101",
+        "evidence_rows": 9
+      },
+      {
+        "case": "synthetic202",
+        "evidence_rows": 9
+      },
+      {
+        "case": "synthetic303",
+        "evidence_rows": 9
+      }
+    ]
+  },
+  "final_report_sha256": "b42feb001e7e27b2388cdf36629229a9ee9df6a476793f545f0e702a6b8aeff5",
+  "release_implementation_matches_all_six_frozen_manifests": true,
+  "clean_tracked_files_export_tests": {
+    "passed": 870,
+    "skipped": 2,
+    "failed": 0,
+    "local_detailed_report_present": false,
+    "local_real_reference_files_present": false
+  },
+  "aggregate_browser": {
+    "ok": true,
+    "report": "webapp/frontend/chain-study-summary.json",
+    "cases": [
+      {
+        "case": "cadets06",
+        "methods": 6,
+        "budget_checks": 12,
+        "reference_chains": 121,
+        "data_visibility": "aggregate_only",
+        "mobile_overflow": false
+      },
+      {
+        "case": "cadets12",
+        "methods": 6,
+        "budget_checks": 12,
+        "reference_chains": 31,
+        "data_visibility": "aggregate_only",
+        "mobile_overflow": false
+      },
+      {
+        "case": "cadets13",
+        "methods": 6,
+        "budget_checks": 12,
+        "reference_chains": 75,
+        "data_visibility": "aggregate_only",
+        "mobile_overflow": false
+      },
+      {
+        "case": "synthetic101",
+        "methods": 6,
+        "budget_checks": 12,
+        "reference_chains": 6,
+        "data_visibility": "aggregate_only",
+        "mobile_overflow": false
+      },
+      {
+        "case": "synthetic202",
+        "methods": 6,
+        "budget_checks": 12,
+        "reference_chains": 6,
+        "data_visibility": "aggregate_only",
+        "mobile_overflow": false
+      },
+      {
+        "case": "synthetic303",
+        "methods": 6,
+        "budget_checks": 12,
+        "reference_chains": 6,
+        "data_visibility": "aggregate_only",
+        "mobile_overflow": false
+      }
+    ],
+    "console_errors": []
+  },
+  "publication": {
+    "data_visibility": "aggregate_only",
+    "new_files_scanned": 37,
+    "known_real_reference_ids_checked": 328,
+    "matching_files": 0,
+    "detailed_report_excluded": true,
+    "real_reference_files_excluded": true
+  }
+}

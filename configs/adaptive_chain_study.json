@@ -1,0 +1,25 @@
+{
+  "schema_version": "adaptive-chain-study-inputs-v1",
+  "path_base": "repository_root",
+  "reference_semantics": "CAPTAIN-derived positive events; not independently reviewed complete attack chains",
+  "cases": {
+    "E3-CADETS/node_Nginx_Backdoor_06.csv": {
+      "database": "output/tc/cadets-e3-from-raw-2026-09-07_15-27-47.db",
+      "ledger": "output/tc/poi-prefix-sweep/2026-09-09_10-47-48/scenario-06/poi-prefix-3-ledger/edge-scores.jsonl.gz",
+      "annotation": "configs/chain_references/cadets-06.json",
+      "upstream_annotation_sha256": "bfe9bcd0fef5d502c07993627d9902f5a7c0d9093ae2a8715626fe1b35a7d751"
+    },
+    "E3-CADETS/node_Nginx_Backdoor_12.csv": {
+      "database": "output/tc/cadets-e3-from-raw-2026-09-07_15-27-47.db",
+      "ledger": "output/tc/poi-prefix-sweep/2026-09-09_10-47-48/scenario-12/poi-prefix-8-ledger/edge-scores.jsonl.gz",
+      "annotation": "configs/chain_references/cadets-12.json",
+      "upstream_annotation_sha256": "f0f03218916efd3ae0623ee18efc711822c96a22a325c45554fa89edf1393bf4"
+    },
+    "E3-CADETS/node_Nginx_Backdoor_13.csv": {
+      "database": "output/tc/cadets-e3-from-raw-2026-09-07_15-27-47.db",
+      "ledger": "output/tc/poi-prefix-sweep/2026-09-09_10-47-48/scenario-13/poi-prefix-3-ledger/edge-scores.jsonl.gz",
+      "annotation": "configs/chain_references/cadets-13.json",
+      "upstream_annotation_sha256": "5368fa54c7419f0b9ba15a6dca392fcfdf21d1f8c13a12bd96d7607b9d956978"
+    }
+  }
+}

@@ -1,5 +1,9 @@
 # NODOZE：基于历史对比与可核验证据的溯源图攻击调查
 
+最终 [324 点实验结果与限制](docs/adaptive-chain-results.md)。
+
+新增 [上下文稀有度与整链剪枝实验](docs/adaptive-chain-method.md)：分阶段损失诊断、完整参考链计数、压缩率—完整参考链保留率主图及 HTML 交互页。启动网页后访问 `/assets/chain-study.html`；完整攻击链无独立真值时显示 N/A。 GitHub 页面数据仅含汇总指标；逐事件链图和评分使用本机详细报告，[数据准备步骤](configs/chain_references/README.md)。
+
 当前产品入口 `/` 是**指定节点的预算约束调查**：搜索进程、文件或网络实体，选择关联时间锚，以该节点作为图扩散起点，输出带严格时间见证的事件集合。默认产品流程无需外部告警，不读取参考真值；结果可以重开、导出和离线复放。原攻击检测实验界面保留在 `/research`。
 
 [产品评审、实测与交付范围](docs/product/README.md) · [私有部署与客户数据接入](docs/product/deployment.md) · [节点调查 HTML](webapp/frontend/product.html) · [最新 200 项对比实验](docs/group-completion-v8/comparison.md) · [论文实验协议](docs/group-completion-v8/paper-protocol.md)

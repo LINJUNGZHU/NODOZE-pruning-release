@@ -37,3 +37,7 @@ venv/
 *.tmp
 *.log
 nohup.out
+
+# Local event-level chain evidence; publish only the aggregate summary
+/webapp/frontend/chain-study-results.json
+/configs/chain_references/cadets-*.json
