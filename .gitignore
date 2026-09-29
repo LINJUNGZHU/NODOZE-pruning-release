@@ -41,3 +41,11 @@ nohup.out
 # Local event-level chain evidence; publish only the aggregate summary
 /webapp/frontend/chain-study-results.json
 /configs/chain_references/cadets-*.json
+
+# Retained-event graph exports and local research data catalog
+/webapp/frontend/retained-chain-data/
+/webapp/frontend/retained-chain-catalog.json
+/webapp/frontend/chain-workbench-local.json
+/research/local/
+
+/webapp/frontend/retained-chain-data

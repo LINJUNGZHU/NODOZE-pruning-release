@@ -1,0 +1,18 @@
+{
+  "schema_version": "research-data-readiness-v2",
+  "local_sqlite_databases_audited": 13,
+  "local_postgresql_databases_audited": 3,
+  "e3_providers": [
+    "CADETS",
+    "THEIA",
+    "TRACE",
+    "FIVEDIRECTIONS"
+  ],
+  "registered_cases": 9,
+  "e5_annotation_csv_copies": 18,
+  "e5_event_databases_found": 0,
+  "e5_raw_event_shards_found": 0,
+  "e5_status": "annotation_only_missing_matching_event_source",
+  "scope": "Visible local project and data directories, mounted data roots, SQLite and PostgreSQL catalogs, TAPAS master and nested archive listings; hidden credential directories and unmounted or remote storage excluded.",
+  "completeness": "Partial local data; neither whole E3 nor whole E5 coverage is claimed."
+}

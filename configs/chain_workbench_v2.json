@@ -1,0 +1,171 @@
+{
+  "schema_version": "chain-workbench-protocol-v2",
+  "parameter_policy": "fixed before new matrix evaluation; development cases only",
+  "raw_budgets": [
+    256,
+    1024,
+    4096
+  ],
+  "ratio_budgets": [
+    0.01,
+    0.02,
+    0.05,
+    0.1,
+    0.2,
+    0.5,
+    1.0
+  ],
+  "poi_policies": [
+    "single",
+    "declared",
+    "adaptive"
+  ],
+  "max_pois": 8,
+  "max_anchors": 512,
+  "max_hops": 64,
+  "max_recent_history_events": 250000,
+  "expansion": {
+    "step_seconds": 300,
+    "max_extension_seconds": 900,
+    "boundary_seconds": 60,
+    "max_events": 300000
+  },
+  "cases": [
+    {
+      "id": "cadets06",
+      "label": "CADETS06",
+      "provider": "CADETS",
+      "ledger": "output/tc/poi-prefix-sweep/2026-09-09_10-47-48/scenario-06/poi-prefix-3-ledger/edge-scores.jsonl.gz",
+      "database": "output/tc/cadets-e3-from-raw-2026-09-07_15-27-47.db",
+      "expand_window": true,
+      "history_database": "output/tc/cadets-e3-from-raw-2026-09-07_15-27-47.db",
+      "start_ns": 1523028000000000000,
+      "end_ns": 1523030940000000000,
+      "reference": {
+        "kind": "captain_events",
+        "path": "configs/chain_references/cadets-06.json"
+      }
+    },
+    {
+      "id": "cadets12",
+      "label": "CADETS12",
+      "provider": "CADETS",
+      "ledger": "output/tc/poi-prefix-sweep/2026-09-09_10-47-48/scenario-12/poi-prefix-8-ledger/edge-scores.jsonl.gz",
+      "database": "output/tc/cadets-e3-from-raw-2026-09-07_15-27-47.db",
+      "expand_window": true,
+      "history_database": "output/tc/cadets-e3-from-raw-2026-09-07_15-27-47.db",
+      "start_ns": 1523555940000000000,
+      "end_ns": 1523558340000000000,
+      "reference": {
+        "kind": "captain_events",
+        "path": "configs/chain_references/cadets-12.json"
+      }
+    },
+    {
+      "id": "cadets13",
+      "label": "CADETS13",
+      "provider": "CADETS",
+      "ledger": "output/tc/poi-prefix-sweep/2026-09-09_10-47-48/scenario-13/poi-prefix-3-ledger/edge-scores.jsonl.gz",
+      "database": "output/tc/cadets-e3-from-raw-2026-09-07_15-27-47.db",
+      "expand_window": true,
+      "history_database": "output/tc/cadets-e3-from-raw-2026-09-07_15-27-47.db",
+      "start_ns": 1523624580000000000,
+      "end_ns": 1523625386684642175,
+      "reference": {
+        "kind": "captain_events",
+        "path": "configs/chain_references/cadets-13.json"
+      }
+    },
+    {
+      "id": "theia-case1",
+      "label": "THEIA-CASE1",
+      "provider": "THEIA",
+      "ledger": "output/tc/sparse-five/theia-case1-direct-3poi-fast-results-ledger/edge-scores.jsonl.gz",
+      "database": "output/tc/theia-depimpact-case1-2026-09-09_15-35-45.db",
+      "expand_window": false,
+      "reference": {
+        "kind": "local_critical_subset",
+        "path": "docs/sparse-five-local-critical-reference.json",
+        "case_index": 2
+      }
+    },
+    {
+      "id": "theia-case3",
+      "label": "THEIA-CASE3",
+      "provider": "THEIA",
+      "ledger": "output/tc/theia-case3-poi-prefix-fixed-2026-09-09_23-36-33/scenario-theia-case3/poi-prefix-3-ledger/edge-scores.jsonl.gz",
+      "database": "output/tc/theia-depimpact-case3-2026-09-09_15-32-25.db",
+      "expand_window": false,
+      "reference": {
+        "kind": "local_critical_subset",
+        "path": "docs/sparse-five-local-critical-reference.json",
+        "case_index": 3
+      }
+    },
+    {
+      "id": "theia-case5",
+      "label": "THEIA-CASE5",
+      "provider": "THEIA",
+      "ledger": "output/tc/sparse-five/theia-case5-literal-results-ledger/edge-scores.jsonl.gz",
+      "database": "output/tc/sparse-five/theia-case5-literal.db",
+      "expand_window": false,
+      "history_database": "output/tc/sparse-five/theia-apr12-baseline.db",
+      "reference": {
+        "kind": "unavailable"
+      }
+    },
+    {
+      "id": "trace-case5-paper",
+      "label": "TRACE-CASE5-PAPER",
+      "provider": "TRACE",
+      "ledger": "output/tc/sparse-five/trace-case5-paper-results-ledger/edge-scores.jsonl.gz",
+      "database": "output/tc/sparse-five/trace-case5-paper.db",
+      "expand_window": false,
+      "reference": {
+        "kind": "local_critical_subset",
+        "path": "docs/sparse-five-local-critical-reference.json",
+        "case_index": 4
+      }
+    },
+    {
+      "id": "fivedirections-case1",
+      "label": "FIVEDIRECTIONS-CASE1",
+      "provider": "FIVEDIRECTIONS",
+      "ledger": "output/tc/sparse-five/fivedirections/case1-phishing-results-ledger/edge-scores.jsonl.gz",
+      "database": "output/tc/sparse-five/fivedirections/case1-phishing.db",
+      "expand_window": false,
+      "reference": {
+        "kind": "local_critical_subset",
+        "path": "docs/sparse-five-local-critical-reference.json",
+        "case_index": 0
+      }
+    },
+    {
+      "id": "fivedirections-case3",
+      "label": "FIVEDIRECTIONS-CASE3",
+      "provider": "FIVEDIRECTIONS",
+      "ledger": "output/tc/sparse-five/fivedirections/case3-two-poi-results-ledger/edge-scores.jsonl.gz",
+      "database": "output/tc/sparse-five/fivedirections/case3-shards.db",
+      "expand_window": false,
+      "reference": {
+        "kind": "local_critical_subset",
+        "path": "docs/sparse-five-local-critical-reference.json",
+        "case_index": 1
+      }
+    }
+  ],
+  "data_readiness": [
+    {
+      "dataset": "E3",
+      "provider": "CADETS/THEIA/TRACE/FIVEDIRECTIONS",
+      "status": "available_partial_logs",
+      "reason": "Nine registered local investigation cases; previously observed development data."
+    },
+    {
+      "dataset": "E5",
+      "provider": "local annotation folders",
+      "status": "annotation_only",
+      "reason": "18 CSV copies and official PDF found; no matching raw event log or database in inspected local directories/archives. Attack retention unavailable."
+    }
+  ]
+}

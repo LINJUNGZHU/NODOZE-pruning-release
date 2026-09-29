@@ -1,6 +1,10 @@
 # NODOZE：基于历史对比与可核验证据的溯源图攻击调查
 
-最终 [324 点实验结果与限制](docs/adaptive-chain-results.md)。
+当前研究入口：[多 POI、候选窗口与保留链工作台](docs/chain-workbench-v2/README.md) · [实验与数据目录索引](research/README.md)。启动网页后访问 `/assets/research-workbench.html` 查看对照曲线，访问 `/assets/retained-chains.html` 查看与下载实际保留链路。
+
+本轮已完成 **9个E3案例、36个变体、2520个决策点**，包含多起点、自动扩窗和固定参考链阶段损失。[压缩率—完整参考路径保留率主图](docs/chain-workbench-v2/figures/overview-reference-chain.png)。完整攻击无独立真值时为N/A，E5因仅找到标注未计入实验。
+
+上一轮 [324 点实验结果与限制](docs/adaptive-chain-results.md)。
 
 新增 [上下文稀有度与整链剪枝实验](docs/adaptive-chain-method.md)：分阶段损失诊断、完整参考链计数、压缩率—完整参考链保留率主图及 HTML 交互页。启动网页后访问 `/assets/chain-study.html`；完整攻击链无独立真值时显示 N/A。 GitHub 页面数据仅含汇总指标；逐事件链图和评分使用本机详细报告，[数据准备步骤](configs/chain_references/README.md)。
 

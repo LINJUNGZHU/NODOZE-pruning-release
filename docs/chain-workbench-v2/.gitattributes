@@ -1,0 +1,4 @@
+# Keep the generated, audited artifact bytes unchanged across checkouts.
+# Python's CSV writer uses CRLF; Matplotlib SVG path lines contain trailing spaces.
+report.csv -text whitespace=cr-at-eol
+figures/*.svg -text whitespace=-blank-at-eol

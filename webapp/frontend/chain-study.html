@@ -7,10 +7,11 @@
   <script src="/assets/chain-study.js" defer></script>
 </head>
 <body>
-<header class="topbar"><a class="brand" href="/" aria-label="NODOZE 首页"><span class="brand-mark">N</span>NODOZE<span class="brand-sub">剪枝实验</span></a><a href="/research">返回攻击调查 ↗</a></header>
+<header class="topbar"><a class="brand" href="/" aria-label="NODOZE 首页"><span class="brand-mark">N</span>NODOZE<span class="brand-sub">剪枝实验</span></a><a href="/assets/retained-chains.html">实际保留链路 ↗</a><a href="/research">返回攻击调查 ↗</a></header>
 <main>
   <div class="intro"><div><p class="eyebrow">RARITY · DIFFUSION · PATH PRESERVATION</p><h1>压缩一张图，保留多少条完整链？</h1><p>比较真实事件预算下的参考链保留情况，逐阶段定位缺失，再核对每一条原始事件。</p></div><span class="scope-badge">参考链 ≠ 已核验完整攻击链</span></div>
-  <p id="load-status" role="status" aria-live="polite">正在读取实验报告…</p>
+  <p class="hint"><a href="/assets/research-workbench.html">打开研究工作台 v2 ↗</a> · 同预算方法对照与数据覆盖</p>
+<p id="load-status" role="status" aria-live="polite">正在读取实验报告…</p>
   <section id="load-error" class="panel empty-state" role="alert" hidden><h2>实验报告暂不可用</h2><p id="load-error-detail"></p><p>请先在项目根目录生成实验报告：</p><code>python -m scripts.run_adaptive_chains --output output/adaptive-chain-study --publish</code><p>结果文件应位于 <code>webapp/frontend/chain-study-results.json</code>。完成后刷新本页。</p><button id="reload-button" type="button">重新读取</button></section>
   <div id="study-content" hidden>
     <section class="panel controls" aria-label="选择实验结果"><label>数据集<select id="case-select"></select></label><label>当前方法<select id="method-select"></select></label><label>保留预算点<select id="budget-select"></select></label><a id="download-report" class="download" href="/assets/chain-study-results.json" download>下载完整结果 JSON ↓</a><p id="case-note" class="hint full-row"></p></section>

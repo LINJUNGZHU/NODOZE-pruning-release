@@ -1,0 +1,74 @@
+{
+  "schema_version": "chain-workbench-v2-verification",
+  "run": "20260930-r1",
+  "verified_date": "2026-09-30",
+  "status": "passed",
+  "environment": {
+    "python": "3.12.6",
+    "numpy": "1.26.4",
+    "matplotlib": "3.9.2",
+    "sqlite": "3.46.1"
+  },
+  "python_suite": {
+    "passed": 1078,
+    "skipped": 2,
+    "duration_seconds": 29.44,
+    "scope": "clean staged source snapshot; final frontend and browser-helper updates separately checked against the running service"
+  },
+  "frozen_experiment": {
+    "registered_cases": 9,
+    "completed_cases": 9,
+    "variants": 36,
+    "methods": 7,
+    "decision_points": 2520,
+    "partial_evaluation": false,
+    "all_variants_validated_before_reference_access": true,
+    "original_and_release_source_files_equal": 14
+  },
+  "aggregate_consistency": {
+    "json_csv_rows_equal": 2520,
+    "numeric_errors": 0,
+    "report_sha256": "4646b90e0c74a4b633e45e34cc9303dfae54392eb3254258a642a8132348f65c",
+    "csv_sha256": "f6e842fac76af9e2e28ebaae21b460582b0a753c299f5d66e451d154ca3eac9c",
+    "public_figures": 84,
+    "figure_formats": [
+      "PDF",
+      "PNG",
+      "SVG"
+    ],
+    "details": "aggregate-audit.json"
+  },
+  "local_reference_overlays": {
+    "entries": 15,
+    "all_aggregate_counts_match": true,
+    "actual_retained_events_per_entry": 1024,
+    "details_public": false
+  },
+  "live_browser": {
+    "engine": "Playwright Chromium",
+    "retained_page_status": "passed",
+    "retained_check_groups": 26,
+    "overview_page_status": "passed",
+    "overview_check_groups": 16,
+    "catalog_entries": 24,
+    "current_exports": 15,
+    "archived_exports": 9,
+    "download_files_checked": 72,
+    "reference_overlays_checked": 15,
+    "aggregate_endpoint_checks": 504,
+    "exact_decision_links_checked": 15,
+    "browser_errors": 0,
+    "mobile_width_px": 390,
+    "screenshots_public": false
+  },
+  "public_artifact_privacy": {
+    "known_real_event_and_poi_ids_checked": 880,
+    "matches": 0,
+    "event_details_uploaded": false
+  },
+  "interpretation": {
+    "reference_paths_are_independent_complete_attacks": false,
+    "held_out_test": false,
+    "e5_event_experiments_available": false
+  }
+}

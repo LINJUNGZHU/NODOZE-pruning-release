@@ -1,0 +1,96 @@
+{
+  "schema_version": "research-experiment-registry-v1",
+  "path_base": "project_root",
+  "scope": "workflow_registry_and_local_data_references_only",
+  "contains_raw_event_ids": false,
+  "current_experiment": "chain-workbench-v2",
+  "links": {
+    "current_report": "docs/chain-workbench-v2/README.md",
+    "previous_results": "docs/adaptive-chain-results.md",
+    "existing_research_index": "docs/research-experiment-index.md",
+    "retained_viewer": "webapp/frontend/retained-chains.html",
+    "retained_viewer_url": "/assets/retained-chains.html",
+    "reference_curve_viewer": "webapp/frontend/chain-study.html",
+    "current_summary": "docs/chain-workbench-v2/report.json",
+    "current_curve_viewer": "webapp/frontend/research-workbench.html"
+  },
+  "experiments": [
+    {
+      "id": "chain-workbench-v2",
+      "status": "current",
+      "report": "docs/chain-workbench-v2/README.md",
+      "output_directory": "output/research/chain-workbench-v2",
+      "local_link": "research/local/current",
+      "dataset_references": [
+        "darpa-e3-local"
+      ],
+      "status_scope": "completed development matrix; partial references do not certify independently complete attacks",
+      "latest_completed_run": "20260930-r1",
+      "completed_cases": 9,
+      "completed_variants": 36,
+      "completed_decision_points": 2520,
+      "partial_evaluation": false,
+      "aggregate_json": "docs/chain-workbench-v2/report.json",
+      "aggregate_csv": "docs/chain-workbench-v2/report.csv",
+      "main_figure": "docs/chain-workbench-v2/figures/overview-reference-chain.pdf"
+    },
+    {
+      "id": "chain-study-v1-exploratory",
+      "status": "archived_v1",
+      "report": "docs/adaptive-chain-results.md",
+      "output_directory": "output/research/archive/chain-study-v1-exploratory",
+      "compatibility_path": "output/adaptive-chain-study-20260929",
+      "dataset_references": [
+        "darpa-e3-local",
+        "synthetic-temporal-graphs"
+      ],
+      "status_scope": "archived on this workstation with compatibility symlink; frozen contents retained"
+    },
+    {
+      "id": "chain-study-v1-final",
+      "status": "archived_v1",
+      "report": "docs/adaptive-chain-results.md",
+      "output_directory": "output/research/archive/chain-study-v1-final",
+      "compatibility_path": "output/adaptive-chain-study-20260929-final",
+      "dataset_references": [
+        "darpa-e3-local",
+        "synthetic-temporal-graphs"
+      ],
+      "status_scope": "archived on this workstation with compatibility symlink; frozen contents retained"
+    }
+  ],
+  "datasets": [
+    {
+      "id": "darpa-e3-local",
+      "availability": "local_event_data_available",
+      "local_reference": "research/local/datasets",
+      "source_directory": "output/tc",
+      "providers_with_local_inputs": [
+        "CADETS",
+        "THEIA",
+        "TRACE",
+        "FIVEDIRECTIONS"
+      ],
+      "inventory_reference": "research/local/data-inventory.json",
+      "scope": "local sources differ in imported time span, history coverage and reference admission; report each executed case separately"
+    },
+    {
+      "id": "darpa-e5-local",
+      "availability": "reference_annotations_only_no_event_data_found_in_local_audit",
+      "inventory_reference": "research/local/data-inventory.json",
+      "enabled_event_experiments": false,
+      "scope": "local audit found E5 annotations and a report, but no matching raw event shard or event database; remote and unmounted sources were not inspected"
+    },
+    {
+      "id": "synthetic-temporal-graphs",
+      "availability": "generated_by_runner",
+      "generator": "scripts/run_adaptive_chains.py",
+      "scope": "synthetic witnesses and known truth validate contracts; they do not establish real-world attack completeness"
+    }
+  ],
+  "local_only": {
+    "directory": "research/local",
+    "retained_exports": "webapp/frontend/retained-chain-data",
+    "retained_catalog": "webapp/frontend/retained-chain-catalog.json"
+  }
+}
