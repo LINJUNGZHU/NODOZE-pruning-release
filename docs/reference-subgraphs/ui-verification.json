@@ -1,0 +1,44 @@
+{
+  "status": "passed",
+  "live_flask_origin": "http://127.0.0.1:8000",
+  "overview_browser_groups": 24,
+  "retained_browser_groups": 38,
+  "browser_errors": 0,
+  "cases": 9,
+  "variants": 36,
+  "frozen_decisions": 2520,
+  "existing_curve_endpoint_checks": 504,
+  "subgraph_method_variant_endpoint_scope_checks": 1008,
+  "exact_representative_links": 15,
+  "retained_exports": 24,
+  "three_format_downloads": 72,
+  "local_reference_chain_audits": 15,
+  "local_subgraph_audits": 15,
+  "subgraph_scopes_checked": 30,
+  "reference_scope_hash_binding_verified": true,
+  "ratio_and_fork_join_tamper_rejected": true,
+  "original_and_release_owned_files_identical": true,
+  "ui_sha256": {
+    "webapp/frontend/research-workbench.html": "d1c6674563adfa444f207af2cf096363b0557b5663a7b320f5c2628470f88e4e",
+    "webapp/frontend/research-workbench.css": "dd1ea9b857cb14faf0783d7b6856c4aabe828e9ee37344f53dea3f2bf1c70bf9",
+    "webapp/frontend/research-workbench.js": "c5ad4b88dac142bd360cca2eaee03b5891ce5e5db950f3f4ad8f1e55d97d2ee1",
+    "webapp/frontend/retained-chains.html": "cd47c261b71ead96113f060f0eee0ce26ab4e8583447f4d10765e3a04abfbbc0",
+    "webapp/frontend/retained-chains.css": "bdfb02a78300512e9c965fe7f5d8566d75fb37ff0231ff9c7f3028fe0f522edb",
+    "webapp/frontend/retained-chains.js": "fc78b8e1632a52f024dcae5b302b5eea61271f7a4200dc1bd615585abfa303e7",
+    "webapp/scripts/verify_research_workbench.py": "88629e2cb6109016700bdd0761b3acc2e0928dc427817e0ad84e52875c06a6d7",
+    "webapp/scripts/verify_retained_chains.py": "0d4bed2f6209d688429a155ac236ea7c8f5513f0cc53caebff754a1dfc72a955"
+  },
+  "manual_visual_review": {
+    "desktop_and_390px_mobile": true,
+    "cases": [
+      "cadets13",
+      "trace"
+    ],
+    "native_and_augmented": true,
+    "missing_vs_retained_relationships_distinct": true,
+    "native_trace_complete_subgraphs_unavailable": true,
+    "mobile_axis_labels_do_not_overlap": true,
+    "mobile_graph_horizontal_scroll_explicit": true
+  },
+  "raw_screenshots_published": false
+}

@@ -1,0 +1,81 @@
+{
+  "schema_version": "reference-subgraph-verification-v1",
+  "run": "20260930-r1",
+  "verified_date": "2026-09-30",
+  "status": "passed",
+  "environment": {
+    "python": "3.12.6",
+    "numpy": "1.26.4",
+    "matplotlib": "3.9.2",
+    "sqlite": "3.46.1"
+  },
+  "python_suite": {
+    "passed": 1133,
+    "skipped": 2,
+    "duration_seconds": 53.12,
+    "scope": "clean staged source snapshot; all six new implementation/test files still match its exact bytes; final frontend and browser-helper changes separately checked against the running service"
+  },
+  "frozen_experiment": {
+    "registered_cases": 9,
+    "completed_cases": 9,
+    "variants": 36,
+    "methods": 7,
+    "decision_points": 2520,
+    "reference_scopes": 2,
+    "csv_rows": 5040,
+    "partial_evaluation": false,
+    "all_variants_validated_before_reference_access": true,
+    "selection_recomputed": false
+  },
+  "aggregate_consistency": {
+    "numeric_checks": 511315,
+    "csv_cells_checked": 257040,
+    "report_sha256": "735da649a2ee1e0d43da7483fbd5ce80255a8053d89a974a63d00d36cece4853",
+    "csv_sha256": "aeddc421f6e4dbd319678e0ee62a114e243563cb212b17a96b60d4a324e644b9",
+    "old_v2_report_unchanged": true,
+    "old_v2_csv_unchanged": true,
+    "public_figures": 33,
+    "figure_formats": {
+      "pdf": 11,
+      "png": 11,
+      "svg": 11
+    },
+    "numeric_errors": 0,
+    "details": "aggregate-audit.json"
+  },
+  "local_subgraph_overlays": {
+    "entries": 15,
+    "scopes_checked": 30,
+    "all_aggregate_counts_match": true,
+    "actual_retained_events_per_entry": 1024,
+    "details_public": false
+  },
+  "live_browser": {
+    "engine": "Playwright Chromium",
+    "overview_check_groups": 24,
+    "retained_check_groups": 38,
+    "browser_errors": 0,
+    "catalog_entries": 24,
+    "download_files_checked": 72,
+    "new_subgraph_endpoint_scope_checks": 1008,
+    "prior_path_endpoint_checks": 504,
+    "exact_decision_links_checked": 15,
+    "mobile_width_px": 390,
+    "screenshots_public": false,
+    "details": "ui-verification.json"
+  },
+  "public_artifact_privacy": {
+    "known_real_event_and_poi_ids_checked": 880,
+    "matches": 0,
+    "event_details_uploaded": false,
+    "details": "aggregate-audit.json"
+  },
+  "interpretation": {
+    "posthoc_development_analysis": true,
+    "independent_complete_attack_counts_available": false,
+    "observed_reference_completeness_proves_full_real_attack": false,
+    "held_out_test": false,
+    "algorithm_gain_from_new_metric_claimed": false,
+    "e5_event_experiments_available": false
+  }
+}

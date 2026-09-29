@@ -1,0 +1,858 @@
+{
+  "schema_version": "reference-subgraph-aggregate-audit-v1",
+  "run": "20260930-r1",
+  "status": "passed",
+  "audit_scope": "independent aggregate arithmetic, prior-report bindings, scalar CSV equivalence, exact publication copies, and text/metadata privacy; no full frozen validator rerun",
+  "registered_cases": 9,
+  "completed_cases": 9,
+  "variants": 36,
+  "methods": 7,
+  "decision_points": 2520,
+  "scopes": 2,
+  "csv_rows": 5040,
+  "csv_cells_checked": 257040,
+  "numeric_checks": 511315,
+  "numeric_errors": [],
+  "privacy_findings": [],
+  "known_real_event_and_poi_ids_checked": 880,
+  "public_figures": 33,
+  "figure_formats": {
+    "pdf": 11,
+    "png": 11,
+    "svg": 11
+  },
+  "old_v2_report_unchanged": true,
+  "old_v2_csv_unchanged": true,
+  "old_v2_report_sha256": "4646b90e0c74a4b633e45e34cc9303dfae54392eb3254258a642a8132348f65c",
+  "old_v2_csv_sha256": "f6e842fac76af9e2e28ebaae21b460582b0a753c299f5d66e451d154ca3eac9c",
+  "report_sha256": "735da649a2ee1e0d43da7483fbd5ce80255a8053d89a974a63d00d36cece4853",
+  "csv_sha256": "aeddc421f6e4dbd319678e0ee62a114e243563cb212b17a96b60d4a324e644b9",
+  "publication_copy_mismatches": [],
+  "source_provenance_hashes_checked": 6,
+  "case_reference_summaries": [
+    {
+      "case": "cadets06",
+      "native": {
+        "reference_subgraph_count": 1,
+        "singleton_event_count": 0,
+        "reference_events": 166,
+        "reference_dependencies": 5829,
+        "terminal_pairs": 9
+      },
+      "augmented": {
+        "reference_subgraph_count": 1,
+        "singleton_event_count": 0,
+        "reference_events": 166,
+        "reference_dependencies": 5829,
+        "terminal_pairs": 9
+      }
+    },
+    {
+      "case": "cadets12",
+      "native": {
+        "reference_subgraph_count": 4,
+        "singleton_event_count": 0,
+        "reference_events": 44,
+        "reference_dependencies": 320,
+        "terminal_pairs": 12
+      },
+      "augmented": {
+        "reference_subgraph_count": 4,
+        "singleton_event_count": 0,
+        "reference_events": 44,
+        "reference_dependencies": 320,
+        "terminal_pairs": 12
+      }
+    },
+    {
+      "case": "cadets13",
+      "native": {
+        "reference_subgraph_count": 1,
+        "singleton_event_count": 0,
+        "reference_events": 118,
+        "reference_dependencies": 3384,
+        "terminal_pairs": 7
+      },
+      "augmented": {
+        "reference_subgraph_count": 1,
+        "singleton_event_count": 0,
+        "reference_events": 118,
+        "reference_dependencies": 3384,
+        "terminal_pairs": 7
+      }
+    },
+    {
+      "case": "fivedirections-case1",
+      "native": {
+        "reference_subgraph_count": 2,
+        "singleton_event_count": 0,
+        "reference_events": 37,
+        "reference_dependencies": 121,
+        "terminal_pairs": 79
+      },
+      "augmented": {
+        "reference_subgraph_count": 2,
+        "singleton_event_count": 0,
+        "reference_events": 38,
+        "reference_dependencies": 135,
+        "terminal_pairs": 81
+      }
+    },
+    {
+      "case": "fivedirections-case3",
+      "native": {
+        "reference_subgraph_count": 1,
+        "singleton_event_count": 4,
+        "reference_events": 14,
+        "reference_dependencies": 16,
+        "terminal_pairs": 16
+      },
+      "augmented": {
+        "reference_subgraph_count": 1,
+        "singleton_event_count": 5,
+        "reference_events": 15,
+        "reference_dependencies": 16,
+        "terminal_pairs": 16
+      }
+    },
+    {
+      "case": "theia-case1",
+      "native": {
+        "reference_subgraph_count": 3,
+        "singleton_event_count": 3,
+        "reference_events": 239,
+        "reference_dependencies": 463,
+        "terminal_pairs": 449
+      },
+      "augmented": {
+        "reference_subgraph_count": 3,
+        "singleton_event_count": 3,
+        "reference_events": 239,
+        "reference_dependencies": 463,
+        "terminal_pairs": 449
+      }
+    },
+    {
+      "case": "theia-case3",
+      "native": {
+        "reference_subgraph_count": 2,
+        "singleton_event_count": 3,
+        "reference_events": 229,
+        "reference_dependencies": 228,
+        "terminal_pairs": 220
+      },
+      "augmented": {
+        "reference_subgraph_count": 2,
+        "singleton_event_count": 3,
+        "reference_events": 229,
+        "reference_dependencies": 228,
+        "terminal_pairs": 220
+      }
+    },
+    {
+      "case": "theia-case5",
+      "native": {
+        "reference_subgraph_count": null,
+        "singleton_event_count": null,
+        "reference_events": null,
+        "reference_dependencies": null,
+        "terminal_pairs": null
+      },
+      "augmented": {
+        "reference_subgraph_count": null,
+        "singleton_event_count": null,
+        "reference_events": null,
+        "reference_dependencies": null,
+        "terminal_pairs": null
+      }
+    },
+    {
+      "case": "trace-case5-paper",
+      "native": {
+        "reference_subgraph_count": 0,
+        "singleton_event_count": 29,
+        "reference_events": 29,
+        "reference_dependencies": 0,
+        "terminal_pairs": 0
+      },
+      "augmented": {
+        "reference_subgraph_count": 1,
+        "singleton_event_count": 27,
+        "reference_events": 31,
+        "reference_dependencies": 3,
+        "terminal_pairs": 3
+      }
+    }
+  ],
+  "base_declared_budget1024_path_vs_subgraph": [
+    {
+      "case": "cadets06",
+      "method": "rarity_only",
+      "retained_reference_paths": 0,
+      "reference_path_count": 121,
+      "native_complete_subgraphs": 0,
+      "native_reference_subgraphs": 1,
+      "native_event_retention": 0.6867469879518072,
+      "native_terminal_reachability": 0.0
+    },
+    {
+      "case": "cadets06",
+      "method": "diffusion_only",
+      "retained_reference_paths": 0,
+      "reference_path_count": 121,
+      "native_complete_subgraphs": 0,
+      "native_reference_subgraphs": 1,
+      "native_event_retention": 0.9939759036144579,
+      "native_terminal_reachability": 0.0
+    },
+    {
+      "case": "cadets06",
+      "method": "rasp",
+      "retained_reference_paths": 120,
+      "reference_path_count": 121,
+      "native_complete_subgraphs": 0,
+      "native_reference_subgraphs": 1,
+      "native_event_retention": 0.9939759036144579,
+      "native_terminal_reachability": 0.8888888888888888
+    },
+    {
+      "case": "cadets06",
+      "method": "context_v1",
+      "retained_reference_paths": 121,
+      "reference_path_count": 121,
+      "native_complete_subgraphs": 1,
+      "native_reference_subgraphs": 1,
+      "native_event_retention": 1.0,
+      "native_terminal_reachability": 1.0
+    },
+    {
+      "case": "cadets06",
+      "method": "reliability",
+      "retained_reference_paths": 120,
+      "reference_path_count": 121,
+      "native_complete_subgraphs": 0,
+      "native_reference_subgraphs": 1,
+      "native_event_retention": 0.9939759036144579,
+      "native_terminal_reachability": 0.8888888888888888
+    },
+    {
+      "case": "cadets06",
+      "method": "adaptive_v1",
+      "retained_reference_paths": 121,
+      "reference_path_count": 121,
+      "native_complete_subgraphs": 1,
+      "native_reference_subgraphs": 1,
+      "native_event_retention": 1.0,
+      "native_terminal_reachability": 1.0
+    },
+    {
+      "case": "cadets06",
+      "method": "reliability_chain",
+      "retained_reference_paths": 120,
+      "reference_path_count": 121,
+      "native_complete_subgraphs": 0,
+      "native_reference_subgraphs": 1,
+      "native_event_retention": 0.9939759036144579,
+      "native_terminal_reachability": 0.8888888888888888
+    },
+    {
+      "case": "cadets12",
+      "method": "rarity_only",
+      "retained_reference_paths": 0,
+      "reference_path_count": 31,
+      "native_complete_subgraphs": 0,
+      "native_reference_subgraphs": 4,
+      "native_event_retention": 0.045454545454545456,
+      "native_terminal_reachability": 0.0
+    },
+    {
+      "case": "cadets12",
+      "method": "diffusion_only",
+      "retained_reference_paths": 1,
+      "reference_path_count": 31,
+      "native_complete_subgraphs": 0,
+      "native_reference_subgraphs": 4,
+      "native_event_retention": 0.8181818181818182,
+      "native_terminal_reachability": 0.25
+    },
+    {
+      "case": "cadets12",
+      "method": "rasp",
+      "retained_reference_paths": 1,
+      "reference_path_count": 31,
+      "native_complete_subgraphs": 0,
+      "native_reference_subgraphs": 4,
+      "native_event_retention": 0.8863636363636364,
+      "native_terminal_reachability": 0.25
+    },
+    {
+      "case": "cadets12",
+      "method": "context_v1",
+      "retained_reference_paths": 1,
+      "reference_path_count": 31,
+      "native_complete_subgraphs": 0,
+      "native_reference_subgraphs": 4,
+      "native_event_retention": 0.8181818181818182,
+      "native_terminal_reachability": 0.25
+    },
+    {
+      "case": "cadets12",
+      "method": "reliability",
+      "retained_reference_paths": 1,
+      "reference_path_count": 31,
+      "native_complete_subgraphs": 0,
+      "native_reference_subgraphs": 4,
+      "native_event_retention": 0.8863636363636364,
+      "native_terminal_reachability": 0.25
+    },
+    {
+      "case": "cadets12",
+      "method": "adaptive_v1",
+      "retained_reference_paths": 1,
+      "reference_path_count": 31,
+      "native_complete_subgraphs": 0,
+      "native_reference_subgraphs": 4,
+      "native_event_retention": 0.8181818181818182,
+      "native_terminal_reachability": 0.25
+    },
+    {
+      "case": "cadets12",
+      "method": "reliability_chain",
+      "retained_reference_paths": 1,
+      "reference_path_count": 31,
+      "native_complete_subgraphs": 0,
+      "native_reference_subgraphs": 4,
+      "native_event_retention": 0.8863636363636364,
+      "native_terminal_reachability": 0.25
+    },
+    {
+      "case": "cadets13",
+      "method": "rarity_only",
+      "retained_reference_paths": 0,
+      "reference_path_count": 75,
+      "native_complete_subgraphs": 0,
+      "native_reference_subgraphs": 1,
+      "native_event_retention": 0.6610169491525424,
+      "native_terminal_reachability": 0.0
+    },
+    {
+      "case": "cadets13",
+      "method": "diffusion_only",
+      "retained_reference_paths": 0,
+      "reference_path_count": 75,
+      "native_complete_subgraphs": 0,
+      "native_reference_subgraphs": 1,
+      "native_event_retention": 0.6694915254237288,
+      "native_terminal_reachability": 0.0
+    },
+    {
+      "case": "cadets13",
+      "method": "rasp",
+      "retained_reference_paths": 0,
+      "reference_path_count": 75,
+      "native_complete_subgraphs": 0,
+      "native_reference_subgraphs": 1,
+      "native_event_retention": 0.6694915254237288,
+      "native_terminal_reachability": 0.0
+    },
+    {
+      "case": "cadets13",
+      "method": "context_v1",
+      "retained_reference_paths": 0,
+      "reference_path_count": 75,
+      "native_complete_subgraphs": 0,
+      "native_reference_subgraphs": 1,
+      "native_event_retention": 0.6694915254237288,
+      "native_terminal_reachability": 0.0
+    },
+    {
+      "case": "cadets13",
+      "method": "reliability",
+      "retained_reference_paths": 0,
+      "reference_path_count": 75,
+      "native_complete_subgraphs": 0,
+      "native_reference_subgraphs": 1,
+      "native_event_retention": 0.6694915254237288,
+      "native_terminal_reachability": 0.0
+    },
+    {
+      "case": "cadets13",
+      "method": "adaptive_v1",
+      "retained_reference_paths": 0,
+      "reference_path_count": 75,
+      "native_complete_subgraphs": 0,
+      "native_reference_subgraphs": 1,
+      "native_event_retention": 0.6694915254237288,
+      "native_terminal_reachability": 0.0
+    },
+    {
+      "case": "cadets13",
+      "method": "reliability_chain",
+      "retained_reference_paths": 0,
+      "reference_path_count": 75,
+      "native_complete_subgraphs": 0,
+      "native_reference_subgraphs": 1,
+      "native_event_retention": 0.6694915254237288,
+      "native_terminal_reachability": 0.0
+    },
+    {
+      "case": "fivedirections-case1",
+      "method": "rarity_only",
+      "retained_reference_paths": 0,
+      "reference_path_count": 33,
+      "native_complete_subgraphs": 0,
+      "native_reference_subgraphs": 2,
+      "native_event_retention": 0.08108108108108109,
+      "native_terminal_reachability": 0.0
+    },
+    {
+      "case": "fivedirections-case1",
+      "method": "diffusion_only",
+      "retained_reference_paths": 17,
+      "reference_path_count": 33,
+      "native_complete_subgraphs": 1,
+      "native_reference_subgraphs": 2,
+      "native_event_retention": 0.4864864864864865,
+      "native_terminal_reachability": 0.9746835443037974
+    },
+    {
+      "case": "fivedirections-case1",
+      "method": "rasp",
+      "retained_reference_paths": 17,
+      "reference_path_count": 33,
+      "native_complete_subgraphs": 1,
+      "native_reference_subgraphs": 2,
+      "native_event_retention": 0.4864864864864865,
+      "native_terminal_reachability": 0.9746835443037974
+    },
+    {
+      "case": "fivedirections-case1",
+      "method": "context_v1",
+      "retained_reference_paths": 17,
+      "reference_path_count": 33,
+      "native_complete_subgraphs": 1,
+      "native_reference_subgraphs": 2,
+      "native_event_retention": 0.4864864864864865,
+      "native_terminal_reachability": 0.9746835443037974
+    },
+    {
+      "case": "fivedirections-case1",
+      "method": "reliability",
+      "retained_reference_paths": 17,
+      "reference_path_count": 33,
+      "native_complete_subgraphs": 1,
+      "native_reference_subgraphs": 2,
+      "native_event_retention": 0.4864864864864865,
+      "native_terminal_reachability": 0.9746835443037974
+    },
+    {
+      "case": "fivedirections-case1",
+      "method": "adaptive_v1",
+      "retained_reference_paths": 17,
+      "reference_path_count": 33,
+      "native_complete_subgraphs": 1,
+      "native_reference_subgraphs": 2,
+      "native_event_retention": 0.4864864864864865,
+      "native_terminal_reachability": 0.9746835443037974
+    },
+    {
+      "case": "fivedirections-case1",
+      "method": "reliability_chain",
+      "retained_reference_paths": 17,
+      "reference_path_count": 33,
+      "native_complete_subgraphs": 1,
+      "native_reference_subgraphs": 2,
+      "native_event_retention": 0.4864864864864865,
+      "native_terminal_reachability": 0.9746835443037974
+    },
+    {
+      "case": "fivedirections-case3",
+      "method": "rarity_only",
+      "retained_reference_paths": 0,
+      "reference_path_count": 9,
+      "native_complete_subgraphs": 0,
+      "native_reference_subgraphs": 1,
+      "native_event_retention": 0.14285714285714285,
+      "native_terminal_reachability": 0.0
+    },
+    {
+      "case": "fivedirections-case3",
+      "method": "diffusion_only",
+      "retained_reference_paths": 9,
+      "reference_path_count": 9,
+      "native_complete_subgraphs": 1,
+      "native_reference_subgraphs": 1,
+      "native_event_retention": 0.8571428571428571,
+      "native_terminal_reachability": 1.0
+    },
+    {
+      "case": "fivedirections-case3",
+      "method": "rasp",
+      "retained_reference_paths": 9,
+      "reference_path_count": 9,
+      "native_complete_subgraphs": 1,
+      "native_reference_subgraphs": 1,
+      "native_event_retention": 0.8571428571428571,
+      "native_terminal_reachability": 1.0
+    },
+    {
+      "case": "fivedirections-case3",
+      "method": "context_v1",
+      "retained_reference_paths": 9,
+      "reference_path_count": 9,
+      "native_complete_subgraphs": 1,
+      "native_reference_subgraphs": 1,
+      "native_event_retention": 0.8571428571428571,
+      "native_terminal_reachability": 1.0
+    },
+    {
+      "case": "fivedirections-case3",
+      "method": "reliability",
+      "retained_reference_paths": 9,
+      "reference_path_count": 9,
+      "native_complete_subgraphs": 1,
+      "native_reference_subgraphs": 1,
+      "native_event_retention": 0.8571428571428571,
+      "native_terminal_reachability": 1.0
+    },
+    {
+      "case": "fivedirections-case3",
+      "method": "adaptive_v1",
+      "retained_reference_paths": 9,
+      "reference_path_count": 9,
+      "native_complete_subgraphs": 1,
+      "native_reference_subgraphs": 1,
+      "native_event_retention": 0.8571428571428571,
+      "native_terminal_reachability": 1.0
+    },
+    {
+      "case": "fivedirections-case3",
+      "method": "reliability_chain",
+      "retained_reference_paths": 9,
+      "reference_path_count": 9,
+      "native_complete_subgraphs": 1,
+      "native_reference_subgraphs": 1,
+      "native_event_retention": 0.8571428571428571,
+      "native_terminal_reachability": 1.0
+    },
+    {
+      "case": "theia-case1",
+      "method": "rarity_only",
+      "retained_reference_paths": 0,
+      "reference_path_count": 230,
+      "native_complete_subgraphs": 0,
+      "native_reference_subgraphs": 3,
+      "native_event_retention": 0.012552301255230125,
+      "native_terminal_reachability": 0.0
+    },
+    {
+      "case": "theia-case1",
+      "method": "diffusion_only",
+      "retained_reference_paths": 6,
+      "reference_path_count": 230,
+      "native_complete_subgraphs": 2,
+      "native_reference_subgraphs": 3,
+      "native_event_retention": 0.058577405857740586,
+      "native_terminal_reachability": 0.0066815144766146995
+    },
+    {
+      "case": "theia-case1",
+      "method": "rasp",
+      "retained_reference_paths": 6,
+      "reference_path_count": 230,
+      "native_complete_subgraphs": 2,
+      "native_reference_subgraphs": 3,
+      "native_event_retention": 0.058577405857740586,
+      "native_terminal_reachability": 0.0066815144766146995
+    },
+    {
+      "case": "theia-case1",
+      "method": "context_v1",
+      "retained_reference_paths": 1,
+      "reference_path_count": 230,
+      "native_complete_subgraphs": 1,
+      "native_reference_subgraphs": 3,
+      "native_event_retention": 0.0502092050209205,
+      "native_terminal_reachability": 0.0066815144766146995
+    },
+    {
+      "case": "theia-case1",
+      "method": "reliability",
+      "retained_reference_paths": 6,
+      "reference_path_count": 230,
+      "native_complete_subgraphs": 2,
+      "native_reference_subgraphs": 3,
+      "native_event_retention": 0.058577405857740586,
+      "native_terminal_reachability": 0.0066815144766146995
+    },
+    {
+      "case": "theia-case1",
+      "method": "adaptive_v1",
+      "retained_reference_paths": 1,
+      "reference_path_count": 230,
+      "native_complete_subgraphs": 1,
+      "native_reference_subgraphs": 3,
+      "native_event_retention": 0.0502092050209205,
+      "native_terminal_reachability": 0.0066815144766146995
+    },
+    {
+      "case": "theia-case1",
+      "method": "reliability_chain",
+      "retained_reference_paths": 6,
+      "reference_path_count": 230,
+      "native_complete_subgraphs": 2,
+      "native_reference_subgraphs": 3,
+      "native_event_retention": 0.058577405857740586,
+      "native_terminal_reachability": 0.0066815144766146995
+    },
+    {
+      "case": "theia-case3",
+      "method": "rarity_only",
+      "retained_reference_paths": 0,
+      "reference_path_count": 221,
+      "native_complete_subgraphs": 0,
+      "native_reference_subgraphs": 2,
+      "native_event_retention": 0.017467248908296942,
+      "native_terminal_reachability": 0.0
+    },
+    {
+      "case": "theia-case3",
+      "method": "diffusion_only",
+      "retained_reference_paths": 3,
+      "reference_path_count": 221,
+      "native_complete_subgraphs": 1,
+      "native_reference_subgraphs": 2,
+      "native_event_retention": 0.039301310043668124,
+      "native_terminal_reachability": 0.00909090909090909
+    },
+    {
+      "case": "theia-case3",
+      "method": "rasp",
+      "retained_reference_paths": 1,
+      "reference_path_count": 221,
+      "native_complete_subgraphs": 0,
+      "native_reference_subgraphs": 2,
+      "native_event_retention": 0.03056768558951965,
+      "native_terminal_reachability": 0.004545454545454545
+    },
+    {
+      "case": "theia-case3",
+      "method": "context_v1",
+      "retained_reference_paths": 0,
+      "reference_path_count": 221,
+      "native_complete_subgraphs": 0,
+      "native_reference_subgraphs": 2,
+      "native_event_retention": 0.013100436681222707,
+      "native_terminal_reachability": 0.0
+    },
+    {
+      "case": "theia-case3",
+      "method": "reliability",
+      "retained_reference_paths": 218,
+      "reference_path_count": 221,
+      "native_complete_subgraphs": 1,
+      "native_reference_subgraphs": 2,
+      "native_event_retention": 0.9781659388646288,
+      "native_terminal_reachability": 0.990909090909091
+    },
+    {
+      "case": "theia-case3",
+      "method": "adaptive_v1",
+      "retained_reference_paths": 0,
+      "reference_path_count": 221,
+      "native_complete_subgraphs": 0,
+      "native_reference_subgraphs": 2,
+      "native_event_retention": 0.013100436681222707,
+      "native_terminal_reachability": 0.0
+    },
+    {
+      "case": "theia-case3",
+      "method": "reliability_chain",
+      "retained_reference_paths": 218,
+      "reference_path_count": 221,
+      "native_complete_subgraphs": 1,
+      "native_reference_subgraphs": 2,
+      "native_event_retention": 0.9781659388646288,
+      "native_terminal_reachability": 0.990909090909091
+    },
+    {
+      "case": "theia-case5",
+      "method": "rarity_only",
+      "retained_reference_paths": null,
+      "reference_path_count": null,
+      "native_complete_subgraphs": null,
+      "native_reference_subgraphs": null,
+      "native_event_retention": null,
+      "native_terminal_reachability": null
+    },
+    {
+      "case": "theia-case5",
+      "method": "diffusion_only",
+      "retained_reference_paths": null,
+      "reference_path_count": null,
+      "native_complete_subgraphs": null,
+      "native_reference_subgraphs": null,
+      "native_event_retention": null,
+      "native_terminal_reachability": null
+    },
+    {
+      "case": "theia-case5",
+      "method": "rasp",
+      "retained_reference_paths": null,
+      "reference_path_count": null,
+      "native_complete_subgraphs": null,
+      "native_reference_subgraphs": null,
+      "native_event_retention": null,
+      "native_terminal_reachability": null
+    },
+    {
+      "case": "theia-case5",
+      "method": "context_v1",
+      "retained_reference_paths": null,
+      "reference_path_count": null,
+      "native_complete_subgraphs": null,
+      "native_reference_subgraphs": null,
+      "native_event_retention": null,
+      "native_terminal_reachability": null
+    },
+    {
+      "case": "theia-case5",
+      "method": "reliability",
+      "retained_reference_paths": null,
+      "reference_path_count": null,
+      "native_complete_subgraphs": null,
+      "native_reference_subgraphs": null,
+      "native_event_retention": null,
+      "native_terminal_reachability": null
+    },
+    {
+      "case": "theia-case5",
+      "method": "adaptive_v1",
+      "retained_reference_paths": null,
+      "reference_path_count": null,
+      "native_complete_subgraphs": null,
+      "native_reference_subgraphs": null,
+      "native_event_retention": null,
+      "native_terminal_reachability": null
+    },
+    {
+      "case": "theia-case5",
+      "method": "reliability_chain",
+      "retained_reference_paths": null,
+      "reference_path_count": null,
+      "native_complete_subgraphs": null,
+      "native_reference_subgraphs": null,
+      "native_event_retention": null,
+      "native_terminal_reachability": null
+    },
+    {
+      "case": "trace-case5-paper",
+      "method": "rarity_only",
+      "retained_reference_paths": 0,
+      "reference_path_count": 3,
+      "native_complete_subgraphs": 0,
+      "native_reference_subgraphs": 0,
+      "native_event_retention": 0.034482758620689655,
+      "native_terminal_reachability": null
+    },
+    {
+      "case": "trace-case5-paper",
+      "method": "diffusion_only",
+      "retained_reference_paths": 1,
+      "reference_path_count": 3,
+      "native_complete_subgraphs": 0,
+      "native_reference_subgraphs": 0,
+      "native_event_retention": 0.8620689655172413,
+      "native_terminal_reachability": null
+    },
+    {
+      "case": "trace-case5-paper",
+      "method": "rasp",
+      "retained_reference_paths": 1,
+      "reference_path_count": 3,
+      "native_complete_subgraphs": 0,
+      "native_reference_subgraphs": 0,
+      "native_event_retention": 0.8620689655172413,
+      "native_terminal_reachability": null
+    },
+    {
+      "case": "trace-case5-paper",
+      "method": "context_v1",
+      "retained_reference_paths": 0,
+      "reference_path_count": 3,
+      "native_complete_subgraphs": 0,
+      "native_reference_subgraphs": 0,
+      "native_event_retention": 0.8620689655172413,
+      "native_terminal_reachability": null
+    },
+    {
+      "case": "trace-case5-paper",
+      "method": "reliability",
+      "retained_reference_paths": 1,
+      "reference_path_count": 3,
+      "native_complete_subgraphs": 0,
+      "native_reference_subgraphs": 0,
+      "native_event_retention": 0.8620689655172413,
+      "native_terminal_reachability": null
+    },
+    {
+      "case": "trace-case5-paper",
+      "method": "adaptive_v1",
+      "retained_reference_paths": 0,
+      "reference_path_count": 3,
+      "native_complete_subgraphs": 0,
+      "native_reference_subgraphs": 0,
+      "native_event_retention": 0.8620689655172413,
+      "native_terminal_reachability": null
+    },
+    {
+      "case": "trace-case5-paper",
+      "method": "reliability_chain",
+      "retained_reference_paths": 1,
+      "reference_path_count": 3,
+      "native_complete_subgraphs": 0,
+      "native_reference_subgraphs": 0,
+      "native_event_retention": 0.8620689655172413,
+      "native_terminal_reachability": null
+    }
+  ],
+  "public_artifact_sha256": {
+    "report.json": "735da649a2ee1e0d43da7483fbd5ce80255a8053d89a974a63d00d36cece4853",
+    "report.csv": "aeddc421f6e4dbd319678e0ee62a114e243563cb212b17a96b60d4a324e644b9",
+    "figures/cadets06-native-subgraphs-fixed-scope.pdf": "721dc910904edf778625b49e19cb6089e5c20a035e973cca3d1316118a19854c",
+    "figures/cadets06-native-subgraphs-fixed-scope.png": "e8229df8f06bfa9296af40dafdb120a5033f496ac5c48a53bbcdb7f414c155b1",
+    "figures/cadets06-native-subgraphs-fixed-scope.svg": "3e645d464261f263dcb5c37e73e7099d11e024a5131cc1a3bf7735c9f16b0d14",
+    "figures/cadets12-native-subgraphs-fixed-scope.pdf": "c9a721d0f8601ac9da20c3ac0cd3f5c8aa2aa9d8dcc94cbe59ef1b0cd8a97fb5",
+    "figures/cadets12-native-subgraphs-fixed-scope.png": "42f1b36f708fe1d5bd612c4223897940972d6e5b9a0a3aad1a96288a196f38a9",
+    "figures/cadets12-native-subgraphs-fixed-scope.svg": "e4203d45a95e56a67927337ac7c0da321916fe0361125266ca808e1ee3c5b00b",
+    "figures/cadets13-native-subgraphs-fixed-scope.pdf": "ed27ba81174d0d1fa6b3e6ed0e07160b4070ad75981ccfb8a9358a7ec734adc5",
+    "figures/cadets13-native-subgraphs-fixed-scope.png": "107c544f67a60b0b0a74a64974e6e286d8f8e89b069b0c6475268bd38a2c3081",
+    "figures/cadets13-native-subgraphs-fixed-scope.svg": "4a0cb2672516e5a2772a322c9a51ee914a6ff5335b474fa538d8413d45f91596",
+    "figures/fivedirections-case1-native-subgraphs-fixed-scope.pdf": "e5be662257f0bfb6ba010a1f5b44f9d93f4f8505d551d1291d698da4b9793208",
+    "figures/fivedirections-case1-native-subgraphs-fixed-scope.png": "d6e17e2bcf8024ce79bc238f6218a5687322dfd1a4415b6ba401b59a0c3df390",
+    "figures/fivedirections-case1-native-subgraphs-fixed-scope.svg": "eef0440215c087a15949ada39f906358ae37753056549ef4b2b431c1fc4648ed",
+    "figures/fivedirections-case3-native-subgraphs-fixed-scope.pdf": "a9f97628ee1dadc86ad8bce4cc53a971143c5154e77f1c54eb38d8dd92483903",
+    "figures/fivedirections-case3-native-subgraphs-fixed-scope.png": "09c30ca7cec981c2b37e9e59304faf2287c7aea59435e00d8b144f6c4fba1d70",
+    "figures/fivedirections-case3-native-subgraphs-fixed-scope.svg": "641e12bea34eaa4abb47c0a28ee13e400bfd7a006aac91eb2c17bef0bc7d3f6b",
+    "figures/overview-augmented-subgraphs.pdf": "5cdf3f6e3d916c9c3a0371600d3b9cbdf19ee8e38ca04613fbc6fe81fcacca55",
+    "figures/overview-augmented-subgraphs.png": "d77568b086365c76bf6aa4db739cbcbf7e559525f883365853409cdef35a3b08",
+    "figures/overview-augmented-subgraphs.svg": "28e045b6b0dee18424c55e071d4d40f1b2541422be7015a82ecc4374da7a1cc8",
+    "figures/overview-native-subgraphs.pdf": "24f68cfaeb6837da30b01dfce0d25d80190a8f165853c36347fa86376115344e",
+    "figures/overview-native-subgraphs.png": "0982ae14893b49830d9e15db6870538221ef0e2f715d3b90e7dd8b31a6d54f57",
+    "figures/overview-native-subgraphs.svg": "00522ea9cbba0bdd9f3f058d61ff61dae61dfebbc8eb3aee604853f4502ec65c",
+    "figures/theia-case1-native-subgraphs-fixed-scope.pdf": "3be6989171ab7318115a0c8b792495d5a902673123a0f0e883ed46f7b8d43191",
+    "figures/theia-case1-native-subgraphs-fixed-scope.png": "1f5c4bf912aac6ef492938251f1c1d6f6d97c1ae4489fc604d08f4336c98ca15",
+    "figures/theia-case1-native-subgraphs-fixed-scope.svg": "2787db5c00b83d1252ebd635954cda17eab384e498e8679316956ac40b40b31d",
+    "figures/theia-case3-native-subgraphs-fixed-scope.pdf": "8afe3f55c61f695a170436621bb2b8eb427f5874779892bb8ac1c96a84572f37",
+    "figures/theia-case3-native-subgraphs-fixed-scope.png": "2df58e103c3f23c4265cab4e6178bd7c88df263bda2fde7647fbc64d9d4c80ba",
+    "figures/theia-case3-native-subgraphs-fixed-scope.svg": "e35c931e098b38a0e0e511d37594b5366634693d9df133b3b0bcb4b2253ce5ef",
+    "figures/theia-case5-native-subgraphs-fixed-scope.pdf": "bc59b6ca44269c92b210ac983edc734f8a6a2cca3be39e2e558e8d537fad78b6",
+    "figures/theia-case5-native-subgraphs-fixed-scope.png": "e1ab32bb6fa2828f9d04b11c14a6a381bcd32d4c93f1bfb2c8c08e910ca95ccb",
+    "figures/theia-case5-native-subgraphs-fixed-scope.svg": "68663d9690cd305811a41fc55de00dec0c75d585dae27979cc489d5f10ab0698",
+    "figures/trace-case5-paper-native-subgraphs-fixed-scope.pdf": "c127d6c08d5942dc1cf957689898583ea079ba4b5c9ec6e3d4901f6eeeef6b13",
+    "figures/trace-case5-paper-native-subgraphs-fixed-scope.png": "1cdd539fb9a9a5849ef9b9dc100d58e3db2100adb55f1877cf9fb3eda2239c16",
+    "figures/trace-case5-paper-native-subgraphs-fixed-scope.svg": "066c991e035e0cac106b0dccb864075496a06077753bdd1f9667afffb4e6dc0e"
+  },
+  "independent_attack_count_available": false,
+  "semantic_attack_stage_completeness_available": false
+}

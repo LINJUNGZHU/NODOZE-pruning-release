@@ -1,6 +1,8 @@
-> Web 页面已切换为精简 OPTC 版本：`python webapp/scripts/prepare_optc.py` 准备真实窗口，
-> `python webapp/backend/app.py` 启动，访问 http://127.0.0.1:8000 。
-> 页面支持 Ground Truth 手动 POI、POI 前全部历史频率、剪枝对比、逐边评分及运行日志。范围和真值口径见 [webapp/README.md](webapp/README.md)。
+当前研究入口见 [实验与数据目录](research/README.md) 和 [多 POI 剪枝实验](docs/chain-workbench-v2/README.md)。新增 [参考子图完整性](docs/reference-subgraphs/README.md)，将分支、汇合和全部参考成员一起核对。
+
+启动已有数据的服务：`python webapp/backend/app.py`。访问 http://127.0.0.1:8000/assets/research-workbench.html 查看压缩率曲线；访问 http://127.0.0.1:8000/assets/retained-chains.html 查看、检索并下载实际保留链路与本机参考子图。页面只展示已经完成的实验，不会因打开网页重跑算法。
+
+下面保留早期 CADETS CLI 快速上手。其他数据准备与网页部署见 [webapp/README.md](webapp/README.md)。
 
 # NODOZE 稀有度与图扩散剪枝项目
 

@@ -2,7 +2,7 @@
   'use strict';
   const $ = id => document.getElementById(id);
   const LIST_PAGE = 20, DETAIL_PAGE = 40, EVENT_PAGE = 50;
-  const state = {entries: [], artifact: null, selected: null, listPage: 0, detailPage: 0, eventPage: 0, search: [], pathSearch: new Map(), related: new Map(), poiRoles: null, audit: null, auditSelected: null, auditListPage: 0, auditEventPage: 0, request: 0};
+  const state = {entries: [], artifact: null, selected: null, listPage: 0, detailPage: 0, eventPage: 0, search: [], pathSearch: new Map(), related: new Map(), poiRoles: null, audit: null, auditSelected: null, auditListPage: 0, auditEventPage: 0, request: 0, sgAudit: null, sgSelected: null, sgFilterIds: null, sgListPage: 0, sgEventPage: 0, sgDependencyPage: 0};
   const text = value => value == null ? '' : String(value);
   const identity = value => text(value).trim().toUpperCase();
   const number = value => Number.isFinite(value) ? value.toLocaleString('en-US') : 'N/A';
@@ -142,9 +142,9 @@
     const node = side => { const block = el('div', label(event, side), 'flow-node'); block.append(el('code', `${text(event[side + '_type'])} · ${text(event[side])}`)); return block; };
     const arrow = el('div', event.relation, 'flow-arrow'); arrow.append(el('span', '→', 'arrow'));
     flow.append(node(source(event)), arrow, node(target(event)));
-    card.append(meta, flow, el('p', `${event.timestamp_ns} ns`, 'event-time'));
+    card.append(meta, flow, el('p', event.timestamp_ns == null || event.timestamp_ns === '0' ? '时间未知（没有可核验纳秒值）' : `${event.timestamp_ns} ns`, 'event-time'));
     if (event.causal_direction === 'dst_to_src') card.append(el('p', `因果方向：原始目标 → 源；原始记录：${text(event.src)} → ${text(event.dst)}`, 'hint'));
-    if (text(event.event_id).toUpperCase().includes('LINEAGE')) card.append(el('p', 'LINEAGE 派生关系：不是独立原始审计事件。', 'lineage-note'));
+    if (event.synthetic === true || text(event.event_id).toUpperCase().includes('LINEAGE') || text(event.relation).toUpperCase() === 'EVENT_LINEAGE') card.append(el('p', 'LINEAGE 派生关系：不是独立原始审计事件。', 'lineage-note'));
     return card;
   }
   function renderDetail(item) {
@@ -262,13 +262,222 @@
       $('reference-audit-status').hidden = true; $('reference-audit-content').hidden = true; $('reference-audit-error').hidden = false; $('reference-audit-error').textContent = error.message;
     }
   }
+  const sgScope = () => state.sgAudit?.scopes[$('sg-scope').value];
+  const sgComponent = () => sgScope()?.components.find(item => item.id === state.sgSelected);
+  const sgRatio = (a, b) => Number.isFinite(a) && Number.isFinite(b) && b > 0 ? `${number(a)} / ${number(b)}` : 'N/A';
+  const sgNodeKey = (event, node) => JSON.stringify([event.host || '', identity(node)]);
+  function validateSubgraphMetrics(point, component = false) {
+    const pairs = [['event_retention', component ? 'retained_events' : 'retained_reference_events', 'reference_events'], ['terminal_reachability', 'reachable_terminal_pairs', 'terminal_pairs'], ['dependency_retention', 'retained_dependencies', 'reference_dependencies'], ['fork_retention', 'complete_forks', 'fork_count'], ['join_retention', 'complete_joins', 'join_count']];
+    if (!component) pairs.push(['subgraph_retention', 'complete_subgraphs', 'reference_subgraph_count'], [null, 'retained_singleton_events', 'singleton_event_count']);
+    if (!point) throw new Error('子图阶段指标缺失。');
+    for (const [ratio, numerator, denominator] of pairs) {
+      const a = point[numerator], b = point[denominator], value = ratio && point[ratio];
+      if ((a === null) !== (b === null) || (component && a === null) || (a !== null && (!Number.isInteger(a) || !Number.isInteger(b) || a < 0 || b < 0 || a > b))) throw new Error('子图阶段计数超出参考分母或格式无效。');
+      if (ratio && ((b === null || b === 0) ? value !== null : !Number.isFinite(value) || Math.abs(value - a / b) > 1e-12)) throw new Error('子图阶段比例与分子、分母不一致。');
+    }
+  }
+  function validateSubgraphAudit(data, base, baseHash) {
+    const artifact = state.artifact;
+    if (data?.schema_version !== 'chain-subgraph-audit-v1' || base?.schema_version !== 'chain-workbench-v2-report' || !data.scopes || data.independent_attack_count !== null) throw new Error('子图参考叠层格式或完整攻击声明不符合约定。');
+    if (!artifact.source_manifest_sha256 || data.source_manifest_sha256 !== artifact.source_manifest_sha256) throw new Error('子图叠层来源哈希与当前保留图不同。');
+    for (const field of ['case_id', 'track', 'poi_policy', 'method', 'budget_edges']) if (data[field] !== artifact[field]) throw new Error('子图参考与当前冻结决策不匹配。');
+    if (!baseHash || data.base_report_sha256 !== baseHash) throw new Error('子图叠层与 v2 报告文件哈希不匹配。');
+    const sourceCase = base.cases?.find(item => item.id === data.case_id);
+    if (!sourceCase || ['reference_sha256', 'source_positive_snapshot_sha256'].some(field => sourceCase[field] !== data[field])) throw new Error('子图叠层参考来源与当前 v2 案例不匹配。');
+    const retained = new Map(artifact.events.map(event => [identity(event.event_id), event]));
+    for (const scope of ['native', 'augmented']) {
+      const model = data.scopes[scope];
+      if (!model || !Array.isArray(model.events) || !Array.isArray(model.components) || !model.summary || !model.stages?.retained) throw new Error('子图范围缺少事件、成员或阶段计数。');
+      const byId = new Map(), covered = new Set();
+      for (const event of model.events) {
+        if (!event.event_id || byId.has(identity(event.event_id)) || typeof event.host !== 'string' || typeof event.synthetic !== 'boolean') throw new Error('子图事件标识、主机或派生属性无效。');
+        if (event.timestamp_ns !== null && (typeof event.timestamp_ns !== 'string' || !/^\d+$/.test(event.timestamp_ns))) throw new Error('子图时间必须为精确纳秒字符串或明确未知值，拒绝不安全数值。');
+        if (['retained', 'candidate_present', 'temporal_eligible'].some(field => typeof event[field] !== 'boolean') || event.retained !== retained.has(identity(event.event_id)) || (event.temporal_eligible && !event.candidate_present) || (event.retained && (!event.candidate_present || !event.temporal_eligible))) throw new Error('子图参考事件保留状态与实际冻结保留图不一致。');
+        const forward = event.causal_src === event.src && event.causal_dst === event.dst, reverse = event.causal_src === event.dst && event.causal_dst === event.src;
+        if (!forward && !reverse) throw new Error('子图事件因果端点不一致。');
+        if (scope === 'native' && event.synthetic) throw new Error('原生范围中出现派生事件。');
+        byId.set(identity(event.event_id), {...retained.get(identity(event.event_id)), ...event, causal_direction: reverse && (!forward || text(event.relation).toUpperCase() === 'EVENT_EXECUTE') ? 'dst_to_src' : 'src_to_dst'});
+      }
+      const componentIds = new Set();
+      for (const item of model.components) {
+        if (!item.id || componentIds.has(item.id) || !Array.isArray(item.event_ids) || !item.event_ids.length || !item.stages?.retained) throw new Error('参考子图标识或成员格式无效。');
+        componentIds.add(item.id);
+        const members = new Set(item.event_ids.map(identity));
+        if (members.size !== item.event_ids.length || [...members].some(id => !byId.has(id) || covered.has(id)) || item.is_singleton !== (members.size === 1)) throw new Error('参考子图成员重复、缺失或单事件属性不一致。');
+        members.forEach(id => covered.add(id));
+        let firstLoss = null;
+        for (const [stage, field] of [['source', null], ['candidate', 'candidate_present'], ['temporal_eligible', 'temporal_eligible'], ['retained', 'retained']]) {
+          const point = item.stages[stage], missing = item.event_ids.filter(id => field && !byId.get(identity(id))[field]);
+          const missingSet = new Set(missing.map(identity)), kept = item.event_ids.filter(id => !missingSet.has(identity(id)));
+          const exactIds = (actual, expected) => { if (!Array.isArray(actual) || actual.length !== expected.length) return false; const ids = new Set(actual.map(identity)); return ids.size === actual.length && expected.every(id => ids.has(identity(id))); };
+          if (!point || !exactIds(point.missing_event_ids, missing) || !exactIds(point.retained_event_ids, kept) || point.reference_events !== members.size || point.retained_events !== kept.length || point.complete !== (missing.length === 0) || point.status !== (missing.length === 0 ? 'complete' : kept.length === 0 ? 'missing' : 'partial')) throw new Error('参考子图分阶段成员、状态或缺失清单与事件证据不一致。');
+          if (missing.length && firstLoss === null) firstLoss = stage;
+        }
+        if (item.first_loss_stage !== firstLoss) throw new Error('参考子图首次损失阶段与成员证据不一致。');
+        if (!Array.isArray(item.dependencies) || !Array.isArray(item.cover_dependencies)) throw new Error('参考子图缺少明确的事件依赖。');
+        const dependencies = new Set();
+        for (const pair of item.dependencies) {
+          if (!Array.isArray(pair) || pair.length !== 2 || pair.some(id => !members.has(identity(id)))) throw new Error('子图依赖引用不存在的成员。');
+          const a = byId.get(identity(pair[0])), b = byId.get(identity(pair[1])), key = JSON.stringify(pair.map(identity));
+          if (dependencies.has(key) || identity(a.causal_dst) !== identity(b.causal_src) || (a.host && b.host && a.host !== b.host) || !a.timestamp_ns || !b.timestamp_ns || BigInt(a.timestamp_ns) <= 0n || BigInt(a.timestamp_ns) >= BigInt(b.timestamp_ns)) throw new Error('子图事件依赖不满足主机、方向或严格时间条件。');
+          dependencies.add(key);
+        }
+        if (item.cover_dependencies.some(pair => !Array.isArray(pair) || !dependencies.has(JSON.stringify(pair.map(identity))))) throw new Error('子图覆盖依赖超出原有依赖范围。');
+        for (const field of ['roots', 'sinks', 'fork_event_ids', 'join_event_ids']) if (!Array.isArray(item[field]) || item[field].some(id => !members.has(identity(id)))) throw new Error('子图入口、出口或分支成员无效。');
+        if (!Array.isArray(item.terminal_pairs) || item.terminal_pairs.some(pair => !Array.isArray(pair) || pair.length !== 2 || pair.some(id => !members.has(identity(id))))) throw new Error('子图端点对成员无效。');
+        const outgoing = new Map([...members].map(id => [id, new Set()])), incoming = new Map([...members].map(id => [id, new Set()])), coverKeys = new Set();
+        for (const [a, b] of item.cover_dependencies) {
+          const key = JSON.stringify([identity(a), identity(b)]);
+          if (coverKeys.has(key)) throw new Error('子图覆盖依赖重复。');
+          coverKeys.add(key); outgoing.get(identity(a)).add(identity(b)); incoming.get(identity(b)).add(identity(a));
+        }
+        const exactSet = (actual, expected) => actual.length === expected.length && new Set(actual.map(identity)).size === actual.length && expected.every(id => actual.map(identity).includes(id));
+        if (!exactSet(item.fork_event_ids, [...members].filter(id => outgoing.get(id).size > 1)) || !exactSet(item.join_event_ids, [...members].filter(id => incoming.get(id).size > 1))) throw new Error('子图分支或汇合点与覆盖依赖不一致。');
+        for (const stage of ['source', 'candidate', 'temporal_eligible', 'retained']) {
+          const point = item.stages[stage], kept = new Set(point.retained_event_ids.map(identity));
+          validateSubgraphMetrics(point, true);
+          const required = {reference_dependencies: item.dependencies.length, terminal_pairs: item.terminal_pairs.length, fork_count: item.fork_event_ids.length, join_count: item.join_event_ids.length};
+          const completeNeighborhoods = (ids, neighbors) => ids.filter(id => kept.has(identity(id)) && [...neighbors.get(identity(id))].every(next => kept.has(next))).length;
+          const retainedDependencies = item.dependencies.filter(([a, b]) => kept.has(identity(a)) && kept.has(identity(b))).length;
+          if (Object.entries(required).some(([key, count]) => point[key] !== count) || point.retained_dependencies !== retainedDependencies || point.complete_forks !== completeNeighborhoods(item.fork_event_ids, outgoing) || point.complete_joins !== completeNeighborhoods(item.join_event_ids, incoming)) throw new Error('子图组件依赖、分支或汇合计数与保留成员不一致。');
+          const possibleTerminals = item.terminal_pairs.filter(([a, b]) => kept.has(identity(a)) && kept.has(identity(b))).length;
+          if (point.reachable_terminal_pairs > possibleTerminals) throw new Error('子图可达端点计数超过实际保留端点。');
+        }
+      }
+      if (covered.size !== byId.size) throw new Error('参考子图及单事件清单未覆盖全部参考事件。');
+      for (const stage of ['source', 'candidate', 'temporal_eligible', 'retained']) validateSubgraphMetrics(model.stages[stage]);
+      const m = model.stages.retained;
+      if (m.independent_attack_count !== null || m.attack_stage_completeness !== null) throw new Error('子图参考未提供独立完整攻击真值。');
+      if (m.reference_subgraph_count === null) {
+        if (byId.size || model.components.length) throw new Error('未标注范围不能提供已定义参考子图。');
+      } else {
+        const groups = model.components.filter(item => !item.is_singleton), singles = model.components.filter(item => item.is_singleton);
+        const fixed = {reference_subgraph_count: groups.length, reference_events: byId.size, singleton_event_count: singles.length, reference_dependencies: model.components.reduce((n, item) => n + item.dependencies.length, 0), terminal_pairs: model.components.reduce((n, item) => n + item.terminal_pairs.length, 0), fork_count: model.components.reduce((n, item) => n + item.fork_event_ids.length, 0), join_count: model.components.reduce((n, item) => n + item.join_event_ids.length, 0)};
+        if (Object.entries(fixed).some(([key, count]) => model.summary[key] !== count)) throw new Error('子图固定汇总数量与完整成员清单不一致。');
+        for (const [stage, field] of [['source', null], ['candidate', 'candidate_present'], ['temporal_eligible', 'temporal_eligible'], ['retained', 'retained']]) {
+          const point = model.stages[stage], kept = event => !field || event[field];
+          if (!point || Object.entries(fixed).some(([key, count]) => point[key] !== count) || point.complete_subgraphs !== groups.filter(item => item.stages[stage].complete).length || point.retained_reference_events !== [...byId.values()].filter(kept).length || point.retained_singleton_events !== singles.filter(item => item.stages[stage].complete).length) throw new Error('子图阶段汇总数量与逐事件成员不一致。');
+          const dependencies = model.components.flatMap(item => item.dependencies);
+          if (point.retained_dependencies !== dependencies.filter(([a, b]) => kept(byId.get(identity(a))) && kept(byId.get(identity(b)))).length) throw new Error('子图阶段依赖保留计数与成员不一致。');
+          for (const key of ['reachable_terminal_pairs', 'complete_forks', 'complete_joins']) if (point[key] !== model.components.reduce((total, item) => total + item.stages[stage][key], 0)) throw new Error('子图阶段端点、分支或汇合汇总与组件计数不一致。');
+        }
+        const losses = {source: 0, candidate: 0, temporal_eligible: 0, retained: 0, surviving: 0};
+        for (const item of groups) losses[item.first_loss_stage || 'surviving']++;
+        if (!model.first_loss_counts || Object.entries(losses).some(([stage, count]) => model.first_loss_counts[stage] !== count)) throw new Error('子图首次损失汇总与成员不一致。');
+      }
+      model.byId = byId;
+    }
+    return data;
+  }
+  function renderSubgraphAudit() {
+    const model = sgScope(); if (!model) return;
+    const m = model.stages.retained, summary = model.summary;
+    const cards = [['complete', '完整多事件参考子图', sgRatio(m.complete_subgraphs, m.reference_subgraph_count)], ['events', '参考事件保留', sgRatio(m.retained_reference_events, m.reference_events)], ['singletons', '单事件参考保留', sgRatio(m.retained_singleton_events, m.singleton_event_count)], ['terminals', '端点时序可达', sgRatio(m.reachable_terminal_pairs, m.terminal_pairs)], ['dependencies', '事件依赖保留', sgRatio(m.retained_dependencies, m.reference_dependencies)], ['forks', '完整分支点', sgRatio(m.complete_forks, m.fork_count)], ['joins', '完整汇合点', sgRatio(m.complete_joins, m.join_count)], ['verified', '已核验完整攻击', 'N/A']];
+    $('sg-metrics').replaceChildren(...cards.map(([id, title, value]) => { const node = el('article'); node.id = 'sg-metric-' + id; node.append(el('span', title), el('strong', value)); return node; }));
+    $('sg-quality-note').textContent = `${$('sg-scope').value === 'native' ? '原生审计事件范围' : '含 LINEAGE 等派生关系范围'}：当前派生事件 ${number(summary.synthetic_events)}，排除派生事件 ${number(summary.excluded_synthetic_events)}，主机未知的依赖 ${number(summary.inferred_host_dependencies)}，时间不可核验 ${number(summary.unverifiable_time_events)}。两范围使用不同固定参考分母，不改变实际保留图；单事件单列，参考子图不代表独立攻击数。独立攻击数量与攻击阶段完整性均为 N/A。源中缺失正事件 ${number(state.sgAudit.source_missing_positive_events)}。`;
+    renderSubgraphList();
+  }
+  function subgraphItems() {
+    const model = sgScope(), kind = $('sg-kind').value, status = $('sg-status-filter').value;
+    return model.components.filter(item => (kind === 'all' || (kind === 'singletons') === item.is_singleton) && (status === 'all' || (status === 'complete') === item.stages.retained.complete));
+  }
+  function renderSubgraphList() {
+    const model = sgScope(), items = subgraphItems();
+    state.sgListPage = Math.min(state.sgListPage, Math.max(0, Math.ceil(items.length / LIST_PAGE) - 1));
+    if (!items.some(item => item.id === state.sgSelected)) { state.sgSelected = items[0]?.id || null; state.sgEventPage = state.sgDependencyPage = 0; state.sgFilterIds = null; }
+    $('sg-component-list').replaceChildren(...items.slice(state.sgListPage * LIST_PAGE, (state.sgListPage + 1) * LIST_PAGE).map(item => {
+      const button = el('button', null, item.id === state.sgSelected ? 'active' : ''); button.type = 'button'; button.setAttribute('aria-pressed', String(item.id === state.sgSelected));
+      button.append(el('strong', item.id), el('span', `${item.is_singleton ? '单事件参考' : '多事件参考子图'} · ${item.stages.retained.complete ? '完整保留' : '成员缺失'} · ${item.event_ids.length} 个事件`));
+      button.addEventListener('click', () => { state.sgSelected = item.id; state.sgEventPage = state.sgDependencyPage = 0; state.sgFilterIds = null; $('sg-event-search').value = ''; renderSubgraphList(); }); return button;
+    }));
+    if (!items.length) $('sg-component-list').append(el('p', model.stages.retained.reference_subgraph_count === null ? '该范围没有可用参考标注，子图完整性为 N/A。' : '当前筛选没有参考项；单事件可从类型选项单独查看。', 'no-data'));
+    pagination('sg-list', items.length, LIST_PAGE, state.sgListPage); $('sg-detail').hidden = !items.length;
+    if (items.length) renderSubgraphDetail();
+  }
+  function renderSubgraphDetail() {
+    const item = sgComponent(); if (!item) return;
+    const m = item.stages.retained;
+    $('sg-title').textContent = item.id;
+    $('sg-detail-note').textContent = `${item.is_singleton ? '单事件参考，不计入多事件子图分母' : '固定多事件参考子图'} · 保留 ${number(m.retained_events)} / ${number(item.event_ids.length)} 个必需事件 · 缺失 ${number(m.missing_event_ids.length)} 个 · ${item.dependencies.length} 个事件依赖 · 分支 ${item.fork_event_ids.length} / 汇合 ${item.join_event_ids.length}。${m.complete ? '全部成员保留，仍不能证明未观测攻击完整。' : '即使保住一条入口到出口路径，也不能把本子图计为完整。'}`;
+    renderSubgraphProjection(); renderSubgraphEvents(); renderSubgraphDependencies();
+  }
+  function renderSubgraphProjection() {
+    const item = sgComponent(), model = sgScope(), graph = $('sg-graph'); graph.replaceChildren();
+    const nodes = new Map(), edges = new Map();
+    for (const id of item.event_ids) {
+      const event = model.byId.get(identity(id));
+      for (const side of [source(event), target(event)]) { const key = sgNodeKey(event, event[side]); if (!nodes.has(key)) nodes.set(key, {key, label: label(event, side), uuid: event[side], host: event.host}); }
+      const a = sgNodeKey(event, event.causal_src), b = sgNodeKey(event, event.causal_dst), key = JSON.stringify([a, b, event.relation, event.retained, event.synthetic]);
+      if (!edges.has(key)) edges.set(key, {a, b, relation: event.relation, retained: event.retained, synthetic: event.synthetic, ids: []});
+      edges.get(key).ids.push(id);
+    }
+    const ns = 'http://www.w3.org/2000/svg', shape = (tag, attrs = {}, value) => { const node = document.createElementNS(ns, tag); for (const [key, val] of Object.entries(attrs)) node.setAttribute(key, String(val)); if (value != null) node.textContent = String(value); return node; };
+    const choose = ids => { state.sgFilterIds = new Set(ids.map(identity)); state.sgEventPage = 0; renderSubgraphEvents(); };
+    const edgeButtons = [...edges.values()].map(edge => { const button = el('button', `${edge.relation} · ${edge.ids.length} 个事件 · ${edge.retained ? '已保留' : '缺失'}${edge.synthetic ? ' · 派生' : ''}`); button.type = 'button'; button.addEventListener('click', () => choose(edge.ids)); return button; });
+    $('sg-edge-buttons').replaceChildren(...edgeButtons);
+    $('sg-graph-note').textContent = `实体关系静态概览：${nodes.size} 个主机隔离实体、${edges.size} 组关系，合计 ${item.event_ids.length} 个事件。相同端点、关系及状态合并显示数量；完整性、分支和汇合以事件依赖 DAG 为准，布局不表示时间顺序。点击关系筛选下方事件，计数分母保持不变。手机上可横向滚动查看完整概览。`;
+    graph.setAttribute('viewBox', '0 0 800 470');
+    if (nodes.size > 120 || edges.size > 400) { graph.append(shape('text', {x: 20, y: 40, class: 'sg-svg-label'}, '子图较大，请使用下方关系筛选与完整事件表；未截去评价成员。')); return; }
+    const defs = shape('defs');
+    for (const [stateName, color] of [['retained', '#087f79'], ['missing', '#bb6652'], ['synthetic', '#a67b35']]) { const marker = shape('marker', {id: 'sg-arrow-' + stateName, viewBox: '0 0 10 10', refX: 9, refY: 5, markerWidth: 6, markerHeight: 6, orient: 'auto-start-reverse'}); marker.append(shape('path', {d: 'M 0 0 L 10 5 L 0 10 z', fill: color})); defs.append(marker); } graph.append(defs);
+    const ordered = [...nodes.values()].sort((a, b) => a.key.localeCompare(b.key));
+    ordered.forEach((node, index) => { const angle = -Math.PI / 2 + 2 * Math.PI * index / ordered.length; node.x = 400 + (ordered.length > 1 ? 285 * Math.cos(angle) : 0); node.y = 230 + (ordered.length > 1 ? 170 * Math.sin(angle) : 0); });
+    const counts = new Map(), used = new Map(); for (const edge of edges.values()) { const key = JSON.stringify([edge.a, edge.b].sort()); counts.set(key, (counts.get(key) || 0) + 1); }
+    for (const edge of edges.values()) {
+      const a = nodes.get(edge.a), b = nodes.get(edge.b), pair = JSON.stringify([edge.a, edge.b].sort()), offset = ((used.get(pair) || 0) - (counts.get(pair) - 1) / 2) * 30; used.set(pair, (used.get(pair) || 0) + 1);
+      const dx = b.x - a.x, dy = b.y - a.y, distance = Math.hypot(dx, dy) || 1, ux = dx / distance, uy = dy / distance;
+      const middleX = (a.x + b.x) / 2 - uy * offset, middleY = (a.y + b.y) / 2 + ux * offset;
+      const d = edge.a === edge.b ? `M ${a.x + 40} ${a.y - 10} C ${a.x + 115} ${a.y - 90}, ${a.x - 80} ${a.y - 100}, ${a.x - 35} ${a.y - 20}` : `M ${a.x + ux * 52} ${a.y + uy * 25} Q ${middleX} ${middleY} ${b.x - ux * 58} ${b.y - uy * 30}`;
+      const stateName = !edge.retained ? 'missing' : edge.synthetic ? 'synthetic' : 'retained', color = {missing: '#bb6652', synthetic: '#a67b35', retained: '#087f79'}[stateName];
+      const path = shape('path', {d, fill: 'none', stroke: color, 'stroke-width': 2.4, 'stroke-dasharray': !edge.retained ? '7 5' : edge.synthetic ? '3 3' : '', 'marker-end': `url(#sg-arrow-${stateName})`, class: 'sg-edge', 'data-state': edge.retained ? 'retained' : 'missing', 'data-event-count': edge.ids.length});
+      path.append(shape('title', {}, `${edge.relation} · ${edge.ids.length} 个事件 · ${edge.retained ? '已保留' : '缺失'}`)); path.addEventListener('click', () => choose(edge.ids)); graph.append(path);
+      const t = .35, labelX = (1 - t) ** 2 * (a.x + ux * 52) + 2 * (1 - t) * t * middleX + t ** 2 * (b.x - ux * 58), labelY = (1 - t) ** 2 * (a.y + uy * 25) + 2 * (1 - t) * t * middleY + t ** 2 * (b.y - uy * 30);
+      graph.append(shape('text', {x: labelX, y: labelY - 5, 'text-anchor': 'middle', class: 'sg-svg-edge-label', fill: color}, `${edge.relation.replace(/^EVENT_/, '')} ×${edge.ids.length}`));
+    }
+    for (const node of ordered) { const group = shape('g', {class: 'sg-node'}); group.append(shape('rect', {x: node.x - 63, y: node.y - 23, width: 126, height: 46, rx: 7, fill: '#f4faf6', stroke: '#aecdbb'}), shape('text', {x: node.x, y: node.y - 2, 'text-anchor': 'middle', class: 'sg-svg-label'}, node.label.length > 18 ? node.label.slice(0, 17) + '…' : node.label), shape('text', {x: node.x, y: node.y + 15, 'text-anchor': 'middle', class: 'sg-svg-host'}, node.host || '主机未知'), shape('title', {}, `${node.label}\n${node.uuid}\n${node.host || '主机未知'}`)); graph.append(group); }
+  }
+  function renderSubgraphEvents() {
+    const item = sgComponent(); if (!item) return;
+    const query = $('sg-event-search').value.trim().toLowerCase(), model = sgScope();
+    const events = item.event_ids.map(id => model.byId.get(identity(id))).filter(event => (!state.sgFilterIds || state.sgFilterIds.has(identity(event.event_id))) && (!query || eventText(event).includes(query)));
+    state.sgEventPage = Math.min(state.sgEventPage, Math.max(0, Math.ceil(events.length / DETAIL_PAGE) - 1));
+    $('sg-events').replaceChildren(...events.slice(state.sgEventPage * DETAIL_PAGE, (state.sgEventPage + 1) * DETAIL_PAGE).map(event => { const card = eventCard(event); if (!event.retained) card.classList.add('missing'); card.prepend(el('p', event.retained ? '已保留' : `缺失 · ${!event.candidate_present ? '候选未覆盖' : !event.temporal_eligible ? '时序资格未覆盖' : '最终未保留'}`, 'event-state')); return card; }));
+    if (!events.length) $('sg-events').append(el('p', '筛选下没有事件；参考子图计数仍使用全部固定成员。', 'no-data'));
+    $('sg-member-note').textContent = `当前筛选 ${events.length} / ${item.event_ids.length} 个成员。完整性始终按全部固定成员判断，筛选不改变分母。`;
+    $('sg-clear-filter').hidden = !state.sgFilterIds && !query; pagination('sg-events', events.length, DETAIL_PAGE, state.sgEventPage);
+  }
+  function renderSubgraphDependencies() {
+    const item = sgComponent(), model = sgScope(); if (!item) return;
+    state.sgDependencyPage = Math.min(state.sgDependencyPage, Math.max(0, Math.ceil(item.dependencies.length / EVENT_PAGE) - 1));
+    $('sg-dependency-rows').replaceChildren(...item.dependencies.slice(state.sgDependencyPage * EVENT_PAGE, (state.sgDependencyPage + 1) * EVENT_PAGE).map(([a, b]) => { const row = el('tr'); row.append(el('td', a), el('td', '→'), el('td', b), el('td', model.byId.get(identity(a)).retained && model.byId.get(identity(b)).retained ? '两端保留' : '至少一端缺失')); return row; }));
+    pagination('sg-dependencies', item.dependencies.length, EVENT_PAGE, state.sgDependencyPage);
+  }
+  async function loadSubgraphAudit(entry, request) {
+    state.sgAudit = null; state.sgSelected = null; state.sgFilterIds = null; state.sgListPage = state.sgEventPage = state.sgDependencyPage = 0;
+    $('subgraph-audit-panel').hidden = !entry.reference_subgraph_audit_url; $('subgraph-audit-content').hidden = true; $('sg-error').hidden = true; $('sg-load-status').hidden = false;
+    $('download-subgraph-audit').hidden = true; $('download-subgraph-audit').removeAttribute('href');
+    if (!entry.reference_subgraph_audit_url) return;
+    try {
+      const url = safeURL(entry.reference_subgraph_audit_url); if (!url) throw new Error('子图叠层链接不是有效的本机地址。');
+      const [response, baseResponse] = await Promise.all([fetch(url, {cache: 'no-store'}), fetch('/assets/chain-workbench-summary.json', {cache: 'no-store'})]);
+      if (request !== state.request) return;
+      if (!response.ok || !baseResponse.ok) throw new Error(`子图叠层或用于校验的 v2 汇总暂不可读（HTTP ${!response.ok ? response.status : baseResponse.status}）；实际保留图仍可使用。`);
+      const [data, bytes] = await Promise.all([response.json(), baseResponse.arrayBuffer()]);
+      const hash = window.crypto?.subtle ? Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', bytes)), value => value.toString(16).padStart(2, '0')).join('') : null;
+      if (request !== state.request) return;
+      state.sgAudit = validateSubgraphAudit(data, JSON.parse(new TextDecoder().decode(bytes)), hash);
+      $('sg-scope').value = 'native'; $('sg-kind').value = 'subgraphs'; $('sg-status-filter').value = 'all'; $('sg-event-search').value = '';
+      renderSubgraphAudit(); $('subgraph-audit-content').hidden = false; $('sg-load-status').hidden = true;
+      $('download-subgraph-audit').href = new URL(url).pathname; $('download-subgraph-audit').hidden = false;
+    } catch (error) { if (request !== state.request) return; $('sg-load-status').hidden = true; $('subgraph-audit-content').hidden = true; $('sg-error').hidden = false; $('sg-error').textContent = error.message; }
+  }
   function fail(error) {
     $('viewer-content').hidden = true; $('load-status').hidden = true; $('load-error').hidden = false;
     $('load-error-detail').textContent = error.message || '读取失败，请核对本机导出目录。';
   }
   async function loadArtifact(index) {
     const request = ++state.request;
-    $('reference-audit-panel').hidden = true;
+    $('reference-audit-panel').hidden = true; $('subgraph-audit-panel').hidden = true;
     $('load-status').hidden = false; $('load-status').textContent = '正在读取冻结保留子图…'; $('load-error').hidden = true; $('viewer-content').hidden = true;
     try {
       const entry = state.entries[index], url = safeURL(entry.artifact_url);
@@ -284,7 +493,7 @@
       }
       indexArtifact(); renderMetrics(); renderList(); renderEvents();
       $('viewer-content').hidden = false; $('load-status').hidden = true;
-      loadReferenceAudit(entry, request);
+      loadReferenceAudit(entry, request); loadSubgraphAudit(entry, request);
     } catch (error) { if (request === state.request) fail(error); }
   }
   async function loadCatalog() {
@@ -310,6 +519,13 @@
       $('export-select').value = String(index);
       await loadArtifact(index);
     } catch (error) { fail(error); }
+  }
+  for (const control of ['sg-scope', 'sg-kind', 'sg-status-filter']) $(control).addEventListener('change', () => { state.sgSelected = null; state.sgFilterIds = null; state.sgListPage = state.sgEventPage = state.sgDependencyPage = 0; $('sg-event-search').value = ''; renderSubgraphAudit(); });
+  $('sg-event-search').addEventListener('input', () => { state.sgEventPage = 0; renderSubgraphEvents(); });
+  $('sg-clear-filter').addEventListener('click', () => { state.sgFilterIds = null; state.sgEventPage = 0; $('sg-event-search').value = ''; renderSubgraphEvents(); });
+  for (const [prefix, field, render] of [['sg-list', 'sgListPage', renderSubgraphList], ['sg-events', 'sgEventPage', renderSubgraphEvents], ['sg-dependencies', 'sgDependencyPage', renderSubgraphDependencies]]) {
+    $(prefix + '-prev').addEventListener('click', () => { state[field]--; render(); });
+    $(prefix + '-next').addEventListener('click', () => { state[field]++; render(); });
   }
   $('audit-filter').addEventListener('change', () => { state.auditListPage = state.auditEventPage = 0; renderAuditList(); });
   for (const [prefix, field, render] of [['audit-paths', 'auditListPage', renderAuditList], ['audit-detail', 'auditEventPage', () => renderAuditDetail(state.audit.chains.find(chain => chain.id === state.auditSelected))]]) {

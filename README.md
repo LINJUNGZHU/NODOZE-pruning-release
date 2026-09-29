@@ -2,6 +2,8 @@
 
 当前研究入口：[多 POI、候选窗口与保留链工作台](docs/chain-workbench-v2/README.md) · [实验与数据目录索引](research/README.md)。启动网页后访问 `/assets/research-workbench.html` 查看对照曲线，访问 `/assets/retained-chains.html` 查看与下载实际保留链路。
 
+新增 [参考子图完整性评价](docs/reference-subgraphs/README.md)：在已有冻结选择上核对分叉、汇合及全部必需事件，分别展示严格子图完整率和固定入口—出口可达率，单事件与合成关系单独报告。
+
 本轮已完成 **9个E3案例、36个变体、2520个决策点**，包含多起点、自动扩窗和固定参考链阶段损失。[压缩率—完整参考路径保留率主图](docs/chain-workbench-v2/figures/overview-reference-chain.png)。完整攻击无独立真值时为N/A，E5因仅找到标注未计入实验。
 
 上一轮 [324 点实验结果与限制](docs/adaptive-chain-results.md)。

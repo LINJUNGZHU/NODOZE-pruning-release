@@ -1,0 +1,2 @@
+# Preserve audited Matplotlib SVG bytes, including path-line whitespace.
+figures/*.svg -text whitespace=-blank-at-eol

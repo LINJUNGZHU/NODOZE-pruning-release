@@ -5,6 +5,7 @@
 | 入口 | 用途 |
 |---|---|
 | [v2 方法与实验报告](../docs/chain-workbench-v2/README.md) | 当前工作线：候选窗口、多调查起点、上下文稀有度与保留图 |
+| [参考子图完整性](../docs/reference-subgraphs/README.md) | 在同一冻结选择上检查分叉、汇合、全部必需事件及固定入口—出口可达性 |
 | [v2 研究工作台页面](../webapp/frontend/research-workbench.html) | 切换案例、候选范围、POI策略与预算，查看聚合曲线及阶段损失 |
 | [v2 固定配置](../configs/chain_workbench_v2.json) | 案例数据入口、方法参数、预算与数据就绪登记 |
 | [实际保留链路页面](../webapp/frontend/retained-chains.html) | 查看全部保留事件、严格时间路径、单事件和已观测调查见证 |
@@ -26,6 +27,7 @@
 | 导出论文图表 | `python -m scripts.plot_chain_workbench`；当前候选/固定候选范围的参考链曲线、等预算增量正例对照，各含PDF、PNG、SVG |
 | 导出某一实际选择 | `python -m scripts.export_chain_workbench`；按方法和整数事件预算读取冻结掩码，输出JSON、CSV、GraphML |
 | 本机逐条审查固定参考 | `python -m scripts.export_chain_reference_audit`；在验证后生成离线参考路径、断点与成员事件叠加文件，不修改选择 |
+| 参考子图事后结构分析 | `python -m scripts.evaluate_reference_subgraphs`；校验同一批冻结选择，区分严格完整性、端点可达性和阶段损失；`scripts.plot_reference_subgraphs` 生成对应曲线 |
 | HTML聚合入口 | `webapp/frontend/chain-workbench-summary.json`；来自聚合报告，不包含逐事件数据 |
 | HTML详细导出入口 | `webapp/frontend/retained-chain-catalog.json`；本机目录条目指向实际导出文件 |
 

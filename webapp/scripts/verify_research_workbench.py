@@ -2,6 +2,7 @@
 from __future__ import annotations
 import argparse
 import json
+import hashlib
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -37,6 +38,31 @@ def fixture():
         data_readiness=[dict(dataset='E3',provider='test',status='ready',reason='合成检查，不代表实测'),dict(dataset='E5',provider='test',status='annotation_only',reason='只有标注，无匹配日志')])
 
 
+def subgraph_fixture(base, blob):
+    cases=[]
+    for case in base['cases']:
+        known=case['annotation_status']!='unavailable'
+        summaries={scope:dict(input_events=5,excluded_synthetic_events=1 if scope=='native' else 0,synthetic_events=0 if scope=='native' else 1,inferred_host_dependencies=0,unverifiable_time_events=0,include_synthetic=scope=='augmented') for scope in ['native','augmented']}
+        variants=[]
+        for variant in case['variants']:
+            rows=[]
+            for row in variant['rows']:
+                scopes={}
+                for scope in ['native','augmented']:
+                    count=2 if scope=='native' else 3
+                    complete=count if row['budget']>=20 else (1 if scope=='native' else 0)
+                    metrics=dict(reference_subgraph_count=count,complete_subgraphs=complete,subgraph_retention=complete/count,reference_events=4 if scope=='native' else 5,retained_reference_events=3,event_retention=.75 if scope=='native' else .6,singleton_event_count=1,retained_singleton_events=1,terminal_pairs=2,reachable_terminal_pairs=1,terminal_reachability=.5,reference_dependencies=4,retained_dependencies=2,dependency_retention=.5,fork_count=1,complete_forks=0,fork_retention=0.,join_count=1,complete_joins=0,join_retention=0.,independent_attack_count=None,attack_stage_completeness=None,first_loss_counts={'candidate':0,'temporal_eligible':0,'retained':count-complete,'surviving':complete},subgraph_stage_counts={'source':count,'candidate':count,'temporal_eligible':count,'retained':complete},event_stage_counts={'source':4,'candidate':4,'temporal_eligible':4,'retained':3})
+                    if row['budget']>=20:
+                        metrics['retained_reference_events']=metrics['reference_events'];metrics['event_retention']=1.
+                        metrics.update(reachable_terminal_pairs=2,terminal_reachability=1.,retained_dependencies=4,dependency_retention=1.,complete_forks=1,fork_retention=1.,complete_joins=1,join_retention=1.)
+                    if not known:metrics={key:None for key in metrics}
+                    scopes[scope]=metrics
+                rows.append({key:row.get(key) for key in ['method','budget','retained_events','compression','fixed_scope_compression']}|{'scopes':scopes})
+            variants.append({key:variant[key] for key in ['track','poi_policy','candidate_events','source_scope_events','poi_count']}|{'rows':rows})
+        cases.append({key:case.get(key) for key in ['id','label','provider','annotation_status','reference_sha256','source_positive_snapshot_sha256']}|{'positive_count':5 if known else None,'source_missing_positive_events':0 if known else None,'reference_summaries':summaries,'variants':variants})
+    return {'schema_version':'chain-subgraph-report-v1','base_report_sha256':hashlib.sha256(blob).hexdigest(),'methods':base['methods'],'cases':cases}
+
+
 class Handler(SimpleHTTPRequestHandler):
     def do_GET(self):
         self.path=self.path.removeprefix('/assets')
@@ -59,7 +85,9 @@ def run(args):
             browser=pw.chromium.launch(headless=True)
             page=browser.new_page(viewport=dict(width=1440,height=1100));errors=[]
             page.on('pageerror',lambda error:errors.append(str(error)))
-            page.route('**/chain-workbench-summary.json',lambda route:route.fulfill(json=fixture()))
+            fixture_bytes=json.dumps(fixture(),ensure_ascii=False).encode('utf-8')
+            page.route('**/chain-workbench-summary.json',lambda route:route.fulfill(body=fixture_bytes,content_type='application/json'))
+            page.route('**/chain-subgraph-summary.json',lambda route:route.fulfill(status=404,body='missing'))
             export_catalog={'entries':[{'id':'exact fixture / 10','study_version':'chain-workbench-v2','case_id':fixture()['cases'][0]['id'],'track':'base','poi_policy':'declared','method':'reliability_chain','budget_edges':10}]}
             page.route('**/retained-chain-catalog.json',lambda route:route.fulfill(json=export_catalog))
             page.goto(origin+'/assets/research-workbench.html')
@@ -120,6 +148,50 @@ def run(args):
             assert '没有可定义' in page.locator('#chart-note').inner_text()
             assert page.locator('#stage-rows td.stage-count').first.inner_text()=='N/A'
             checks.append('null and zero-denominator metrics')
+            sidecar=subgraph_fixture(fixture(),fixture_bytes)
+            page.unroute('**/chain-subgraph-summary.json')
+            page.route('**/chain-subgraph-summary.json',lambda route:route.fulfill(json=sidecar))
+            page.reload();page.locator('#subgraph-content').wait_for(state='visible')
+            assert page.locator('#subgraph-curve-title').inner_text()=='压缩率—完整参考子图保留率'
+            assert page.locator('#subgraph-chart circle').count()==14
+            assert page.locator('#subgraph-metric-complete .metric-value').inner_text()=='1 / 2'
+            assert page.locator('#subgraph-metric-verified .metric-value').inner_text()=='N/A'
+            assert page.locator('#metric-reference .metric-value').inner_text()=='1 / 2'
+            page.locator('#subgraph-scope').select_option('augmented')
+            assert page.locator('#subgraph-metric-complete .metric-value').inner_text()=='0 / 3'
+            assert '分母' in page.locator('#subgraph-scope-note').inner_text()
+            assert 'LINEAGE' in page.locator('#subgraph-quality-note').inner_text()
+            assert page.locator('#subgraph-stage-rows tr').count()==4
+            page.locator('#subgraph-point-buttons button').last.focus();page.keyboard.press('Enter')
+            assert page.locator('#budget-select').input_value()=='20'
+            assert page.locator('#subgraph-metric-complete .metric-value').inner_text()=='3 / 3'
+            assert page.evaluate('document.documentElement.scrollWidth<=window.innerWidth')
+            assert page.locator('#subgraph-chart').evaluate("svg => { const axis = svg.querySelectorAll('.chart-axis-title')[1].getBoundingClientRect(); const ticks = [...svg.querySelectorAll('.chart-label')].filter((_, index) => index % 2 === 0); return ticks.every(tick => axis.right + 2 < tick.getBoundingClientRect().left); }"), 'mobile vertical title must not overlap percentage ticks'
+            page.locator('#subgraph-panel').screenshot(path=str(output/'subgraph-fixture-mobile.png'))
+            page.locator('#case-select').select_option('1')
+            assert page.locator('#subgraph-metric-complete .metric-value').inner_text()=='N/A'
+            assert page.locator('#subgraph-chart circle').count()==0
+            checks.extend(['optional subgraph native/augmented denominators','subgraph dependency/fork/join and stage metrics','subgraph independent attacks N/A','subgraph keyboard budget and 390px layout'])
+            sidecar['base_report_sha256']='0'*64
+            page.reload();page.locator('#subgraph-status').wait_for(state='visible')
+            page.wait_for_function("() => document.querySelector('#subgraph-status').textContent.includes('哈希')")
+            assert page.locator('#workbench-content').is_visible()
+            assert page.locator('#subgraph-content').is_hidden()
+            sidecar['base_report_sha256']=hashlib.sha256(fixture_bytes).hexdigest()
+            sidecar['cases'][0]['variants'][0]['rows'][0]['scopes']['augmented']['subgraph_retention']=1.
+            page.reload();page.wait_for_function("() => document.querySelector('#subgraph-status').textContent.includes('比例')")
+            assert page.locator('#subgraph-content').is_hidden()
+            sidecar['cases'][0]['variants'][0]['rows'][0]['scopes']['augmented']['subgraph_retention']=0.
+            checks.append('subgraph curve ratio must equal its numerator and denominator')
+            sidecar['cases'][0]['variants'][0]['rows'][0]['retained_events']+=1
+            page.reload();page.wait_for_function("() => document.querySelector('#subgraph-status').textContent.includes('冻结决策')")
+            assert page.locator('#workbench-content').is_visible()
+            checks.append('subgraph stale hash and mismatched decision rejected without breaking v2')
+            page.unroute('**/chain-subgraph-summary.json')
+            page.route('**/chain-subgraph-summary.json',lambda route:route.fulfill(status=404,body='missing'))
+            page.reload();page.wait_for_function("() => document.querySelector('#subgraph-status').textContent.includes('尚未')")
+            assert page.locator('#workbench-content').is_visible()
+            checks.append('missing subgraph sidecar preserves original report')
             page.unroute('**/chain-workbench-summary.json')
             page.route('**/chain-workbench-summary.json',lambda route:route.fulfill(status=404,body='missing'))
             page.reload();page.locator('#load-error').wait_for(state='visible')
@@ -129,15 +201,26 @@ def run(args):
                 report=json.loads(Path(args.report).read_text())
                 page.unroute('**/chain-workbench-summary.json')
                 page.unroute('**/retained-chain-catalog.json')
+                page.unroute('**/chain-subgraph-summary.json')
                 if args.base_url:
                     with build_opener(ProxyHandler({})).open(origin+'/assets/chain-workbench-summary.json') as response:
                         assert json.load(response)==report, 'live summary differs from the supplied expected report'
                     checks.append('live HTTP summary matches expected report; browser response not intercepted')
                 else:
-                    page.route('**/chain-workbench-summary.json',lambda route:route.fulfill(json=report))
+                    page.route('**/chain-workbench-summary.json',lambda route:route.fulfill(body=Path(args.report).read_bytes(),content_type='application/json'))
+                actual_subgraphs=None
+                if args.subgraph_report:
+                    actual_subgraphs=json.loads(Path(args.subgraph_report).read_text())
+                    assert actual_subgraphs['base_report_sha256']==hashlib.sha256(Path(args.report).read_bytes()).hexdigest()
+                    if args.base_url:
+                        with build_opener(ProxyHandler({})).open(origin+'/assets/chain-subgraph-summary.json') as response:
+                            assert json.load(response)==actual_subgraphs, 'live subgraph summary differs from supplied expected sidecar'
+                    else:
+                        page.route('**/chain-subgraph-summary.json',lambda route:route.fulfill(json=actual_subgraphs))
                 page.set_viewport_size(dict(width=1440,height=1100));page.reload()
                 page.locator('#workbench-content').wait_for(state='visible')
-                count=0
+                if actual_subgraphs:page.locator('#subgraph-content').wait_for(state='visible')
+                count=0;subgraph_checks=0
                 for ci,case in enumerate(report['cases']):
                     page.locator('#case-select').select_option(str(ci))
                     for variant in case['variants']:
@@ -153,6 +236,18 @@ def run(args):
                                 expected='N/A' if not row['reference_chain_count'] or row['reference_chain_retention'] is None else f"{row['retained_reference_chains']:,} / {row['reference_chain_count']:,}"
                                 assert page.locator('#metric-reference .metric-value').inner_text()==expected
                                 count+=1
+                                if actual_subgraphs:
+                                    source_case=next(c for c in actual_subgraphs['cases'] if c['id']==case['id'])
+                                    source_variant=next(v for v in source_case['variants'] if v['track']==variant['track'] and v['poi_policy']==variant['poi_policy'])
+                                    source_row=next(r for r in source_variant['rows'] if r['method']==method and r['budget']==row['budget'])
+                                    for scope in ['native','augmented']:
+                                        page.locator('#subgraph-scope').select_option(scope)
+                                        metrics=source_row['scopes'][scope]
+                                        expected='N/A' if not metrics['reference_subgraph_count'] else f"{metrics['complete_subgraphs']:,} / {metrics['reference_subgraph_count']:,}"
+                                        assert page.locator('#subgraph-metric-complete .metric-value').inner_text()==expected
+                                        assert page.locator('#subgraph-metric-verified .metric-value').inner_text()=='N/A'
+                                        subgraph_checks+=1
+                if actual_subgraphs:checks.append(f'actual subgraph sidecar: {subgraph_checks} exact method/variant/endpoint/scope checks')
                 if args.base_url:
                     try:
                         with build_opener(ProxyHandler({})).open(origin+'/assets/retained-chain-catalog.json') as response:
@@ -195,6 +290,16 @@ def run(args):
                     page.screenshot(path=str(output/f'overview-{name}.png'))
                     page.locator('#reference-coverage-note').screenshot(path=str(output/f'overview-{name}-reference-scope.png'))
                     page.locator('#curve-title').locator('xpath=ancestor::section[1]').screenshot(path=str(output/f'overview-{name}-curve.png'))
+                    if actual_subgraphs:
+                        for scope in ['native','augmented']:
+                            page.locator('#subgraph-scope').select_option(scope)
+                            page.locator('#subgraph-panel').screenshot(path=str(output/f'overview-{name}-subgraphs-{scope}.png'))
+                            page.set_viewport_size(dict(width=390,height=844))
+                            assert page.evaluate('document.documentElement.scrollWidth<=window.innerWidth')
+                            page.locator('#subgraph-panel').evaluate("node=>node.scrollIntoView({block:'start'})")
+                            page.screenshot(path=str(output/f'overview-{name}-subgraphs-{scope}-mobile.png'))
+                            page.locator('#subgraph-chart').screenshot(path=str(output/f'overview-{name}-subgraphs-{scope}-mobile-curve.png'))
+                            page.set_viewport_size(dict(width=1440,height=1100))
                 page.evaluate('window.scrollTo(0,0)');page.screenshot(path=str(output/'actual-desktop.png'))
                 page.set_viewport_size(dict(width=390,height=844))
                 assert page.evaluate('document.documentElement.scrollWidth<=window.innerWidth')
@@ -211,5 +316,5 @@ def run(args):
 
 if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--base-url',help='Use a running app; with --report, verify its real HTTP summary without interception.');parser.add_argument('--report',help='Expected aggregate JSON; local mode supplies it as a fixture, live mode checks the served copy.');parser.add_argument('--output',default='/tmp/nodoze-workbench-browser')
+    parser.add_argument('--subgraph-report',help='Optional expected additive subgraph summary, bound to exact --report bytes.');parser.add_argument('--base-url',help='Use a running app; with --report, verify its real HTTP summary without interception.');parser.add_argument('--report',help='Expected aggregate JSON; local mode supplies it as a fixture, live mode checks the served copy.');parser.add_argument('--output',default='/tmp/nodoze-workbench-browser')
     run(parser.parse_args())

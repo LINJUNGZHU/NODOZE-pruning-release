@@ -12,7 +12,9 @@
     "retained_viewer_url": "/assets/retained-chains.html",
     "reference_curve_viewer": "webapp/frontend/chain-study.html",
     "current_summary": "docs/chain-workbench-v2/report.json",
-    "current_curve_viewer": "webapp/frontend/research-workbench.html"
+    "current_curve_viewer": "webapp/frontend/research-workbench.html",
+    "reference_subgraphs": "docs/reference-subgraphs/README.md",
+    "reference_subgraph_summary": "docs/reference-subgraphs/report.json"
   },
   "experiments": [
     {
@@ -32,7 +34,25 @@
       "partial_evaluation": false,
       "aggregate_json": "docs/chain-workbench-v2/report.json",
       "aggregate_csv": "docs/chain-workbench-v2/report.csv",
-      "main_figure": "docs/chain-workbench-v2/figures/overview-reference-chain.pdf"
+      "main_figure": "docs/chain-workbench-v2/figures/overview-reference-chain.pdf",
+      "additional_evaluations": [
+        {
+          "id": "reference-subgraphs-v1",
+          "status": "completed_posthoc_development_analysis",
+          "selection_recomputed": false,
+          "report": "docs/reference-subgraphs/README.md",
+          "aggregate_json": "docs/reference-subgraphs/report.json",
+          "aggregate_csv": "docs/reference-subgraphs/report.csv",
+          "main_figure": "docs/reference-subgraphs/figures/overview-native-subgraphs.pdf",
+          "decision_points": 2520,
+          "reference_scopes": [
+            "native",
+            "augmented"
+          ],
+          "scope_rows": 5040,
+          "independent_attack_counts_available": false
+        }
+      ]
     },
     {
       "id": "chain-study-v1-exploratory",

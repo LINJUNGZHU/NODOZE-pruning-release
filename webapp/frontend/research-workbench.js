@@ -6,7 +6,7 @@
   const COLORS = {rarity_only: '#ad8452', diffusion_only: '#668cbd', rasp: '#8f969a', context_v1: '#a16fa2', reliability: '#d28056', adaptive_v1: '#60a59a', reliability_chain: '#087f79'};
   const TRACKS = {base: '基础候选范围', expanded: '扩展候选范围'};
   const POLICIES = {single: '最早声明单起点', declared: '全部声明起点', adaptive: '最早单起点 + 自适应建议'};
-  const state = {report: null, catalog: null, caseIndex: 0, track: '', poi: '', method: 'reliability_chain', budget: 1024};
+  const state = {report: null, reportHash: null, subgraph: null, request: 0, catalog: null, caseIndex: 0, track: '', poi: '', method: 'reliability_chain', budget: 1024};
   const el = (tag, value, cls) => { const node = document.createElement(tag); if (value != null) node.textContent = String(value); if (cls) node.className = cls; return node; };
   const svg = (tag, attributes = {}, value) => { const node = document.createElementNS(NS, tag); for (const [key, val] of Object.entries(attributes)) node.setAttribute(key, String(val)); if (value != null) node.textContent = String(value); return node; };
   const finite = value => typeof value === 'number' && Number.isFinite(value);
@@ -86,7 +86,7 @@
     const mobile = window.matchMedia('(max-width:650px)').matches;
     chart.setAttribute('viewBox', mobile ? '0 0 420 330' : '0 0 1000 410');
     chart.append(svg('desc', {id: 'chart-description'}, '横轴为实际压缩率，纵轴为固定参考链完整保留率。点与线仅表示已经运行的预算结果。'));
-    const x = value => (mobile ? 54 : 74) + value * (mobile ? 346 : 884), y = value => (mobile ? 260 : 336) - value * (mobile ? 222 : 298);
+    const x = value => (mobile ? 72 : 74) + value * (mobile ? 328 : 884), y = value => (mobile ? 260 : 336) - value * (mobile ? 222 : 298);
     for (let tick = 0; tick <= 5; tick++) {
       const value = tick / 5;
       chart.append(svg('line', {x1: x(0), y1: y(value), x2: x(1), y2: y(value), stroke: '#e4ece7'}));
@@ -160,13 +160,123 @@
     $('export-catalog-note').textContent = `汇总含 ${num(decisions)} 个已冻结决策，任意方法和预算均可精确导出。` + (state.catalog ? ` 本机目录：本轮代表导出 ${num(current)} 份，旧版归档 ${num(entries.length - current)} 份。` : ' 本机逐事件导出目录尚未读取到；公开汇总不附带私有事件图。');
     $('point-export-command').textContent = `python -m scripts.export_chain_workbench --frozen <本轮目录>/${item.id}/${state.track}/${state.poi} --method ${row.method} --budget ${row.budget} --output <新的导出目录>`;
   }
-  function render() { renderMetrics(); renderChart(); renderComparison(); renderStages(); renderExport(); }
+  const SUBGRAPH_COUNTS = ['reference_subgraph_count', 'complete_subgraphs', 'reference_events', 'retained_reference_events', 'singleton_event_count', 'retained_singleton_events', 'terminal_pairs', 'reachable_terminal_pairs', 'reference_dependencies', 'retained_dependencies', 'fork_count', 'complete_forks', 'join_count', 'complete_joins'];
+  const SUBGRAPH_RATIOS = ['subgraph_retention', 'event_retention', 'terminal_reachability', 'dependency_retention', 'fork_retention', 'join_retention'];
+  const subgraphKey = (caseId, track, poi, method, budget) => JSON.stringify([caseId, track, poi, method, budget]);
+  function validateSubgraphReport(data) {
+    if (data?.schema_version !== 'chain-subgraph-report-v1' || !Array.isArray(data.cases)) throw new Error('子图附加汇总格式不匹配。');
+    if (!state.reportHash || data.base_report_sha256 !== state.reportHash) throw new Error('子图附加汇总与当前 v2 报告的文件哈希不匹配，已拒绝混用。');
+    const rows = new Map(), cases = new Map();
+    for (const item of data.cases) {
+      const original = state.report.cases.find(c => c.id === item.id);
+      if (!original || cases.has(item.id) || !Array.isArray(item.variants)) throw new Error('子图汇总的案例范围与冻结决策不匹配。');
+      for (const field of ['reference_sha256', 'source_positive_snapshot_sha256']) if (original[field] != null && item[field] !== original[field]) throw new Error('子图参考来源哈希与 v2 汇总不匹配。');
+      cases.set(item.id, item);
+      for (const v of item.variants) {
+        const base = original.variants.find(b => b.track === v.track && b.poi_policy === v.poi_policy);
+        if (!base || v.candidate_events !== base.candidate_events || !Array.isArray(v.rows)) throw new Error('子图候选范围与冻结决策不匹配。');
+        for (const row of v.rows) {
+          const before = base.rows.find(b => b.method === row.method && b.budget === row.budget);
+          const key = subgraphKey(item.id, v.track, v.poi_policy, row.method, row.budget);
+          if (!before || rows.has(key) || row.retained_events !== before.retained_events || row.compression !== before.compression) throw new Error('子图附加行与原有冻结决策不匹配。');
+          for (const scope of ['native', 'augmented']) {
+            const m = row.scopes?.[scope];
+            if (!m || m.independent_attack_count !== null || m.attack_stage_completeness !== null) throw new Error('子图参考不能提供未经独立验证的攻击数量或攻击阶段完整性。');
+            if (SUBGRAPH_COUNTS.some(field => m[field] !== null && (!Number.isInteger(m[field]) || m[field] < 0)) || SUBGRAPH_RATIOS.some(field => m[field] !== null && (!finite(m[field]) || m[field] < 0 || m[field] > 1))) throw new Error('子图计数或比例不符合汇总格式。');
+            for (const [a, b] of [['complete_subgraphs', 'reference_subgraph_count'], ['retained_reference_events', 'reference_events'], ['retained_singleton_events', 'singleton_event_count'], ['reachable_terminal_pairs', 'terminal_pairs'], ['retained_dependencies', 'reference_dependencies'], ['complete_forks', 'fork_count'], ['complete_joins', 'join_count']]) if (finite(m[a]) && finite(m[b]) && m[a] > m[b]) throw new Error('子图保留数量超过参考分母。');
+            for (const [ratio, numerator, denominator] of [['subgraph_retention', 'complete_subgraphs', 'reference_subgraph_count'], ['event_retention', 'retained_reference_events', 'reference_events'], ['terminal_reachability', 'reachable_terminal_pairs', 'terminal_pairs'], ['dependency_retention', 'retained_dependencies', 'reference_dependencies'], ['fork_retention', 'complete_forks', 'fork_count'], ['join_retention', 'complete_joins', 'join_count']]) {
+              const a = m[numerator], b = m[denominator], value = m[ratio];
+              if ((a === null) !== (b === null) || ((b === null || b === 0) ? value !== null : value === null || Math.abs(value - a / b) > 1e-12)) throw new Error('子图比例与对应分子、分母不一致。');
+            }
+          }
+          rows.set(key, row);
+        }
+      }
+    }
+    return {data, rows, cases};
+  }
+  const subgraphRow = (method = state.method, budget = state.budget) => state.subgraph?.rows.get(subgraphKey(currentCase().id, state.track, state.poi, method, budget));
+  const countRatio = (a, b) => finite(a) && finite(b) && b > 0 ? `${num(a)} / ${num(b)}` : 'N/A';
+  function renderSubgraphChart() {
+    const chart = $('subgraph-chart'); chart.replaceChildren();
+    const scope = $('subgraph-scope').value, mobile = window.matchMedia('(max-width:650px)').matches;
+    chart.setAttribute('viewBox', mobile ? '0 0 420 330' : '0 0 1000 410');
+    chart.append(svg('desc', {id: 'subgraph-chart-description'}, '子图完整保留要求固定参考组的全部必需事件保留。分支和汇合不拆成独立攻击。'));
+    const x = value => (mobile ? 72 : 74) + value * (mobile ? 328 : 884), y = value => (mobile ? 260 : 336) - value * (mobile ? 222 : 298);
+    for (let tick = 0; tick <= 5; tick++) {
+      const value = tick / 5;
+      chart.append(svg('line', {x1: x(0), y1: y(value), x2: x(1), y2: y(value), stroke: '#e4ece7'}));
+      chart.append(svg('text', {x: x(0) - 13, y: y(value) + 4, 'text-anchor': 'end', class: 'chart-label'}, `${tick * 20}%`));
+      chart.append(svg('text', {x: x(value), y: mobile ? 282 : 359, 'text-anchor': 'middle', class: 'chart-label'}, `${tick * 20}%`));
+    }
+    chart.append(svg('text', {x: mobile ? 225 : 515, y: mobile ? 317 : 397, 'text-anchor': 'middle', class: 'chart-axis-title'}, '实际压缩率（当前候选分母）'));
+    chart.append(svg('text', {transform: mobile ? 'translate(14 150) rotate(-90)' : 'translate(20 190) rotate(-90)', 'text-anchor': 'middle', class: 'chart-axis-title'}, '完整参考子图保留率'));
+    const legends = [];
+    for (const method of methods()) {
+      const color = COLORS[method] || '#5f8381';
+      const points = variant().rows.filter(row => row.method === method).map(row => subgraphRow(method, row.budget)).filter(row => row && finite(row.scopes[scope].subgraph_retention)).sort((a, b) => a.compression - b.compression);
+      if (points.length) chart.append(svg('polyline', {points: points.map(row => `${x(row.compression)},${y(row.scopes[scope].subgraph_retention)}`).join(' '), fill: 'none', stroke: color, 'stroke-width': method === state.method ? 3 : 1.6, opacity: method === state.method ? 1 : .65}));
+      for (const row of points) {
+        const m = row.scopes[scope], selected = method === state.method && row.budget === state.budget;
+        const dot = svg('circle', {cx: x(row.compression), cy: y(m.subgraph_retention), r: selected ? 6 : 3.6, fill: selected ? '#fff' : color, stroke: color, 'stroke-width': selected ? 3 : 1});
+        dot.append(svg('title', {}, `${methodLabel(method)} · 条目预算 ${num(row.budget)} · 压缩 ${pct(row.compression)} · 完整参考子图 ${countRatio(m.complete_subgraphs, m.reference_subgraph_count)}`));
+        dot.addEventListener('click', () => { state.method = method; state.budget = row.budget; selectMethod(); }); chart.append(dot);
+      }
+      const button = el('button', null, method === state.method ? 'active' : ''); button.type = 'button'; button.style.setProperty('--method-color', color); button.setAttribute('aria-pressed', String(method === state.method)); button.append(el('i'), el('span', methodLabel(method))); button.addEventListener('click', () => { state.method = method; selectMethod(); }); legends.push(button);
+    }
+    $('subgraph-legend').replaceChildren(...legends);
+    $('subgraph-point-buttons').replaceChildren(...methodRows().map(base => {
+      const row = subgraphRow(state.method, base.budget), m = row?.scopes[scope];
+      const button = el('button', null, base.budget === state.budget ? 'active' : ''); button.type = 'button'; button.setAttribute('aria-pressed', String(base.budget === state.budget));
+      button.append(el('strong', `预算 ${num(base.budget)}`), el('span', `压缩 ${pct(base.compression)} · 完整子图 ${m ? countRatio(m.complete_subgraphs, m.reference_subgraph_count) : 'N/A'}`));
+      button.addEventListener('click', () => { state.budget = base.budget; $('budget-select').value = String(base.budget); render(); }); return button;
+    }));
+  }
+  function renderSubgraphs() {
+    if (!state.subgraph) return;
+    const row = subgraphRow();
+    $('subgraph-content').hidden = !row; $('subgraph-status').hidden = Boolean(row);
+    if (!row) { $('subgraph-status').textContent = '当前冻结决策尚未提供子图附加评价；原有路径结果仍有效。'; return; }
+    const scope = $('subgraph-scope').value, m = row.scopes[scope], item = state.subgraph.cases.get(currentCase().id), quality = item.reference_summaries?.[scope] || {};
+    const metrics = [
+      ['complete', '完整参考子图', countRatio(m.complete_subgraphs, m.reference_subgraph_count), pct(m.subgraph_retention)],
+      ['events', '参考事件保留', countRatio(m.retained_reference_events, m.reference_events), pct(m.event_retention)],
+      ['singletons', '单事件参考保留', countRatio(m.retained_singleton_events, m.singleton_event_count), '单例单独核对，不充当多事件攻击数'],
+      ['terminals', '端点时序可达', countRatio(m.reachable_terminal_pairs, m.terminal_pairs), pct(m.terminal_reachability)],
+      ['dependencies', '事件依赖保留', countRatio(m.retained_dependencies, m.reference_dependencies), pct(m.dependency_retention)],
+      ['forks', '完整分支点', countRatio(m.complete_forks, m.fork_count), pct(m.fork_retention)],
+      ['joins', '完整汇合点', countRatio(m.complete_joins, m.join_count), pct(m.join_retention)],
+      ['verified', '已核验完整攻击', 'N/A', '攻击阶段完整性也为 N/A'],
+    ];
+    $('subgraph-metrics').replaceChildren(...metrics.map(([id, title, value, note]) => { const node = el('article', null, 'metric'); node.id = 'subgraph-metric-' + id; node.append(el('p', title, 'metric-label'), el('p', value, 'metric-value'), el('p', note, 'metric-note')); return node; }));
+    $('subgraph-scope-note').textContent = `${scope === 'native' ? '原生审计事件范围：排除 LINEAGE 等派生关系。' : '含派生关系范围：保留 LINEAGE 等关系，用于敏感性核对。'} 参考范围切换不改变冻结候选、预算、压缩率或保留决策。两种范围各自使用固定分母，不可把比例差直接解释为方法提升。一个参考子图的多条路径、分支和汇合不计为多个独立攻击。`;
+    $('subgraph-quality-note').textContent = `输入事件 ${num(quality.input_events)} · 排除派生事件 ${num(quality.excluded_synthetic_events)} · 当前含 LINEAGE 等派生事件 ${num(quality.synthetic_events)} · 推断主机依赖 ${num(quality.inferred_host_dependencies)} · 时间不可核验 ${num(quality.unverifiable_time_events)} · 源中缺失正事件 ${num(item.source_missing_positive_events)}。完整性仅针对离线固定参考，不能证明未观测攻击范围。`;
+    const stages = [['source', '源中可见'], ['candidate', '候选覆盖'], ['temporal_eligible', '时序资格'], ['retained', '最终保留']];
+    $('subgraph-stage-rows').replaceChildren(...stages.map(([key, label]) => { const tr = el('tr'); tr.append(el('td', label), el('td', num(m.subgraph_stage_counts?.[key])), el('td', num(m.event_stage_counts?.[key])), el('td', key === 'source' ? '—' : num(m.first_loss_counts?.[key]))); return tr; }));
+    renderSubgraphChart();
+  }
+  async function loadSubgraphs(request) {
+    state.subgraph = null; $('subgraph-content').hidden = true; $('subgraph-status').hidden = false; $('subgraph-status').textContent = '正在校验子图附加汇总…';
+    try {
+      const response = await fetch('/assets/chain-subgraph-summary.json', {cache: 'no-store'});
+      if (request !== state.request) return;
+      if (!response.ok) throw new Error(response.status === 404 ? '子图附加评价尚未发布；现有路径曲线、保留图和下载仍可使用。' : `子图附加汇总读取失败（HTTP ${response.status}）；现有 v2 结果仍可使用。`);
+      const data = await response.json(); if (request !== state.request) return;
+      state.subgraph = validateSubgraphReport(data); renderSubgraphs();
+    } catch (error) { if (request !== state.request) return; state.subgraph = null; $('subgraph-content').hidden = true; $('subgraph-status').hidden = false; $('subgraph-status').textContent = error.message; }
+  }
+  function render() { renderMetrics(); renderChart(); renderComparison(); renderStages(); renderExport(); renderSubgraphs(); }
   async function load() {
+    const request = ++state.request; state.subgraph = null;
     $('load-error').hidden = true; $('workbench-content').hidden = true; $('load-status').hidden = false;
     try {
       const response = await fetch('/assets/chain-workbench-summary.json', {cache: 'no-store'});
       if (!response.ok) throw new Error(response.status === 404 ? '尚未发布本轮公开汇总，现有链路与参考链页面仍可访问。' : `汇总读取失败（HTTP ${response.status}）。`);
-      const report = await response.json();
+      const reportBytes = await response.arrayBuffer();
+      const report = JSON.parse(new TextDecoder().decode(reportBytes));
+      const reportHash = window.crypto?.subtle ? Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', reportBytes)), byte => byte.toString(16).padStart(2, '0')).join('') : null;
+      if (request !== state.request) return;
+      state.reportHash = reportHash;
       if (report.schema_version !== 'chain-workbench-v2-report' || !Array.isArray(report.cases) || !report.cases.length) throw new Error('汇总格式不匹配，或尚无已完成的实验案例。');
       if (report.cases.some(item => !Array.isArray(item.variants) || !item.variants.length || item.variants.some(v => !Array.isArray(v.rows) || !v.rows.length))) throw new Error('汇总包含没有结果行的实验范围，请完成对应实验后再发布。');
       state.report = report; state.caseIndex = 0; state.catalog = null;
@@ -175,7 +285,7 @@
         if (catalogResponse.ok) { const catalog = await catalogResponse.json(); if (Array.isArray(catalog.entries)) state.catalog = catalog.entries; }
       } catch (_) { /* Aggregate comparisons remain usable without local exports. */ }
       options('case-select', report.cases.map((_, i) => i), 0, i => report.cases[i].label || report.cases[i].id);
-      selectVariant(); renderReadiness(); $('workbench-content').hidden = false; $('load-status').hidden = true;
+      selectVariant(); renderReadiness(); $('workbench-content').hidden = false; $('load-status').hidden = true; loadSubgraphs(request);
     } catch (error) { $('load-status').hidden = true; $('load-error').hidden = false; $('load-error-detail').textContent = error.message; }
   }
   $('case-select').addEventListener('change', event => { state.caseIndex = Number(event.target.value); selectVariant(); });
@@ -183,7 +293,8 @@
   $('poi-select').addEventListener('change', event => { state.poi = event.target.value; selectMethod(); });
   $('method-select').addEventListener('change', event => { state.method = event.target.value; selectMethod(); });
   $('budget-select').addEventListener('change', event => { state.budget = Number(event.target.value); render(); });
+  $('subgraph-scope').addEventListener('change', renderSubgraphs);
   $('reload-button').addEventListener('click', load);
-  window.addEventListener('resize', () => { if (state.report) renderChart(); });
+  window.addEventListener('resize', () => { if (state.report) { renderChart(); if (state.subgraph) renderSubgraphs(); } });
   load();
 })();
