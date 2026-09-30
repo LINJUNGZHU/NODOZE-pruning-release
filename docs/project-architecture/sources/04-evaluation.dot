@@ -1,0 +1,39 @@
+digraph evaluation {
+  graph [rankdir=TB, bgcolor="#ffffff", pad="0.35", nodesep="0.32", ranksep="0.55", splines=polyline, fontname="WenQuanYi Zen Hei", fontsize=22, fontcolor="#132d46", label="04  子图评价、压缩率选择与网页展示\n同一批冻结掩码：固定分母评价，精确导出实际保留图", labelloc=t];
+  node [shape=box, style="rounded,filled", fillcolor="#eef4fb", color="#91abc6", fontname="WenQuanYi Zen Hei", fontsize=14, fontcolor="#132d46", margin="0.18,0.14", penwidth=1.2];
+  edge [color="#57738d", arrowsize=0.7, fontname="WenQuanYi Zen Hei", fontsize=12, fontcolor="#456078"];
+  freeze [label="冻结工件\ncandidates / eligibility / decisions\nmanifest 与源码、配置、工件哈希", fillcolor="#173d54", color="#173d54", fontcolor=white];
+  validate [label="evaluate_chain_workbench._validate_all()\n先验证全部案例与变体\n再允许打开离线参考"];
+  source [label="load_source_events()\n固定源正例事件\n部分参考，不是现实全部攻击真值", fillcolor="#fff3df", color="#d7b06a"];
+  paths [label="evaluate_chain_workbench.evaluate_run()\nderive_reference_chains()\n固定参考路径的完整保留与事件损失", fillcolor="#fff3df", color="#d7b06a"];
+  dag [label="subgraph_evaluation.derive_reference_subgraphs()\n参考事件作为顶点\n因果端点相接 + 严格时间递增 + 无明确主机冲突\n弱连通分量 ≥ 2 个事件作为参考子图；单例单列", fillcolor="#fff3df", color="#d7b06a"];
+  stages [label="evaluate_reference_subgraphs.evaluate_run()\n→ evaluate_subgraphs()\n源参考 → 候选覆盖 → 时间资格 → 最终保留\n同一参考分母，定位首次发生损失的阶段", fillcolor="#fff3df", color="#d7b06a"];
+  metrics [label="子图指标与曲线\n参考事件 / 依赖 / 整个参考子图完整保留率\n固定入口—出口可达率 / 分叉与汇合完整率\nnative 原生关系与 augmented 合成增强分开统计", fillcolor="#fff3df", color="#d7b06a"];
+  target [label="analyze_retention_targets.select_budget()\n在已冻结预算中检查同一点的各项保留率\n事件、依赖 ≥ 目标；可选入口—出口约束\n达标点中取实际压缩率最高者", fillcolor="#fff3df", color="#d7b06a"];
+  aggregate [label="公开聚合 JSON / CSV / 曲线图\nchain-workbench-summary.json\nchain-subgraph-summary.json"];
+  export [label="export_chain_workbench.export_frozen()\nvalidate_variant() → build_retained_artifact()\n→ write_retained_export()\n严格读取指定方法 / 预算的已有掩码"];
+  artifact [label="本机精确导出 + 参考审计\nJSON / CSV / GraphML；catalog 定位冻结点\n候选内见证、事件路径覆盖、缺失参考依赖"];
+  overview [label="research-workbench.html / .js\nload() / loadSubgraphs() → renderSubgraphs()\nretentionTarget() → renderRetentionTarget()\n曲线、分阶段损失、离线达标预算", fillcolor="#eeeafa", color="#b1a2d1"];
+  detail [label="retained-chains.html / .js\nloadCatalog() → loadArtifact()\nloadSubgraphAudit() → renderSubgraphDetail()\n实际事件与链路、参考子图叠加、三种格式下载", fillcolor="#eeeafa", color="#b1a2d1"];
+  note [shape=note, label="离线预算筛选使用参考指标，不代表对未知攻击的在线正确率保证。\n保留图的路径分解数量不是独立攻击数量；完整参考子图也不是完整现实攻击。\nHTML 读取已生成的结果与导出，不会触发重评分或重剪枝。", fillcolor="#f5f7fa", color="#c5d0dc", fontsize=12];
+  freeze -> validate;
+  validate -> source [label="验证成功后"];
+  source -> paths;
+  source -> dag;
+  dag -> stages;
+  freeze -> stages [label="各阶段事件集合", style=dashed];
+  stages -> metrics;
+  paths -> aggregate;
+  metrics -> aggregate;
+  metrics -> target;
+  target -> overview [style=dashed, label="网页复现同一筛选规则"];
+  aggregate -> overview [label="fetch 聚合数据 + 校验绑定"];
+  freeze -> export [label="精确决策", color="#397d72"];
+  export -> artifact;
+  stages -> artifact [style=dashed, label="本机审计叠加"];
+  artifact -> detail;
+  overview -> detail [label="只链接已有精确导出", style=dashed];
+  {rank=same; overview; detail;}
+  overview -> note [style=invis];
+  detail -> note [style=invis];
+}

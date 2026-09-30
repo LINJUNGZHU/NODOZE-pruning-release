@@ -6,6 +6,8 @@
 
 新增 [按保留目标调整压缩率](docs/retention-targets/README.md)：工作台支持90%、95%、99%、100%的事件与依赖保留目标，并可追加端点可达约束，选择已测预算中压缩率最高的达标点。这是参考驱动的离线预算筛选。
 
+新增 [方法与项目框架图](docs/project-architecture/README.md)：四张图展示当前方法、整体框架、关键函数调用和子图评价到 HTML 的流程。访问 `/assets/project-architecture.html`，可放大并下载 SVG / PNG / PDF。
+
 本轮已完成 **9个E3案例、36个变体、2520个决策点**，包含多起点、自动扩窗和固定参考链阶段损失。[压缩率—完整参考路径保留率主图](docs/chain-workbench-v2/figures/overview-reference-chain.png)。完整攻击无独立真值时为N/A，E5因仅找到标注未计入实验。
 
 上一轮 [324 点实验结果与限制](docs/adaptive-chain-results.md)。

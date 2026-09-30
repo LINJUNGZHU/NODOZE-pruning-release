@@ -4,6 +4,7 @@
 
 | 入口 | 用途 |
 |---|---|
+| [方法、框架与函数调用图](../docs/project-architecture/README.md) | 四张代码对应图：整体框架、方法流程、关键函数、子图评价与 HTML 展示；提供 SVG / PNG / PDF |
 | [v2 方法与实验报告](../docs/chain-workbench-v2/README.md) | 当前工作线：候选窗口、多调查起点、上下文稀有度与保留图 |
 | [参考子图完整性](../docs/reference-subgraphs/README.md) | 在同一冻结选择上检查分叉、汇合、全部必需事件及固定入口—出口可达性 |
 | [按保留目标调整压缩率](../docs/retention-targets/README.md) | 设定事件／依赖保留目标，从已测预算中选最高达标压缩率；明确标记参考驱动的离线筛选 |

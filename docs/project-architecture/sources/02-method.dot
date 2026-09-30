@@ -1,0 +1,35 @@
+digraph method {
+  graph [rankdir=TB, bgcolor="#ffffff", pad="0.35", nodesep="0.32", ranksep="0.48", splines=polyline, fontname="WenQuanYi Zen Hei", fontsize=22, fontcolor="#132d46", label="02  当前方法的执行流程\nreliability_chain：置信度校准 + 多起点扩散 + 时序见证选择", labelloc=t];
+  node [shape=box, style="rounded,filled", fillcolor="#eef4fb", color="#91abc6", fontname="WenQuanYi Zen Hei", fontsize=15, fontcolor="#132d46", margin="0.20,0.14", penwidth=1.2];
+  edge [color="#57738d", arrowsize=0.7, fontname="WenQuanYi Zen Hei", fontsize=12, fontcolor="#456078"];
+  candidate [label="① 形成候选事件集 C\n原窗口；按登记案例启用边界扩展\n保存 event_id、因果端点和精确时间"];
+  raw [label="频率稀有度 r(e)\n既有账本 / 频率缓存\n缺省时使用模型频次分数"];
+  context [label="② 上下文建模\nContextualRarityModel.fit / score_rows\n语义归一化 + 同类程序 / 主机条件统计\n得到惊异度 u(e) 和支持置信度 c(e)", fillcolor="#eaf7f2", color="#7bbba7"];
+  rarity [label="③ 校准稀有度 reliability_rarity\na(e) = 0.75 × c(e)\nR(e) = [1 − a(e)] × r(e) + a(e) × u(e)\n历史无支持：c = 0，回退到频率稀有度", fillcolor="#eaf7f2", color="#7bbba7"];
+  policy [label="④ 按配置选择 POI 策略\nsingle：最早登记起点\ndeclared：全部登记起点\nadaptive：最早起点 + 初次扩散 + 覆盖增益建议\n自适应最多 8 个；新增点是调查建议"];
+  diffusion [label="⑤ 多起点扩散 propagate\n按 无序端点对 + 关系 合并交互通道\n通道权重 = 0.2 + 0.8 × max R(e)\n背景 PPR 与各 POI 的 PPR 做对照\n稀有度再次调制事件分数；跨 POI 取最大值", fillcolor="#eaf7f2", color="#7bbba7"];
+  temporal [label="⑥ 形成有向、严格时间递增的见证\ntemporal_routes / temporal_fork_routes\nbuild_chain_bundles 扩展前后文和分支\n最多 512 个锚点，路径上限 64 跳"];
+  queue [label="⑦ 遍历锚点 / 事件优先序\nselect_adaptive_bundles\n初始化保留全部选定 POI"];
+  fits [shape=diamond, label="候选内完整见证包\n是否能放入剩余预算？", fillcolor="#fff3df", color="#d7b06a", margin="0.12,0.08"];
+  whole [label="加入完整见证包\n共享事件只计一次", fillcolor="#eaf7f2", color="#7bbba7"];
+  fallback [label="尝试原时序分叉见证\n可达、有正分数且放得下才加入\n否则跳过，继续下一项", fillcolor="#fff3df", color="#d7b06a"];
+  output [label="⑧ 得到保留事件集 K\n|K| ≤ 整数事件预算 B；选定 POI 必留\n验证资格集合、方向、时间并冻结\n实际压缩率 = 1 − |K| / |C|", fillcolor="#173d54", color="#173d54", fontcolor=white];
+  note [shape=note, label="扩散图是无向的，因果与时间约束在见证层检查。\n候选内完整见证 ≠ 现实完整攻击；预算不足时可能只保留部分结构。\n子图参考标签不参与上述打分与选择。", fillcolor="#f5f7fa", color="#c5d0dc", fontsize=12];
+  candidate -> raw;
+  candidate -> context [label="历史严格早于上下文截止点"];
+  {rank=same; raw; context;}
+  raw -> rarity;
+  context -> rarity;
+  rarity -> policy [label="初次传播的权重"];
+  policy -> diffusion [label="选定 POI"];
+  rarity -> diffusion [label="R(e)", style=dashed];
+  diffusion -> temporal [label="事件分数 + 原始方向 / 时间"];
+  temporal -> queue;
+  queue -> fits;
+  fits -> whole [label="是"];
+  fits -> fallback [label="否 / 无可用完整包"];
+  {rank=same; whole; fallback;}
+  whole -> output [label="所有项处理完成"];
+  fallback -> output [label="所有项处理完成"];
+  output -> note [style=invis];
+}

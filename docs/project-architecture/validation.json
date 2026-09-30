@@ -1,0 +1,75 @@
+{
+  "status": "passed",
+  "checks": [
+    {
+      "viewport": "desktop",
+      "width": 1440,
+      "diagrams_loaded": 4,
+      "anchors": 4,
+      "details": "passed",
+      "page_overflow": false
+    },
+    {
+      "download_files_verified": 12
+    },
+    {
+      "workbench_navigation": "desktop",
+      "status": "passed"
+    },
+    {
+      "viewport": "tablet",
+      "width": 820,
+      "diagrams_loaded": 4,
+      "anchors": 4,
+      "details": "passed",
+      "page_overflow": false
+    },
+    {
+      "viewport": "mobile",
+      "width": 390,
+      "diagrams_loaded": 4,
+      "anchors": 4,
+      "details": "passed",
+      "page_overflow": false
+    },
+    {
+      "workbench_navigation": "mobile",
+      "status": "passed"
+    },
+    {
+      "local_file_open": "passed"
+    }
+  ],
+  "browser_errors": [],
+  "scope": "documentation diagrams and static HTML only",
+  "implementation_commit": "8226c249c085ced9e474182b55205aad6efc4313",
+  "frozen_implementation_inputs_unchanged": 15,
+  "rendering": {
+    "graphviz": "four DOT sources rendered to 12 SVG/PNG/PDF assets",
+    "svg_xml": "passed",
+    "documentation_links": "passed",
+    "chinese_layout_visual_review": "passed",
+    "svg_viewport_containment": [
+      {
+        "file": "01-framework.svg",
+        "fits": true,
+        "transform": "scale(1 1) rotate(0) translate(25.2 1165.2)"
+      },
+      {
+        "file": "02-method.svg",
+        "fits": true,
+        "transform": "scale(1 1) rotate(0) translate(25.2 1449.2)"
+      },
+      {
+        "file": "03-calls.svg",
+        "fits": true,
+        "transform": "scale(1 1) rotate(0) translate(25.2 899.7)"
+      },
+      {
+        "file": "04-evaluation.svg",
+        "fits": true,
+        "transform": "scale(1 1) rotate(0) translate(25.2 1242.2)"
+      }
+    ]
+  }
+}

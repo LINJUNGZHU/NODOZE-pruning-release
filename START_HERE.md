@@ -1,5 +1,7 @@
 当前研究入口见 [实验与数据目录](research/README.md) 和 [多 POI 剪枝实验](docs/chain-workbench-v2/README.md)。新增 [参考子图完整性](docs/reference-subgraphs/README.md)，将分支、汇合和全部参考成员一起核对。
 
+[方法与项目框架图](docs/project-architecture/README.md) 用四张图展示整体框架、方法流程、函数调用以及子图评价到网页的过程。网页入口：`/assets/project-architecture.html`，可放大和下载 SVG / PNG / PDF。
+
 启动已有数据的服务：`python webapp/backend/app.py`。访问 http://127.0.0.1:8000/assets/research-workbench.html 查看压缩率曲线；访问 http://127.0.0.1:8000/assets/retained-chains.html 查看、检索并下载实际保留链路与本机参考子图。页面只展示已经完成的实验，不会因打开网页重跑算法。
 
 下面保留早期 CADETS CLI 快速上手。其他数据准备与网页部署见 [webapp/README.md](webapp/README.md)。

@@ -1,0 +1,54 @@
+digraph framework {
+  graph [rankdir=TB, bgcolor="#ffffff", pad="0.35", nodesep="0.35", ranksep="0.58", splines=polyline, fontname="WenQuanYi Zen Hei", fontsize=22, fontcolor="#132d46", label="01  项目整体框架\nchain-workbench-v2 · 当前主方法 reliability_chain", labelloc=t];
+  node [shape=box, style="rounded,filled", fillcolor="#eef4fb", color="#91abc6", fontname="WenQuanYi Zen Hei", fontsize=15, fontcolor="#132d46", margin="0.20,0.15", penwidth=1.2];
+  edge [color="#57738d", arrowsize=0.7, fontname="WenQuanYi Zen Hei", fontsize=12, fontcolor="#456078"];
+
+  subgraph cluster_inputs {
+    label="输入层 · 数据与调查起点"; fontsize=17; color="#d7e1ed"; style="rounded";
+    data [label="本机 E3 事件数据库 / 候选账本\nSQLite · event_id · 关系 · 纳秒时间"];
+    history [label="候选窗口之前的上下文历史\n类型 / 行为语义 / 主机 / 程序群体"];
+    poi [label="登记的调查起点 POI + 固定配置\n单起点 / 全部登记 / 自适应补充"];
+    {rank=same; data; history; poi;}
+  }
+  subgraph cluster_online {
+    label="剪枝计算层 · 不读取离线参考标签"; fontsize=17; color="#97d1c3"; style="rounded";
+    candidates [label="候选构建\nbase；部分案例另有 expanded\n边界活动触发窗口扩展", fillcolor="#eaf7f2", color="#7bbba7"];
+    evidence [label="置信度校准的上下文稀有度\n条件行为惊异度 + 历史支持度\n融合既有频率稀有度", fillcolor="#eaf7f2", color="#7bbba7"];
+    scoring [label="多 POI 图扩散评分\n无向交互通道 + 背景对照 PPR\n每个 POI 传播后取最大得分", fillcolor="#eaf7f2", color="#7bbba7"];
+    selection [label="时序因果见证 + 预算选择\n优先保留候选内完整见证包\n可回退到时间分叉见证", fillcolor="#eaf7f2", color="#7bbba7"];
+    freeze [label="冻结并验证每个决策\n候选 / 分数 / 可选集合 / 保留掩码\nmanifest 绑定源码、配置与工件哈希", fillcolor="#173d54", fontcolor="white", color="#173d54"];
+    {rank=same; candidates; evidence;}
+    candidates -> scoring [label="事件图"];
+    evidence -> scoring [label="校准稀有度"];
+    scoring -> selection [label="事件重要性"];
+    candidates -> selection [label="方向与时间", style=dashed];
+    selection -> freeze [label="遍历方法与预算"];
+  }
+  data -> candidates;
+  history -> evidence;
+  candidates -> evidence [label="候选行为", constraint=false];
+  poi -> scoring [label="起点策略"];
+  poi -> selection [label="预算 / 必留起点", style=dashed];
+
+  subgraph cluster_outputs {
+    label="冻结结果的两个下游"; fontsize=17; color="#d7e1ed"; style="rounded";
+    evaluation [label="离线参考评价\n固定参考路径 + 固定参考子图\n逐阶段损失与压缩率曲线", fillcolor="#fff3df", color="#d7b06a"];
+    export [label="精确导出实际保留图\n读取指定方法 / 整数预算的掩码\nJSON · CSV · GraphML"];
+    {rank=same; evaluation; export;}
+  }
+  references [label="源正例 / 参考标注\n仅供冻结后的评价", fillcolor="#fff3df", color="#d7b06a"];
+  freeze -> evaluation [label="先全局校验"];
+  freeze -> export [label="不重选、不重评分"];
+  references -> evaluation [color="#b88734", label="固定评价分母"];
+  {rank=same; references; evaluation; export;}
+  summary [label="公开聚合报告\n曲线 / 达标预算离线筛选\n不含逐事件明细", fillcolor="#fff3df", color="#d7b06a"];
+  local [label="本机保留事件与审计叠加\n精确事件 ID / 时间 / 缺失依赖\n目录与冻结点绑定"];
+  evaluation -> summary;
+  evaluation -> local [label="参考审计", style=dashed];
+  export -> local;
+  web [label="Flask 静态服务 → HTML\nresearch-workbench：聚合比较、曲线、目标预算\nretained-chains：实际链路、子图、逐事件下载", fillcolor="#eeeafa", color="#b1a2d1"];
+  summary -> web;
+  local -> web;
+  scope [shape=note, label="当前实测：9 个 E3 案例 / 36 个变体 / 7 种方法 / 2520 个决策点\nE5 缺少匹配原始事件，尚无 E5 实验结果；网页只读取已有结果。", fillcolor="#f5f7fa", color="#c5d0dc", fontsize=12];
+  web -> scope [style=invis];
+}

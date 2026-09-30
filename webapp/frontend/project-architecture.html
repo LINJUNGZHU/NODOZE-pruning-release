@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NODOZE · 方法与项目框架图</title>
+  <link rel="stylesheet" href="project-architecture.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="research-workbench.html"><span class="brand-mark">N</span><strong>NODOZE</strong><span>研究图解</span></a>
+    <nav aria-label="研究页面"><a href="research-workbench.html">研究工作台 ↗</a><a href="retained-chains.html">实际保留链路 ↗</a></nav>
+  </header>
+  <main>
+    <section class="hero" aria-labelledby="title">
+      <p class="eyebrow">CHAIN-WORKBENCH-V2 · CODE → METHOD → EVIDENCE</p>
+      <h1 id="title">从原始事件，到保留下来的因果结构</h1>
+      <p class="lead">四张图对应当前项目的框架、算法执行、函数调用，以及参考子图评价与网页展示。主方法为 <code>reliability_chain</code>：融合置信度校准的上下文稀有度与多 POI 图扩散，按预算保留时序因果见证。</p>
+      <div class="facts" aria-label="当前实验范围"><span><b>9</b> E3 案例</span><span><b>36</b> 候选 / 起点变体</span><span><b>7</b> 比较方法</span><span><b>2520</b> 冻结决策点</span></div>
+      <p class="meta">对应运行 20260930-r1，核对代码版本 <code>8226c24</code>。E5 尚缺匹配事件源，当前没有 E5 实验结果。</p>
+    </section>
+    <nav class="contents" aria-label="四张图"><a href="#framework"><b>01</b> 整体框架</a><a href="#method"><b>02</b> 方法流程</a><a href="#calls"><b>03</b> 函数调用</a><a href="#evaluation"><b>04</b> 评价与展示</a></nav>
+    <div class="legend" aria-label="图例"><span><i class="blue"></i>输入、控制与导出</span><span><i class="green"></i>稀有度与扩散计算</span><span><i class="amber"></i>条件判断 / 离线参考评价</span><span><i class="purple"></i>HTML 展示</span></div>
+
+    <section class="panel" id="framework" aria-labelledby="framework-title">
+      <div class="section-head"><div><p class="eyebrow">01 / ARCHITECTURE</p><h2 id="framework-title">项目整体框架</h2></div><div class="downloads" aria-label="下载框架图"><a href="project-architecture/01-framework.svg" target="_blank" rel="noopener">放大 SVG ↗</a><a href="project-architecture/01-framework.png" download>PNG</a><a href="project-architecture/01-framework.pdf" download>PDF</a></div></div>
+      <p>先构建候选与历史证据，再完成剪枝并冻结每个选择。冻结结果分别用于离线评价和实际链路导出，最后进入同一个研究页面。参考标签只进入评价分支。</p>
+      <figure><div class="diagram" tabindex="0" role="region" aria-label="整体框架图，可横向滚动"><img src="project-architecture/01-framework.svg" alt="整体框架：事件、历史和调查起点进入候选、评分与时序选择，冻结后分别进行参考评价和保留图导出，再由 Flask 提供 HTML 展示。"></div><figcaption>箭头表示数据或工件流向；虚线表示辅助输入、审计叠加。公开汇总和本机逐事件明细分别保存。</figcaption></figure>
+    </section>
+
+    <section class="panel" id="method" aria-labelledby="method-title">
+      <div class="section-head"><div><p class="eyebrow">02 / PRUNING METHOD</p><h2 id="method-title">方法的实际执行流程</h2></div><div class="downloads" aria-label="下载方法流程图"><a href="project-architecture/02-method.svg" target="_blank" rel="noopener">放大 SVG ↗</a><a href="project-architecture/02-method.png" download>PNG</a><a href="project-architecture/02-method.pdf" download>PDF</a></div></div>
+      <p>上下文模块估计“在这类程序与主机环境中，这个行为有多意外”，并用历史支持度控制其权重。它能减轻“少见就高分”的问题，但无历史支持时仍回退到频率稀有度，输出也不是恶意概率。</p>
+      <figure><div class="diagram" tabindex="0" role="region" aria-label="方法流程图，可横向滚动"><img src="project-architecture/02-method.svg" alt="八步方法流程：候选集、上下文建模、置信度校准、POI 策略、多起点扩散、时序见证、整包及回退选择、冻结保留结果。"></div><figcaption>图扩散使用无向交互通道。因果方向、严格递增时间和分叉结构在见证构建及选择阶段检查。</figcaption></figure>
+      <details><summary>展开实际评分公式与 POI 策略说明</summary>
+        <div class="explanation">
+          <p>设既有频率稀有度为 <code>r(e)</code>，上下文惊异度为 <code>u(e)</code>，历史支持置信度为 <code>c(e)</code>。当前融合为：</p>
+          <pre>α(e) = 0.75 × c(e)
+R(e) = [1 − α(e)] × r(e) + α(e) × u(e)</pre>
+          <p>按无序端点对与关系合并通道，通道权重为 <code>0.2 + 0.8 × max R(e)</code>。重复事件不重复增加通道导通权重。背景 PPR 从进程节点出发；各 POI 从其两个端点出发，重启概率为 0.15。</p>
+          <pre>Lₚ(v) = log(1 + max(PPRₚ(v) / PPR背景(v) − 1, 0))
+qₚ(e) = sqrt[Lₚ(src) × Lₚ(dst)] × [0.2 + 0.8 × R(e)]
+S对照(e) = maxₚ normalize(qₚ(e))
+S(e) = [S对照(e) + 10⁻⁶ × S普通PPR(e)] / [1 + 10⁻⁶]</pre>
+          <p>每个 POI 的事件分数分别按最大值归一化，再跨 POI 取最大值；选定 POI 的分数设为 1。普通 PPR 的微小回退项让背景常见但可能必需的依赖仍有机会被选择。</p>
+          <p><code>single</code> 使用最早的登记 POI；<code>declared</code> 使用全部登记 POI；<code>adaptive</code> 从最早登记 POI 开始，用初次扩散证据与主机 / 程序群体的覆盖增益补充起点，最多 8 个。新增起点属于算法建议。候选窗口扩展使用原登记起点，发生在自适应起点选择之前。</p>
+          <p>上下文历史截止在完整候选范围之前；既有频率账本 / 缓存的时间口径另有记录，不能把这一严格截止声明扩展到所有旧稀有度输入。</p>
+        </div>
+      </details>
+    </section>
+
+    <section class="panel" id="calls" aria-labelledby="calls-title">
+      <div class="section-head"><div><p class="eyebrow">03 / FUNCTION CALLS</p><h2 id="calls-title">关键函数如何串起来</h2></div><div class="downloads" aria-label="下载函数调用图"><a href="project-architecture/03-calls.svg" target="_blank" rel="noopener">放大 SVG ↗</a><a href="project-architecture/03-calls.png" download>PNG</a><a href="project-architecture/03-calls.pdf" download>PDF</a></div></div>
+      <p>从 <code>scripts/run_chain_workbench.py::main()</code> 开始阅读。<code>run_case()</code> 负责实验调度，<code>run_variant()</code> 负责一个候选范围与 POI 策略下的评分、见证构建和多预算选择。</p>
+      <figure><div class="diagram call-diagram" tabindex="0" role="region" aria-label="函数调用图，可横向滚动"><img src="project-architecture/03-calls.svg" alt="函数调用：main 调用 run_case，run_case 调度候选、历史、prepare_evidence、run_variant 和冻结；run_variant 调用传播、POI 选择、时序路由、见证构建和预算选择。"></div><figcaption>实线表示直接函数调用。时序路由在构建、选择中复用，因此右侧再次列出同一组函数。调用图展示调用关系，不表示并发执行。</figcaption></figure>
+      <div class="table-wrap"><table><caption>读代码时的入口</caption><thead><tr><th>职责</th><th>源码文件</th><th>关键函数</th></tr></thead><tbody>
+        <tr><td>运行与冻结</td><td><code>scripts/run_chain_workbench.py</code><br><code>tc_pruning/chain_workbench.py</code></td><td><code>run_case</code>、<code>run_variant</code>、<code>freeze_variant</code></td></tr>
+        <tr><td>上下文稀有度 / POI</td><td><code>tc_pruning/contextual_rarity.py</code><br><code>tc_pruning/adaptive_pois.py</code></td><td><code>fit</code>、<code>score_rows</code>、<code>reliability_rarity</code>、<code>select_adaptive_pois</code></td></tr>
+        <tr><td>传播与时序</td><td><code>tc_pruning/rasp.py</code></td><td><code>propagate</code>、<code>personalized_pagerank</code>、<code>temporal_fork_routes</code></td></tr>
+        <tr><td>见证构建与预算</td><td><code>tc_pruning/adaptive_chains.py</code></td><td><code>build_chain_bundles</code>、<code>select_adaptive_bundles</code></td></tr>
+        <tr><td>子图参考评价</td><td><code>tc_pruning/subgraph_evaluation.py</code></td><td><code>derive_reference_subgraphs</code>、<code>evaluate_subgraphs</code></td></tr>
+        <tr><td>精确链路导出</td><td><code>scripts/export_chain_workbench.py</code><br><code>tc_pruning/retained_chains.py</code></td><td><code>export_frozen</code>、<code>build_retained_artifact</code>、<code>write_retained_export</code></td></tr>
+      </tbody></table></div>
+    </section>
+
+    <section class="panel" id="evaluation" aria-labelledby="evaluation-title">
+      <div class="section-head"><div><p class="eyebrow">04 / EVALUATION &amp; DISPLAY</p><h2 id="evaluation-title">子图保留率怎样进入网页</h2></div><div class="downloads" aria-label="下载评价流程图"><a href="project-architecture/04-evaluation.svg" target="_blank" rel="noopener">放大 SVG ↗</a><a href="project-architecture/04-evaluation.png" download>PNG</a><a href="project-architecture/04-evaluation.pdf" download>PDF</a></div></div>
+      <p>将固定源正例事件构成有向无环图，以事件依赖连接分支与汇合。对同一批冻结选择，分别检查参考事件、依赖、整个参考子图和固定入口—出口可达性；逐阶段损失显示问题出在候选覆盖、时间资格还是预算选择。</p>
+      <figure><div class="diagram" tabindex="0" role="region" aria-label="评价与展示流程图，可横向滚动"><img src="project-architecture/04-evaluation.svg" alt="冻结工件验证后加载固定源正例，派生参考路径与子图，评价各阶段保留率，生成曲线和离线达标预算；同一冻结掩码精确导出实际链路，网页展示聚合与本机明细。"></div><figcaption>原生关系 native 与包含合成 LINEAGE 的 augmented 使用各自固定分母。缺少参考或分母为零时，指标显示 N/A。</figcaption></figure>
+      <div class="boundary"><strong>如何理解“保证保留率后调整压缩率”</strong><p>当前实现是在已有冻结预算中，用离线参考指标筛选达标点，再选择实际压缩率最高的点。它使用了参考信息，属于开发集上的事后工作点选择；未实现针对未知攻击的在线正确率保证。子图分析目前是评价模块，尚未作为在线优化损失。</p></div>
+      <div class="boundary"><strong>如何理解输出的“链路数量”</strong><p>实际保留图可以完整导出；路径覆盖、候选内见证包、完整参考子图分别计数。它们都不能直接当作独立真实攻击的数量，候选边界之外仍可能有未观察到的事件。</p></div>
+    </section>
+    <footer><p>图源位于 <code>docs/project-architecture/sources/</code>。在项目根目录执行 <code>python scripts/render_project_architecture.py</code>，重新生成 SVG、PNG、PDF。</p><a href="#title">返回页首 ↑</a></footer>
+  </main>
+</body>
+</html>
