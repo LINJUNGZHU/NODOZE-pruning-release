@@ -1,0 +1,11 @@
+{
+  "status": "passed",
+  "profiles_checked": 4032,
+  "comparison": "independent integer-fraction floors and minimum actual retained count; same method, track, POI and scope",
+  "csv_cells_checked": 161280,
+  "known_real_event_ids_checked": 880,
+  "private_id_matches": 0,
+  "source_report_sha256": "735da649a2ee1e0d43da7483fbd5ce80255a8053d89a974a63d00d36cece4853",
+  "report_sha256": "919713f83f702176025f515b54b2218aba8700513ed19f753672083b9e118197",
+  "csv_sha256": "fcd872fb4756ed67525c9bd76b9a24991cd8fc357ec2e76704b428b099a871e9"
+}

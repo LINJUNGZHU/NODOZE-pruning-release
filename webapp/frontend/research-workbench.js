@@ -78,7 +78,7 @@
     } else $('reference-coverage-note').textContent = item.annotation_status === 'unavailable' ? '该案例没有可用参考标注，完整参考与正事件保留统计为 N/A；实际保留子图仍可独立核对。' : '此汇总未提供完整的参考覆盖分解；不要将固定参考链比例解释为全部已知正事件或完整攻击范围的保留率。';
     const split = {development: '开发集', external: '外部检验', heldout: '留出检验'}[item.split] || item.split || '未声明';
     const annotation = {partial_positive: '部分正事件标注', unavailable: '无可用标注', derived_reference: '自动派生参考', captain_event_pattern_reference: 'CAPTAIN 事件模式参考（非完整链真值）', local_critical_partial_reference: '本地关键事件部分参考（非完整链真值）'}[item.annotation_status] || item.annotation_status || '未声明';
-    $('case-note').textContent = `提供方 ${item.provider || '未声明'} · ${split} · 标注状态：${annotation}。参考标签用于离线评价，不作为结果选择的证据。`;
+    $('case-note').textContent = `提供方 ${item.provider || '未声明'} · ${split} · 标注状态：${annotation}。剪枝评分未使用参考标签；保留目标预算由离线参考评价筛选。`;
     $('variant-note').textContent = `${TRACKS[v.track] || v.track} · ${POLICIES[v.poi_policy] || v.poi_policy} · POI ${num(v.poi_count)} 个 · 候选 ${num(v.candidate_events)} / 固定源范围 ${num(v.source_scope_events)} 个事件。自适应起点为算法建议${finite(v.suggested_poi_count) ? `（新增 ${num(v.suggested_poi_count)} 个，未经核验）` : '，未经核验'}。`;
   }
   function renderChart() {
@@ -197,11 +197,49 @@
   }
   const subgraphRow = (method = state.method, budget = state.budget) => state.subgraph?.rows.get(subgraphKey(currentCase().id, state.track, state.poi, method, budget));
   const countRatio = (a, b) => finite(a) && finite(b) && b > 0 ? `${num(a)} / ${num(b)}` : 'N/A';
+  const SUBGRAPH_LABELS = {event_retention: '参考事件保留率', dependency_retention: '事件依赖保留率', terminal_reachability: '固定入口—出口可达率', subgraph_retention: '完整参考子图保留率'};
+  const exactPct = value => finite(value) ? `${(value * 100).toFixed(2)}%` : 'N/A';
+  function retentionTarget() {
+    const scope = $('subgraph-scope').value, target = Number($('retention-target').value);
+    const fields = ['event_retention', 'dependency_retention'];
+    if ($('retention-terminals').checked) fields.push('terminal_reachability');
+    const rows = methodRows().map(row => subgraphRow(state.method, row.budget));
+    if (!rows.length || rows.some(row => !row || fields.some(key => !finite(row.scopes[scope][key])))) return {status: 'unavailable', scope, target, fields};
+    const valid = rows.filter(row => fields.every(key => row.scopes[scope][key] >= target)).sort((a, b) => b.compression - a.compression || a.budget - b.budget);
+    if (valid.length) return {status: 'met', row: valid[0], scope, target, fields};
+    const score = row => Math.min(...fields.map(key => row.scopes[scope][key]));
+    const closest = [...rows].sort((a, b) => score(b) - score(a) || b.compression - a.compression || a.budget - b.budget)[0];
+    const m = closest.scopes[scope], counts = m.event_stage_counts;
+    let reason = '已测预算中没有同时达标的点，不能通过曲线插值承诺达标。';
+    if (counts && m.reference_events > 0) {
+      if (counts.candidate / m.reference_events < target) reason = `候选事件覆盖上限 ${exactPct(counts.candidate / m.reference_events)}，应先扩大候选范围。`;
+      else if (counts.temporal_eligible / m.reference_events < target) reason = `当前方法的时序资格事件覆盖上限 ${exactPct(counts.temporal_eligible / m.reference_events)}，增加预算仍无法越过这一缺口。`;
+    }
+    return {status: 'unmet', closest, reason, scope, target, fields};
+  }
+  function renderRetentionTarget() {
+    const result = retentionTarget(), node = $('retention-target-result'), button = $('apply-retention-target');
+    node.dataset.status = result.status; node.removeAttribute('data-budget'); button.disabled = result.status !== 'met';
+    if (result.status === 'unavailable') node.textContent = 'N/A：所需参考指标没有可用分母，无法据此筛选达标预算。';
+    else {
+      const row = result.row || result.closest, m = row.scopes[result.scope];
+      const values = `事件 ${exactPct(m.event_retention)} · 依赖 ${exactPct(m.dependency_retention)} · 入口—出口可达 ${exactPct(m.terminal_reachability)}`;
+      if (result.status === 'met') {
+        node.dataset.budget = String(row.budget);
+        node.textContent = `已测预算中的最高达标压缩率 ${exactPct(row.compression)}：预算 ${num(row.budget)}，实际保留 ${num(row.retained_events)} 个事件。${values}。`;
+      } else node.textContent = `${result.reason} 联合保留率最高的已测点为预算 ${num(row.budget)}：${values}。`;
+    }
+    const current = subgraphRow()?.scopes[result.scope];
+    const available = current && result.fields.every(key => finite(current[key]));
+    $('retention-current-status').textContent = !available ? '当前预算的目标状态：N/A。' : `当前预算 ${num(state.budget)}：${result.fields.every(key => current[key] >= result.target) ? '已达标' : '尚未达标'}。${$('retention-terminals').checked ? '事件、依赖和端点可达率须同时满足目标。' : '本目标约束事件和依赖，端点可达率单独显示。'}`;
+  }
   function renderSubgraphChart() {
     const chart = $('subgraph-chart'); chart.replaceChildren();
     const scope = $('subgraph-scope').value, mobile = window.matchMedia('(max-width:650px)').matches;
+    const metric = $('subgraph-metric-select').value, label = SUBGRAPH_LABELS[metric];
+    $('subgraph-curve-title').textContent = '压缩率—' + label;
     chart.setAttribute('viewBox', mobile ? '0 0 420 330' : '0 0 1000 410');
-    chart.append(svg('desc', {id: 'subgraph-chart-description'}, '子图完整保留要求固定参考组的全部必需事件保留。分支和汇合不拆成独立攻击。'));
+    chart.append(svg('desc', {id: 'subgraph-chart-description'}, `纵轴为${label}，只显示已测预算。事件和依赖保留允许部分保留；完整子图要求全部固定成员保留。`));
     const x = value => (mobile ? 72 : 74) + value * (mobile ? 328 : 884), y = value => (mobile ? 260 : 336) - value * (mobile ? 222 : 298);
     for (let tick = 0; tick <= 5; tick++) {
       const value = tick / 5;
@@ -210,16 +248,20 @@
       chart.append(svg('text', {x: x(value), y: mobile ? 282 : 359, 'text-anchor': 'middle', class: 'chart-label'}, `${tick * 20}%`));
     }
     chart.append(svg('text', {x: mobile ? 225 : 515, y: mobile ? 317 : 397, 'text-anchor': 'middle', class: 'chart-axis-title'}, '实际压缩率（当前候选分母）'));
-    chart.append(svg('text', {transform: mobile ? 'translate(14 150) rotate(-90)' : 'translate(20 190) rotate(-90)', 'text-anchor': 'middle', class: 'chart-axis-title'}, '完整参考子图保留率'));
+    chart.append(svg('text', {transform: mobile ? 'translate(14 150) rotate(-90)' : 'translate(20 190) rotate(-90)', 'text-anchor': 'middle', class: 'chart-axis-title'}, label));
+    if (metric !== 'subgraph_retention' && (metric !== 'terminal_reachability' || $('retention-terminals').checked)) {
+      const floor = Number($('retention-target').value);
+      chart.append(svg('line', {x1: x(0), y1: y(floor), x2: x(1), y2: y(floor), class: 'target-floor'}));
+    }
     const legends = [];
     for (const method of methods()) {
       const color = COLORS[method] || '#5f8381';
-      const points = variant().rows.filter(row => row.method === method).map(row => subgraphRow(method, row.budget)).filter(row => row && finite(row.scopes[scope].subgraph_retention)).sort((a, b) => a.compression - b.compression);
-      if (points.length) chart.append(svg('polyline', {points: points.map(row => `${x(row.compression)},${y(row.scopes[scope].subgraph_retention)}`).join(' '), fill: 'none', stroke: color, 'stroke-width': method === state.method ? 3 : 1.6, opacity: method === state.method ? 1 : .65}));
+      const points = variant().rows.filter(row => row.method === method).map(row => subgraphRow(method, row.budget)).filter(row => row && finite(row.scopes[scope][metric])).sort((a, b) => a.compression - b.compression);
+      if (points.length) chart.append(svg('polyline', {points: points.map(row => `${x(row.compression)},${y(row.scopes[scope][metric])}`).join(' '), fill: 'none', stroke: color, 'stroke-width': method === state.method ? 3 : 1.6, opacity: method === state.method ? 1 : .65}));
       for (const row of points) {
         const m = row.scopes[scope], selected = method === state.method && row.budget === state.budget;
-        const dot = svg('circle', {cx: x(row.compression), cy: y(m.subgraph_retention), r: selected ? 6 : 3.6, fill: selected ? '#fff' : color, stroke: color, 'stroke-width': selected ? 3 : 1});
-        dot.append(svg('title', {}, `${methodLabel(method)} · 条目预算 ${num(row.budget)} · 压缩 ${pct(row.compression)} · 完整参考子图 ${countRatio(m.complete_subgraphs, m.reference_subgraph_count)}`));
+        const dot = svg('circle', {cx: x(row.compression), cy: y(m[metric]), r: selected ? 6 : 3.6, fill: selected ? '#fff' : color, stroke: color, 'stroke-width': selected ? 3 : 1});
+        dot.append(svg('title', {}, `${methodLabel(method)} · 条目预算 ${num(row.budget)} · 压缩 ${exactPct(row.compression)} · ${label} ${exactPct(m[metric])}`));
         dot.addEventListener('click', () => { state.method = method; state.budget = row.budget; selectMethod(); }); chart.append(dot);
       }
       const button = el('button', null, method === state.method ? 'active' : ''); button.type = 'button'; button.style.setProperty('--method-color', color); button.setAttribute('aria-pressed', String(method === state.method)); button.append(el('i'), el('span', methodLabel(method))); button.addEventListener('click', () => { state.method = method; selectMethod(); }); legends.push(button);
@@ -228,7 +270,7 @@
     $('subgraph-point-buttons').replaceChildren(...methodRows().map(base => {
       const row = subgraphRow(state.method, base.budget), m = row?.scopes[scope];
       const button = el('button', null, base.budget === state.budget ? 'active' : ''); button.type = 'button'; button.setAttribute('aria-pressed', String(base.budget === state.budget));
-      button.append(el('strong', `预算 ${num(base.budget)}`), el('span', `压缩 ${pct(base.compression)} · 完整子图 ${m ? countRatio(m.complete_subgraphs, m.reference_subgraph_count) : 'N/A'}`));
+      button.append(el('strong', `预算 ${num(base.budget)}`), el('span', `压缩 ${exactPct(base.compression)} · ${label} ${m ? exactPct(m[metric]) : 'N/A'}`));
       button.addEventListener('click', () => { state.budget = base.budget; $('budget-select').value = String(base.budget); render(); }); return button;
     }));
   }
@@ -238,6 +280,7 @@
     $('subgraph-content').hidden = !row; $('subgraph-status').hidden = Boolean(row);
     if (!row) { $('subgraph-status').textContent = '当前冻结决策尚未提供子图附加评价；原有路径结果仍有效。'; return; }
     const scope = $('subgraph-scope').value, m = row.scopes[scope], item = state.subgraph.cases.get(currentCase().id), quality = item.reference_summaries?.[scope] || {};
+    renderRetentionTarget();
     const metrics = [
       ['complete', '完整参考子图', countRatio(m.complete_subgraphs, m.reference_subgraph_count), pct(m.subgraph_retention)],
       ['events', '参考事件保留', countRatio(m.retained_reference_events, m.reference_events), pct(m.event_retention)],
@@ -294,6 +337,13 @@
   $('method-select').addEventListener('change', event => { state.method = event.target.value; selectMethod(); });
   $('budget-select').addEventListener('change', event => { state.budget = Number(event.target.value); render(); });
   $('subgraph-scope').addEventListener('change', renderSubgraphs);
+  $('subgraph-metric-select').addEventListener('change', renderSubgraphChart);
+  $('retention-target').addEventListener('change', renderSubgraphs);
+  $('retention-terminals').addEventListener('change', renderSubgraphs);
+  $('apply-retention-target').addEventListener('click', () => {
+    const result = retentionTarget();
+    if (result.status === 'met') { state.budget = result.row.budget; $('budget-select').value = String(state.budget); render(); }
+  });
   $('reload-button').addEventListener('click', load);
   window.addEventListener('resize', () => { if (state.report) { renderChart(); if (state.subgraph) renderSubgraphs(); } });
   load();

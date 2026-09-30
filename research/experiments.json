@@ -14,7 +14,8 @@
     "current_summary": "docs/chain-workbench-v2/report.json",
     "current_curve_viewer": "webapp/frontend/research-workbench.html",
     "reference_subgraphs": "docs/reference-subgraphs/README.md",
-    "reference_subgraph_summary": "docs/reference-subgraphs/report.json"
+    "reference_subgraph_summary": "docs/reference-subgraphs/report.json",
+    "retention_targets": "docs/retention-targets/README.md"
   },
   "experiments": [
     {
@@ -51,6 +52,17 @@
           ],
           "scope_rows": 5040,
           "independent_attack_counts_available": false
+        },
+        {
+          "id": "retention-targets-v1",
+          "status": "completed_posthoc_reference_guided_budget_analysis",
+          "report": "docs/retention-targets/README.md",
+          "aggregate_json": "docs/retention-targets/report.json",
+          "aggregate_csv": "docs/retention-targets/report.csv",
+          "pruning_recomputed": false,
+          "reference_used_for_budget_selection": true,
+          "unseen_data_guarantee": false,
+          "operating_profiles": 4032
         }
       ]
     },

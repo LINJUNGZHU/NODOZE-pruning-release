@@ -6,6 +6,7 @@
 |---|---|
 | [v2 方法与实验报告](../docs/chain-workbench-v2/README.md) | 当前工作线：候选窗口、多调查起点、上下文稀有度与保留图 |
 | [参考子图完整性](../docs/reference-subgraphs/README.md) | 在同一冻结选择上检查分叉、汇合、全部必需事件及固定入口—出口可达性 |
+| [按保留目标调整压缩率](../docs/retention-targets/README.md) | 设定事件／依赖保留目标，从已测预算中选最高达标压缩率；明确标记参考驱动的离线筛选 |
 | [v2 研究工作台页面](../webapp/frontend/research-workbench.html) | 切换案例、候选范围、POI策略与预算，查看聚合曲线及阶段损失 |
 | [v2 固定配置](../configs/chain_workbench_v2.json) | 案例数据入口、方法参数、预算与数据就绪登记 |
 | [实际保留链路页面](../webapp/frontend/retained-chains.html) | 查看全部保留事件、严格时间路径、单事件和已观测调查见证 |

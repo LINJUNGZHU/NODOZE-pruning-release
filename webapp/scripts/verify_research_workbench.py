@@ -152,7 +152,19 @@ def run(args):
             page.unroute('**/chain-subgraph-summary.json')
             page.route('**/chain-subgraph-summary.json',lambda route:route.fulfill(json=sidecar))
             page.reload();page.locator('#subgraph-content').wait_for(state='visible')
-            assert page.locator('#subgraph-curve-title').inner_text()=='压缩率—完整参考子图保留率'
+            assert page.locator('#subgraph-curve-title').inner_text()=='压缩率—参考事件保留率'
+            assert page.locator('#retention-target-result').get_attribute('data-budget')=='20'
+            method_before=page.locator('#method-select').input_value()
+            page.locator('#apply-retention-target').click()
+            assert page.locator('#budget-select').input_value()=='20'
+            assert page.locator('#method-select').input_value()==method_before
+            assert '离线' in page.locator('#retention-target-note').inner_text()
+            page.locator('#budget-select').select_option('10')
+            page.locator('#subgraph-metric-select').select_option('dependency_retention')
+            assert '依赖保留率' in page.locator('#subgraph-curve-title').inner_text()
+            page.locator('#subgraph-metric-select').select_option('subgraph_retention')
+            assert '完整参考子图' in page.locator('#subgraph-curve-title').inner_text()
+            page.locator('#subgraph-metric-select').select_option('event_retention')
             assert page.locator('#subgraph-chart circle').count()==14
             assert page.locator('#subgraph-metric-complete .metric-value').inner_text()=='1 / 2'
             assert page.locator('#subgraph-metric-verified .metric-value').inner_text()=='N/A'
@@ -171,6 +183,9 @@ def run(args):
             page.locator('#case-select').select_option('1')
             assert page.locator('#subgraph-metric-complete .metric-value').inner_text()=='N/A'
             assert page.locator('#subgraph-chart circle').count()==0
+            assert page.locator('#apply-retention-target').is_disabled()
+            assert page.locator('#retention-target-result').get_attribute('data-status')=='unavailable'
+            checks.append('offline joint retention floor selects an observed budget, preserves method and rejects unavailable references')
             checks.extend(['optional subgraph native/augmented denominators','subgraph dependency/fork/join and stage metrics','subgraph independent attacks N/A','subgraph keyboard budget and 390px layout'])
             sidecar['base_report_sha256']='0'*64
             page.reload();page.locator('#subgraph-status').wait_for(state='visible')

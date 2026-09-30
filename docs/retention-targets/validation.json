@@ -1,0 +1,47 @@
+{
+  "schema_version": "retention-target-verification-v1",
+  "status": "passed",
+  "verified_date": "2026-09-30",
+  "python_suite": {
+    "passed": 1147,
+    "skipped": 2,
+    "duration_seconds": 56.05,
+    "scope": "clean staged snapshot; all changed implementation, tests and UI still byte-identical"
+  },
+  "live_target_browser": {
+    "status": "passed",
+    "target_profiles_checked": 4032,
+    "exact_budget_applications": 252,
+    "browser_errors": [],
+    "source_report_sha256": "735da649a2ee1e0d43da7483fbd5ce80255a8053d89a974a63d00d36cece4853",
+    "desktop_and_390px": true,
+    "live_responses_not_intercepted": true
+  },
+  "live_overview_browser": {
+    "status": "passed",
+    "check_groups": 25,
+    "browser_errors": [],
+    "prior_subgraph_checks": 1008,
+    "prior_path_checks": 504
+  },
+  "aggregate_audit": "aggregate-audit.json",
+  "manual_visual_review": {
+    "desktop_and_390px": true,
+    "controls_and_target_result_readable": true
+  },
+  "source_sha256": {
+    "scripts/analyze_retention_targets.py": "2342bba2a5af6a44b238d01d69e93c6045678982ae1ff8aae444ab8918362399",
+    "tests/test_retention_targets.py": "8f4df6110ff550dabbd47ee495b585c55575e81780e8319cc8eeeb903d672192",
+    "webapp/frontend/research-workbench.html": "085127c8709da240438d297c326ccfe2fc421aa9b9f8dfe8e0b294c04a80916d",
+    "webapp/frontend/research-workbench.css": "5103ae5f0da4ada76aefc92590991fa0cb6ca94bc5a536e9745cf4b5b7e57a57",
+    "webapp/frontend/research-workbench.js": "ee21008727074df420a35b5eddf342866cc892ef168175ef163763846375442c",
+    "webapp/scripts/verify_research_workbench.py": "9ba31479e523454007dbe2285a8f93847911ef12e33c4b4862d62c0d74d42070",
+    "webapp/scripts/verify_retention_targets.py": "443be67d44ce8366878f7ad291b41b8ce15390556d80408e2b8eb5f075e9f7cc"
+  },
+  "interpretation": {
+    "reference_used_for_budget_selection": true,
+    "posthoc_development": true,
+    "unseen_data_guarantee": false,
+    "classification_accuracy_measured": false
+  }
+}
